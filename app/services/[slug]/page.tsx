@@ -2,10 +2,60 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SERVICES, SITE } from "@/lib/constants";
+import JsonLd from "@/components/shared/JsonLd";
 
 export async function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
 }
+
+// Per-service meta overrides for precise title/description targeting
+const serviceMeta: Record<
+  string,
+  { title: string; description: string; keywords: string[] }
+> = {
+  adu: {
+    title: "ADU Builder Torrance | Accessory Dwelling Units | 828 Construction",
+    description:
+      "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. 20+ years experience. CA License #1141119. Free consultation.",
+    keywords: [
+      "ADU builder Torrance",
+      "accessory dwelling unit Torrance",
+      "granny flat construction South Bay",
+      "ADU permits Torrance CA",
+      "backyard ADU Torrance",
+      "garage conversion ADU",
+      "junior ADU California",
+    ],
+  },
+  remediation: {
+    title:
+      "Construction Remediation Torrance | Structural Repair | 828 Construction",
+    description:
+      "Expert remediation services in Torrance: foundation repair, structural damage, water damage, and building defect correction. 20+ years building science. CA License #1141119.",
+    keywords: [
+      "remediation contractor Torrance",
+      "foundation repair Torrance",
+      "structural remediation South Bay",
+      "building defect repair",
+      "water damage remediation Torrance",
+      "construction defect correction",
+    ],
+  },
+  consulting: {
+    title:
+      "Construction Consulting Torrance | Building Science Expert | 828 Construction",
+    description:
+      "Professional construction consulting in Torrance. Pre-construction advisory, project feasibility, and building science expertise. 20+ years experience. CA License #1141119.",
+    keywords: [
+      "construction consulting Torrance",
+      "building science consultant",
+      "pre-construction advisory South Bay",
+      "construction project consulting",
+      "feasibility analysis Torrance",
+      "owner representation California",
+    ],
+  },
+};
 
 export async function generateMetadata({
   params,
@@ -15,11 +65,34 @@ export async function generateMetadata({
   const { slug } = await params;
   const service = SERVICES.find((s) => s.slug === slug);
   if (!service) return {};
+  const meta = serviceMeta[slug];
   return {
-    title: `${service.title} - Torrance, CA`,
-    description: service.description,
+    title: meta?.title ?? `${service.title} - Torrance, CA`,
+    description: meta?.description ?? service.description,
+    keywords: meta?.keywords,
+    alternates: { canonical: `${SITE.url}/services/${slug}` },
   };
 }
+
+// ADU-specific FAQ for schema + rendering
+const aduFaq = [
+  {
+    q: "How much does an ADU cost in Torrance?",
+    a: "ADU construction costs in Torrance typically range from $150,000 to $350,000 depending on size, design, and finishes. We provide detailed estimates after a free consultation.",
+  },
+  {
+    q: "Do I need a permit for an ADU in Torrance?",
+    a: "Yes, all ADU construction in Torrance requires building permits. 828 Construction handles the permitting process and ensures full compliance with Torrance zoning regulations.",
+  },
+  {
+    q: "How long does it take to build an ADU in Torrance?",
+    a: "A typical ADU takes 6–12 months from initial consultation to completion, including design, permitting, and construction. The permit phase alone can take 2–4 months depending on city workload.",
+  },
+  {
+    q: "What types of ADUs can be built on my property?",
+    a: "Depending on your lot and zoning, you may qualify for a detached ADU, an attached ADU, a garage conversion, or a Junior ADU (JADU). We assess your property and advise which option is feasible.",
+  },
+];
 
 export default async function ServicePage({
   params,
@@ -32,38 +105,50 @@ export default async function ServicePage({
 
   const serviceIndex = SERVICES.findIndex((s) => s.slug === slug);
   const nextService = SERVICES[(serviceIndex + 1) % SERVICES.length];
+  const keywords = serviceMeta[slug]?.keywords ?? [];
 
-  const serviceKeywords: Record<string, string[]> = {
-    adu: [
-      "Torrance ADU contractor",
-      "ADU builder South Bay",
-      "Accessory dwelling unit construction",
-      "Garage conversion Torrance",
-      "Backyard ADU permits",
-      "Junior ADU California",
-    ],
-    remediation: [
-      "Structural remediation Torrance",
-      "Foundation repair South Bay",
-      "Water damage remediation",
-      "Construction defect correction",
-      "Building envelope repair",
-      "Post-disaster construction",
-    ],
-    consulting: [
-      "Construction consulting Torrance",
-      "Building science consultant",
-      "Pre-purchase construction inspection",
-      "Contractor vetting South Bay",
-      "Owner representation California",
-      "Project feasibility analysis",
-    ],
+  // Service JSON-LD
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: `${service.title} - Torrance, CA`,
+    description: service.description,
+    provider: {
+      "@type": "GeneralContractor",
+      name: SITE.name,
+      telephone: "+12138282388",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: SITE.address.street,
+        addressLocality: SITE.address.city,
+        addressRegion: SITE.address.state,
+        postalCode: SITE.address.zip,
+        addressCountry: "US",
+      },
+    },
+    areaServed: SITE.serviceArea,
+    url: `${SITE.url}/services/${slug}`,
   };
 
-  const keywords = serviceKeywords[service.slug] || [];
+  // FAQ JSON-LD (ADU page only)
+  const faqJsonLd =
+    slug === "adu"
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: aduFaq.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: { "@type": "Answer", text: item.a },
+          })),
+        }
+      : null;
 
   return (
     <>
+      <JsonLd data={serviceJsonLd} />
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
+
       {/* Hero */}
       <section className="bg-black pt-32 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,6 +165,21 @@ export default async function ServicePage({
           </span>
           <h1 className="font-[var(--font-space-grotesk)] font-bold text-5xl lg:text-7xl text-white mt-4 tracking-tight leading-none">
             {service.title}
+            {slug === "adu" && (
+              <span className="block text-gray-600 text-3xl lg:text-4xl mt-3">
+                Construction in Torrance, California
+              </span>
+            )}
+            {slug === "remediation" && (
+              <span className="block text-gray-600 text-3xl lg:text-4xl mt-3">
+                Services in Torrance, California
+              </span>
+            )}
+            {slug === "consulting" && (
+              <span className="block text-gray-600 text-3xl lg:text-4xl mt-3">
+                Services — Torrance & South Bay
+              </span>
+            )}
           </h1>
         </div>
       </section>
@@ -101,7 +201,9 @@ export default async function ServicePage({
                 {service.details.map((detail) => (
                   <li key={detail} className="flex items-start gap-4">
                     <span className="w-px h-4 bg-black flex-shrink-0 mt-1.5" />
-                    <span className="text-gray-700 leading-relaxed">{detail}</span>
+                    <span className="text-gray-700 leading-relaxed">
+                      {detail}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -138,6 +240,27 @@ export default async function ServicePage({
                   ))}
                 </div>
               </div>
+
+              {/* ADU FAQ Section */}
+              {slug === "adu" && (
+                <div className="border-t border-gray-100 pt-12 mt-12">
+                  <h2 className="font-[var(--font-space-grotesk)] font-bold text-2xl text-black mb-8">
+                    ADU Questions & Answers
+                  </h2>
+                  <div className="space-y-6">
+                    {aduFaq.map((item) => (
+                      <div key={item.q} className="border-b border-gray-100 pb-6">
+                        <h3 className="font-[var(--font-space-grotesk)] font-bold text-base text-black mb-3">
+                          {item.q}
+                        </h3>
+                        <p className="text-gray-500 text-sm leading-relaxed">
+                          {item.a}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Keywords */}
               {keywords.length > 0 && (

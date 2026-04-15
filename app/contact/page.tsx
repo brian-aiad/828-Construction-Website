@@ -1,16 +1,46 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/contact/ContactForm";
+import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Contact - Get a Free Estimate",
+  title: "Contact 828 Construction | Free Consultation - Torrance, CA",
   description:
-    "Contact 828 Construction for a free estimate on ADU construction, remediation, or consulting in Torrance and South Bay, CA. Call 213-828-2388.",
+    "Contact 828 Construction for a free estimate. Call 213-828-2388 or request a quote online. Serving Torrance, Redondo Beach, Manhattan Beach & South Bay. License #1141119.",
+  keywords: [
+    "contact construction company Torrance",
+    "free estimate ADU Torrance",
+    "construction quote South Bay",
+    "general contractor contact Torrance",
+  ],
+  alternates: { canonical: `${SITE.url}/contact` },
+};
+
+const contactJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  url: `${SITE.url}/contact`,
+  mainEntity: {
+    "@type": "LocalBusiness",
+    name: SITE.name,
+    telephone: "+12138282388",
+    email: SITE.email,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: SITE.address.street,
+      addressLocality: SITE.address.city,
+      addressRegion: SITE.address.state,
+      postalCode: SITE.address.zip,
+      addressCountry: "US",
+    },
+    areaServed: SITE.serviceArea,
+  },
 };
 
 export default function ContactPage() {
   return (
     <>
+      <JsonLd data={contactJsonLd} />
       {/* Hero */}
       <section className="bg-black pt-32 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Analytics } from "@vercel/analytics/react";
+import GoogleAnalytics from "@/components/shared/GoogleAnalytics";
 import { SITE } from "@/lib/constants";
 
 const inter = Inter({
@@ -71,6 +72,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
