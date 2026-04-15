@@ -1,112 +1,46 @@
 "use client";
 
 import Link from "next/link";
+import { PROJECTS } from "@/lib/constants";
 import FadeIn from "@/components/animations/FadeIn";
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
-const projects = [
-  {
-    id: 1,
-    title: "Torrance ADU Build",
-    category: "ADU Construction",
-    location: "Torrance, CA",
-    spec: "480 sq ft · Detached · Fully permitted",
-    tone: "from-gray-950 to-gray-900",
-    size: "lg", // featured
-  },
-  {
-    id: 2,
-    title: "Redondo Beach Remediation",
-    category: "Remediation",
-    location: "Redondo Beach, CA",
-    spec: "Structural remediation · Water intrusion source corrected",
-    tone: "from-gray-900 to-gray-800",
-    size: "sm",
-  },
-  {
-    id: 3,
-    title: "South Bay Consultation",
-    category: "Consulting",
-    location: "Manhattan Beach, CA",
-    spec: "Pre-purchase feasibility · $1.2M property",
-    tone: "from-gray-800 to-gray-900",
-    size: "sm",
-  },
-];
-
-// ── Full-bleed project plate ──────────────────────────────────────────────
-function ProjectPlate({
-  project,
-  featured = false,
-}: {
-  project: (typeof projects)[0];
-  featured?: boolean;
-}) {
+function PreviewPlate({ index, label }: { index: number; label: string }) {
+  const patterns = [
+    "repeating-linear-gradient(0deg, transparent, transparent 47px, rgba(255,255,255,0.025) 48px)",
+    "repeating-linear-gradient(45deg, transparent, transparent 22px, rgba(255,255,255,0.02) 23px)",
+    "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+  ];
   return (
     <div
-      className={`group relative overflow-hidden ${
-        featured ? "aspect-[16/7]" : "aspect-[16/8]"
-      } bg-gradient-to-br ${project.tone}`}
+      className="absolute inset-0 plate-concrete"
+      style={{
+        backgroundImage: patterns[index % 3],
+        backgroundSize: index % 3 === 2 ? "32px 32px" : "auto",
+      }}
     >
-      {/* Background pattern */}
-      <div className="absolute inset-0 blueprint-grid opacity-[0.4]" />
-
-      {/* Overlay gradient for readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
-
-      {/* Large project number watermark */}
-      <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
         <span
           className="font-numbers font-bold text-white leading-none"
           style={{
-            fontSize: "clamp(6rem, 18vw, 20rem)",
-            opacity: 0.03,
-            letterSpacing: "-0.05em",
+            fontSize: "clamp(4rem, 10vw, 12rem)",
+            opacity: 0.04,
+            letterSpacing: "-0.04em",
           }}
         >
-          0{project.id}
+          0{index + 1}
         </span>
       </div>
-
-      {/* Corner bracket decoration */}
-      <div className="absolute top-6 right-6 w-10 h-10 border-t border-r border-white/10 group-hover:border-white/20 transition-colors duration-500" />
-      <div className="absolute bottom-6 right-6 w-5 h-5 border-b border-r border-white/10" />
-
-      {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-12">
-        {/* Category badge */}
-        <div className="mb-4">
-          <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase border border-gray-700 px-2 py-1">
-            {project.category}
-          </span>
-        </div>
-
-        {/* Title */}
-        <h3
-          className="font-display font-bold text-white leading-tight tracking-tight mb-2 group-hover:text-gray-100 transition-colors duration-300"
-          style={{ fontSize: "clamp(1.4rem, 3vw, 2.2rem)" }}
-        >
-          {project.title}
-        </h3>
-
-        {/* Meta */}
-        <div className="flex items-center gap-4">
-          <span className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase">
-            {project.location}
-          </span>
-          <span className="w-px h-3 bg-gray-700" />
-          <span className="font-labels text-[9px] text-gray-600 tracking-wide">
-            {project.spec}
-          </span>
-        </div>
-      </div>
-
-      {/* Hover reveal */}
-      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/[0.02] transition-colors duration-500" />
+      <div className="absolute top-5 right-5 w-8 h-8 border-t border-r border-gray-800" />
     </div>
   );
 }
 
+const previewProjects = PROJECTS.slice(0, 3);
+
 export default function ProjectsPreview() {
+  const [featured, ...rest] = previewProjects;
+
   return (
     <section className="bg-white py-24 lg:py-36 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -131,29 +65,78 @@ export default function ProjectsPreview() {
               className="font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-black transition-colors duration-200 group inline-flex items-center gap-2 self-start sm:self-auto"
             >
               All Projects
-              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
             </Link>
           </div>
         </FadeIn>
 
         {/* Featured project */}
         <FadeIn delay={0.1} className="mb-1">
-          <ProjectPlate project={projects[0]} featured />
+          <Link href="/projects" className="group block relative aspect-[16/7] overflow-hidden bg-gray-950">
+            <ImageWithFallback
+              src={featured.image}
+              alt={featured.title}
+              fill
+              priority
+              className="object-cover grayscale contrast-110 transition-transform duration-700 group-hover:scale-105"
+              fallback={<PreviewPlate index={0} label={featured.title} />}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-12">
+              <span className="font-labels text-[9px] text-gray-400 tracking-[0.2em] uppercase border border-gray-700 px-2 py-1 self-start mb-4">
+                {featured.category}
+              </span>
+              <h3
+                className="font-display font-bold text-white leading-tight tracking-tight"
+                style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)" }}
+              >
+                {featured.title}
+              </h3>
+              <p className="font-labels text-[9px] text-gray-500 tracking-wide mt-2">
+                {featured.location} · {featured.spec}
+              </p>
+            </div>
+          </Link>
         </FadeIn>
 
-        {/* Two smaller projects */}
+        {/* Two smaller */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-          {projects.slice(1).map((project, i) => (
+          {rest.map((project, i) => (
             <FadeIn key={project.id} delay={0.15 + i * 0.1}>
-              <ProjectPlate project={project} />
+              <Link
+                href="/projects"
+                className="group block relative aspect-[4/3] overflow-hidden bg-gray-950"
+              >
+                <ImageWithFallback
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-cover grayscale contrast-110 transition-transform duration-700 group-hover:scale-105"
+                  fallback={<PreviewPlate index={i + 1} label={project.title} />}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <span className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase">
+                    {project.category}
+                  </span>
+                  <h3 className="font-display font-bold text-white text-base mt-1 leading-tight">
+                    {project.title}
+                  </h3>
+                </div>
+              </Link>
             </FadeIn>
           ))}
         </div>
 
-        {/* Photo pending notice */}
-        <FadeIn delay={0.3} className="mt-8 text-center">
-          <p className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase">
-            Project photography in progress — full portfolio coming soon
+        {/* Photo note */}
+        <FadeIn delay={0.4} className="mt-8 text-center">
+          <p className="font-labels text-[9px] text-gray-300 tracking-[0.18em] uppercase">
+            Project photography in progress · Full portfolio at{" "}
+            <Link href="/projects" className="underline">
+              /projects
+            </Link>
           </p>
         </FadeIn>
       </div>

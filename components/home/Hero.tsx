@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { SITE } from "@/lib/constants";
 import { heroContainer, heroLine, ease } from "@/lib/animations";
 
@@ -17,6 +18,20 @@ const taglines = [
 export default function Hero() {
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [taglineVisible, setTaglineVisible] = useState(true);
+  const [hasHeroPhoto, setHasHeroPhoto] = useState(false);
+
+  // Parallax on scroll
+  const { scrollY } = useScroll();
+  const backgroundY = useTransform(scrollY, [0, 600], ["0%", "18%"]);
+  const contentY = useTransform(scrollY, [0, 600], ["0%", "8%"]);
+
+  // Check if hero photo exists
+  useEffect(() => {
+    const img = new window.Image();
+    img.onload = () => setHasHeroPhoto(true);
+    img.onerror = () => setHasHeroPhoto(false);
+    img.src = "/images/hero/patio-pool.jpg";
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,8 +46,33 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen bg-black overflow-hidden flex flex-col pt-20">
-      {/* Blueprint grid */}
-      <div className="absolute inset-0 blueprint-grid pointer-events-none" />
+      {/* Hero background — photo with parallax, or blueprint grid */}
+      <motion.div
+        className="absolute inset-0 overflow-hidden"
+        style={{ y: backgroundY }}
+      >
+        {hasHeroPhoto ? (
+          <>
+            <Image
+              src="/images/hero/patio-pool.jpg"
+              alt="828 Construction project"
+              fill
+              priority
+              className="object-cover grayscale contrast-110"
+              style={{ scale: 1.1 }}
+            />
+            {/* Dark overlay for text readability */}
+            <div className="absolute inset-0 bg-black/65" />
+          </>
+        ) : (
+          <div className="absolute inset-0 blueprint-grid pointer-events-none" />
+        )}
+      </motion.div>
+
+      {/* Blueprint grid overlay (always, lighter on photo) */}
+      {!hasHeroPhoto && (
+        <div className="absolute inset-0 blueprint-grid pointer-events-none" />
+      )}
 
       {/* Diagonal accent line */}
       <div
@@ -59,7 +99,7 @@ export default function Hero() {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center">
+      <motion.div style={{ y: contentY }} className="relative z-10 flex-1 flex flex-col justify-center">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 pb-8">
           {/* Location label */}
           <motion.div
@@ -163,7 +203,7 @@ export default function Hero() {
             </Link>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats bar — anchored to bottom */}
       <motion.div

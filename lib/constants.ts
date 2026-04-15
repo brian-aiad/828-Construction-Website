@@ -84,6 +84,100 @@ export const SERVICES = [
   },
 ];
 
+// ── Project types ─────────────────────────────────────────────────────────
+export type ProjectCategory = "ADU Construction" | "Remediation" | "Consulting";
+
+export interface Project {
+  id: number;
+  title: string;
+  category: ProjectCategory;
+  location: string;
+  spec: string;
+  description: string;
+  /** Path relative to /public — show designed plate if file missing */
+  image: string;
+  /** Optional additional images for lightbox */
+  images?: string[];
+  featured?: boolean;
+}
+
+export const PROJECTS: Project[] = [
+  {
+    id: 1,
+    title: "Modern Herringbone Bath Remodel",
+    category: "ADU Construction",
+    location: "Torrance, CA",
+    spec: "Custom herringbone tile · Built-in lighting · Full remodel",
+    description:
+      "A complete bathroom overhaul showcasing precision tile work and modern fixtures. Custom herringbone pattern, integrated LED strip lighting, and a seamless design that maximizes the space.",
+    image: "/images/projects/bathroom-herringbone.jpg",
+    images: [
+      "/images/projects/bathroom-herringbone.jpg",
+      "/images/projects/bathroom-led.jpg",
+    ],
+    featured: true,
+  },
+  {
+    id: 2,
+    title: "Geometric ADU Interior",
+    category: "ADU Construction",
+    location: "Redondo Beach, CA",
+    spec: "Bold geometric design · Modern fixtures · Full ADU build",
+    description:
+      "ADU interior with a bold geometric wallpaper feature wall, contemporary fixtures, and clean lines throughout. Every detail was selected to maximize the impact of the 420 sq ft space.",
+    image: "/images/projects/bathroom-geometric.jpg",
+    images: [
+      "/images/projects/bathroom-geometric.jpg",
+      "/images/projects/bathroom-angle.jpg",
+    ],
+  },
+  {
+    id: 3,
+    title: "South Bay Outdoor Living",
+    category: "ADU Construction",
+    location: "South Bay, CA",
+    spec: "Custom patio · Pool integration · Luxury outdoor space",
+    description:
+      "Luxury outdoor living space with custom concrete work, pool integration, and covered patio. Designed for California outdoor living — built to last decades.",
+    image: "/images/hero/patio-pool.jpg",
+    featured: true,
+  },
+  {
+    id: 4,
+    title: "Precision Shower & Niche Detail",
+    category: "Remediation",
+    location: "Torrance, CA",
+    spec: "Waterproofing · Custom niche · Tile remediation",
+    description:
+      "Complete shower remediation — removed improper waterproofing, rebuilt to code, installed custom herringbone tile and a recessed niche with built-in shelf. The kind of work that lasts.",
+    image: "/images/projects/bathroom-shower.jpg",
+    images: [
+      "/images/projects/bathroom-shower.jpg",
+      "/images/projects/niche-detail.jpg",
+    ],
+  },
+  {
+    id: 5,
+    title: "LED Bath with Custom Niche",
+    category: "ADU Construction",
+    location: "Manhattan Beach, CA",
+    spec: "LED lighting · Custom niche · Modern finishes",
+    description:
+      "Clean, contemporary bathroom with integrated LED lighting, a custom built-in niche, and large-format tile. Part of a full ADU build for a long-term rental property.",
+    image: "/images/projects/bathroom-led.jpg",
+  },
+  {
+    id: 6,
+    title: "Pre-Purchase Feasibility Analysis",
+    category: "Consulting",
+    location: "Hermosa Beach, CA",
+    spec: "Feasibility study · Defect report · Contractor review",
+    description:
+      "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and provided a complete feasibility analysis. Client avoided a costly mistake.",
+    image: "/images/projects/niche-detail.jpg",
+  },
+];
+
 export const PROCESS_STEPS = [
   {
     number: "01",
