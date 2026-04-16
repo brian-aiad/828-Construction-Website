@@ -5,7 +5,7 @@ export const SITE = {
     "20+ years of building science expertise. Specializing in ADU construction, remediation, and consulting in Torrance and South Bay, CA.",
   phone: "213-828-2388",
   phoneHref: "tel:+12138282388",
-  email: "joe@828construction.com",
+  email: "joe@828constructions.com",
   address: {
     street: "21223 Hawthorne Boulevard STE B 1087",
     city: "Torrance",
@@ -14,7 +14,7 @@ export const SITE = {
     full: "21223 Hawthorne Blvd STE B 1087, Torrance, CA 90503",
   },
   license: "1141119",
-  url: "https://828construction.com",
+  url: "https://828constructions.com",
   serviceArea: [
     "Torrance",
     "Redondo Beach",
@@ -107,49 +107,41 @@ export const PROJECTS: Project[] = [
     title: "Modern Herringbone Bath Remodel",
     category: "ADU Construction",
     location: "Torrance, CA",
-    spec: "Custom herringbone tile · Built-in lighting · Full remodel",
+    spec: "Custom herringbone tile · Wall-mount toilet · Stone accent wall",
     description:
-      "A complete bathroom overhaul showcasing precision tile work and modern fixtures. Custom herringbone pattern, integrated LED strip lighting, and a seamless design that maximizes the space.",
+      "Full bathroom renovation featuring a floor-to-ceiling herringbone tile shower wall, wall-mounted toilet with in-wall tank, natural stone accent, and recessed niche. A complete gut-and-rebuild executed to the millimeter.",
     image: "/images/projects/bathroom-herringbone.jpg",
-    images: [
-      "/images/projects/bathroom-herringbone.jpg",
-      "/images/projects/bathroom-led.jpg",
-    ],
     featured: true,
   },
   {
     id: 2,
-    title: "Geometric ADU Interior",
+    title: "Geometric Feature Bath",
     category: "ADU Construction",
     location: "Redondo Beach, CA",
-    spec: "Bold geometric design · Modern fixtures · Full ADU build",
+    spec: "Geometric tile · Matte black fixtures · Glass partition",
     description:
-      "ADU interior with a bold geometric wallpaper feature wall, contemporary fixtures, and clean lines throughout. Every detail was selected to maximize the impact of the 420 sq ft space.",
+      "Bold starburst geometric tile dominates this ADU bathroom — black matte fixtures, frameless glass shower partition, and warm wood vanity. Proof that a small space can have maximum personality.",
     image: "/images/projects/bathroom-geometric.jpg",
-    images: [
-      "/images/projects/bathroom-geometric.jpg",
-      "/images/projects/bathroom-angle.jpg",
-    ],
   },
   {
     id: 3,
     title: "South Bay Outdoor Living",
     category: "ADU Construction",
     location: "South Bay, CA",
-    spec: "Custom patio · Pool integration · Luxury outdoor space",
+    spec: "Pergola · Pool deck · Custom wood decking",
     description:
-      "Luxury outdoor living space with custom concrete work, pool integration, and covered patio. Designed for California outdoor living — built to last decades.",
+      "Luxury outdoor living space built around an existing pool — custom wood deck, pergola with pendant lighting, and seamless indoor-outdoor flow. Designed for California life, built to last decades.",
     image: "/images/hero/patio-pool.jpg",
     featured: true,
   },
   {
     id: 4,
-    title: "Precision Shower & Niche Detail",
+    title: "Shower Remediation & Niche Rebuild",
     category: "Remediation",
     location: "Torrance, CA",
-    spec: "Waterproofing · Custom niche · Tile remediation",
+    spec: "Waterproofing · Dual shower heads · Herringbone niche",
     description:
-      "Complete shower remediation — removed improper waterproofing, rebuilt to code, installed custom herringbone tile and a recessed niche with built-in shelf. The kind of work that lasts.",
+      "Shower torn out to the studs — improper waterproofing removed, rebuilt to code, large-format white tile installed with a custom herringbone-tile niche and dual shower system. The kind of work that fixes it right.",
     image: "/images/projects/bathroom-shower.jpg",
     images: [
       "/images/projects/bathroom-shower.jpg",
@@ -158,23 +150,33 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 5,
-    title: "LED Bath with Custom Niche",
+    title: "Recessed Ceiling & LED Bath",
     category: "ADU Construction",
     location: "Manhattan Beach, CA",
-    spec: "LED lighting · Custom niche · Modern finishes",
+    spec: "Tile ceiling · LED downlights · Modern finishes",
     description:
-      "Clean, contemporary bathroom with integrated LED lighting, a custom built-in niche, and large-format tile. Part of a full ADU build for a long-term rental property.",
+      "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a wall-mounted accent light. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
     image: "/images/projects/bathroom-led.jpg",
   },
   {
     id: 6,
-    title: "Pre-Purchase Feasibility Analysis",
-    category: "Consulting",
-    location: "Hermosa Beach, CA",
-    spec: "Feasibility study · Defect report · Contractor review",
+    title: "Custom Shower Niche — In Progress",
+    category: "Remediation",
+    location: "Torrance, CA",
+    spec: "Microcement finish · Recessed niche · Dark tile ceiling",
     description:
-      "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and provided a complete feasibility analysis. Client avoided a costly mistake.",
+      "Mid-project documentation of a precision shower niche in microcement finish — dark tile ceiling contrasts the light walls. This is what the work looks like before the glamour shot. Detail-first, always.",
     image: "/images/projects/niche-detail.jpg",
+  },
+  {
+    id: 7,
+    title: "Vanity & LED Strip Renovation",
+    category: "ADU Construction",
+    location: "South Bay, CA",
+    spec: "LED strip lighting · Warm ambiance · Wood plank floor",
+    description:
+      "Bathroom renovation focused on atmosphere — LED strip lighting under the vanity shelf creates warm, indirect glow. Wood plank flooring and clean white walls complete a space designed for long-term comfort.",
+    image: "/images/projects/bathroom-warm.jpg",
   },
 ];
 

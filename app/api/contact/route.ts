@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const safeMessage = sanitize(message);
 
     const apiKey = process.env.RESEND_API_KEY;
-    const toEmail = process.env.CONTACT_EMAIL || "joe@828construction.com";
+    const toEmail = process.env.CONTACT_EMAIL || "joe@828constructions.com";
 
     if (!apiKey) {
       // In development without API key, log and return success
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "828 Construction Website <noreply@828construction.com>",
+        from: "828 Construction Website <noreply@828constructions.com>",
         to: [toEmail],
         reply_to: safeEmail || undefined,
         subject: `New ${safeService} Inquiry from ${safeName}`,
