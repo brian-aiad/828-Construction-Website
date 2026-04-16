@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #000000;
+  --accent-copper: #B87333;
+  --accent-copper-light: #D4A574;
+  --accent-copper-dark: #8B5A2B;
 }
 
 @theme inline {
@@ -109,7 +112,137 @@ body {
   top: 0;
   left: 0;
   height: 2px;
-  background: #fff;
+  background: var(--accent-copper);
   z-index: 1000;
   transform-origin: left;
+  transform: scaleX(0);
+}
+
+/* ── Accessibility: respect reduced-motion preference ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Copper accent utilities ─────────────────────────────────────────────── */
+.text-copper {
+  color: var(--accent-copper);
+}
+.border-copper {
+  border-color: var(--accent-copper);
+}
+
+/* ── Lenis smooth scroll ─────────────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ── Custom cursor — desktop only ────────────────────────────────────────── */
+@media (pointer: fine) {
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
+  }
+}
+/* Hide cursor elements on touch devices */
+@media (pointer: coarse) {
+  [aria-hidden="true"][style*="border-radius: 50%"] {
+    display: none;
+  }
+}
+
+/* ── Project image color enhancement ─────────────────────────────────────── */
+.project-img {
+  filter: contrast(1.04) saturate(1.08);
+  transition: filter 0.4s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.project-img:hover {
+  filter: contrast(1.08) saturate(1.12) brightness(1.03);
+}
+
+/* ── Magnetic button base ────────────────────────────────────────────────── */
+.btn-magnetic {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* ── Service card — 4-side animated border on hover ─────────────────────── */
+.service-card-border-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+.service-card-border-wrap::before,
+.service-card-border-wrap::after {
+  content: '';
+  position: absolute;
+  background: var(--accent-copper);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+/* Top + bottom edges */
+.service-card-border-wrap::before {
+  top: 0; left: 0;
+  width: 100%; height: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+.service-card-border-wrap::after {
+  bottom: 0; right: 0;
+  width: 100%; height: 1px;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.3s, opacity 0.2s ease 0.3s;
+}
+.group:hover .service-card-border-wrap::before {
+  transform: scaleX(1);
+  opacity: 0.7;
+}
+.group:hover .service-card-border-wrap::after {
+  transform: scaleX(1);
+  opacity: 0.7;
+}
+
+/* Left + right edges — done with inner child spans */
+.service-card-border-left,
+.service-card-border-right {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--accent-copper);
+  opacity: 0;
+  transform: scaleY(0);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+.service-card-border-left {
+  left: 0;
+  transform-origin: top;
+  transition-delay: 0.15s;
+}
+.service-card-border-right {
+  right: 0;
+  transform-origin: bottom;
+  transition-delay: 0.45s;
+}
+.group:hover .service-card-border-left,
+.group:hover .service-card-border-right {
+  transform: scaleY(1);
+  opacity: 0.7;
 }
