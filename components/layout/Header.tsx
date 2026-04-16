@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SITE } from "@/lib/constants";
@@ -24,35 +25,39 @@ export default function Header() {
   // Lock body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
+
+  const isHome = pathname === "/";
 
   return (
     <>
-      <header
+      <motion.header
+        initial={{ y: -72, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-black/95 backdrop-blur-sm border-b border-gray-900"
-            : "bg-black border-b border-transparent"
+            ? "bg-black/85 backdrop-blur-xl border-b border-white/10"
+            : isHome
+            ? "bg-black/30 backdrop-blur-xl border-b border-white/5"
+            : "bg-black/85 backdrop-blur-xl border-b border-white/10"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-18 lg:h-22">
             {/* Logo */}
-            <Link href="/" className="group flex items-center gap-4">
-              <div className="flex items-center justify-center w-9 h-9 border border-gray-700 group-hover:border-white transition-colors duration-300">
-                <span className="font-numbers font-bold text-white text-sm tracking-wider">
-                  828
-                </span>
-              </div>
-              <div className="hidden sm:block">
-                <div className="font-display font-bold text-white text-base tracking-wide leading-none">
-                  828 Construction
-                </div>
-                <div className="font-labels text-[9px] text-gray-600 tracking-[0.2em] uppercase mt-0.5">
-                  Built with Intent
-                </div>
-              </div>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/images/logo/828logo_trans.png"
+                alt="828 Construction"
+                width={280}
+                height={96}
+                className="h-12 w-auto lg:h-16"
+                priority
+              />
             </Link>
 
             {/* Desktop nav */}
@@ -68,14 +73,19 @@ export default function Header() {
                   }`}
                 >
                   {link.label}
-                  {pathname === link.href && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-white" />
-                  )}
+                  {/* Active: copper underline. Hover: white underline slides in */}
+                  <span
+                    className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
+                      pathname === link.href
+                        ? "bg-[#B87333] scale-x-100"
+                        : "bg-white scale-x-0 group-hover:scale-x-100"
+                    }`}
+                  />
                 </Link>
               ))}
             </nav>
 
-            {/* Right side */}
+            {/* Right side: phone + CTA */}
             <div className="hidden lg:flex items-center gap-6">
               <a
                 href={SITE.phoneHref}
@@ -106,9 +116,7 @@ export default function Header() {
               >
                 <span
                   className={`block h-px bg-white transition-all duration-300 origin-center ${
-                    mobileOpen
-                      ? "rotate-45 translate-y-[6px]"
-                      : ""
+                    mobileOpen ? "rotate-45 translate-y-[6px]" : ""
                   }`}
                 />
                 <span
@@ -118,16 +126,14 @@ export default function Header() {
                 />
                 <span
                   className={`block h-px bg-white transition-all duration-300 origin-center ${
-                    mobileOpen
-                      ? "-rotate-45 -translate-y-[6px]"
-                      : ""
+                    mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""
                   }`}
                 />
               </button>
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile fullscreen menu */}
       <AnimatePresence>
@@ -145,7 +151,11 @@ export default function Header() {
                   key={link.href}
                   initial={{ opacity: 0, x: -24 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 + i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{
+                    delay: 0.05 + i * 0.06,
+                    duration: 0.5,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                 >
                   <Link
                     href={link.href}

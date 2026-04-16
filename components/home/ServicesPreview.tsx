@@ -163,9 +163,9 @@ export default function ServicesPreview() {
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10">
-                <div className="flex flex-wrap gap-3 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {adu.keywords.map((kw) => (
-                    <span key={kw} className="font-labels text-[9px] text-white/50 tracking-[0.18em] uppercase">
+                    <span key={kw} className="font-labels text-[9px] text-white/60 tracking-[0.14em] uppercase border border-white/15 px-2 py-0.5 group-hover:border-[#B87333]/40 group-hover:text-white/80 transition-colors duration-300">
                       {kw}
                     </span>
                   ))}
@@ -222,7 +222,7 @@ export default function ServicesPreview() {
               <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                 <div className="flex flex-wrap gap-2 mb-3">
                   {remediation.keywords.map((kw) => (
-                    <span key={kw} className="font-labels text-[9px] text-white/50 tracking-[0.18em] uppercase">
+                    <span key={kw} className="font-labels text-[9px] text-white/60 tracking-[0.14em] uppercase border border-white/15 px-2 py-0.5 group-hover:border-[#B87333]/40 group-hover:text-white/80 transition-colors duration-300">
                       {kw}
                     </span>
                   ))}
@@ -279,7 +279,7 @@ export default function ServicesPreview() {
               <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                 <div className="flex flex-wrap gap-2 mb-3">
                   {consulting.keywords.map((kw) => (
-                    <span key={kw} className="font-labels text-[9px] text-white/50 tracking-[0.18em] uppercase">
+                    <span key={kw} className="font-labels text-[9px] text-white/60 tracking-[0.14em] uppercase border border-white/15 px-2 py-0.5 group-hover:border-[#B87333]/40 group-hover:text-white/80 transition-colors duration-300">
                       {kw}
                     </span>
                   ))}

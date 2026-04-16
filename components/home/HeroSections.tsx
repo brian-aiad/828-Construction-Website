@@ -149,6 +149,7 @@ export default function HeroSections() {
               className="font-display font-bold text-white tracking-tight leading-[0.88] mb-8"
               style={{ fontSize: "clamp(5rem, 13vw, 13rem)" }}
             >
+              {/* Line 1: full-line reveal */}
               <span className="block overflow-hidden">
                 <motion.span
                   className="block"
@@ -159,15 +160,27 @@ export default function HeroSections() {
                   Built with
                 </motion.span>
               </span>
+
+              {/* Line 2: character-by-character on "Intent." */}
               <span className="block overflow-hidden">
-                <motion.span
-                  className="block"
-                  initial={{ y: "110%" }}
-                  animate={{ y: "0%" }}
-                  transition={{ duration: 1.0, delay: 0.36, ease: ease.out }}
-                >
-                  Intent.
-                </motion.span>
+                <span className="flex" aria-label="Intent.">
+                  {["I","n","t","e","n","t","."].map((char, i) => (
+                    <motion.span
+                      key={i}
+                      className="inline-block"
+                      aria-hidden="true"
+                      initial={{ y: "110%", opacity: 0 }}
+                      animate={{ y: "0%", opacity: 1 }}
+                      transition={{
+                        duration: 0.75,
+                        delay: 0.36 + i * 0.055,
+                        ease: ease.out,
+                      }}
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </span>
               </span>
             </h1>
 
