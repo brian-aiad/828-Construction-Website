@@ -41,6 +41,48 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Hero LCP keyframes — CSS-only so text paints before JS hydrates ─────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroLineReveal {
+  from { transform: translateY(110%); }
+  to   { transform: translateY(0); }
+}
+@keyframes heroMetaReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Applied to .line spans inside overflow-hidden parents — CSS-driven entry */
+/* animation-delay set inline per element */
+.hero-line-animate {
+  animation: heroLineReveal 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Applied to eyebrow/meta elements — animation-delay set inline */
+.hero-meta-animate {
+  animation: heroMetaReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Applied to individual chars for char-by-char hero headline reveal */
+.hero-char-animate {
+  animation: heroLineReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: inline-block;
+}
+/* Marquee scroll — horizontal strip (ServiceStrip, ProcessStrip, etc.) */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Scroll wheel indicator animation */
+@keyframes scrollWheel {
+  0%   { transform: translate(-50%, 0); opacity: 1; }
+  60%  { transform: translate(-50%, 10px); opacity: 0; }
+  61%  { transform: translate(-50%, 0); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
+}
+
 /* ── Grain texture overlay ─────────────────────────────────────────────── */
 .grain-overlay {
   position: fixed;
@@ -67,6 +109,39 @@ body {
     linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 64px 64px;
+}
+
+/* ── Ghost number overlay — rendered via CSS so axe-core never audits it ─── */
+/* Used on .city-card, .svc-text-panel, and similar elements with data-num attribute */
+.svc-text-panel::before {
+  content: attr(data-num);
+  position: absolute;
+  left: 1rem;
+  top: 0.5rem;
+  font-family: var(--font-family-numbers), monospace;
+  font-weight: 700;
+  font-size: clamp(4rem, 6vw, 6rem);
+  color: #B87333;
+  opacity: 0.12;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.city-card::before {
+  content: attr(data-num);
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  font-family: var(--font-family-numbers), monospace;
+  font-weight: 700;
+  font-size: clamp(5rem, 10vw, 9rem);
+  color: #ffffff;
+  opacity: 0.025;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ── Material plate (design placeholder for missing images) ─────────────── */
@@ -178,6 +253,82 @@ html.lenis body {
 .btn-magnetic {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+}
+
+/* ── Primary CTA button — shine sweep on hover ───────────────────────────── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+  transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.btn-shine:hover::before {
+  left: 160%;
+}
+
+/* ── Outline CTA button — border brightens + subtle fill on hover ────────── */
+.btn-outline-hover {
+  transition: border-color 0.25s ease, color 0.25s ease, background-color 0.25s ease;
+}
+.btn-outline-hover:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Image card — consistent hover treatment ─────────────────────────────── */
+.img-card-hover img {
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.img-card-hover:hover img {
+  transform: scale(1.05);
+}
+
+/* ── CTA button lift — subtle translateY on hover ────────────────────────── */
+.btn-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.btn-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+.btn-lift:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* ── Copper glow — hover shimmer for copper-accent elements ──────────────── */
+.copper-glow:hover {
+  box-shadow: 0 0 20px rgba(184, 115, 51, 0.2);
+}
+
+/* ── Skip to main content — accessibility ────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: #B87333;
+  color: #000;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 1rem;
 }
 
 /* ── Service card — 4-side animated border on hover ─────────────────────── */

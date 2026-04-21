@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Hero from "@/components/home/Hero";
+import HeroSections from "@/components/home/HeroSections";
 import ServicesPreview from "@/components/home/ServicesPreview";
 import AboutPreview from "@/components/home/AboutPreview";
-import ProcessPreview from "@/components/home/ProcessPreview";
 import ProjectsPreview from "@/components/home/ProjectsPreview";
+import BuildingScience from "@/components/home/BuildingScience";
 import HomeCTA from "@/components/home/HomeCTA";
+import SectionDivider from "@/components/layout/SectionDivider";
 import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
 
@@ -46,11 +47,28 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={jsonLd} />
-      <Hero />
+
+      {/* Hero — 200vh with sticky parallax panel */}
+      <HeroSections />
+
+      {/* Hero → Services: black-to-black, copper seam */}
+      <SectionDivider opacity={0.5} />
       <ServicesPreview />
+
+      {/* Services → About: black-to-white, copper seam */}
+      <SectionDivider opacity={0.6} />
       <AboutPreview />
-      <ProcessPreview />
+
+      {/* About → Projects: white-to-dark, copper seam */}
+      <SectionDivider opacity={0.5} />
       <ProjectsPreview />
+
+      {/* Projects → Building Science: dark-to-white, copper seam */}
+      <SectionDivider opacity={0.6} />
+      <BuildingScience />
+
+      {/* Building Science → CTA: white-to-black, copper seam */}
+      <SectionDivider opacity={0.6} />
       <HomeCTA />
     </>
   );

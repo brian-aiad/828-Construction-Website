@@ -78,7 +78,7 @@ export default function Lightbox({ project, onClose }: LightboxProps) {
                 src={project.image}
                 alt={project.title}
                 fill
-                className="object-cover grayscale contrast-110"
+                className="object-cover"
                 sizes="(max-width: 768px) 100vw, 80vw"
               />
             </motion.div>

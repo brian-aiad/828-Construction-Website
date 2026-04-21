@@ -1,144 +1,287 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS } from "@/lib/constants";
-import FadeIn from "@/components/animations/FadeIn";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
+import { AnimationController } from "@/utils/animationControl";
 
-function PreviewPlate({ index, label }: { index: number; label: string }) {
-  const patterns = [
-    "repeating-linear-gradient(0deg, transparent, transparent 47px, rgba(255,255,255,0.025) 48px)",
-    "repeating-linear-gradient(45deg, transparent, transparent 22px, rgba(255,255,255,0.02) 23px)",
-    "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-  ];
-  return (
-    <div
-      className="absolute inset-0 plate-concrete"
-      style={{
-        backgroundImage: patterns[index % 3],
-        backgroundSize: index % 3 === 2 ? "32px 32px" : "auto",
-      }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        <span
-          className="font-numbers font-bold text-white leading-none"
-          style={{
-            fontSize: "clamp(4rem, 10vw, 12rem)",
-            opacity: 0.04,
-            letterSpacing: "-0.04em",
-          }}
-        >
-          0{index + 1}
-        </span>
-      </div>
-      <div className="absolute top-5 right-5 w-8 h-8 border-t border-r border-gray-800" />
-    </div>
-  );
-}
+gsap.registerPlugin(ScrollTrigger);
 
-const previewProjects = PROJECTS.slice(0, 3);
+// Three preview projects: featured + two secondaries + one wide bottom
+const [featured, secondary1, secondary2, wide] = PROJECTS;
 
 export default function ProjectsPreview() {
-  const [featured, ...rest] = previewProjects;
+  const sectionRef = useRef<HTMLElement>(null);
+  const hairlineRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const trigger = sectionRef.current!;
+      const triggerStart = "top 78%";
+
+      // ── Section header: label + headline clip reveal ─────────────────────
+      const label = trigger.querySelector<HTMLElement>(".proj-label");
+      const headline = trigger.querySelector<HTMLElement>(".proj-headline");
+      const counter = trigger.querySelector<HTMLElement>(".proj-counter");
+
+      if (label) {
+        gsap.fromTo(label, { yPercent: 110 }, {
+          yPercent: 0, duration: 0.7, ease: "power3.out",
+          scrollTrigger: { trigger, start: triggerStart, once: true },
+        });
+      }
+      if (headline) {
+        gsap.fromTo(headline, { yPercent: 110 }, {
+          yPercent: 0, duration: 0.85, delay: 0.08, ease: "power3.out",
+          scrollTrigger: { trigger, start: triggerStart, once: true },
+        });
+      }
+      if (counter) {
+        gsap.fromTo(counter, { opacity: 0, y: 16 }, {
+          opacity: 1, y: 0, duration: 0.6, delay: 0.2, ease: "power3.out",
+          scrollTrigger: { trigger, start: triggerStart, once: true },
+        });
+      }
+
+      // ── Copper hairline scaleX 0→1 ───────────────────────────────────────
+      if (hairlineRef.current) {
+        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
+          scaleX: 1, duration: 0.9, ease: "power2.inOut", transformOrigin: "left",
+          scrollTrigger: { trigger: hairlineRef.current, start: "top 88%", once: true },
+        });
+      }
+
+      // ── Cards: Olson Kundig punch-in clip-path + stagger ─────────────────
+      if (gridRef.current) {
+        const cards = gridRef.current.querySelectorAll<HTMLElement>(".proj-card");
+        gsap.fromTo(
+          cards,
+          { clipPath: "inset(8% 8% 8% 8%)", opacity: 0 },
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            opacity: 1,
+            duration: 1.05,
+            stagger: { each: 0.12, from: "start" },
+            ease: "power3.out",
+            scrollTrigger: { trigger: gridRef.current, start: "top 82%", once: true },
+          }
+        );
+
+        // ── Parallax scrub on each image ────────────────────────────────────
+        cards.forEach((card) => {
+          const imgWrap = card.querySelector<HTMLElement>(".parallax-img-inner");
+          if (!imgWrap) return;
+          gsap.to(imgWrap, {
+            yPercent: -12,
+            ease: "none",
+            scrollTrigger: { trigger: card, start: "top bottom", end: "bottom top", scrub: true },
+          });
+        });
+
+        // ── Hover: image saturation + copper border ──────────────────────────
+        cards.forEach((card) => {
+          const img = card.querySelector<HTMLImageElement>("img");
+          const copperBar = card.querySelector<HTMLElement>(".copper-bar");
+
+          card.addEventListener("mouseenter", () => {
+            if (img) gsap.to(img, { filter: "contrast(1.1) saturate(1.3)", scale: 1.03, duration: 0.45, ease: "power2.out" });
+            if (copperBar) gsap.to(copperBar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+          });
+          card.addEventListener("mouseleave", () => {
+            if (img) gsap.to(img, { filter: "contrast(1.06) saturate(1.1)", scale: 1, duration: 0.45, ease: "power2.out" });
+            if (copperBar) gsap.to(copperBar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
+          });
+        });
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section className="bg-white py-24 lg:py-36 overflow-hidden">
+    <section
+      ref={sectionRef}
+      data-section="projects"
+      className="bg-[#0a0a0a] py-24 lg:py-32 overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
+
         {/* Header */}
-        <FadeIn className="mb-16 lg:mb-20">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
-            <div>
-              <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase">
-                Our Work
+        <div className="flex items-end justify-between gap-6 mb-0">
+          <div>
+            <div className="overflow-hidden mb-3">
+              <span className="proj-label font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block">
+                Selected Work
               </span>
+            </div>
+            <div className="overflow-hidden">
               <h2
-                className="font-display font-bold text-black mt-4 tracking-tight leading-[0.9]"
-                style={{ fontSize: "clamp(2.8rem, 6vw, 5rem)" }}
+                className="proj-headline font-display font-bold text-white tracking-tight leading-[0.9]"
+                style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)" }}
               >
-                Projects.
-                <br />
-                <span className="text-gray-200">Real Work. Real Results.</span>
+                Built with Intent.
               </h2>
             </div>
-            <Link
-              href="/projects"
-              className="font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-black transition-colors duration-200 group inline-flex items-center gap-2 self-start sm:self-auto"
-            >
-              All Projects
-              <span className="transition-transform duration-200 group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
           </div>
-        </FadeIn>
-
-        {/* Featured project */}
-        <FadeIn delay={0.1} className="mb-1">
-          <Link href="/projects" className="group block relative aspect-[16/7] overflow-hidden bg-gray-950">
-            <ImageWithFallback
-              src={featured.image}
-              alt={featured.title}
-              fill
-              priority
-              className="object-cover grayscale contrast-110 transition-transform duration-700 group-hover:scale-105"
-              fallback={<PreviewPlate index={0} label={featured.title} />}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-12">
-              <span className="font-labels text-[9px] text-gray-400 tracking-[0.2em] uppercase border border-gray-700 px-2 py-1 self-start mb-4">
-                {featured.category}
-              </span>
-              <h3
-                className="font-display font-bold text-white leading-tight tracking-tight"
-                style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)" }}
-              >
-                {featured.title}
-              </h3>
-              <p className="font-labels text-[9px] text-gray-500 tracking-wide mt-2">
-                {featured.location} · {featured.spec}
-              </p>
-            </div>
+          <Link
+            href="/projects"
+            className="proj-counter group inline-flex items-center gap-2 font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5 flex-shrink-0 self-start mt-2"
+          >
+            All Projects
+            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </Link>
-        </FadeIn>
-
-        {/* Two smaller */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-          {rest.map((project, i) => (
-            <FadeIn key={project.id} delay={0.15 + i * 0.1}>
-              <Link
-                href="/projects"
-                className="group block relative aspect-[4/3] overflow-hidden bg-gray-950"
-              >
-                <ImageWithFallback
-                  src={project.image}
-                  alt={project.title}
-                  fill
-                  className="object-cover grayscale contrast-110 transition-transform duration-700 group-hover:scale-105"
-                  fallback={<PreviewPlate index={i + 1} label={project.title} />}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <span className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase">
-                    {project.category}
-                  </span>
-                  <h3 className="font-display font-bold text-white text-base mt-1 leading-tight">
-                    {project.title}
-                  </h3>
-                </div>
-              </Link>
-            </FadeIn>
-          ))}
         </div>
 
-        {/* Photo note */}
-        <FadeIn delay={0.4} className="mt-8 text-center">
-          <p className="font-labels text-[9px] text-gray-300 tracking-[0.18em] uppercase">
-            Project photography in progress · Full portfolio at{" "}
-            <Link href="/projects" className="underline">
-              /projects
-            </Link>
-          </p>
-        </FadeIn>
+        {/* Copper hairline — scaleX 0→1 */}
+        <div
+          ref={hairlineRef}
+          className="mt-8 mb-1"
+          style={{ height: 1, background: "#B87333", opacity: 0.45, transformOrigin: "left" }}
+        />
+
+        {/* Grid — mobile: single column stack · desktop: asymmetric 12-col editorial */}
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 md:grid-cols-12 gap-[2px] md:gap-[3px]"
+        >
+          {/* Featured — mobile: full width · desktop: col 1-8, row 1-2 */}
+          {featured && (
+            <div className="proj-card relative overflow-hidden md:[grid-column:1/9] md:[grid-row:1/3]">
+              <Link
+                href="/projects"
+                className="group block relative overflow-hidden bg-[#111]"
+                style={{ height: "clamp(240px, 42vw, 570px)" }}
+              >
+                <div className="parallax-img-inner absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                  <ImageWithFallback
+                    src={featured.image}
+                    alt={featured.title}
+                    fill
+                    priority
+                    className="object-cover"
+                    style={{ filter: "contrast(1.06) saturate(1.1)" }}
+                    sizes="(max-width: 768px) 100vw, 66vw"
+                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-10">
+                  <span className="font-labels text-[9px] text-white/50 tracking-[0.2em] uppercase block mb-2">
+                    {featured.category} · {featured.location}
+                  </span>
+                  <h3
+                    className="font-display font-bold text-white leading-tight tracking-tight mb-2"
+                    style={{ fontSize: "clamp(1.3rem, 2.8vw, 2.4rem)" }}
+                  >
+                    {featured.title}
+                  </h3>
+                  <p className="font-labels text-[9px] text-white/40 tracking-wide hidden md:block">{featured.spec}</p>
+                </div>
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+              </Link>
+            </div>
+          )}
+
+          {/* Secondary 1 — mobile: full width · desktop: col 9-12 row 1 */}
+          {secondary1 && (
+            <div className="proj-card relative overflow-hidden md:[grid-column:9/13] md:[grid-row:1]">
+              <Link
+                href="/projects"
+                className="group block relative overflow-hidden bg-[#111]"
+                style={{ height: "clamp(200px, 20.5vw, 282px)" }}
+              >
+                <div className="parallax-img-inner absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                  <ImageWithFallback
+                    src={secondary1.image}
+                    alt={secondary1.title}
+                    fill
+                    className="object-cover"
+                    style={{ filter: "contrast(1.05) saturate(1.08)" }}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <span className="font-labels text-[9px] text-white/45 tracking-[0.18em] uppercase block mb-1">{secondary1.category}</span>
+                  <h3 className="font-display font-bold text-white text-base leading-tight">{secondary1.title}</h3>
+                </div>
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+              </Link>
+            </div>
+          )}
+
+          {/* Secondary 2 — mobile: full width · desktop: col 9-12 row 2 */}
+          {secondary2 && (
+            <div className="proj-card relative overflow-hidden md:[grid-column:9/13] md:[grid-row:2]">
+              <Link
+                href="/projects"
+                className="group block relative overflow-hidden bg-[#111]"
+                style={{ height: "clamp(200px, 20.5vw, 282px)" }}
+              >
+                <div className="parallax-img-inner absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                  <ImageWithFallback
+                    src={secondary2.image}
+                    alt={secondary2.title}
+                    fill
+                    className="object-cover"
+                    style={{ filter: "contrast(1.05) saturate(1.08)" }}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <span className="font-labels text-[9px] text-white/45 tracking-[0.18em] uppercase block mb-1">{secondary2.category}</span>
+                  <h3 className="font-display font-bold text-white text-base leading-tight">{secondary2.title}</h3>
+                  <p className="font-labels text-[9px] text-white/35 tracking-wide mt-1">{secondary2.location}</p>
+                </div>
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+              </Link>
+            </div>
+          )}
+
+          {/* Inter-row copper hairline */}
+          <div className="col-span-full" style={{ height: 1, background: "rgba(184,115,51,0.18)" }} />
+
+          {/* Wide bottom — full width both viewports */}
+          {wide && (
+            <div className="proj-card col-span-full relative overflow-hidden">
+              <Link
+                href="/projects"
+                className="group block relative overflow-hidden bg-[#111]"
+                style={{ height: "clamp(180px, 22vw, 295px)" }}
+              >
+                <div className="parallax-img-inner absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                  <ImageWithFallback
+                    src={wide.image}
+                    alt={wide.title}
+                    fill
+                    className="object-cover"
+                    style={{ filter: "contrast(1.05) saturate(1.08)" }}
+                    sizes="100vw"
+                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/25 to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 lg:p-10">
+                  <span className="font-labels text-[9px] text-white/45 tracking-[0.18em] uppercase mb-2">{wide.category} · {wide.location}</span>
+                  <h3 className="font-display font-bold text-white leading-tight tracking-tight" style={{ fontSize: "clamp(1.2rem, 2.5vw, 2rem)" }}>
+                    {wide.title}
+                  </h3>
+                </div>
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+              </Link>
+            </div>
+          )}
+        </div>
+
       </div>
     </section>
   );

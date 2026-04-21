@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variation A — Magazine Featured Layout</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* ─── Section wrapper ─────────────────────────────────── */
+  .services-section {
+    background: #000;
+    padding: 96px 0 120px;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ─── Section header ──────────────────────────────────── */
+  /* ANIMATION INTENT: On scroll entry, the label fades up (y:20→0, opacity:0→1, 0.4s).
+     The headline splits into two lines; line 1 reveals clip-path (inset(100%→0%) from bottom)
+     over 0.7s ease power3.out; line 2 follows 0.1s behind. "All Services →" fades in last. */
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #666;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .section-title {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .section-title .dim {
+    color: rgba(255,255,255,0.25);
+  }
+
+  .all-link {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #555;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+    margin-bottom: 6px;
+  }
+  .all-link:hover { color: #B87333; border-color: #B87333; }
+
+  /* ─── 1px copper seam ────────────────────────────────── */
+  /* ANIMATION INTENT: scaleX 0→1 from left, triggered when section header enters viewport.
+     Duration 0.8s, ease power2.inOut. Signals the grid below is intentional. */
+  .copper-seam {
+    width: 100%;
+    height: 1px;
+    background: #B87333;
+    transform-origin: left;
+    margin-bottom: 2px;
+    opacity: 0.6;
+  }
+
+  /* ─── LAYOUT: Magazine Featured ─────────────────────── */
+  /*
+    Structure:
+      ┌─────────────────────────────────────────────────────┐
+      │                                                     │
+      │         ADU CONSTRUCTION  (featured, full-width)    │
+      │                           60vh tall                 │
+      │                                                     │
+      └─────────────────────────────────────────────────────┘
+      ┌────────────────────────┬────────────────────────────┐
+      │   REMEDIATION          │   CONSULTING               │
+      │   50% width, 42vh      │   50% width, 42vh          │
+      └────────────────────────┴────────────────────────────┘
+
+    Zero dead space. ADU has 100% of row 1 width.
+    Remediation + Consulting split 100% of row 2 width.
+    2px gap between all cards.
+  */
+  .services-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .services-row {
+    display: flex;
+    gap: 2px;
+  }
+
+  /* ─── Individual card ────────────────────────────────── */
+  /* ANIMATION INTENT: Each card has clip-path reveal: inset(100% 0 0 0) → inset(0% 0 0 0)
+     ADU: triggers at top 75%, duration 1.0s, ease power3.out
+     Remediation: 200ms delay after ADU trigger
+     Consulting: 350ms delay after ADU trigger
+     After reveal: image has scrub parallax yPercent -8% (translateY tied to scroll position)
+     On hover: image scale 1.0 → 1.04 (duration 0.6s), copper border-bottom grows 0→100% width */
+  .service-card {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+  }
+
+  .service-card.featured {
+    width: 100%;
+    height: clamp(320px, 55vh, 680px);
+  }
+
+  .service-card.secondary {
+    flex: 1;
+    height: clamp(260px, 42vh, 520px);
+  }
+
+  /* Photo fills the card */
+  .card-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 110%; /* 110% to allow -10% parallax travel without showing gap */
+    object-fit: cover;
+    /* ANIMATION INTENT: transform: translateY(0) at rest.
+       GSAP scrub sets translateY(-10%) at bottom of parallax range.
+       will-change: transform set via JS before animation starts. */
+    transition: transform 0.7s ease; /* fallback for hover scale */
+  }
+
+  .service-card:hover .card-photo {
+    transform: scale(1.04);
+  }
+
+  /* Gradient overlay: dense at bottom for text legibility */
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,0.05) 100%);
+  }
+
+  /* Ghost counter number — appears subtly in top-right */
+  /* ANIMATION INTENT: opacity 0.06 at rest → 0.18 on card hover (transition 0.4s) */
+  .ghost-number {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: clamp(6rem, 10vw, 9rem);
+    font-weight: 800;
+    color: #B87333;
+    opacity: 0.06;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.4s ease;
+  }
+  .service-card:hover .ghost-number { opacity: 0.18; }
+
+  /* Bottom content area */
+  .card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  /* Copper bottom-border: grows from 0 to full on hover */
+  /* ANIMATION INTENT: scaleX 0→1 over 300ms ease-out on mouseenter.
+     transform-origin: left. Reverses on mouseleave. */
+  .copper-border-bottom {
+    height: 2px;
+    background: #B87333;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease-out;
+  }
+  .service-card:hover .copper-border-bottom { transform: scaleX(1); }
+
+  .card-inner {
+    padding: 32px 36px;
+  }
+
+  .card-inner.featured-inner {
+    padding: 40px 48px;
+  }
+
+  /* Keyword tags */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .tag {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 3px 8px;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .service-card:hover .tag {
+    border-color: rgba(184,115,51,0.35);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* Service name */
+  .card-name {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .card-title {
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .featured-inner .card-title {
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+  }
+
+  .secondary .card-title {
+    font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+  }
+
+  .card-tagline {
+    color: rgba(255,255,255,0.55);
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  .featured-inner .card-tagline { font-size: 14px; }
+
+  /* Arrow CTA box */
+  .arrow-box {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.5);
+    font-size: 16px;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .service-card:hover .arrow-box {
+    border-color: #B87333;
+    color: #B87333;
+  }
+
+  /* ─── Image fallback plates (when photo doesn't load) ── */
+  .plate {
+    position: absolute;
+    inset: 0;
+    background: #0a0a0a;
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 47px,
+      rgba(255,255,255,0.02) 48px
+    );
+  }
+
+  .plate-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(4rem, 8vw, 10rem);
+    font-weight: 800;
+    color: rgba(255,255,255,0.03);
+    letter-spacing: -0.04em;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<section class="services-section">
+  <div class="container">
+
+    <!-- Section header -->
+    <div class="section-header">
+      <div>
+        <span class="section-label">Services</span>
+        <h2 class="section-title">
+          Three services.<br>
+          <span class="dim">One standard.</span>
+        </h2>
+      </div>
+      <a href="/services" class="all-link">All Services →</a>
+    </div>
+
+    <!-- Copper seam divider -->
+    <!-- ANIMATION INTENT: scaleX 0→1, left origin, 0.8s, triggered with section header -->
+    <div class="copper-seam"></div>
+
+    <!-- Grid: magazine layout -->
+    <div class="services-grid">
+
+      <!-- ROW 1: ADU full-width featured card -->
+      <!-- ANIMATION INTENT: clip-path inset(100% 0 0 0)→inset(0% 0 0 0), 1.0s power3.out, trigger top 75% -->
+      <div class="services-row">
+        <a href="/services/adu" class="service-card featured">
+          <!-- Photo: real image from public/images/projects/service-adu.jpg -->
+          <img
+            class="card-photo"
+            src="../../public/images/projects/service-adu.jpg"
+            alt="ADU Construction — 828 Construction"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          />
+          <!-- Fallback plate if image 404s -->
+          <div class="plate" style="display:none;">
+            <div class="plate-label">ADU</div>
+          </div>
+
+          <div class="card-overlay"></div>
+
+          <!-- Ghost number -->
+          <div class="ghost-number">01</div>
+
+          <!-- Content at bottom -->
+          <div class="card-content">
+            <div class="copper-border-bottom"></div>
+            <div class="card-inner featured-inner">
+              <div class="tags">
+                <span class="tag">Permitting</span>
+                <span class="tag">Layout logic</span>
+                <span class="tag">Full build</span>
+              </div>
+              <div class="card-name">
+                <div>
+                  <h3 class="card-title">ADU Construction</h3>
+                  <p class="card-tagline">Built for added space that actually performs.</p>
+                </div>
+                <div class="arrow-box">→</div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- ROW 2: Remediation (50%) + Consulting (50%) — zero dead space -->
+      <!-- ANIMATION INTENT:
+           Remediation: clip-path reveal 200ms after ADU trigger, 0.9s duration
+           Consulting: clip-path reveal 350ms after ADU trigger, 0.9s duration
+           Both share same ScrollTrigger instance (trigger: services-grid, start: top 75%) -->
+      <div class="services-row">
+
+        <!-- Remediation -->
+        <a href="/services/remediation" class="service-card secondary">
+          <img
+            class="card-photo"
+            src="../../public/images/projects/remediation-after.jpg"
+            alt="Remediation — 828 Construction"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          />
+          <div class="plate" style="display:none;">
+            <div class="plate-label">02</div>
+          </div>
+
+          <div class="card-overlay"></div>
+          <div class="ghost-number">02</div>
+
+          <div class="card-content">
+            <div class="copper-border-bottom"></div>
+            <div class="card-inner">
+              <div class="tags">
+                <span class="tag">Water intrusion</span>
+                <span class="tag">Structural repair</span>
+                <span class="tag">Failure diagnosis</span>
+              </div>
+              <div class="card-name">
+                <div>
+                  <h3 class="card-title">Remediation</h3>
+                  <p class="card-tagline">Fix the cause. Not just the visible symptom.</p>
+                </div>
+                <div class="arrow-box">→</div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Consulting -->
+        <a href="/services/consulting" class="service-card secondary">
+          <img
+            class="card-photo"
+            src="../../public/images/projects/consulting-plans.jpg"
+            alt="Consulting — 828 Construction"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          />
+          <div class="plate" style="display:none;">
+            <div class="plate-label">03</div>
+          </div>
+
+          <div class="card-overlay"></div>
+          <div class="ghost-number">03</div>
+
+          <div class="card-content">
+            <div class="copper-border-bottom"></div>
+            <div class="card-inner">
+              <div class="tags">
+                <span class="tag">Pre-purchase review</span>
+                <span class="tag">Scope analysis</span>
+                <span class="tag">Owner guidance</span>
+              </div>
+              <div class="card-name">
+                <div>
+                  <h3 class="card-title">Consulting</h3>
+                  <p class="card-tagline">Get clarity before you commit money.</p>
+                </div>
+                <div class="arrow-box">→</div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+    <!-- END: Magazine grid. Zero dead space. ADU dominates. Remediation + Consulting equal-weight below. -->
+
+  </div>
+</section>
+
+<!-- Annotation summary:
+  VARIATION A — MAGAZINE FEATURED
+  ================================
+  Structural fix: Consulting card no longer has col-start-3 offset.
+  Row 2 is a flex row: both cards flex:1, each takes exactly 50% minus 1px gap.
+  ADU at 55vh signals hierarchy without needing to be told it's the "hero service."
+
+  Animation sequence (to implement in Phase 3.2):
+  1. Section header label: y:20→0, opacity:0→1, 0.4s, ease power2.out, trigger: top 80%
+  2. Headline line 1: clip-path inset(100% 0 0 0)→0%, 0.7s, ease power3.out, stagger +0.08s for line 2
+  3. Copper seam: scaleX 0→1 from left, 0.8s, ease power2.inOut
+  4. ADU card: clip-path inset(100% 0 0 0)→0%, 1.0s, ease power3.out, trigger: services-grid top 75%
+  5. Remediation: same clip-path reveal, delay 0.2s after ADU
+  6. Consulting: same clip-path reveal, delay 0.35s after ADU
+  7. Scrub parallax on all card photos: yPercent 0→-8%, scrub:true, start: card top bottom, end: card bottom top
+  8. Hover copper border: scaleX 0→1 from left, 300ms ease-out on mouseenter
+
+  Pros: Clearest visual hierarchy. ADU unmistakably leads. Editorial and clean.
+  Cons: Less dramatic than C. No motion during scroll (B has horizontal pull).
+-->
+</body>
+</html>

@@ -4,6 +4,8 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/layout/ScrollProgress";
+import LenisProvider from "@/components/providers/LenisProvider";
+import CustomCursor from "@/components/ui/CustomCursor";
 import { Analytics } from "@vercel/analytics/react";
 import GoogleAnalytics from "@/components/shared/GoogleAnalytics";
 import { SITE } from "@/lib/constants";
@@ -59,6 +61,16 @@ export const metadata: Metadata = {
     type: "website",
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -70,12 +82,20 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-black font-body">
+        {/* Skip to main content — keyboard accessibility */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         {/* Grain texture — fixed overlay, pointer-events none */}
         <div className="grain-overlay" aria-hidden="true" />
         <ScrollProgress />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        {/* Custom cursor — hidden on touch devices via CSS */}
+        <CustomCursor />
+        <LenisProvider>
+          <Header />
+          <main id="main-content" className="flex-1">{children}</main>
+          <Footer />
+        </LenisProvider>
         <Analytics />
         <GoogleAnalytics />
       </body>

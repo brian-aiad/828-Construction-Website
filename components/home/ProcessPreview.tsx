@@ -12,7 +12,7 @@ export default function ProcessPreview() {
         <FadeIn className="mb-20 lg:mb-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
             <div>
-              <span className="font-labels text-[10px] text-gray-600 tracking-[0.22em] uppercase">
+              <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase">
                 How We Work
               </span>
               <h2
@@ -26,7 +26,7 @@ export default function ProcessPreview() {
             </div>
             <Link
               href="/process"
-              className="font-labels text-[11px] text-gray-600 tracking-[0.18em] uppercase hover:text-white transition-colors duration-200 group inline-flex items-center gap-2 self-start sm:self-auto"
+              className="font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-white transition-colors duration-200 group inline-flex items-center gap-2 self-start sm:self-auto"
             >
               Full Process
               <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -62,7 +62,7 @@ export default function ProcessPreview() {
 
                   {/* Description */}
                   <div className="lg:col-span-5">
-                    <p className="text-gray-500 text-sm leading-relaxed">
+                    <p className="text-gray-400 text-sm leading-relaxed">
                       {step.description}
                     </p>
                   </div>

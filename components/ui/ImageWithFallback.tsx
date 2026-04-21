@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ReactNode } from "react";
+import React from "react";
 
 interface ImageWithFallbackProps {
   src: string;
@@ -11,8 +12,11 @@ interface ImageWithFallbackProps {
   width?: number;
   height?: number;
   className?: string;
+  style?: React.CSSProperties;
   fallback: ReactNode;
   priority?: boolean;
+  sizes?: string;
+  quality?: number;
 }
 
 /**
@@ -27,8 +31,11 @@ export default function ImageWithFallback({
   width,
   height,
   className = "",
+  style,
   fallback,
   priority = false,
+  sizes,
+  quality,
 }: ImageWithFallbackProps) {
   const [hasError, setHasError] = useState(false);
 
@@ -44,7 +51,10 @@ export default function ImageWithFallback({
       width={width}
       height={height}
       className={className}
+      style={style}
       priority={priority}
+      sizes={sizes}
+      quality={quality}
       onError={() => setHasError(true)}
     />
   );

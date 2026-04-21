@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Variation C: Punch-In Three Column Grid</title>
+<style>
+  /* Animation intent:
+     - All three cards enter simultaneously with Olson Kundig punch-in
+     - clip-path: inset(10% 10% 10% 10%) to inset(0%) staggered 100ms apart
+     - After clip resolves, title fades up from y:16
+     - Parallax: yPercent -12 on each card's inner image
+     - Hover: image scale 1.04, copper bottom bar scaleX 0 to 1
+     - Section number at far left in 9px caps: "WORK / 11"
+  */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; color: #fff; font-family: system-ui, sans-serif; }
+
+  .section-wrapper { max-width: 1344px; margin: 0 auto; padding: 6rem 3rem 5rem; }
+
+  .section-top {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid rgba(184,115,51,0.35);
+    padding-bottom: 1.5rem;
+  }
+  .section-label { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #6b7280; display: block; margin-bottom: 0.75rem; }
+  .section-headline { font-size: clamp(2.4rem, 4.5vw, 3.8rem); font-weight: 700; line-height: 0.92; letter-spacing: -0.03em; }
+  .section-meta { text-align: right; }
+  .meta-count { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; color: rgba(255,255,255,0.08); line-height: 1; letter-spacing: -0.04em; }
+  .meta-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #6b7280; display: block; margin-top: 0.3rem; }
+
+  /* THREE-COLUMN GRID */
+  .cards-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+    /* clip-path punch-in applied via JS: inset(8%) to inset(0%), stagger 100ms */
+  }
+
+  .project-card { position: relative; overflow: hidden; background: #111; }
+  .card-img-wrap { position: relative; height: clamp(280px, 28vw, 400px); overflow: hidden; }
+  .card-img-inner { position: absolute; inset: -7.5% 0; height: 115%; }
+  .card-img-inner img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.06) saturate(1.1); transition: transform 0.5s ease, filter 0.4s ease; }
+  .project-card:hover .card-img-inner img { transform: scale(1.04); filter: contrast(1.1) saturate(1.25); }
+
+  .card-gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 40%, transparent 65%); pointer-events: none; }
+
+  .card-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem 1.5rem 1.25rem; }
+  .card-num { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #B87333; margin-bottom: 0.5rem; display: block; }
+  .card-category { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.4rem; display: block; }
+  .card-title { font-size: clamp(1rem, 1.8vw, 1.4rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.3rem; /* y:16 to 0 fade after clip resolves */ }
+  .card-location { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+
+  .card-bottom-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #B87333; transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; }
+  .project-card:hover .card-bottom-bar { transform: scaleX(1); }
+
+  /* BOTTOM CTA ROW */
+  .cta-row { margin-top: 3rem; display: flex; justify-content: flex-end; }
+  .cta-link { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #9ca3af; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
+  .cta-link:hover { color: #B87333; border-color: #B87333; }
+
+  @media (max-width: 768px) {
+    .cards-grid { grid-template-columns: 1fr; gap: 2px; }
+    .card-img-wrap { height: 56vw; }
+    .section-wrapper { padding: 4rem 1.5rem 4rem; }
+    .section-top { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+<section>
+  <div class="section-wrapper">
+    <div class="section-top">
+      <div>
+        <span class="section-label">Selected Work</span>
+        <h2 class="section-headline">Built with Intent.</h2>
+      </div>
+      <div class="section-meta">
+        <div class="meta-count">11</div>
+        <span class="meta-label">Projects completed</span>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="project-card">
+        <a href="/projects" style="display:block;position:relative;overflow:hidden;">
+          <div class="card-img-wrap"><div class="card-img-inner"><img src="../../public/images/projects/bathroom-herringbone.jpg" alt="Herringbone Bath"></div></div>
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <span class="card-num">01</span>
+            <span class="card-category">ADU Construction</span>
+            <h3 class="card-title">Modern Herringbone Bath Remodel</h3>
+            <span class="card-location">Torrance, CA</span>
+          </div>
+          <div class="card-bottom-bar"></div>
+        </a>
+      </div>
+
+      <div class="project-card">
+        <a href="/projects" style="display:block;position:relative;overflow:hidden;">
+          <div class="card-img-wrap"><div class="card-img-inner"><img src="../../public/images/projects/outdoor-living-editorial.jpg" alt="South Bay Outdoor"></div></div>
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <span class="card-num">02</span>
+            <span class="card-category">ADU Construction</span>
+            <h3 class="card-title">South Bay Outdoor Living</h3>
+            <span class="card-location">South Bay, CA</span>
+          </div>
+          <div class="card-bottom-bar"></div>
+        </a>
+      </div>
+
+      <div class="project-card">
+        <a href="/projects" style="display:block;position:relative;overflow:hidden;">
+          <div class="card-img-wrap"><div class="card-img-inner"><img src="../../public/images/projects/bathroom-geometric.jpg" alt="Geometric Bath"></div></div>
+          <div class="card-gradient"></div>
+          <div class="card-content">
+            <span class="card-num">03</span>
+            <span class="card-category">ADU Construction</span>
+            <h3 class="card-title">Geometric Feature Bath</h3>
+            <span class="card-location">Redondo Beach, CA</span>
+          </div>
+          <div class="card-bottom-bar"></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="/projects" class="cta-link">All 11 Projects →</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

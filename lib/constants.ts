@@ -99,6 +99,8 @@ export interface Project {
   /** Optional additional images for lightbox */
   images?: string[];
   featured?: boolean;
+  /** True if image is a temporary stock photo pending replacement */
+  tempPhoto?: boolean;
 }
 
 export const PROJECTS: Project[] = [
@@ -111,6 +113,10 @@ export const PROJECTS: Project[] = [
     description:
       "Full bathroom renovation featuring a floor-to-ceiling herringbone tile shower wall, wall-mounted toilet with in-wall tank, natural stone accent, and recessed niche. A complete gut-and-rebuild executed to the millimeter.",
     image: "/images/projects/bathroom-herringbone.jpg",
+    images: [
+      "/images/projects/bathroom-herringbone.jpg",
+      "/images/projects/bathroom-shower.jpg",
+    ],
     featured: true,
   },
   {
@@ -131,7 +137,12 @@ export const PROJECTS: Project[] = [
     spec: "Pergola · Pool deck · Custom wood decking",
     description:
       "Luxury outdoor living space built around an existing pool — custom wood deck, pergola with pendant lighting, and seamless indoor-outdoor flow. Designed for California life, built to last decades.",
-    image: "/images/hero/patio-pool.jpg",
+    image: "/images/projects/outdoor-living-editorial.jpg",
+    images: [
+      "/images/projects/outdoor-living-editorial.jpg",
+      "/images/hero/patio-pool.jpg",
+      "/images/projects/outdoor-patio-pergola.jpg",
+    ],
     featured: true,
   },
   {
@@ -145,6 +156,7 @@ export const PROJECTS: Project[] = [
     image: "/images/projects/bathroom-shower.jpg",
     images: [
       "/images/projects/bathroom-shower.jpg",
+      "/images/projects/shower-black-fixtures.jpg",
       "/images/projects/niche-detail.jpg",
     ],
   },
@@ -153,9 +165,9 @@ export const PROJECTS: Project[] = [
     title: "Recessed Ceiling & LED Bath",
     category: "ADU Construction",
     location: "Manhattan Beach, CA",
-    spec: "Tile ceiling · LED downlights · Modern finishes",
+    spec: "Tile ceiling · LED downlights · Copper sconce",
     description:
-      "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a wall-mounted accent light. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
+      "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a warm copper wall sconce. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
     image: "/images/projects/bathroom-led.jpg",
   },
   {
@@ -177,6 +189,108 @@ export const PROJECTS: Project[] = [
     description:
       "Bathroom renovation focused on atmosphere — LED strip lighting under the vanity shelf creates warm, indirect glow. Wood plank flooring and clean white walls complete a space designed for long-term comfort.",
     image: "/images/projects/bathroom-warm.jpg",
+  },
+  {
+    id: 8,
+    title: "Outdoor Living & Pool Surround",
+    category: "ADU Construction",
+    location: "Torrance, CA",
+    spec: "Teak decking · Pergola · Woven pendant lighting · Pool surround",
+    description:
+      "Full outdoor living transformation — custom teak deck, pergola with statement woven pendants, and a complete pool surround redesign. The kind of project where every material decision matters for long-term performance outdoors.",
+    image: "/images/projects/outdoor-patio-pergola.jpg",
+    images: [
+      "/images/projects/outdoor-patio-pergola.jpg",
+      "/images/hero/patio-pool.jpg",
+    ],
+    featured: true,
+  },
+  {
+    id: 12,
+    title: "Detached ADU — New Construction",
+    category: "ADU Construction",
+    location: "Torrance, CA",
+    spec: "Detached unit · 420 sq ft · Permit expedited",
+    description:
+      "Full-build detached ADU from foundation to finish — permitted, framed, wrapped, and finished to match the main structure. Built for long-term rental income with durable materials throughout.",
+    image: "/images/projects/adu-exterior-new.jpg",
+    images: [
+      "/images/projects/adu-exterior-new.jpg",
+      "/images/projects/exterior-stucco.jpg",
+      "/images/projects/adu-interior-living.jpg",
+      "/images/projects/waterproofing-membrane.jpg",
+      "/images/projects/adu-framing.jpg",
+      "/images/projects/adu-exterior.jpg",
+      "/images/projects/adu-interior.jpg",
+    ],
+    featured: true,
+  },
+  {
+    id: 13,
+    title: "Garage Conversion — Glass Entry ADU",
+    category: "ADU Construction",
+    location: "Torrance, CA",
+    spec: "Garage conversion · Steel glass doors · Polished concrete",
+    description:
+      "Former two-car garage converted to a full ADU — steel-framed glass bifold doors replace the garage opening, polished concrete floors, open kitchen, and seamless indoor-outdoor flow. Permitted and built to code.",
+    image: "/images/projects/garage-conversion.jpg",
+    featured: true,
+  },
+  {
+    id: 14,
+    title: "Kitchen Renovation — Dark Cabinet Build",
+    category: "ADU Construction",
+    location: "Manhattan Beach, CA",
+    spec: "Matte black cabinetry · Waterfall island · Pendant lighting",
+    description:
+      "Full kitchen renovation with custom matte black lower cabinets, white uppers, waterfall-edge island with flush sink, and minimal pendant lighting. Part of a whole-home ADU conversion project.",
+    image: "/images/projects/kitchen-dark.jpg",
+    featured: false,
+  },
+  {
+    id: 15,
+    title: "Foundation — New ADU Construction",
+    category: "ADU Construction",
+    location: "Torrance, CA",
+    spec: "Continuous footings · Rebar grid · Engineered pour",
+    description:
+      "Foundation work for a new detached ADU — continuous concrete footings with engineered rebar placement. This is the part no one photographs but everyone relies on. Built to outlast the structure above it.",
+    image: "/images/projects/foundation-concrete.jpg",
+    featured: false,
+  },
+  {
+    id: 9,
+    title: "Pre-Purchase Structural Evaluation",
+    category: "Consulting",
+    location: "Hermosa Beach, CA",
+    spec: "Feasibility study · Defect report · Contractor review",
+    description:
+      "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and delivered a written feasibility analysis. Client negotiated $80K off the purchase price.",
+    image: "/images/projects/consulting-blueprints.jpg",
+    images: [
+      "/images/projects/consulting-blueprints.jpg",
+      "/images/projects/consulting-inspection.jpg",
+      "/images/projects/consulting-plans.jpg",
+      "/images/projects/consulting-crawlspace.jpg",
+    ],
+  },
+  {
+    id: 10,
+    title: "Water Intrusion Remediation",
+    category: "Remediation",
+    location: "Redondo Beach, CA",
+    spec: "Envelope failure · Moisture remediation · Rebuilt to code",
+    description:
+      "Chronic water intrusion traced to failed flashing and improper window installation — not a roofing issue as originally diagnosed. Scope rebuilt correctly, structure dried, and building envelope sealed. No recurrence.",
+    image: "/images/projects/remediation-after.jpg",
+    images: [
+      "/images/projects/remediation-after.jpg",
+      "/images/projects/remediation-restored.jpg",
+      "/images/projects/remediation-active.jpg",
+      "/images/projects/remediation-mold.jpg",
+      "/images/projects/remediation-work.jpg",
+      "/images/projects/remediation-damage.jpg",
+    ],
   },
 ];
 

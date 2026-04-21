@@ -165,7 +165,7 @@ export default function ContactForm() {
         {state === "loading" ? "Sending..." : "Send Message"}
       </button>
 
-      <p className="text-xs text-gray-400 text-center">
+      <p className="text-xs text-gray-600 text-center">
         We typically respond within 24 hours. For immediate assistance, call{" "}
         <a href="tel:+12138282388" className="underline">
           213-828-2388

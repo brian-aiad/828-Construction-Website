@@ -1,21 +1,38 @@
 "use client";
 
 import { useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimationController } from "@/utils/animationControl";
 
+gsap.registerPlugin(ScrollTrigger);
+
+/**
+ * Copper scroll-progress line pinned to the top of the viewport.
+ * Desktop only — uses GSAP scrub so it stays in sync with Lenis.
+ * CSS in globals.css defines the base styles (transform-origin: left, scaleX: 0).
+ */
 export default function ScrollProgress() {
   useEffect(() => {
+    if (!AnimationController.shouldAnimate()) return;
+
     const bar = document.getElementById("scroll-progress");
     if (!bar) return;
 
-    const update = () => {
-      const scrolled = window.scrollY;
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = total > 0 ? scrolled / total : 0;
-      bar.style.width = `${progress * 100}%`;
-    };
+    const ctx = gsap.context(() => {
+      gsap.to(bar, {
+        scaleX: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: document.documentElement,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0,
+        },
+      });
+    });
 
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    return () => ctx.revert();
   }, []);
 
   return <div id="scroll-progress" aria-hidden="true" />;

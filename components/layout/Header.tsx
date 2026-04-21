@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -10,10 +10,22 @@ import { NAV_LINKS, SITE } from "@/lib/constants";
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 32);
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 32);
+      // Hide on scroll down past 300px, reveal on scroll up
+      if (currentY > 300) {
+        setHidden(currentY > lastScrollY.current);
+      } else {
+        setHidden(false);
+      }
+      lastScrollY.current = currentY;
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -38,18 +50,27 @@ export default function Header() {
         initial={{ y: -72, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        style={{ transform: hidden ? "translateY(-100%)" : "translateY(0)" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-black/85 backdrop-blur-xl border-b border-white/10"
+            ? "bg-black/90 backdrop-blur-xl border-b border-white/10"
             : isHome
-            ? "bg-black/30 backdrop-blur-xl border-b border-white/5"
-            : "bg-black/85 backdrop-blur-xl border-b border-white/10"
+            ? "bg-black/40 backdrop-blur-[6px] border-b border-white/5"
+            : "bg-black/90 backdrop-blur-xl border-b border-white/10"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex items-center justify-between h-18 lg:h-22">
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link
+              href="/"
+              className="flex items-center"
+              onClick={() => {
+                if (pathname === "/") {
+                  window.scrollTo(0, 0);
+                }
+              }}
+            >
               <Image
                 src="/images/logo/828logo_trans.png"
                 alt="828 Construction"
@@ -69,7 +90,7 @@ export default function Header() {
                   className={`font-labels text-[10px] tracking-[0.18em] uppercase transition-colors duration-200 relative group ${
                     pathname === link.href
                       ? "text-white"
-                      : "text-gray-500 hover:text-white"
+                      : "text-white/60 hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -89,13 +110,13 @@ export default function Header() {
             <div className="hidden lg:flex items-center gap-6">
               <a
                 href={SITE.phoneHref}
-                className="font-numbers text-sm text-gray-400 hover:text-white transition-colors duration-200 tracking-wide"
+                className="font-numbers text-sm text-white/55 hover:text-white transition-colors duration-200 tracking-wide"
               >
                 {SITE.phone}
               </a>
               <Link
                 href="/contact"
-                className="bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
+                className="btn-shine bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
               >
                 Get Estimate
               </Link>
@@ -179,7 +200,7 @@ export default function Header() {
             >
               <Link
                 href="/contact"
-                className="block text-center bg-white text-black px-6 py-4 font-labels text-[11px] tracking-[0.18em] uppercase"
+                className="btn-shine block text-center bg-white text-black px-6 py-4 font-labels text-[11px] tracking-[0.18em] uppercase"
               >
                 Get Free Estimate
               </Link>

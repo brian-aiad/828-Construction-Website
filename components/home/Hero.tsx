@@ -1,260 +1,115 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { SITE } from "@/lib/constants";
-import { heroContainer, heroLine, ease } from "@/lib/animations";
-
-const taglines = [
-  "Quality over quantity.",
-  "Built with purpose.",
-  "20+ years building science.",
-  "Torrance's trusted builder.",
-  "Fewer pieces. Stronger impact.",
-];
+import { ease } from "@/lib/animations";
 
 export default function Hero() {
-  const [taglineIndex, setTaglineIndex] = useState(0);
-  const [taglineVisible, setTaglineVisible] = useState(true);
-  const [hasHeroPhoto, setHasHeroPhoto] = useState(false);
-
-  // Parallax on scroll
-  const { scrollY } = useScroll();
-  const backgroundY = useTransform(scrollY, [0, 600], ["0%", "18%"]);
-  const contentY = useTransform(scrollY, [0, 600], ["0%", "8%"]);
-
-  // Check if hero photo exists
-  useEffect(() => {
-    const img = new window.Image();
-    img.onload = () => setHasHeroPhoto(true);
-    img.onerror = () => setHasHeroPhoto(false);
-    img.src = "/images/hero/patio-pool.jpg";
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTaglineVisible(false);
-      setTimeout(() => {
-        setTaglineIndex((i) => (i + 1) % taglines.length);
-        setTaglineVisible(true);
-      }, 450);
-    }, 3600);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <section className="relative min-h-screen bg-black overflow-hidden flex flex-col pt-20">
-      {/* Hero background — photo with parallax, or blueprint grid */}
-      <motion.div
-        className="absolute inset-0 overflow-hidden"
-        style={{ y: backgroundY }}
-      >
-        {hasHeroPhoto ? (
-          <>
-            <Image
-              src="/images/hero/patio-pool.jpg"
-              alt="828 Construction project"
-              fill
-              priority
-              className="object-cover grayscale contrast-110"
-              style={{ scale: 1.1 }}
-            />
-            {/* Dark overlay for text readability */}
-            <div className="absolute inset-0 bg-black/65" />
-          </>
-        ) : (
-          <div className="absolute inset-0 blueprint-grid pointer-events-none" />
-        )}
-      </motion.div>
-
-      {/* Blueprint grid overlay (always, lighter on photo) */}
-      {!hasHeroPhoto && (
-        <div className="absolute inset-0 blueprint-grid pointer-events-none" />
-      )}
-
-      {/* Diagonal accent line */}
-      <div
-        className="absolute top-0 right-0 w-px bg-gradient-to-b from-transparent via-gray-700 to-transparent pointer-events-none"
-        style={{ height: "70%", right: "12%" }}
+    <section className="relative h-screen overflow-hidden">
+      {/* ── Full-color photo — image is the star ────────────────────────── */}
+      <Image
+        src="/images/hero/hero-night.jpg"
+        alt="828 Construction — South Bay modern construction"
+        fill
+        priority
+        quality={95}
+        className="object-cover"
+        style={{ filter: "contrast(1.12) saturate(0.9) brightness(1.0)" }}
       />
 
-      {/* Giant 828 watermark */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <motion.span
+      {/* ── Gradient: bottom only — top of image completely visible ──────── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+      {/* ── Copper line ──────────────────────────────────────────────────── */}
+      <div
+        className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
+        style={{
+          height: "2px",
+          background:
+            "linear-gradient(to right, transparent 5%, #B87333 35%, #B87333 65%, transparent 95%)",
+          opacity: 0.7,
+        }}
+      />
+
+      {/* ── Content ──────────────────────────────────────────────────────── */}
+      <div className="absolute inset-0 z-10 flex flex-col justify-between max-w-7xl mx-auto w-full px-6 lg:px-12 pt-28 pb-10 lg:pb-14">
+
+        {/* Top — clears fixed header, minimal editorial label */}
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1.5, ease: ease.out }}
-          className="font-numbers font-bold leading-none text-white"
-          style={{
-            fontSize: "clamp(10rem, 38vw, 52rem)",
-            opacity: 0.042,
-            letterSpacing: "-0.06em",
-            userSelect: "none",
-          }}
+          transition={{ duration: 1, delay: 0.1 }}
+          className="flex items-center gap-4"
         >
-          828
-        </motion.span>
-      </div>
+          <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
+            Torrance, CA
+          </span>
+          <span className="w-px h-3 bg-white/20" />
+          <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
+            South Bay
+          </span>
+          <span className="w-px h-3 bg-white/20" />
+          <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
+            Est. 2004
+          </span>
+        </motion.div>
 
-      {/* Main content */}
-      <motion.div style={{ y: contentY }} className="relative z-10 flex-1 flex flex-col justify-center">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 pb-8">
-          {/* Location label */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.0, ease: ease.out }}
-            className="mb-12 flex items-center gap-4"
-          >
-            <span className="w-8 h-px bg-gray-700" />
-            <span className="font-labels text-[11px] text-gray-500 tracking-[0.22em] uppercase">
-              Torrance, CA &nbsp;·&nbsp; South Bay &nbsp;·&nbsp; Est. 2004
-            </span>
-          </motion.div>
-
-          {/* Headline — staggered lines */}
-          <motion.div
-            variants={heroContainer}
-            initial="hidden"
-            animate="visible"
-            className="mb-10"
-          >
-            {/* Line 1 */}
-            <div className="overflow-hidden">
-              <motion.div variants={heroLine}>
-                <h1
-                  className="font-display font-bold text-white leading-[0.88] tracking-tight"
-                  style={{ fontSize: "clamp(3.8rem, 9.5vw, 8.5rem)" }}
-                >
-                  Built with
-                </h1>
-              </motion.div>
-            </div>
-
-            {/* Line 2 — indented */}
-            <div className="overflow-hidden">
-              <motion.div variants={heroLine} className="pl-[6vw] sm:pl-[8vw]">
-                <span
-                  className="block font-display font-bold text-white leading-[0.88] tracking-tight"
-                  style={{ fontSize: "clamp(3.8rem, 9.5vw, 8.5rem)" }}
-                >
-                  Intent.
-                </span>
-              </motion.div>
-            </div>
-
-            {/* Line 3 — dimmed */}
-            <div className="overflow-hidden">
-              <motion.div variants={heroLine}>
-                <span
-                  className="block font-display font-bold leading-[0.88] tracking-tight"
-                  style={{
-                    fontSize: "clamp(3.8rem, 9.5vw, 8.5rem)",
-                    color: "#2a2a2a",
-                  }}
-                >
-                  Not by Accident.
-                </span>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Rotating tagline */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-            className="mb-12 h-5"
-          >
-            <p
-              className={`font-labels text-[11px] text-gray-500 tracking-[0.2em] uppercase transition-all duration-500 ${
-                taglineVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 -translate-y-2"
-              }`}
+        {/* Bottom — headline + CTA, anchored to viewport floor */}
+        <div>
+          {/* Headline */}
+          <div className="mb-8 overflow-hidden">
+            <motion.h1
+              initial={{ opacity: 0, y: 80 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.1, delay: 0.25, ease: ease.out }}
+              className="font-display font-bold text-white tracking-tight leading-[0.85]"
+              style={{ fontSize: "clamp(4rem, 10.5vw, 10rem)" }}
             >
-              &mdash;&nbsp; {taglines[taglineIndex]}
-            </p>
-          </motion.div>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.05, ease: ease.out }}
-            className="flex flex-col sm:flex-row gap-4"
-          >
-            <Link
-              href="/contact"
-              className="group inline-flex items-center justify-center gap-3 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
-            >
-              Request a Consultation
-              <span className="transition-transform duration-200 group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-            <Link
-              href="/services"
-              className="group inline-flex items-center justify-center border border-gray-700 text-white px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:border-gray-400 transition-colors duration-200"
-            >
-              Our Services
-            </Link>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Stats bar — anchored to bottom */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.3, ease: ease.out }}
-        className="relative z-10 mt-auto border-t border-gray-800"
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-3 divide-x divide-gray-800">
-            {[
-              { value: "20+", label: "Years Experience" },
-              { value: "3", label: "Core Services" },
-              { value: `#${SITE.license}`, label: "CA License" },
-            ].map((stat) => (
-              <div key={stat.label} className="py-6 pr-6 lg:pr-10 first:pl-0">
-                <div className="font-numbers font-bold text-white text-2xl lg:text-3xl mb-1 tracking-tight">
-                  {stat.value}
-                </div>
-                <div className="font-labels text-[9px] text-gray-600 tracking-[0.18em] uppercase">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
+              Built with
+              <br />
+              Intent.
+            </motion.h1>
           </div>
-        </div>
-      </motion.div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.8, duration: 0.6 }}
-        className="absolute right-6 lg:right-10 bottom-28 flex flex-col items-center gap-3 pointer-events-none"
-      >
-        <motion.div
-          animate={{ scaleY: [1, 0.4, 1], opacity: [0.4, 1, 0.4] }}
-          transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
-          className="w-px h-14 bg-gradient-to-b from-gray-600 to-transparent"
-        />
-        <span
-          className="font-labels text-[9px] text-gray-700 tracking-[0.2em] uppercase"
-          style={{
-            writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-            letterSpacing: "0.18em",
-          }}
-        >
-          Scroll
-        </span>
-      </motion.div>
+          {/* Bottom row: tagline left, CTAs right */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.55, ease: ease.out }}
+            className="flex flex-col sm:flex-row sm:items-end justify-between gap-6"
+          >
+            {/* Tagline */}
+            <div>
+              <p className="font-labels text-[10px] text-white/40 tracking-[0.18em] uppercase">
+                ADU · Remediation · Consulting
+              </p>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 bg-white text-black
+                  px-8 py-3.5 font-labels text-[10px] tracking-[0.18em] uppercase
+                  hover:bg-gray-100 transition-colors duration-200"
+              >
+                Request Estimate →
+              </Link>
+              <a
+                href={SITE.phoneHref}
+                className="inline-flex items-center justify-center border border-white/30 text-white
+                  px-8 py-3.5 font-labels text-[10px] tracking-[0.18em] uppercase
+                  hover:border-white transition-colors duration-200 font-numbers"
+              >
+                {SITE.phone}
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </section>
   );
 }

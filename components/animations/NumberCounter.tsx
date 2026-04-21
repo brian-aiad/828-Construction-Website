@@ -18,31 +18,41 @@ export default function NumberCounter({
   duration = 1800,
   className = "",
 }: NumberCounterProps) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(target); // Start at final value — no blank flash
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
 
   useEffect(() => {
     if (!isInView) return;
-    let start = 0;
+
+    const isMobile = window.innerWidth < 768;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (isMobile || reducedMotion) {
+      setCount(target);
+      return;
+    }
+
+    // Count up from 0
+    setCount(0);
+    let current = 0;
     const step = target / (duration / 16);
+
     const timer = setInterval(() => {
-      start += step;
-      if (start >= target) {
+      current += step;
+      if (current >= target) {
         setCount(target);
         clearInterval(timer);
       } else {
-        setCount(Math.floor(start));
+        setCount(Math.floor(current));
       }
     }, 16);
+
     return () => clearInterval(timer);
   }, [isInView, target, duration]);
 
   return (
     <span ref={ref} className={className}>
-      {prefix}
-      {count}
-      {suffix}
+      {prefix}{count}{suffix}
     </span>
   );
 }
