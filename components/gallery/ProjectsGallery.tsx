@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -154,6 +154,8 @@ function ProjectsHero() {
   const hairlineRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -190,14 +192,15 @@ function ProjectsHero() {
         });
       }
 
-      // ── Technique 9: Counter count-up scrub ─────────────────────────────
+      // Fix 10: once:true — counter fires on enter, never reverses
       if (counterRef.current) {
         const el = counterRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: PROJECTS.length, ease: "none",
+          val: PROJECTS.length, duration: 2, ease: "power2.out",
+          immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val).toString(); },
-          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", end: "top 20%", scrub: 1.5 },
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", once: true },
         });
       }
 
@@ -234,12 +237,13 @@ function ProjectsHero() {
       }
     }, sectionRef);
 
+    ctxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (herSplit && heroLineEl?.isConnected) { try { herSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 

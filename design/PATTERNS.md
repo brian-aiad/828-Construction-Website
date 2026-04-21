@@ -270,6 +270,47 @@ Local desktop LCP result: 0.8s (vs 6.2s in mobile throttled mode).
 
 ---
 
+### Fix 10 — Counter reverses on scroll-up
+
+**Symptom:** Stats counter animates 0 → 20+ on first scroll-down, then reverts to some intermediate value when user scrolls back up. Confuses users and looks broken.
+
+**Root cause:** ScrollTrigger fires both `onEnter` (down) and `onEnterBack` (up) without `once: true`, so the counter animation replays in reverse.
+
+**Fix:**
+```javascript
+gsap.to(counterObj, {
+  val: targetValue,
+  duration: 2,
+  ease: "power2.out",
+  snap: { val: 1 },
+  onUpdate: () => setDisplayValue(Math.floor(counterObj.val)),
+  scrollTrigger: {
+    trigger: el,
+    start: "top 80%",
+    once: true,          // ← the critical line
+    // no toggleActions, no onLeaveBack
+  },
+});
+```
+Also: render the final value as JSX text content so it's there before JS hydrates.
+
+---
+
+### Fix 11 — Black/white abyss after pinned section
+
+**Symptom:** Pinned section releases, and the next ~50–100vh is completely empty dead space before the next real section appears.
+
+**Root cause:** Pin's `end: "+=150%"` or similar extends the scroll range by that distance, but no content fills the extension. When the pin releases, the spacer is all that's left until the next section triggers.
+
+**Fix (pick one based on intent):**
+- **Option A — shorten the pin:** reduce `end` to just enough for the pin's internal animation. Usually the correct fix.
+- **Option B — fill the released region with content:** add a reveal section immediately after the pin that occupies the previously-empty scroll distance.
+- **Option C — remove the pin entirely on mobile:** wrap in `matchMedia` and disable below 1024px per the v3.2 mobile philosophy.
+
+Verify: scroll the page and capture the 100vh immediately after each pin releases. No visible dead zone.
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:
@@ -286,3 +327,20 @@ Techniques referenced in component comments:
 | 8 | Parallax yPercent | background moves at different speed than foreground |
 | 9 | GSAP pin + cross-fade | sticky panel; active state selected via onUpdate snap |
 | 10 | Copper hairline scaleX | decorative line grows left→right via transform scrub |
+
+
+---
+
+## Per-Page Signatures
+
+Each page has one animation moment that does not appear on any other page. These are the canonical signature moments — do not replicate them cross-page.
+
+| Page | Unique Signature Moment |
+|------|------------------------|
+| Home (`/`) | **BuildingScience pinned cross-fade** — full-height pin where 4 philosophy panels dissolve through each other with opacity cross-fade while a large chapter number counts up. Triggered only on the homepage. No other page uses a 4-state cross-fade pin. |
+| About (`/about`) | **Timeline horizontal drift** — the 828 founding year and milestone markers scroll horizontally against a fixed viewport while the vertical scroll progresses. Creates a "reading a timeline on a wall" effect. Unique to the About page; no other page uses horizontal drift within a vertical scroll. |
+| Services (`/services`) | **3-panel decision pin with color-snap activation** — the "Scope it in 60 seconds" section pins for 1.6 viewport heights while the three service panels cycle active state via `gsap.set()` borderColor/backgroundColor snap (not opacity). The visitor literally "chooses" a panel by scrolling. No other page has a comparative choice structure pinned to scroll progress. |
+| Process (`/process`) | **Pinned phase progression timeline** — a single 360vh pinned container where 4 project phases unlock sequentially via opacity snap. Ghost chapter number snaps 01→04 on each phase. Scrub progress bar tracks position 0→100%. Each phase image clips in from bottom (inset reveal) when phase activates. No other page has a chapter-progression structure with snapping ghost numerals + progress indicator. |
+| Services detail (`/services/{adu,remediation,consulting}`) | **PinnedWhy with copper border activation** — 280vh pinned section where 4 "Why 828" panels activate via border-color snap (copper on active, gray on inactive) rather than opacity. Counter in top-right snaps from "01" to "04". Shared signature across all three service detail pages — the template's unique moment. |
+| Projects (`/projects`) | **Animated filter toggle with composited exit/enter cycle** — when a visitor changes project category, Framer Motion's AnimatePresence `mode="wait"` fires a staged exit (all cards fade + y +24) then enters the filtered set (cards stagger in from y +24, 0.12s each). This "page turn" quality on filter change is unique to the Projects page and does not appear on any other page. |
+| Contact (`/contact`) | **Form interaction quality as signature** (not a cinematic motion beat) — copper focus rings on all form inputs (`border-[#B87333]` on focus), labels positioned above fields (never floating), "What to Include" friction-reduction block, "What Happens After" process preview, response-time expectation stated explicitly. The 2004 establishment year counter (scrubs 0→2004) is the only place on the site this date appears as a scrub counter. |

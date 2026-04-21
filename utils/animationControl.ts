@@ -1,7 +1,7 @@
 /**
  * AnimationController
  * Two-layer detection only:
- *   1. Screen width < 768 → true mobile
+ *   1. Screen width < 1024 → mobile/tablet (no scroll-hijacking)
  *   2. prefers-reduced-motion → user preference
  *
  * NOTE: We intentionally SKIP navigator.maxTouchPoints / ontouchstart because
@@ -17,7 +17,7 @@ export class AnimationController {
 
   private constructor() {
     if (typeof window === "undefined") return;
-    this._isMobile = window.innerWidth < 768;
+    this._isMobile = window.innerWidth < 1024;
     this._prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -26,7 +26,7 @@ export class AnimationController {
   }
 
   private _onResize() {
-    this._isMobile = window.innerWidth < 768;
+    this._isMobile = window.innerWidth < 1024;
   }
 
   private static getInstance(): AnimationController {

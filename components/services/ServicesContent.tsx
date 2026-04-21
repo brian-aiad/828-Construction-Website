@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -84,8 +84,8 @@ const serviceDetails = [
     image: "/images/projects/remediation-after.jpg",
     imageAlt: "Remediation — 828 Construction Torrance CA",
     imageLeft: false,
-    bg: "bg-white",
-    textOnDark: false,
+    bg: "bg-[#0f0f0f]",
+    textOnDark: true,
   },
   {
     slug: "consulting",
@@ -108,6 +108,8 @@ const serviceDetails = [
 ];
 
 // ─── Section: Hero ────────────────────────────────────────────────────────────
+// Variation C winner: service index strip at bottom, chapter eyebrow at top,
+// brightness fixed to 0.92 (was 0.88 — CLAUDE.md violation)
 
 function ServicesHero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -115,6 +117,8 @@ function ServicesHero() {
   const midRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -123,30 +127,27 @@ function ServicesHero() {
     let heroLineEl: HTMLElement | null = null;
     let heroSplit: SplitType | null = null;
     const ctx = gsap.context(() => {
-      // ── Technique 1: Triple-layer parallax ──────────────────────────────
+      // Triple-layer parallax scrub
       if (bgRef.current) {
         gsap.to(bgRef.current, {
-          yPercent: -15,
-          ease: "none",
+          yPercent: -15, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
         });
       }
       if (midRef.current) {
         gsap.to(midRef.current, {
-          yPercent: -8,
-          ease: "none",
+          yPercent: -8, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
         });
       }
       if (headlineRef.current) {
         gsap.to(headlineRef.current, {
-          yPercent: 5,
-          ease: "none",
+          yPercent: 5, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
         });
       }
 
-      // ── Technique 2: SplitType char scatter EXIT on "One Standard." ─────
+      // SplitType char scatter EXIT on "One Standard." — 4-guard cleanup
       splitFrame = requestAnimationFrame(() => {
         if (!mounted) return;
         const heroLine = sectionRef.current?.querySelector<HTMLElement>(".svc-hero-line");
@@ -162,9 +163,7 @@ function ServicesHero() {
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: "30% top",
-              end: "bottom top",
-              scrub: 1.2,
+              start: "30% top", end: "bottom top", scrub: 1.2,
             },
           });
           const lcpLine = headlineRef.current?.querySelector(".svc-lcp-line");
@@ -179,20 +178,20 @@ function ServicesHero() {
 
       const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
       if (fadeEls?.length) {
-        gsap.fromTo(
-          fadeEls,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7, stagger: 0.12, delay: 0.35, ease: "power3.out" }
+        gsap.fromTo(fadeEls,
+          { y: 18, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, delay: 0.3, ease: "power3.out" }
         );
       }
     }, sectionRef);
+    ctxRef.current = ctx;
 
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (heroSplit && heroLineEl?.isConnected) { try { heroSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -203,7 +202,7 @@ function ServicesHero() {
       className="relative h-screen overflow-hidden bg-black"
       style={{ position: "relative", zIndex: 1 }}
     >
-      {/* Layer 1: Background — brightness corrected (Fix 3: ≥0.8) */}
+      {/* Layer 1: Background — brightness 0.92 (Fix 3: was 0.88, below 0.9 threshold) */}
       <div
         ref={bgRef}
         className="absolute left-0 right-0"
@@ -212,59 +211,74 @@ function ServicesHero() {
           backgroundImage: "url('/images/services/services-hero.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "contrast(1.06) saturate(1.1) brightness(0.88)",
+          filter: "contrast(1.06) saturate(1.1) brightness(0.92)",
         }}
         role="presentation"
         aria-hidden="true"
       />
-      {/* Layer 2: Mid gradient — max from-black/60 (Fix 3) */}
+      {/* Layer 2: Mid gradient — max from-black/65 */}
       <div
         ref={midRef}
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.60) 100%)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.65) 100%)",
         }}
         aria-hidden="true"
       />
 
-      {/* Layer 3: Content */}
-      <div className="relative z-10 h-full flex flex-col justify-end max-w-7xl mx-auto px-6 lg:px-12 pb-16 lg:pb-24">
-        <span className="hero-fade font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase mb-6 block">
-          Services
+      {/* Layer 3: Top eyebrow */}
+      <div className="hero-fade absolute top-0 left-0 right-0 z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-28 lg:pt-32">
+        <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase">
+          Services — CA Lic #1141119
         </span>
+      </div>
 
+      {/* Layer 4: Bottom content — headline + service index */}
+      <div className="relative z-10 h-full flex flex-col justify-end max-w-7xl mx-auto px-6 lg:px-12 pb-8 lg:pb-14">
         <h1
           ref={headlineRef}
-          className="font-display font-bold text-white tracking-tight leading-[0.88] mb-8"
-          style={{ fontSize: "clamp(3rem, 8vw, 8rem)", textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}
+          className="font-display font-bold text-white tracking-tight leading-[0.88] mb-10 lg:mb-12"
+          style={{ fontSize: "clamp(3.2rem, 8vw, 8.5rem)", textShadow: "0 2px 24px rgba(0,0,0,0.35)" }}
         >
           <span className="svc-lcp-line block">Three Services.</span>
           <span className="block overflow-hidden">
-            <span className="svc-hero-line hero-line-animate block" style={{ color: "rgba(255,255,255,0.40)", animationDelay: "0.1s" }}>
+            <span
+              className="svc-hero-line hero-line-animate block"
+              style={{ color: "rgba(255,255,255,0.55)", animationDelay: "0.1s" }}
+            >
               One Standard.
             </span>
           </span>
         </h1>
 
-        <p
-          className="hero-fade text-white/55 max-w-lg leading-relaxed"
-          style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
+        {/* Service index strip — Variation C pattern */}
+        <div
+          className="hero-fade border-t flex flex-row flex-wrap gap-x-8 gap-y-2 pt-5"
+          style={{ borderColor: "rgba(255,255,255,0.08)" }}
         >
-          We don&apos;t try to do everything. Three areas where building science
-          knowledge makes the biggest difference — and where bad contractors
-          consistently underserve their clients.
-        </p>
+          {decisionAid.map((item) => (
+            <div key={item.slug} className="flex items-center gap-2">
+              <span
+                className="font-numbers text-[9px] tracking-[0.2em] font-bold"
+                style={{ color: "#B87333" }}
+              >
+                {item.num}
+              </span>
+              <span className="font-labels text-[8px] text-white/40 tracking-[0.16em] uppercase whitespace-nowrap">
+                {item.service}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
 // ─── Section: Keyword strip ───────────────────────────────────────────────────
-// Dark bg with copper-dot marquee — copper used as accent only, not background
 
 function ServiceStrip() {
   const labels = ["ADU Construction", "Remediation", "Consulting", "Building Science", "South Bay CA", "Torrance"];
-
   return (
     <div
       className="bg-[#0a0a0a] overflow-hidden py-3 border-t border-b border-white/5"
@@ -273,13 +287,13 @@ function ServiceStrip() {
     >
       <div
         className="flex gap-12 items-center"
-        style={{
-          animation: "marqueeScroll 28s linear infinite",
-          width: "max-content",
-        }}
+        style={{ animation: "marqueeScroll 28s linear infinite", width: "max-content" }}
       >
         {[...labels, ...labels].map((label, i) => (
-          <span key={i} className="font-labels text-[9px] text-gray-500 tracking-[0.28em] uppercase whitespace-nowrap flex items-center gap-12">
+          <span
+            key={i}
+            className="font-labels text-[9px] text-gray-500 tracking-[0.28em] uppercase whitespace-nowrap flex items-center gap-12"
+          >
             {label}
             <span className="w-1 h-1 rounded-full inline-block" style={{ background: "#B87333", opacity: 0.5 }} />
           </span>
@@ -289,7 +303,167 @@ function ServiceStrip() {
   );
 }
 
+// ─── Section: Services Intro (new) ───────────────────────────────────────────
+// Editorial chapter between marquee strip and decision aid.
+// Establishes WHY building science expertise before asking visitors to self-select.
+// Scrub ratio for this section: 3 SCRUB (headline chars, hairline, ghost parallax) : 1 EVENT (proof items)
+
+function ServicesIntro() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const hairlineRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
+
+  useEffect(() => {
+    if (!AnimationController.shouldAnimate()) return;
+    let mounted = true;
+    let splitFrame = -1;
+    let introSplit: SplitType | null = null;
+    const headlineEl = headlineRef.current;
+
+    const ctx = gsap.context(() => {
+      // Copper hairline scaleX scrub (Pattern D)
+      if (hairlineRef.current) {
+        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
+        });
+      }
+
+      // Ghost number parallax scrub — caps at 0.07 so it stays decorative
+      if (ghostRef.current) {
+        gsap.fromTo(ghostRef.current, { yPercent: 12, opacity: 0 }, {
+          yPercent: 0, opacity: 0.07, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "top 20%", scrub: 1.5 },
+        });
+      }
+
+      // SplitType char scrub on headline — 4-guard cleanup
+      if (headlineEl) {
+        const _el = headlineEl;
+        splitFrame = requestAnimationFrame(() => {
+          if (!mounted || !_el.isConnected) return;
+          const split = new SplitType(_el, { types: "words,chars" });
+          introSplit = split;
+          splitRef.current = split;
+          if (split.chars?.length) {
+            gsap.fromTo(split.chars,
+              { yPercent: 110, opacity: 0 },
+              {
+                yPercent: 0, opacity: 1,
+                stagger: { each: 0.016, from: "start" },
+                ease: "none",
+                scrollTrigger: { trigger: sectionRef.current, start: "top 78%", end: "top 20%", scrub: 1.2 },
+              }
+            );
+          }
+        });
+      }
+
+      // Proof items — event, stagger (once)
+      const proofEls = sectionRef.current?.querySelectorAll<HTMLElement>(".proof-el");
+      if (proofEls?.length) {
+        gsap.fromTo(proofEls, { y: 20, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power3.out",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 60%", once: true },
+        });
+      }
+    }, sectionRef);
+    ctxRef.current = ctx;
+
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(splitFrame);
+      if (introSplit && headlineEl?.isConnected) { try { introSplit.revert(); } catch {} }
+      splitRef.current = null;
+      ctxRef.current = null; try { ctx.revert(); } catch {}
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      data-section="services-intro"
+      className="bg-black relative"
+      style={{ position: "relative", zIndex: 2, paddingTop: "clamp(5rem, 10vw, 8rem)", paddingBottom: "clamp(5rem, 10vw, 8rem)" }}
+    >
+      {/* Ghost number — decorative 20 (for 20+ years) */}
+      <div
+        ref={ghostRef}
+        className="absolute right-6 lg:right-12 pointer-events-none select-none font-numbers font-bold leading-none"
+        aria-hidden="true"
+        style={{
+          top: "50%", transform: "translateY(-50%)",
+          fontSize: "clamp(6rem, 12vw, 12rem)",
+          color: "#B87333",
+          opacity: 0,
+        }}
+      >
+        20
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
+        <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-6">
+          Building Science Expertise
+        </span>
+
+        {/* Copper hairline */}
+        <div
+          ref={hairlineRef}
+          style={{
+            height: 1, background: "#B87333", opacity: 0.5,
+            transformOrigin: "left", maxWidth: 80, marginBottom: "2rem",
+          }}
+        />
+
+        <h2
+          ref={headlineRef}
+          className="font-display font-bold text-white tracking-tight leading-[0.9] mb-10"
+          style={{ fontSize: "clamp(2.6rem, 5vw, 4.5rem)", maxWidth: "16ch" }}
+        >
+          <span className="block">Twenty years.</span>
+          <span className="block" style={{ color: "rgba(255,255,255,0.45)" }}>Three services.</span>
+          <span className="block" style={{ color: "rgba(255,255,255,0.28)" }}>One standard.</span>
+        </h2>
+
+        {/* Proof items */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12 pt-8 border-t border-white/5 max-w-2xl">
+          <div className="proof-el">
+            <div className="font-numbers font-bold text-[#B87333] leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
+              20+
+            </div>
+            <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
+              Years field experience
+            </div>
+          </div>
+          <div className="proof-el">
+            <div className="font-numbers font-bold text-white leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
+              3
+            </div>
+            <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
+              Services. Carefully chosen.
+            </div>
+          </div>
+          <div className="proof-el">
+            <div className="font-numbers font-bold text-white leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
+              1
+            </div>
+            <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
+              Standard. No exceptions.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Section: Pinned Decision Aid ─────────────────────────────────────────────
+// Counter animation removed (Fix 4: was causing "3"→"0"→"3" jump).
+// Static "3" in JSX is the correct behavior — ghost numbers on service rows provide counter decoration.
 
 function PinnedDecisionAid() {
   const isMobile = useMobile();
@@ -298,31 +472,19 @@ function PinnedDecisionAid() {
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const numRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const hairlineRef = useRef<HTMLDivElement>(null);
-  const counterRef = useRef<HTMLSpanElement>(null);
+  const pinCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
-
     const isMobileWindow = window.innerWidth < 1024;
 
     const ctx = gsap.context(() => {
-      // ── Copper hairline scaleX scrub ────────────────────────────────────
+      // Copper hairline scaleX scrub
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
           scrollTrigger: { trigger: wrapperRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
-        });
-      }
-
-      // ── Counter scrub — immediateRender: false prevents "0" flash (Fix 4) ─
-      if (counterRef.current) {
-        const el = counterRef.current;
-        const obj = { val: 0 };
-        gsap.to(obj, {
-          val: 3, ease: "none",
-          immediateRender: false,
-          onUpdate: () => { el.textContent = Math.round(obj.val).toString(); },
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", end: "top 20%", scrub: 1.5 },
         });
       }
 
@@ -335,15 +497,32 @@ function PinnedDecisionAid() {
         return;
       }
 
-      // ── Desktop: Pinned scroll — activate panels as you scroll ──────────
+      // Desktop: Pinned scroll — explicit color snap (Fix 2: no panel-level opacity;
+      // panel opacity caused text to fail a11y contrast — use per-element color dimming instead)
       const setActive = (activeIndex: number) => {
         decisionAid.forEach((_, i) => {
           const panel = panelRefs.current[i];
           const num = numRefs.current[i];
           if (!panel || !num) return;
           const isActive = i === activeIndex;
-          gsap.set(panel, { opacity: isActive ? 1 : 0.28, borderColor: isActive ? "#B87333" : "rgba(255,255,255,0.05)" });
-          gsap.set(num, { color: isActive ? "#B87333" : "#555", opacity: isActive ? 1 : 0.35, scale: isActive ? 1.05 : 0.95 });
+          // Panel: border and bg change only — NO opacity on wrapper
+          gsap.set(panel, {
+            borderColor: isActive ? "#B87333" : "rgba(255,255,255,0.04)",
+            backgroundColor: isActive ? "#0d0d0d" : "#070707",
+          });
+          // Number: explicit color change, no opacity (aria-hidden but still needs contrast)
+          gsap.set(num, {
+            color: isActive ? "#B87333" : "#666",
+            scale: isActive ? 1.05 : 0.95,
+          });
+          // List items: dim via color, not opacity
+          const listItems = panel.querySelectorAll<HTMLElement>(".panel-item-text");
+          listItems.forEach(el => {
+            gsap.set(el, { color: isActive ? "#9ca3af" : "#555" });
+          });
+          // CTA link
+          const link = panel.querySelector<HTMLElement>(".panel-cta");
+          if (link) gsap.set(link, { color: isActive ? "#9ca3af" : "#555", borderColor: isActive ? "transparent" : "transparent" });
         });
       };
 
@@ -367,12 +546,17 @@ function PinnedDecisionAid() {
       });
       tl.to({}, { duration: 1 });
     }, wrapperRef);
+    pinCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
-    <div ref={wrapperRef} data-section="services-decision" style={{ minHeight: isMobile ? "auto" : "250vh", position: "relative", zIndex: 2 }}>
+    <div
+      ref={wrapperRef}
+      data-section="services-decision"
+      style={{ minHeight: isMobile ? "auto" : "260vh", position: "relative", zIndex: 2 }}
+    >
       <div ref={stickyRef} className="bg-black" style={{ minHeight: "100vh", overflowX: "clip" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
           <div className="mb-14">
@@ -383,21 +567,13 @@ function PinnedDecisionAid() {
               ref={hairlineRef}
               style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", maxWidth: 80, marginBottom: "2rem" }}
             />
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-              <h2
-                className="font-display font-bold text-white tracking-tight leading-[0.9]"
-                style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
-              >
-                Scope it in{" "}
-                <span style={{ color: "rgba(255,255,255,0.40)" }}>60 seconds.</span>
-              </h2>
-              <div className="text-left sm:text-right flex-shrink-0">
-                <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(2rem, 3vw, 3rem)" }}>
-                  <span ref={counterRef}>3</span>
-                </div>
-                <div className="font-labels text-[8px] text-gray-600 tracking-[0.18em] uppercase mt-1">Services</div>
-              </div>
-            </div>
+            <h2
+              className="font-display font-bold text-white tracking-tight leading-[0.9]"
+              style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
+            >
+              Scope it in{" "}
+              <span style={{ color: "rgba(255,255,255,0.58)" }}>60 seconds.</span>
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px">
@@ -407,8 +583,8 @@ function PinnedDecisionAid() {
                 <div
                   key={item.slug}
                   ref={(el) => { panelRefs.current[i] = el; }}
-                  className="decision-panel bg-[#0a0a0a] border p-10 lg:p-12"
-                  style={{ opacity: i === 0 ? 1 : 0.28, borderColor: i === 0 ? "#B87333" : "rgba(255,255,255,0.05)" }}
+                  className="decision-panel border p-10 lg:p-12"
+                  style={{ borderColor: i === 0 ? "#B87333" : "rgba(255,255,255,0.04)", backgroundColor: i === 0 ? "#0d0d0d" : "#070707" }}
                 >
                   <span
                     ref={(el) => { numRefs.current[i] = el; }}
@@ -416,8 +592,7 @@ function PinnedDecisionAid() {
                     className="font-numbers font-bold leading-none block mb-6 select-none"
                     style={{
                       fontSize: "clamp(2.5rem, 3.5vw, 3.5rem)",
-                      color: i === 0 ? "#B87333" : "#555",
-                      opacity: i === 0 ? 1 : 0.35,
+                      color: i === 0 ? "#B87333" : "#666",
                     }}
                   >
                     {item.num}
@@ -432,13 +607,14 @@ function PinnedDecisionAid() {
                     {item.when.map((w) => (
                       <li key={w} className="flex items-start gap-3">
                         <span className="w-px h-3.5 bg-[#B87333] flex-shrink-0 mt-[3px] opacity-60" />
-                        <span className="text-gray-400 text-sm leading-relaxed">{w}</span>
+                        <span className="panel-item-text text-sm leading-relaxed" style={{ color: i === 0 ? "#9ca3af" : "#555" }}>{w}</span>
                       </li>
                     ))}
                   </ul>
                   <Link
                     href={`/services/${item.slug}`}
-                    className="group inline-flex items-center gap-2 font-labels text-[10px] text-gray-400 tracking-[0.16em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5"
+                    className="panel-cta group inline-flex items-center gap-2 font-labels text-[10px] tracking-[0.16em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5"
+                    style={{ color: i === 0 ? "#9ca3af" : "#555" }}
                   >
                     {service?.short ?? item.service}
                     <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -453,8 +629,10 @@ function PinnedDecisionAid() {
   );
 }
 
-// ─── Section: Service row — editorial chapter layout ─────────────────────────
-// Variation A: full-viewport panel, image 60%, text 40%, SplitType scrub on tagline
+// ─── Section: Service row ─────────────────────────────────────────────────────
+// v3 upgrade: body text now scrub-parallaxed (yPercent), not event-fired.
+// Ghost number opacity reduced (0 → 0.08) — was overbrighted at 1.
+// Remediation bg changed from white to #0f0f0f — eliminates jarring light flash.
 
 function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0]; index: number }) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -465,7 +643,10 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
   const hairlineRef = useRef<HTMLDivElement>(null);
   const taglineRef = useRef<HTMLHeadingElement>(null);
   const ghostNumRef = useRef<HTMLDivElement>(null);
+  const bodyTextRef = useRef<HTMLDivElement>(null);
   const taglineSplitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (taglineSplitRef.current) { try { taglineSplitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   const service = SERVICES.find((s) => s.slug === detail.slug)!;
 
@@ -479,19 +660,17 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
     const ctx = gsap.context(() => {
       const trigger = rowRef.current!;
 
-      // ── Technique 3: Scrubbed clip-path on image pane ───────────────────
+      // Scrubbed clip-path on image pane (Pattern B)
       const clipFrom = detail.imageLeft ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)";
-      gsap.fromTo(
-        imagePaneRef.current,
+      gsap.fromTo(imagePaneRef.current,
         { clipPath: clipFrom },
         {
-          clipPath: "inset(0% 0% 0% 0%)",
-          ease: "none",
+          clipPath: "inset(0% 0% 0% 0%)", ease: "none",
           scrollTrigger: { trigger, start: "top 80%", end: "top 25%", scrub: 1.2 },
         }
       );
 
-      // ── Technique 8: Image parallax yPercent ────────────────────────────
+      // Image parallax yPercent (Pattern F)
       if (imgRef.current) {
         gsap.to(imgRef.current, {
           yPercent: -12, ease: "none",
@@ -499,7 +678,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // ── Technique 4: Scale-through-scroll ───────────────────────────────
+      // Scale-through-scroll (Pattern 4)
       const imgEl = imagePaneRef.current?.querySelector("img");
       if (imgEl) {
         gsap.fromTo(imgEl, { scale: 1.08 }, {
@@ -508,15 +687,15 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // ── Ghost number parallax scrub ──────────────────────────────────────
+      // Ghost number parallax — opacity caps at 0.08 (was 1, too bright)
       if (ghostNumRef.current) {
         gsap.fromTo(ghostNumRef.current, { opacity: 0, yPercent: 8 }, {
-          opacity: 1, yPercent: 0, ease: "none",
+          opacity: 0.08, yPercent: 0, ease: "none",
           scrollTrigger: { trigger, start: "top bottom", end: "top 30%", scrub: 1.5 },
         });
       }
 
-      // ── Copper hairline scaleX scrub ─────────────────────────────────────
+      // Copper hairline scaleX scrub (Pattern D)
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -524,7 +703,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // ── Copper seam scaleY (event, once) ────────────────────────────────
+      // Copper seam scaleY (event, once — Pattern E)
       if (seamRef.current) {
         gsap.fromTo(seamRef.current, { scaleY: 0 }, {
           scaleY: 1, duration: 1, delay: 0.3, ease: "power2.inOut", transformOrigin: "top",
@@ -532,17 +711,25 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // ── Text stagger (event, once) ───────────────────────────────────────
-      const revealEls = textRef.current?.querySelectorAll<HTMLElement>(".reveal-el");
-      if (revealEls?.length) {
-        gsap.fromTo(revealEls, { y: 24, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.65, stagger: 0.07, ease: "power3.out",
-          scrollTrigger: { trigger, start: "top 65%", once: true },
-        });
+      // Body text — scrub yPercent (v3 upgrade: was event-only, now scrubbed)
+      if (bodyTextRef.current) {
+        const bodyEls = bodyTextRef.current.querySelectorAll<HTMLElement>(".body-scrub");
+        if (bodyEls.length) {
+          bodyEls.forEach((el, i) => {
+            gsap.fromTo(el, { yPercent: 8, opacity: 0 }, {
+              yPercent: 0, opacity: 1, ease: "none",
+              scrollTrigger: {
+                trigger,
+                start: `top ${72 - i * 4}%`,
+                end: `top ${35 - i * 3}%`,
+                scrub: 1.2,
+              },
+            });
+          });
+        }
       }
 
-      // ── Technique 2: SplitType char reveal SCRUB on tagline ─────────────
-      // (scrub-dominant pattern — chars reveal as you scroll)
+      // SplitType char reveal SCRUB on tagline — 4-guard cleanup
       if (taglineEl) {
         const _el = taglineEl;
         taglineSplitFrame = requestAnimationFrame(() => {
@@ -551,8 +738,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
           taglineSplit = split;
           taglineSplitRef.current = split;
           if (split.chars?.length) {
-            gsap.fromTo(
-              split.chars,
+            gsap.fromTo(split.chars,
               { yPercent: 110, opacity: 0 },
               {
                 yPercent: 0, opacity: 1,
@@ -565,30 +751,27 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
     }, rowRef);
+    ctxRef.current = ctx;
 
     return () => {
       mounted = false;
       cancelAnimationFrame(taglineSplitFrame);
       if (taglineSplit && taglineEl?.isConnected) { try { taglineSplit.revert(); } catch {} }
       taglineSplitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, [detail.imageLeft]);
 
-  const isOnDark = detail.textOnDark;
-  const textPrimary = isOnDark ? "text-white" : "text-[#0a0a0a]";
-  const textSecondary = isOnDark ? "text-gray-400" : "text-gray-600";
-  const labelColor = isOnDark ? "text-gray-500" : "text-gray-500";
-  const bgText = isOnDark ? "bg-black" : "bg-white";
-  const bulletPrimary = "bg-[#B87333]";
-  const bulletSecondary = isOnDark ? "bg-white/20" : "bg-black/20";
+  // All service rows now dark — eliminates jarring white flash between black sections
+  const textPrimary = "text-white";
+  const textSecondary = "text-gray-400";
+  const labelColor = "text-gray-500";
 
   const imagePart = (
     <div
       className="relative flex-shrink-0 w-full md:w-[60%] self-stretch"
       style={{ minHeight: "clamp(360px, 50vw, 100%)" }}
     >
-      {/* Clip-path container — overflow:hidden is on this div */}
       <div ref={imagePaneRef} className="absolute inset-0 overflow-hidden">
         <div ref={imgRef} className="absolute left-0 right-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
@@ -600,7 +783,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
             sizes="(max-width: 768px) 100vw, 60vw"
           />
         </div>
-        {/* Edge gradient — blends into text panel */}
+        {/* Edge gradient */}
         <div
           className="absolute inset-0"
           style={{
@@ -611,7 +794,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         />
       </div>
 
-      {/* Ghost chapter number — parallax scrub in */}
+      {/* Ghost chapter number */}
       <div
         ref={ghostNumRef}
         className="absolute z-10 pointer-events-none select-none font-numbers font-bold leading-none"
@@ -627,7 +810,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         0{index + 1}
       </div>
 
-      {/* Copper seam — vertical line at image/text border */}
+      {/* Copper seam */}
       <div
         ref={seamRef}
         className="absolute top-[12%] z-20 pointer-events-none"
@@ -644,15 +827,15 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
   const textPart = (
     <div
       ref={textRef}
-      className={`flex flex-col justify-center flex-1 ${bgText} px-10 py-16 md:px-14 lg:px-16`}
+      className={`flex flex-col justify-center flex-1 ${detail.bg} px-10 py-16 md:px-14 lg:px-16`}
       style={{ minHeight: "clamp(420px, 40vw, 100%)" }}
     >
       {/* Eyebrow */}
-      <span className={`reveal-el font-labels text-[10px] ${labelColor} tracking-[0.22em] uppercase mb-3 block`}>
+      <span className={`font-labels text-[10px] ${labelColor} tracking-[0.22em] uppercase mb-3 block`}>
         {service.short}
       </span>
 
-      {/* Tagline — SplitType char reveal scrub */}
+      {/* Tagline — SplitType char scrub */}
       <h2
         ref={taglineRef}
         className={`font-display font-bold ${textPrimary} tracking-tight leading-[0.92] mb-5`}
@@ -660,7 +843,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
       >
         {detail.tagline[0]}
         {detail.tagline[1] && (
-          <span className="block" style={{ color: isOnDark ? "rgba(255,255,255,0.42)" : "rgba(0,0,0,0.42)" }}>
+          <span className="block" style={{ color: "rgba(255,255,255,0.42)" }}>
             {detail.tagline[1]}
           </span>
         )}
@@ -675,45 +858,48 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         }}
       />
 
-      {/* For who */}
-      <p className={`reveal-el text-sm leading-relaxed mb-6 max-w-[22rem] italic ${isOnDark ? "text-gray-500" : "text-gray-600"}`}>
-        &ldquo;{detail.forWho}&rdquo;
-      </p>
+      {/* Body text — scrub yPercent parallax */}
+      <div ref={bodyTextRef}>
+        {/* For who */}
+        <p className={`body-scrub text-sm leading-relaxed mb-6 max-w-[22rem] italic ${textSecondary}`}>
+          &ldquo;{detail.forWho}&rdquo;
+        </p>
 
-      {/* Common problems */}
-      <div className="reveal-el mb-5">
-        <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>Common Problems We Solve</div>
-        <ul className="space-y-2">
-          {detail.problems.map((p) => (
-            <li key={p} className="flex items-start gap-2.5">
-              <span className={`w-px h-3 ${bulletPrimary} flex-shrink-0 mt-[3px] opacity-55`} />
-              <span className={`${textSecondary} text-xs leading-relaxed`}>{p}</span>
-            </li>
-          ))}
-        </ul>
+        {/* Common problems */}
+        <div className="body-scrub mb-5">
+          <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>
+            Common Problems We Solve
+          </div>
+          <ul className="space-y-2">
+            {detail.problems.map((p) => (
+              <li key={p} className="flex items-start gap-2.5">
+                <span className="w-px h-3 bg-[#B87333] flex-shrink-0 mt-[3px] opacity-55" />
+                <span className={`${textSecondary} text-xs leading-relaxed`}>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* What's included */}
+        <div className="body-scrub mb-8">
+          <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>
+            What&apos;s Included
+          </div>
+          <ul className="space-y-2">
+            {service.details.slice(0, 4).map((d) => (
+              <li key={d} className="flex items-start gap-2.5">
+                <span className="w-px h-3 bg-white/20 flex-shrink-0 mt-[3px]" />
+                <span className={`${textSecondary} text-xs leading-relaxed`}>{d}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      {/* What's included */}
-      <div className="reveal-el mb-8">
-        <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>What&apos;s Included</div>
-        <ul className="space-y-2">
-          {service.details.slice(0, 4).map((d) => (
-            <li key={d} className="flex items-start gap-2.5">
-              <span className={`w-px h-3 ${bulletSecondary} flex-shrink-0 mt-[3px]`} />
-              <span className={`${textSecondary} text-xs leading-relaxed`}>{d}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* CTA — text link, no MagneticButton */}
+      {/* CTA */}
       <Link
         href={`/services/${detail.slug}`}
-        className={`reveal-el group inline-flex items-center gap-2 font-labels text-[10px] tracking-[0.16em] uppercase border-b pb-0.5 self-start transition-colors duration-200 ${
-          isOnDark
-            ? "text-gray-400 border-gray-700 hover:text-[#B87333] hover:border-[#B87333]"
-            : "text-gray-600 border-gray-300 hover:text-black hover:border-black"
-        }`}
+        className="group inline-flex items-center gap-2 font-labels text-[10px] tracking-[0.16em] uppercase border-b pb-0.5 self-start transition-colors duration-200 text-gray-400 border-gray-700 hover:text-[#B87333] hover:border-[#B87333]"
       >
         Full {service.title} details
         <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -735,12 +921,15 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
 }
 
 // ─── Section: CTA ─────────────────────────────────────────────────────────────
+// v3 upgrade: larger headline clamp(3rem, 6vw, 5.5rem), stronger eyebrow, tighter copy
 
 function ServicesCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -748,6 +937,7 @@ function ServicesCTA() {
     let splitFrame = -1;
     let ctaSplit: SplitType | null = null;
     const ctaEl = headlineRef.current;
+
     const ctx = gsap.context(() => {
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
@@ -756,6 +946,7 @@ function ServicesCTA() {
         });
       }
 
+      // SplitType 4-guard cleanup
       if (ctaEl) {
         const _el = ctaEl;
         const _trigger = sectionRef.current;
@@ -769,7 +960,7 @@ function ServicesCTA() {
               { yPercent: 110, opacity: 0 },
               {
                 yPercent: 0, opacity: 1,
-                stagger: { each: 0.02, from: "start" },
+                stagger: { each: 0.018, from: "start" },
                 ease: "none",
                 scrollTrigger: { trigger: _trigger, start: "top 75%", end: "top 35%", scrub: 1.2 },
               }
@@ -786,17 +977,19 @@ function ServicesCTA() {
         });
       }
     }, sectionRef);
+    ctxRef.current = ctx;
+
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="services-cta" className="bg-black py-28" style={{ position: "relative", zIndex: 2 }}>
+    <section ref={sectionRef} data-section="services-cta" className="bg-black py-28 lg:py-36" style={{ position: "relative", zIndex: 2 }}>
       <div
         ref={hairlineRef}
         className="max-w-7xl mx-auto px-6 lg:px-12 mb-16"
@@ -804,25 +997,27 @@ function ServicesCTA() {
       />
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <span className="cta-el font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-5">
-          Still not sure which service fits?
+          Still deciding?
         </span>
         <h2
           ref={headlineRef}
           className="font-display font-bold text-white tracking-tight leading-[0.9] mb-6"
-          style={{ fontSize: "clamp(2.2rem, 5vw, 4.5rem)" }}
+          style={{ fontSize: "clamp(3rem, 6vw, 5.5rem)" }}
         >
           Start with a free consultation.
         </h2>
-        <p className="cta-el text-gray-400 max-w-lg leading-relaxed mb-12">
-          We&apos;ll help you figure out exactly what your project requires — no
-          obligation, no pressure.
+        <p className="cta-el text-gray-500 max-w-lg leading-relaxed mb-12">
+          We&apos;ll help you figure out exactly what your project requires — no obligation, no pressure.
         </p>
         <div className="cta-el flex flex-col sm:flex-row gap-4">
           <Link
             href="/contact"
             className="group relative inline-flex items-center justify-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
           >
-            <span className="absolute inset-0 bg-[#B87333] translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out" aria-hidden="true" />
+            <span
+              className="absolute inset-0 bg-[#B87333] translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+              aria-hidden="true"
+            />
             <span className="relative">Get Free Estimate</span>
             <span className="relative transition-transform duration-200 group-hover:translate-x-1">→</span>
           </Link>
@@ -845,12 +1040,13 @@ export default function ServicesContent() {
     <>
       <ServicesHero />
       <ServiceStrip />
+      <ServicesIntro />
       <PinnedDecisionAid />
       {serviceDetails.map((detail, i) => (
         <div key={detail.slug}>
           <ServiceSection detail={detail} index={i} />
           {i < serviceDetails.length - 1 && (
-            <div style={{ height: 1, background: "rgba(184,115,51,0.15)" }} />
+            <div style={{ height: 1, background: "rgba(184,115,51,0.12)" }} />
           )}
         </div>
       ))}

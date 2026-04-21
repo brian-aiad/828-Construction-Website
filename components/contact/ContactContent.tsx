@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -38,6 +38,8 @@ function ContactHero() {
   const midRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -98,13 +100,14 @@ function ContactHero() {
         });
       }
     }, sectionRef);
+    ctxRef.current = ctx;
 
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (heroSplit && heroLineEl?.isConnected) { try { heroSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -201,6 +204,8 @@ function PinnedTrust() {
   const yearsRef = useRef<HTMLSpanElement>(null);
   const citiesRef = useRef<HTMLSpanElement>(null);
   const imageWrapRef = useRef<HTMLDivElement>(null);
+  const pinCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
@@ -214,23 +219,25 @@ function PinnedTrust() {
         });
       }
 
-      // ── Technique 9: Counter count-up (scrub) ───────────────────────────
+      // Fix 10: once:true — counters fire on enter, never reverse
       if (yearsRef.current) {
         const el = yearsRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, ease: "none",
+          val: 20, duration: 2, ease: "power2.out",
+          immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", end: "top 20%", scrub: 1.5 },
+          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", once: true },
         });
       }
       if (citiesRef.current) {
         const el = citiesRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 2004, ease: "none",
+          val: 2004, duration: 2.5, ease: "power2.out",
+          immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val).toString(); },
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", end: "top 20%", scrub: 1.5 },
+          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", once: true },
         });
       }
 
@@ -275,12 +282,13 @@ function PinnedTrust() {
         tl.to({}, { duration: 1 });
       }
     }, wrapperRef);
+    pinCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
-    <div ref={wrapperRef} data-section="contact-trust" style={{ minHeight: isMobile ? "auto" : "220vh", position: "relative", zIndex: 2 }}>
+    <div ref={wrapperRef} data-section="contact-trust" style={{ minHeight: isMobile ? "auto" : "240vh", position: "relative", zIndex: 2 }}>
       <div ref={stickyRef} className="bg-[#0a0a0a] overflow-hidden" style={{ minHeight: "100vh" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
           {/* Copper hairline scrub */}
@@ -379,6 +387,8 @@ function ContactMain() {
   const hairlineRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -435,12 +445,13 @@ function ContactMain() {
         });
       }
     }, sectionRef);
+    ctxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 

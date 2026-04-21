@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -24,6 +24,8 @@ export default function AboutPreview() {
   const imagesRef = useRef<HTMLDivElement>(null);
   const stat0Ref = useRef<HTMLDivElement>(null);
   const stat1Ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
@@ -74,7 +76,7 @@ export default function AboutPreview() {
         );
       }
 
-      // ── GSAP scrub counters (not fire-once NumberCounter) ───────────────
+      // Fix 10: once:true — counters fire on enter, never reverse
       [
         { ref: stat0Ref, target: 20, suffix: "+" },
         { ref: stat1Ref, target: 2004, suffix: "" },
@@ -84,14 +86,14 @@ export default function AboutPreview() {
         const obj = { val: 0 };
         gsap.to(obj, {
           val: target,
-          ease: "none",
+          duration: 2,
+          ease: "power2.out",
           immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + suffix; },
           scrollTrigger: {
             trigger,
             start: "top 80%",
-            end: "top 30%",
-            scrub: 1.5,
+            once: true,
           },
         });
       });
@@ -188,7 +190,12 @@ export default function AboutPreview() {
 
     }, sectionRef);
 
-    return () => ctx.revert();
+    ctxRef.current = ctx;
+
+    return () => {
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
   }, []);
 
   return (

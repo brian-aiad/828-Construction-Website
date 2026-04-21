@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -93,6 +93,12 @@ function AboutHero() {
   const heroLinesRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const allSplitsRef = useRef<SplitType[]>([]);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    allSplitsRef.current.forEach(s => { try { s.revert(); } catch {} });
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -217,6 +223,7 @@ function AboutHero() {
 
     }, sectionRef);
 
+    ctxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
@@ -225,7 +232,8 @@ function AboutHero() {
       });
       localSplits = [];
       allSplitsRef.current = [];
-      ctx.revert();
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -324,6 +332,11 @@ function AboutFounder() {
   const textRef = useRef<HTMLDivElement>(null);
   const storyH2Ref = useRef<HTMLHeadingElement>(null);
   const splitStoryRef = useRef<SplitType | null>(null);
+  const founderCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    if (splitStoryRef.current) { try { splitStoryRef.current.revert(); } catch {} }
+    try { founderCtxRef.current?.revert(); } catch {}
+  }, []);
   const statCardRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
 
@@ -426,12 +439,14 @@ function AboutFounder() {
       }
     }, sectionRef);
 
+    founderCtxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (storySplit && storyEl?.isConnected) { try { storySplit.revert(); } catch {} }
       splitStoryRef.current = null;
-      ctx.revert();
+      founderCtxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -555,6 +570,8 @@ function AboutFounder() {
 function AboutStats() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const numRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const statsCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { statsCtxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -574,35 +591,31 @@ function AboutStats() {
         );
       }
 
-      // GSAP scrub counters — tied to scroll position
-      // immediateRender: false prevents GSAP from applying from-state (0) before the
-      // ScrollTrigger fires, which would overwrite the hardcoded JSX values.
+      // Fix 10: once:true — counters fire once on enter and never reverse
       statItems.forEach((stat, i) => {
         const el = numRefs.current[i];
         if (!el) return;
 
         const obj = { val: 0 };
-        gsap.fromTo(obj,
-          { val: 0 },
-          {
-            val: stat.target,
-            immediateRender: false,
-            ease: "none",
-            onUpdate: () => {
-              el.textContent = Math.round(obj.val) + stat.suffix;
-            },
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 85%",
-              end: "top 25%",
-              scrub: 1.5,
-            },
-          }
-        );
+        gsap.to(obj, {
+          val: stat.target,
+          duration: 2,
+          ease: "power2.out",
+          immediateRender: false,
+          onUpdate: () => {
+            el.textContent = Math.round(obj.val) + stat.suffix;
+          },
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            once: true,
+          },
+        });
       });
     }, sectionRef);
+    statsCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { statsCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
@@ -656,6 +669,8 @@ function AboutPhilosophy() {
   const sectionRef = useRef<HTMLElement>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const philCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { philCtxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
@@ -708,8 +723,9 @@ function AboutPhilosophy() {
         );
       });
     }, sectionRef);
+    philCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { philCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   const PhilPanel = ({ p, idx }: { p: typeof philosophyPanels[0]; idx: number }) => (
@@ -885,6 +901,8 @@ function AboutPhilosophy() {
 
 function AboutCraft() {
   const gridRef = useRef<HTMLDivElement>(null);
+  const craftCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { craftCtxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !gridRef.current) return;
@@ -945,8 +963,9 @@ function AboutCraft() {
         }
       });
     }, gridRef);
+    craftCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { craftCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
@@ -1013,40 +1032,29 @@ function AboutSouthBay() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
+  // pinSTRef stores the actual ScrollTrigger instance for the pin.
+  // gsap.context() does NOT track setTimeout-deferred GSAP calls (context is
+  // synchronous only), so ctx.revert() misses this ST. We kill it directly.
+  const pinSTRef = useRef<ScrollTrigger | null>(null);
+  const southBayCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    if (pinSTRef.current) {
+      try { pinSTRef.current.kill(true); } catch {}
+      pinSTRef.current = null;
+    }
+    try { southBayCtxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !sectionRef.current || !trackRef.current) return;
+    // Below 1024px: skip horizontal pin — phone/tablet native scroll handles it
+    if (window.innerWidth < 1024) return;
 
     let mounted = true;
     let timeoutId: ReturnType<typeof setTimeout>;
 
+    // Hairline animation runs synchronously inside context (correctly tracked)
     const ctx = gsap.context(() => {
-      const track = trackRef.current!;
-
-      // Wait for layout so scrollWidth is accurate
-      const setupH = () => {
-        if (!mounted || !sectionRef.current?.isConnected) return;
-        const totalWidth = track.scrollWidth - window.innerWidth;
-        if (totalWidth <= 0) return;
-
-        gsap.to(track, {
-          x: -totalWidth,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: `+=${totalWidth}`,
-            pin: true,
-            pinSpacing: true,
-            scrub: 1.2,
-            anticipatePin: 1,
-          },
-        });
-      };
-
-      timeoutId = setTimeout(setupH, 80);
-
-      // Hairline: scaleX scrub on section enter
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 },
           {
@@ -1061,11 +1069,39 @@ function AboutSouthBay() {
         );
       }
     }, sectionRef);
+    southBayCtxRef.current = ctx;
+
+    // Pin ScrollTrigger is created via setTimeout so GSAP context does NOT track
+    // it. Store the instance directly so useLayoutEffect can kill it before React
+    // removes the DOM.
+    const track = trackRef.current;
+    timeoutId = setTimeout(() => {
+      if (!mounted || !sectionRef.current?.isConnected || !track) return;
+      const totalWidth = track.scrollWidth - window.innerWidth;
+      if (totalWidth <= 0) return;
+
+      const tween = gsap.to(track, {
+        x: -totalWidth,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: `+=${totalWidth}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: 1.2,
+          anticipatePin: 1,
+        },
+      });
+      pinSTRef.current = tween.scrollTrigger ?? null;
+    }, 80);
 
     return () => {
       mounted = false;
       clearTimeout(timeoutId);
+      southBayCtxRef.current = null;
       try { ctx.revert(); } catch {}
+      // pinSTRef.current is killed in useLayoutEffect (fires before DOM removal)
     };
   }, []);
 
@@ -1158,6 +1194,11 @@ function AboutCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const ctaH2Ref = useRef<HTMLHeadingElement>(null);
   const splitCtaRef = useRef<SplitType | null>(null);
+  const ctaCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    if (splitCtaRef.current) { try { splitCtaRef.current.revert(); } catch {} }
+    try { ctaCtxRef.current?.revert(); } catch {}
+  }, []);
   const hairlineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1221,12 +1262,14 @@ function AboutCTA() {
       }
     }, sectionRef);
 
+    ctaCtxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
       splitCtaRef.current = null;
-      ctx.revert();
+      ctaCtxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 

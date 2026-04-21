@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -21,56 +21,40 @@ const steps = [
     title: "Consultation",
     thesis:
       "A real conversation about your goals, site conditions, and constraints — before any commitment is made. We'll tell you honestly whether the project makes sense.",
-    details: [
-      "Understand your goals, timeline, and realistic budget",
-      "Assess site conditions and any prior work",
-      "Identify issues to address before scope is locked",
-    ],
     promise:
       "You'll leave knowing whether the project is feasible, what it realistically involves, and whether 828 is the right fit.",
     image: "/images/process/planning.jpg",
+    tag: "Before Anything Begins",
   },
   {
     number: "02",
     title: "Planning",
     thesis:
       "Every decision is made before work starts — scope, materials, sequencing, and budget. No ambiguity, no scope creep, no surprises later.",
-    details: [
-      "Written scope of work before any work begins",
-      "Material selection grounded in performance, not just price",
-      "Timeline with milestones and realistic contingency",
-    ],
     promise:
       "Changes to scope are discussed with you before they become costs. Not after.",
     image: "/images/process/scope-document.jpg",
+    tag: "No Surprises by Design",
   },
   {
     number: "03",
     title: "Execution",
     thesis:
       "Precise, quality-focused work with proactive communication. You'll know what's happening — we don't wait until you ask.",
-    details: [
-      "Regular progress updates on your schedule",
-      "Quality checkpoints at critical stages",
-      "Transparent communication if conditions change",
-    ],
     promise:
       "If something unexpected comes up, you hear it from us first — along with a clear path forward.",
-    image: "/images/process/quality-check.jpg",
+    image: "/images/process/execution.jpg",
+    tag: "Quality at Every Stage",
   },
   {
     number: "04",
     title: "Completion",
     thesis:
       "A thorough walkthrough, full documentation, and continued availability after handoff. The job isn't done when the tools leave the site.",
-    details: [
-      "Complete walkthrough of all finished work",
-      "Full project documentation package",
-      "Post-project support for questions or follow-up",
-    ],
     promise:
       "We stay available. If a question comes up six months later, we're still here.",
-    image: "/images/process/final-detail.jpg",
+    image: "/images/process/completion.jpg",
+    tag: "Done Right, Not Just Done",
   },
 ];
 
@@ -101,6 +85,8 @@ function ProcessHero() {
   const midRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -109,7 +95,6 @@ function ProcessHero() {
     let heroLineEl: HTMLElement | null = null;
     let heroSplit: SplitType | null = null;
     const ctx = gsap.context(() => {
-      // ── Technique 1: Triple-layer parallax ──────────────────────────────
       if (bgRef.current) {
         gsap.to(bgRef.current, {
           yPercent: -15, ease: "none",
@@ -129,7 +114,6 @@ function ProcessHero() {
         });
       }
 
-      // ── Technique 2: SplitType char scatter exit on "Work." line ────────
       splitFrame = requestAnimationFrame(() => {
         if (!mounted) return;
         const heroLine = sectionRef.current?.querySelector<HTMLElement>(".proc-hero-line");
@@ -161,13 +145,14 @@ function ProcessHero() {
         });
       }
     }, sectionRef);
+    ctxRef.current = ctx;
 
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (heroSplit && heroLineEl?.isConnected) { try { heroSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -175,8 +160,8 @@ function ProcessHero() {
     <section
       ref={sectionRef}
       data-section="process-hero"
-      className="relative h-screen overflow-hidden bg-black"
-      style={{ position: "relative", zIndex: 1 }}
+      className="relative h-screen bg-black"
+      style={{ position: "relative", zIndex: 1, overflowX: "clip" }}
     >
       <div
         ref={bgRef}
@@ -186,7 +171,7 @@ function ProcessHero() {
           backgroundImage: "url('/images/process/planning.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "contrast(1.05) saturate(0.8) brightness(0.38)",
+          filter: "contrast(1.05) saturate(0.8) brightness(0.44)",
         }}
         role="presentation"
         aria-hidden="true"
@@ -228,15 +213,14 @@ function ProcessHero() {
 }
 
 // ─── Section: Process horizontal strip ───────────────────────────────────────
-// Technique 7: Horizontal-on-vertical scroll
 
 function ProcessStrip() {
   const labels = ["01 Consultation", "02 Planning", "03 Execution", "04 Completion", "No Surprises", "Clear Scope"];
 
   return (
     <div
-      className="bg-[#0a0a0a] border-t border-b border-white/5 overflow-hidden py-3"
-      style={{ position: "relative", zIndex: 2 }}
+      className="bg-[#0a0a0a] border-t border-b border-white/5 py-3"
+      style={{ position: "relative", zIndex: 2, overflow: "hidden" }}
       aria-hidden="true"
     >
       <div
@@ -254,8 +238,309 @@ function ProcessStrip() {
   );
 }
 
+// ─── Section: Pinned Timeline (signature moment) ──────────────────────────────
+// Technique: ONE long pinned scroll section where 4 phases unlock sequentially.
+// Each phase: number, title, thesis, commitment quote, photo clip-path reveal.
+// This is unique to the Process page — no other page uses this chapter progression.
+
+function PinnedTimeline() {
+  const isMobile = useMobile();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const imgInnerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const ghostNumRef = useRef<HTMLSpanElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const hairlineRef = useRef<HTMLDivElement>(null);
+  const pinCtxRef = useRef<gsap.Context | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
+
+  useEffect(() => {
+    if (!AnimationController.shouldAnimate()) return;
+    if (!wrapperRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Hairline enter
+      if (hairlineRef.current) {
+        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: wrapperRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
+        });
+      }
+
+      // Image clip-path reveals — each phase photo clips in from bottom as phase activates
+      imgRefs.current.forEach((imgWrap, i) => {
+        if (!imgWrap) return;
+        // Scale-through-scroll on image inner
+        const inner = imgInnerRefs.current[i];
+        if (inner) {
+          gsap.fromTo(inner, { scale: 1.08 }, {
+            scale: 1.0, ease: "none",
+            scrollTrigger: { trigger: wrapperRef.current, start: "top bottom", end: "bottom top", scrub: 1.5 },
+          });
+        }
+      });
+
+      // Main pin: 4 phases over 4×vh travel
+      const phaseCount = steps.length;
+      const travelMultiple = 3.6; // total = 3.6×vh for all 4 phases
+
+      ScrollTrigger.create({
+        trigger: wrapperRef.current,
+        pin: stickyRef.current,
+        start: "top top",
+        end: "+=" + window.innerHeight * travelMultiple,
+        scrub: 0.8,
+        pinSpacing: false,
+        onUpdate: (self) => {
+          const p = self.progress;
+          // Each phase gets equal share of progress
+          const threshold = 1 / phaseCount;
+          let newIndex = Math.min(phaseCount - 1, Math.floor(p / threshold));
+          // Last 5% of progress stays on last panel
+          if (p >= 0.98) newIndex = phaseCount - 1;
+
+          setActiveIndex(newIndex);
+
+          // Ghost number counter (01→04) via snap
+          if (ghostNumRef.current) {
+            ghostNumRef.current.textContent = String(newIndex + 1).padStart(2, "0");
+          }
+
+          // Progress bar scrub
+          if (progressBarRef.current) {
+            gsap.set(progressBarRef.current, { scaleX: p });
+          }
+
+          // Panel opacity snap (Fix 2 — no tweened opacity between panels)
+          panelRefs.current.forEach((panel, i) => {
+            if (!panel) return;
+            gsap.set(panel, { opacity: i === newIndex ? 1 : 0, pointerEvents: i === newIndex ? "auto" : "none" });
+          });
+
+          // Image clip-path snap (each photo is inset(0) when active, inset(100% 0% 0% 0%) when not)
+          imgRefs.current.forEach((imgWrap, i) => {
+            if (!imgWrap) return;
+            if (i === newIndex) {
+              gsap.to(imgWrap, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power3.out", overwrite: true });
+            } else {
+              gsap.set(imgWrap, { clipPath: "inset(100% 0% 0% 0%)" });
+            }
+          });
+        },
+      });
+    }, wrapperRef);
+    pinCtxRef.current = ctx;
+    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
+  }, []);
+
+  // Mobile fallback: sequential stagger, no pin
+  if (isMobile) {
+    return (
+      <div data-section="process-timeline" className="bg-black" style={{ position: "relative", zIndex: 2 }}>
+        {/* Copper hairline */}
+        <div className="max-w-7xl mx-auto px-6 pt-16 pb-4">
+          <div style={{ height: 1, background: "#B87333", opacity: 0.5 }} />
+        </div>
+        <div className="max-w-7xl mx-auto px-6 pb-8 pt-4">
+          <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-2">Our Process</span>
+          <h2 className="font-display font-bold text-white tracking-tight leading-[0.9] mb-8" style={{ fontSize: "clamp(2rem, 8vw, 3rem)" }}>
+            Four phases.<br />
+            <span style={{ color: "rgba(255,255,255,0.40)" }}>No shortcuts.</span>
+          </h2>
+        </div>
+        {steps.map((step, i) => (
+          <div key={step.number} className="border-t border-white/5">
+            <div className="relative overflow-hidden" style={{ height: "clamp(240px, 55vw, 320px)" }}>
+              <Image
+                src={step.image}
+                alt={`828 Construction — ${step.title}`}
+                fill
+                className="object-cover"
+                style={{ filter: "contrast(1.06) saturate(0.9)" }}
+                sizes="100vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <span className="font-numbers font-bold text-[#B87333] leading-none block" style={{ fontSize: "2.5rem" }}>
+                  {step.number}
+                </span>
+                <h3 className="font-display font-bold text-white text-2xl leading-tight">{step.title}</h3>
+              </div>
+            </div>
+            <div className="px-6 py-8 bg-black">
+              <span className="font-labels text-[9px] text-gray-500 tracking-[0.22em] uppercase block mb-4">{step.tag}</span>
+              <p className="text-gray-300 leading-relaxed mb-5" style={{ fontSize: 15 }}>{step.thesis}</p>
+              <div className="border border-white/5 p-4">
+                <span className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase block mb-2">Our Commitment</span>
+                <p className="text-gray-400 text-sm leading-relaxed italic">&ldquo;{step.promise}&rdquo;</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop: full pinned timeline
+  return (
+    <div
+      ref={wrapperRef}
+      data-section="process-timeline"
+      style={{ minHeight: `${3.6 * 100 + 100}vh`, position: "relative", zIndex: 2 }}
+    >
+      <div
+        ref={stickyRef}
+        className="bg-black"
+        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        {/* Top bar */}
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full pt-16 pb-0">
+          <div
+            ref={hairlineRef}
+            style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", marginBottom: "1.5rem" }}
+          />
+          <div className="flex items-end justify-between">
+            <div>
+              <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-2">Our Process</span>
+              <h2
+                className="font-display font-bold text-white tracking-tight leading-[0.9]"
+                style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}
+              >
+                Four phases.<br />
+                <span style={{ color: "rgba(255,255,255,0.40)" }}>No shortcuts.</span>
+              </h2>
+            </div>
+            {/* Ghost number — snaps 01→04 */}
+            <div className="text-right select-none" aria-hidden="true">
+              <span
+                ref={ghostNumRef}
+                className="font-numbers font-bold leading-none text-[#B87333]"
+                style={{ fontSize: "clamp(4rem, 8vw, 7rem)", opacity: 0.1 }}
+              >
+                01
+              </span>
+            </div>
+          </div>
+          {/* Scrub progress bar */}
+          <div className="mt-5 mb-0" style={{ height: 1, background: "rgba(255,255,255,0.08)" }}>
+            <div
+              ref={progressBarRef}
+              style={{ height: "100%", background: "#B87333", opacity: 0.6, transformOrigin: "left", transform: "scaleX(0)" }}
+            />
+          </div>
+          {/* Phase labels */}
+          <div className="flex mt-2 mb-0">
+            {steps.map((step) => (
+              <div key={step.number} className="flex-1 font-labels text-[8px] text-gray-600 tracking-[0.2em] uppercase">
+                {step.number}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Panels stack — only 1 visible at a time via opacity snap */}
+        <div className="flex-1 relative" style={{ minHeight: "calc(100vh - 160px)" }}>
+          {steps.map((step, i) => (
+            <div
+              key={step.number}
+              ref={(el) => { panelRefs.current[i] = el; }}
+              className="absolute inset-0"
+              style={{ opacity: i === 0 ? 1 : 0, pointerEvents: i === 0 ? "auto" : "none" }}
+            >
+              <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full h-full flex items-center pt-8 pb-16">
+                <div className="grid grid-cols-12 gap-12 lg:gap-16 w-full items-center">
+
+                  {/* Left: text */}
+                  <div className="col-span-12 lg:col-span-5">
+                    {/* Tag */}
+                    <span className="font-labels text-[9px] text-gray-500 tracking-[0.22em] uppercase block mb-5">
+                      {step.tag}
+                    </span>
+                    {/* Phase number + title */}
+                    <div className="flex items-baseline gap-5 mb-6">
+                      <span
+                        className="font-numbers font-bold text-[#B87333] leading-none flex-shrink-0"
+                        style={{ fontSize: "clamp(2.5rem, 4vw, 3.5rem)" }}
+                        aria-hidden="true"
+                      >
+                        {step.number}
+                      </span>
+                      <h3
+                        className="font-display font-bold text-white tracking-tight leading-[0.92]"
+                        style={{ fontSize: "clamp(1.8rem, 3vw, 3rem)" }}
+                      >
+                        {step.title}
+                      </h3>
+                    </div>
+
+                    {/* Copper seam */}
+                    <div style={{ height: 1, background: "#B87333", opacity: 0.35, marginBottom: "1.5rem" }} />
+
+                    {/* Thesis */}
+                    <p className="text-gray-300 leading-relaxed mb-8 max-w-md" style={{ fontSize: "clamp(0.95rem, 1.4vw, 1.05rem)" }}>
+                      {step.thesis}
+                    </p>
+
+                    {/* Commitment */}
+                    <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", padding: "1.25rem 1.5rem" }}>
+                      <span className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase block mb-2">
+                        Our Commitment
+                      </span>
+                      <p className="text-gray-400 text-sm leading-relaxed italic">
+                        &ldquo;{step.promise}&rdquo;
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: photo — scrubbed clip-path + scale */}
+                  <div className="col-span-12 lg:col-span-7">
+                    <div
+                      ref={(el) => { imgRefs.current[i] = el; }}
+                      className="relative"
+                      style={{
+                        height: "clamp(340px, 42vw, 560px)",
+                        clipPath: i === 0 ? "inset(0% 0% 0% 0%)" : "inset(100% 0% 0% 0%)",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        ref={(el) => { imgInnerRefs.current[i] = el; }}
+                        className="absolute left-0 right-0"
+                        style={{ top: "-7.5%", height: "115%" }}
+                      >
+                        <Image
+                          src={step.image}
+                          alt={`828 Construction — ${step.title} phase`}
+                          fill
+                          className="object-cover"
+                          style={{ filter: "contrast(1.06) saturate(0.9)" }}
+                          sizes="(max-width: 1280px) 55vw, 700px"
+                          priority={i === 0}
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      {/* Phase tag bottom-right */}
+                      <div className="absolute bottom-5 right-5">
+                        <span className="font-labels text-[9px] text-white/50 tracking-[0.18em] uppercase">
+                          Phase {step.number}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Section: Pinned standards ────────────────────────────────────────────────
-// Technique 5: Pinned moment — standards activate as you scroll
 
 function PinnedStandards() {
   const isMobile = useMobile();
@@ -264,14 +549,15 @@ function PinnedStandards() {
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const pinCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
 
-    const isMobile = window.innerWidth < 1024;
+    const isMobileW = window.innerWidth < 1024;
 
     const ctx = gsap.context(() => {
-      // ── Technique 10: Copper hairline scaleX scrub ──────────────────────
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -279,18 +565,18 @@ function PinnedStandards() {
         });
       }
 
-      // ── Technique 9: Counter count-up scrub ─────────────────────────────
       if (counterRef.current) {
         const el = counterRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, ease: "none",
+          val: 20, duration: 2, ease: "power2.out",
+          immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", end: "top 20%", scrub: 1.5 },
+          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", once: true },
         });
       }
 
-      if (isMobile) {
+      if (isMobileW) {
         const rows = wrapperRef.current!.querySelectorAll<HTMLElement>(".standard-row");
         gsap.fromTo(rows, { opacity: 0, y: 24 }, {
           opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out",
@@ -299,7 +585,6 @@ function PinnedStandards() {
         return;
       }
 
-      // ── Desktop: Pinned scroll with row activation ───────────────────────
       const setActive = (activeIndex: number) => {
         standards.forEach((_, i) => {
           const row = rowRefs.current[i];
@@ -335,16 +620,16 @@ function PinnedStandards() {
       });
       tl.to({}, { duration: 1 });
     }, wrapperRef);
+    pinCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
     <div ref={wrapperRef} data-section="process-standards" style={{ minHeight: isMobile ? "auto" : "280vh", position: "relative", zIndex: 2 }}>
-      <div ref={stickyRef} className="bg-black overflow-hidden" style={{ minHeight: "100vh" }}>
+      <div ref={stickyRef} className="bg-black" style={{ minHeight: "100vh", overflowX: "clip" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
 
-          {/* Copper hairline scrub */}
           <div
             ref={hairlineRef}
             style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", marginBottom: "4rem" }}
@@ -366,7 +651,6 @@ function PinnedStandards() {
                 Structure varies project to project. Standards don&apos;t.
                 These four principles apply to every engagement.
               </p>
-              {/* Counter */}
               <div className="border-t border-white/5 pt-8">
                 <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(3rem, 5vw, 4rem)" }}>
                   <span ref={counterRef}>20+</span>
@@ -420,177 +704,6 @@ function PinnedStandards() {
   );
 }
 
-// ─── Section: Step Row ────────────────────────────────────────────────────────
-
-function StepRow({ step, index }: { step: (typeof steps)[0]; index: number }) {
-  const rowRef = useRef<HTMLDivElement>(null);
-  const imagePaneRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const seamRef = useRef<HTMLDivElement>(null);
-
-  const imageLeft = index % 2 === 0;
-
-  useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
-    const ctx = gsap.context(() => {
-      const trigger = rowRef.current!;
-
-      // ── Technique 3: Scrubbed clip-path ─────────────────────────────────
-      const clipFrom = imageLeft ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)";
-      gsap.fromTo(imagePaneRef.current, { clipPath: clipFrom }, {
-        clipPath: "inset(0% 0% 0% 0%)", ease: "none",
-        scrollTrigger: { trigger, start: "top 80%", end: "top 30%", scrub: 1.2 },
-      });
-
-      // Image parallax
-      if (imgRef.current) {
-        gsap.to(imgRef.current, {
-          yPercent: -10, ease: "none",
-          scrollTrigger: { trigger, start: "top bottom", end: "bottom top", scrub: true },
-        });
-      }
-
-      // ── Technique 4: Scale-through-scroll ───────────────────────────────
-      const imgEl = imagePaneRef.current?.querySelector("img");
-      if (imgEl) {
-        gsap.fromTo(imgEl, { scale: 1.08 }, {
-          scale: 1.0, ease: "none",
-          scrollTrigger: { trigger, start: "top bottom", end: "bottom top", scrub: 1.5 },
-        });
-      }
-
-      // Text stagger
-      const textEls = textRef.current?.querySelectorAll<HTMLElement>(".text-el");
-      if (textEls?.length) {
-        gsap.fromTo(textEls, { y: 28, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.7, stagger: 0.08, delay: 0.3, ease: "power3.out",
-          scrollTrigger: { trigger, start: "top 68%", once: true },
-        });
-      }
-
-      // Copper seam
-      if (seamRef.current) {
-        gsap.fromTo(seamRef.current, { scaleY: 0 }, {
-          scaleY: 1, duration: 0.9, delay: 0.45, ease: "power2.inOut", transformOrigin: "top",
-          scrollTrigger: { trigger, start: "top 68%", once: true },
-        });
-      }
-    }, rowRef);
-    return () => ctx.revert();
-  }, [imageLeft]);
-
-  const isEven = index % 2 === 0;
-  const bg = isEven ? "bg-black" : "bg-white";
-  const textPrimary = isEven ? "text-white" : "text-black";
-  const textSec = isEven ? "text-gray-400" : "text-gray-600";
-  const eyebrow = isEven ? "text-gray-400" : "text-gray-600";
-  const bullet = isEven ? "bg-[#B87333]/60" : "bg-black";
-  const commitBg = isEven ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-100";
-  const commitText = isEven ? "text-gray-400" : "text-gray-600";
-
-  return (
-    <div ref={rowRef} data-step={step.number} style={{ position: "relative", zIndex: 2 }}>
-      <div
-        className={`flex flex-col ${imageLeft ? "md:flex-row" : "md:flex-row-reverse"} w-full`}
-      >
-        {/* Image pane */}
-        <div className="relative overflow-hidden flex-shrink-0 w-full md:w-[50%]" style={{ minHeight: "clamp(340px, 48vw, 600px)" }}>
-          <div ref={imagePaneRef} className="absolute inset-0">
-            <div ref={imgRef} className="absolute left-0 right-0" style={{ top: "-7.5%", height: "115%" }}>
-              <Image
-                src={step.image}
-                alt={`828 Construction — ${step.title}`}
-                fill
-                className="object-cover"
-                style={{ filter: "contrast(1.06) saturate(0.9)" }}
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-            <div
-              className="absolute inset-0"
-              style={{
-                background: imageLeft
-                  ? "linear-gradient(to right, rgba(0,0,0,0) 50%, rgba(0,0,0,0.4) 100%)"
-                  : "linear-gradient(to left, rgba(0,0,0,0) 50%, rgba(0,0,0,0.4) 100%)",
-              }}
-            />
-          </div>
-
-          <div
-            className="absolute z-10 pointer-events-none select-none font-numbers font-bold leading-none"
-            aria-hidden="true"
-            style={{
-              fontSize: "clamp(5rem, 8vw, 8rem)",
-              color: "#B87333", opacity: 0.12,
-              bottom: 24,
-              ...(imageLeft ? { right: 28 } : { left: 28 }),
-            }}
-          >
-            {step.number}
-          </div>
-
-          <div
-            ref={seamRef}
-            className="absolute top-[15%] z-20 pointer-events-none"
-            style={{
-              [imageLeft ? "right" : "left"]: 0,
-              width: 2, height: "70%",
-              background: "linear-gradient(to bottom, transparent 0%, #B87333 20%, #B87333 80%, transparent 100%)",
-              opacity: 0.5, transformOrigin: "top",
-            }}
-          />
-        </div>
-
-        {/* Text pane */}
-        <div ref={textRef} className={`flex flex-col justify-center flex-1 ${bg} px-10 py-16 md:px-14 lg:px-16`}>
-          <span
-            className="text-el font-numbers font-bold leading-none block mb-6 select-none"
-            aria-hidden="true"
-            style={{ fontSize: "clamp(3rem, 5vw, 5rem)", color: isEven ? "#B87333" : "#6b7280", opacity: isEven ? 0.8 : 0.6 }}
-          >
-            {step.number}
-          </span>
-
-          <h2
-            className={`text-el font-display font-bold ${textPrimary} tracking-tight leading-[0.92] mb-5`}
-            style={{ fontSize: "clamp(1.8rem, 3vw, 2.8rem)" }}
-          >
-            {step.title}
-          </h2>
-
-          <p className={`text-el ${textSec} leading-relaxed mb-8 max-w-sm`} style={{ fontSize: 15 }}>
-            {step.thesis}
-          </p>
-
-          <div className="text-el mb-8">
-            <span className={`font-labels text-[9px] ${eyebrow} tracking-[0.2em] uppercase block mb-4`}>
-              What We Do
-            </span>
-            <ul className="space-y-3">
-              {step.details.map((d) => (
-                <li key={d} className="flex items-start gap-3">
-                  <span className={`w-px h-3.5 ${bullet} flex-shrink-0 mt-[3px]`} />
-                  <span className={`${textSec} text-sm leading-relaxed`}>{d}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className={`text-el border ${commitBg} p-5`}>
-            <span className={`font-labels text-[9px] ${eyebrow} tracking-[0.2em] uppercase block mb-2`}>
-              Our Commitment
-            </span>
-            <p className={`${commitText} text-sm leading-relaxed italic`}>
-              &ldquo;{step.promise}&rdquo;
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Section: CTA ─────────────────────────────────────────────────────────────
 
 function ProcessCTA() {
@@ -599,6 +712,8 @@ function ProcessCTA() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const imageWrapRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -607,7 +722,6 @@ function ProcessCTA() {
     let ctaSplit: SplitType | null = null;
     const ctaEl = headlineRef.current;
     const ctx = gsap.context(() => {
-      // ── Technique 10: Copper hairline scaleX scrub ──────────────────────
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -615,7 +729,6 @@ function ProcessCTA() {
         });
       }
 
-      // ── Technique 2: SplitType char reveal scrub ─────────────────────────
       if (ctaEl) {
         const _el = ctaEl;
         const _trigger = sectionRef.current;
@@ -637,13 +750,11 @@ function ProcessCTA() {
         });
       }
 
-      // ── Technique 3: Scrubbed clip-path on decorative image ─────────────
       if (imageWrapRef.current) {
         gsap.fromTo(imageWrapRef.current, { clipPath: "inset(100% 0% 0% 0%)" }, {
           clipPath: "inset(0% 0% 0% 0%)", ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 30%", scrub: 1.2 },
         });
-        // ── Technique 4: Scale-through-scroll ─────────────────────────────
         const imgEl = imageWrapRef.current.querySelector("img");
         if (imgEl) {
           gsap.fromTo(imgEl, { scale: 1.1 }, {
@@ -661,18 +772,18 @@ function ProcessCTA() {
         });
       }
     }, sectionRef);
+    ctxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="process-cta" className="bg-black py-28 lg:py-36 overflow-hidden" style={{ position: "relative", zIndex: 2 }}>
-      {/* Copper hairline scrub */}
+    <section ref={sectionRef} data-section="process-cta" className="bg-black py-28 lg:py-36" style={{ position: "relative", zIndex: 2, overflowX: "clip" }}>
       <div
         ref={hairlineRef}
         className="max-w-7xl mx-auto px-6 lg:px-12 mb-16"
@@ -695,7 +806,6 @@ function ProcessCTA() {
               The first consultation is free. Let&apos;s understand your project
               before any commitment is made.
             </p>
-            {/* ── Technique 8: MagneticButton ─────────────────────────────── */}
             <div className="cta-el flex flex-col sm:flex-row gap-4">
               <MagneticButton strength={0.3}>
                 <Link
@@ -716,7 +826,6 @@ function ProcessCTA() {
             </div>
           </div>
 
-          {/* Right: scrub clip-path image */}
           <div className="lg:col-span-6 hidden lg:block">
             <div
               ref={imageWrapRef}
@@ -747,14 +856,7 @@ export default function ProcessContent() {
     <>
       <ProcessHero />
       <ProcessStrip />
-      {steps.map((step, i) => (
-        <div key={step.number}>
-          <StepRow step={step} index={i} />
-          {i < steps.length - 1 && (
-            <div style={{ height: 1, background: "rgba(184,115,51,0.2)" }} />
-          )}
-        </div>
-      ))}
+      <PinnedTimeline />
       <PinnedStandards />
       <ProcessCTA />
     </>

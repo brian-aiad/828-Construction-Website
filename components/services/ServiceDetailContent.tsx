@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -95,6 +95,8 @@ function DetailHero({
   const hairlineRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -153,17 +155,18 @@ function DetailHero({
         );
       }
 
-      // Technique 9: Counter 0 → 20 (years experience) via scrub
+      // Fix 10: once:true — years counter fires once, never reverses
       if (counterRef.current) {
         const obj = { val: 0 };
         gsap.to(obj, {
           val: 20,
-          ease: "none",
+          duration: 2,
+          ease: "power2.out",
+          immediateRender: false,
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: "top 60%",
-            end: "top 10%",
-            scrub: 1.5,
+            start: "top 70%",
+            once: true,
           },
           onUpdate: () => {
             if (counterRef.current)
@@ -197,12 +200,13 @@ function DetailHero({
         }
       });
     }, sectionRef);
+    ctxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (locSplit && locLineEl?.isConnected) { try { locSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, [service.slug]);
 
@@ -383,6 +387,8 @@ function PinnedWhy() {
   const numRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const pinCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   const setActive = (activeIndex: number) => {
     WHY_PANELS.forEach((_, i) => {
@@ -390,19 +396,17 @@ function PinnedWhy() {
       const num = numRefs.current[i];
       if (!panel || !num) return;
       const isActive = i === activeIndex;
-      // Color tweens — no opacity on containers
       const heading = panel.querySelector<HTMLElement>(".why-heading");
       const body = panel.querySelector<HTMLElement>(".why-body");
       if (heading)
         gsap.to(heading, {
-          color: isActive ? "#ffffff" : "#374151",
+          color: isActive ? "#ffffff" : "rgba(255,255,255,0.25)",
           duration: 0.35,
         });
       if (body)
-        gsap.to(body, { opacity: isActive ? 1 : 0.3, duration: 0.35 });
+        gsap.to(body, { opacity: isActive ? 1 : 0.25, duration: 0.35 });
       gsap.to(num, {
-        color: isActive ? "#B87333" : "#374151",
-        opacity: isActive ? 1 : 0.3,
+        color: isActive ? "#B87333" : "rgba(255,255,255,0.25)",
         duration: 0.35,
       });
       gsap.to(panel, {
@@ -418,9 +422,10 @@ function PinnedWhy() {
     // Always initialize active state so panels are visible on all devices
     setActive(0);
     if (!AnimationController.shouldAnimate()) return;
+
     const ctx = gsap.context(() => {
-      // Technique 10: Copper hairline scaleX scrub
-      if (hairlineRef.current) {
+      // Copper hairline scaleX — desktop only (below 1024px no scrub)
+      if (hairlineRef.current && window.innerWidth >= 1024) {
         gsap.fromTo(
           hairlineRef.current,
           { scaleX: 0 },
@@ -435,9 +440,26 @@ function PinnedWhy() {
             },
           }
         );
+      } else if (hairlineRef.current) {
+        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power2.out",
+          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", once: true },
+        });
       }
 
-      // Technique 9: Counter 0→4 panels via scrub
+      // Below 1024px: stagger reveal panels, no pin, no scrub counter
+      if (window.innerWidth < 1024) {
+        const panels = wrapperRef.current?.querySelectorAll<HTMLElement>(".why-panel");
+        if (panels?.length) {
+          gsap.fromTo(panels, { opacity: 0, y: 24 }, {
+            opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out",
+            scrollTrigger: { trigger: wrapperRef.current, start: "top 72%", once: true },
+          });
+        }
+        return;
+      }
+
+      // Desktop (≥1024px): panel counter + pin
+      // Counter 0→4 synced with pin progress — shows which panel is active
       if (counterRef.current) {
         const obj = { val: 0 };
         gsap.to(obj, {
@@ -458,7 +480,7 @@ function PinnedWhy() {
         });
       }
 
-      // Technique 5: Pinned moment
+      // Pinned moment
       ScrollTrigger.create({
         trigger: wrapperRef.current,
         pin: stickyRef.current,
@@ -475,7 +497,8 @@ function PinnedWhy() {
         },
       });
     }, wrapperRef);
-    return () => ctx.revert();
+    pinCtxRef.current = ctx;
+    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -505,9 +528,9 @@ function PinnedWhy() {
                   maxWidth: "48px",
                 }}
               />
-              <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase">
+              <h2 className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase">
                 Why 828 Construction
-              </span>
+              </h2>
             </div>
             <div className="text-right">
               <span
@@ -517,7 +540,7 @@ function PinnedWhy() {
               >
                 04
               </span>
-              <span className="font-labels text-[10px] text-gray-500 tracking-[0.14em] uppercase block">
+              <span className="font-labels text-[10px] text-gray-400 tracking-[0.14em] uppercase block">
                 / 04 Standards
               </span>
             </div>
@@ -531,7 +554,7 @@ function PinnedWhy() {
                 ref={(el) => {
                   panelRefs.current[i] = el;
                 }}
-                className="py-8 border border-transparent"
+                className="why-panel py-8 border border-transparent"
                 style={{ borderColor: "rgba(255,255,255,0.04)" }}
               >
                 <div className="flex items-start gap-8">
@@ -540,10 +563,10 @@ function PinnedWhy() {
                       numRefs.current[i] = el;
                     }}
                     className="font-numbers font-bold flex-shrink-0"
+                    aria-hidden="true"
                     style={{
                       fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
-                      color: "#374151",
-                      opacity: i === 0 ? 1 : 0.3,
+                      color: i === 0 ? "#B87333" : "rgba(255,255,255,0.25)",
                       lineHeight: 1,
                     }}
                   >
@@ -554,14 +577,14 @@ function PinnedWhy() {
                       className="why-heading font-display font-bold mb-3 tracking-tight"
                       style={{
                         fontSize: "clamp(1.1rem, 2vw, 1.5rem)",
-                        color: i === 0 ? "#ffffff" : "#374151",
+                        color: i === 0 ? "#ffffff" : "rgba(255,255,255,0.25)",
                       }}
                     >
                       {panel.title}
                     </h3>
                     <p
                       className="why-body text-gray-400 leading-relaxed"
-                      style={{ opacity: i === 0 ? 1 : 0.3 }}
+                      style={{ opacity: i === 0 ? 1 : 0.25 }}
                     >
                       {panel.body}
                     </p>
@@ -595,6 +618,8 @@ function DetailContent({
   const h2Ref = useRef<HTMLHeadingElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const h2SplitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (h2SplitRef.current) { try { h2SplitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -730,12 +755,13 @@ function DetailContent({
         );
       }
     }, sectionRef);
+    ctxRef.current = ctx;
     return () => {
       mounted = false;
       cancelAnimationFrame(h2SplitFrame);
       if (h2LocalSplit && h2El?.isConnected) { try { h2LocalSplit.revert(); } catch {} }
       h2SplitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null; try { ctx.revert(); } catch {}
     };
   }, [service.slug]);
 
