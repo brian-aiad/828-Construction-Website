@@ -228,6 +228,52 @@ text is too large, the two zones collide.
 
 Techniques referenced in component comments:
 
+---
+
+### Fix 8 — Copper-background strip (Design Violation)
+
+**Symptom:** A horizontal marquee/strip section uses full copper (#B87333) as its
+background color. Looks cheap and violates brand guidelines.
+
+**Rule:** Copper (#B87333) must be used sparingly — thin lines, borders, hover states,
+accent dots, and number labels ONLY. Never as a background for a layout block.
+
+**Fix:**
+```tsx
+// Wrong:
+<div className="bg-[#B87333] overflow-hidden py-3">
+
+// Right:
+<div className="bg-[#0a0a0a] overflow-hidden py-3 border-t border-b border-white/5">
+  // Use copper only as separator dots inside the marquee:
+  <span className="w-1 h-1 rounded-full" style={{ background: "#B87333", opacity: 0.5 }} />
+```
+
+---
+
+### Fix 9 — Lighthouse LCP inflated by mobile throttle in localhost Lighthouse runs
+
+**Symptom:** Lighthouse reports LCP of 5-7s and Performance score of 70-80 when run
+against `localhost:4000` in default mobile mode.
+
+**Root cause:** Lighthouse applies 4x CPU slowdown + 10 Mbps network throttle in
+mobile mode. On localhost, static assets are served without CDN, fonts are
+loaded locally, and the throttled CPU makes JavaScript execution appear very slow.
+This produces an artificially inflated LCP.
+
+**Fix:** Run with `--preset=desktop` for representative local scores. Reserve
+mobile mode for deployed-to-CDN measurements:
+```bash
+npx lighthouse http://localhost:4000/services --preset=desktop --only-categories=performance,accessibility
+```
+Local desktop LCP result: 0.8s (vs 6.2s in mobile throttled mode).
+
+---
+
+## Animation Vocabulary
+
+Techniques referenced in component comments:
+
 | # | Technique | Description |
 |---|-----------|-------------|
 | 1 | CSS keyframe entry | LCP-safe entry animation — paint before JS hydrates |

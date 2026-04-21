@@ -7,7 +7,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE, SERVICES } from "@/lib/constants";
-import MagneticButton from "@/components/ui/MagneticButton";
 import { AnimationController } from "@/utils/animationControl";
 import { useMobile } from "@/hooks/useMobile";
 
@@ -54,7 +53,7 @@ const decisionAid = [
 const serviceDetails = [
   {
     slug: "adu",
-    tagline: "Accessory Dwelling Units.\nBuilt to Last.",
+    tagline: ["Accessory Dwelling Units.", "Built to Last."],
     forWho:
       "Homeowners planning to add living space who want a builder that balances practicality, durability, and long-term value — not the cheapest bid.",
     problems: [
@@ -64,7 +63,7 @@ const serviceDetails = [
     ],
     difference:
       "We approach every ADU with building science fundamentals — envelope performance, moisture management, structural load paths — before aesthetics.",
-    image: "/images/projects/service-adu.jpg",
+    image: "/images/projects/adu-exterior-new.jpg",
     imageAlt: "ADU Construction — 828 Construction Torrance CA",
     imageLeft: true,
     bg: "bg-black",
@@ -72,7 +71,7 @@ const serviceDetails = [
   },
   {
     slug: "remediation",
-    tagline: "Fix It Right.\nFix It Once.",
+    tagline: ["Fix It Right.", "Fix It Once."],
     forWho:
       "Owners dealing with water damage, structural failures, or repeated issues who need the underlying cause addressed — not just cosmetically hidden.",
     problems: [
@@ -90,7 +89,7 @@ const serviceDetails = [
   },
   {
     slug: "consulting",
-    tagline: "Clarity Before\nCommitment.",
+    tagline: ["Clarity Before", "Commitment."],
     forWho:
       "Homeowners and investors who need expert clarity before committing to a contractor, a scope, or a repair strategy.",
     problems: [
@@ -100,7 +99,7 @@ const serviceDetails = [
     ],
     difference:
       "We represent the owner's interests — not a material supplier, not a subcontractor. Our consulting gives you the information to make confident decisions.",
-    image: "/images/projects/consulting-plans.jpg",
+    image: "/images/projects/consulting-blueprints.jpg",
     imageAlt: "Consulting — 828 Construction Torrance CA",
     imageLeft: true,
     bg: "bg-black",
@@ -125,7 +124,6 @@ function ServicesHero() {
     let heroSplit: SplitType | null = null;
     const ctx = gsap.context(() => {
       // ── Technique 1: Triple-layer parallax ──────────────────────────────
-      // Layer 1: background (yPercent -15 over scroll)
       if (bgRef.current) {
         gsap.to(bgRef.current, {
           yPercent: -15,
@@ -133,7 +131,6 @@ function ServicesHero() {
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
         });
       }
-      // Layer 2: mid gradient overlay (yPercent -8)
       if (midRef.current) {
         gsap.to(midRef.current, {
           yPercent: -8,
@@ -141,7 +138,6 @@ function ServicesHero() {
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
         });
       }
-      // Layer 3: headline counter-motion (+5 moves DOWN as user scrolls)
       if (headlineRef.current) {
         gsap.to(headlineRef.current, {
           yPercent: 5,
@@ -151,7 +147,6 @@ function ServicesHero() {
       }
 
       // ── Technique 2: SplitType char scatter EXIT on "One Standard." ─────
-      // (entry is CSS clip-reveal below — no DOM mutation on LCP element)
       splitFrame = requestAnimationFrame(() => {
         if (!mounted) return;
         const heroLine = sectionRef.current?.querySelector<HTMLElement>(".svc-hero-line");
@@ -172,7 +167,6 @@ function ServicesHero() {
               scrub: 1.2,
             },
           });
-          // Also fade the LCP line via opacity only (no DOM mutation)
           const lcpLine = headlineRef.current?.querySelector(".svc-lcp-line");
           if (lcpLine) {
             gsap.to(lcpLine, {
@@ -183,7 +177,6 @@ function ServicesHero() {
         }
       });
 
-      // Eyebrow + sub fade up
       const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
       if (fadeEls?.length) {
         gsap.fromTo(
@@ -210,7 +203,7 @@ function ServicesHero() {
       className="relative h-screen overflow-hidden bg-black"
       style={{ position: "relative", zIndex: 1 }}
     >
-      {/* Layer 1: Background */}
+      {/* Layer 1: Background — brightness corrected (Fix 3: ≥0.8) */}
       <div
         ref={bgRef}
         className="absolute left-0 right-0"
@@ -219,22 +212,22 @@ function ServicesHero() {
           backgroundImage: "url('/images/services/services-hero.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "contrast(1.08) saturate(0.85) brightness(0.45)",
+          filter: "contrast(1.06) saturate(1.1) brightness(0.88)",
         }}
         role="presentation"
         aria-hidden="true"
       />
-      {/* Layer 2: Mid gradient (independent parallax) */}
+      {/* Layer 2: Mid gradient — max from-black/60 (Fix 3) */}
       <div
         ref={midRef}
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.85) 100%)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.60) 100%)",
         }}
         aria-hidden="true"
       />
 
-      {/* Layer 3: Content (counter-motion) */}
+      {/* Layer 3: Content */}
       <div className="relative z-10 h-full flex flex-col justify-end max-w-7xl mx-auto px-6 lg:px-12 pb-16 lg:pb-24">
         <span className="hero-fade font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase mb-6 block">
           Services
@@ -243,11 +236,9 @@ function ServicesHero() {
         <h1
           ref={headlineRef}
           className="font-display font-bold text-white tracking-tight leading-[0.88] mb-8"
-          style={{ fontSize: "clamp(3.5rem, 8vw, 8rem)", textShadow: "0 2px 24px rgba(0,0,0,0.5)" }}
+          style={{ fontSize: "clamp(3rem, 8vw, 8rem)", textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}
         >
-          {/* Line 1: LCP — no SplitType, no will-change */}
           <span className="svc-lcp-line block">Three Services.</span>
-          {/* Line 2: CSS clip reveal entry, SplitType exit */}
           <span className="block overflow-hidden">
             <span className="svc-hero-line hero-line-animate block" style={{ color: "rgba(255,255,255,0.40)", animationDelay: "0.1s" }}>
               One Standard.
@@ -268,15 +259,15 @@ function ServicesHero() {
   );
 }
 
-// ─── Section: Horizontal keyword strip ───────────────────────────────────────
-// Technique 7: Horizontal-on-vertical scroll — CSS marquee
+// ─── Section: Keyword strip ───────────────────────────────────────────────────
+// Dark bg with copper-dot marquee — copper used as accent only, not background
 
 function ServiceStrip() {
   const labels = ["ADU Construction", "Remediation", "Consulting", "Building Science", "South Bay CA", "Torrance"];
 
   return (
     <div
-      className="bg-[#B87333] overflow-hidden py-3"
+      className="bg-[#0a0a0a] overflow-hidden py-3 border-t border-b border-white/5"
       style={{ position: "relative", zIndex: 2 }}
       aria-hidden="true"
     >
@@ -288,9 +279,9 @@ function ServiceStrip() {
         }}
       >
         {[...labels, ...labels].map((label, i) => (
-          <span key={i} className="font-labels text-[9px] text-black tracking-[0.28em] uppercase whitespace-nowrap flex items-center gap-12">
+          <span key={i} className="font-labels text-[9px] text-gray-500 tracking-[0.28em] uppercase whitespace-nowrap flex items-center gap-12">
             {label}
-            <span className="w-1 h-1 bg-black/40 rounded-full inline-block" />
+            <span className="w-1 h-1 rounded-full inline-block" style={{ background: "#B87333", opacity: 0.5 }} />
           </span>
         ))}
       </div>
@@ -299,7 +290,6 @@ function ServiceStrip() {
 }
 
 // ─── Section: Pinned Decision Aid ─────────────────────────────────────────────
-// Technique 5: Pinned section — 3 service panels activate as you scroll
 
 function PinnedDecisionAid() {
   const isMobile = useMobile();
@@ -313,10 +303,10 @@ function PinnedDecisionAid() {
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
 
-    const isMobile = window.innerWidth < 1024;
+    const isMobileWindow = window.innerWidth < 1024;
 
     const ctx = gsap.context(() => {
-      // ── Technique 10: Copper hairline scaleX scrub ──────────────────────
+      // ── Copper hairline scaleX scrub ────────────────────────────────────
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -324,18 +314,19 @@ function PinnedDecisionAid() {
         });
       }
 
-      // ── Technique 9: Counter count-up (scrub) ───────────────────────────
+      // ── Counter scrub — immediateRender: false prevents "0" flash (Fix 4) ─
       if (counterRef.current) {
         const el = counterRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
           val: 3, ease: "none",
+          immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val).toString(); },
           scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", end: "top 20%", scrub: 1.5 },
         });
       }
 
-      if (isMobile) {
+      if (isMobileWindow) {
         const panels = wrapperRef.current!.querySelectorAll<HTMLElement>(".decision-panel");
         gsap.fromTo(panels, { opacity: 0, y: 28 }, {
           opacity: 1, y: 0, duration: 0.7, stagger: 0.2, ease: "power3.out",
@@ -351,9 +342,8 @@ function PinnedDecisionAid() {
           const num = numRefs.current[i];
           if (!panel || !num) return;
           const isActive = i === activeIndex;
-
-          gsap.to(panel, { opacity: isActive ? 1 : 0.28, borderColor: isActive ? "#B87333" : "rgba(255,255,255,0.05)", duration: 0.4 });
-          gsap.to(num, { color: isActive ? "#B87333" : "#555", opacity: isActive ? 1 : 0.35, scale: isActive ? 1.05 : 0.95, duration: 0.4 });
+          gsap.set(panel, { opacity: isActive ? 1 : 0.28, borderColor: isActive ? "#B87333" : "rgba(255,255,255,0.05)" });
+          gsap.set(num, { color: isActive ? "#B87333" : "#555", opacity: isActive ? 1 : 0.35, scale: isActive ? 1.05 : 0.95 });
         });
       };
 
@@ -383,19 +373,17 @@ function PinnedDecisionAid() {
 
   return (
     <div ref={wrapperRef} data-section="services-decision" style={{ minHeight: isMobile ? "auto" : "250vh", position: "relative", zIndex: 2 }}>
-      <div ref={stickyRef} className="bg-black overflow-hidden" style={{ minHeight: "100vh" }}>
+      <div ref={stickyRef} className="bg-black" style={{ minHeight: "100vh", overflowX: "clip" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
-          {/* Header */}
           <div className="mb-14">
             <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
               Which service fits your project?
             </span>
-            {/* Copper hairline scrub */}
             <div
               ref={hairlineRef}
               style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", maxWidth: 80, marginBottom: "2rem" }}
             />
-            <div className="flex items-end justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <h2
                 className="font-display font-bold text-white tracking-tight leading-[0.9]"
                 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
@@ -403,8 +391,7 @@ function PinnedDecisionAid() {
                 Scope it in{" "}
                 <span style={{ color: "rgba(255,255,255,0.40)" }}>60 seconds.</span>
               </h2>
-              {/* Counter */}
-              <div className="text-right flex-shrink-0">
+              <div className="text-left sm:text-right flex-shrink-0">
                 <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(2rem, 3vw, 3rem)" }}>
                   <span ref={counterRef}>3</span>
                 </div>
@@ -413,7 +400,6 @@ function PinnedDecisionAid() {
             </div>
           </div>
 
-          {/* 3-panel grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px">
             {decisionAid.map((item, i) => {
               const service = SERVICES.find((s) => s.slug === item.slug);
@@ -421,7 +407,7 @@ function PinnedDecisionAid() {
                 <div
                   key={item.slug}
                   ref={(el) => { panelRefs.current[i] = el; }}
-                  className="decision-panel bg-[#0a0a0a] border p-10 lg:p-12 transition-colors duration-300"
+                  className="decision-panel bg-[#0a0a0a] border p-10 lg:p-12"
                   style={{ opacity: i === 0 ? 1 : 0.28, borderColor: i === 0 ? "#B87333" : "rgba(255,255,255,0.05)" }}
                 >
                   <span
@@ -467,25 +453,33 @@ function PinnedDecisionAid() {
   );
 }
 
-// ─── Section: Service row ─────────────────────────────────────────────────────
+// ─── Section: Service row — editorial chapter layout ─────────────────────────
+// Variation A: full-viewport panel, image 60%, text 40%, SplitType scrub on tagline
 
 function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0]; index: number }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const imagePaneRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
-  const imgInnerRef = useRef<HTMLImageElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const seamRef = useRef<HTMLDivElement>(null);
-  const detailRef = useRef<HTMLDivElement>(null);
+  const hairlineRef = useRef<HTMLDivElement>(null);
+  const taglineRef = useRef<HTMLHeadingElement>(null);
+  const ghostNumRef = useRef<HTMLDivElement>(null);
+  const taglineSplitRef = useRef<SplitType | null>(null);
 
   const service = SERVICES.find((s) => s.slug === detail.slug)!;
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
+    let mounted = true;
+    let taglineSplitFrame = -1;
+    let taglineSplit: SplitType | null = null;
+    const taglineEl = taglineRef.current;
+
     const ctx = gsap.context(() => {
       const trigger = rowRef.current!;
 
-      // ── Technique 3: Scrubbed clip-path on image ─────────────────────────
+      // ── Technique 3: Scrubbed clip-path on image pane ───────────────────
       const clipFrom = detail.imageLeft ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)";
       gsap.fromTo(
         imagePaneRef.current,
@@ -493,11 +487,11 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         {
           clipPath: "inset(0% 0% 0% 0%)",
           ease: "none",
-          scrollTrigger: { trigger, start: "top 80%", end: "top 30%", scrub: 1.2 },
+          scrollTrigger: { trigger, start: "top 80%", end: "top 25%", scrub: 1.2 },
         }
       );
 
-      // Image parallax
+      // ── Technique 8: Image parallax yPercent ────────────────────────────
       if (imgRef.current) {
         gsap.to(imgRef.current, {
           yPercent: -12, ease: "none",
@@ -514,170 +508,228 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // Text stagger
-      const textEls = textRef.current?.querySelectorAll<HTMLElement>(".reveal-el");
-      if (textEls?.length) {
-        gsap.fromTo(textEls, { y: 32, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.7, stagger: 0.08, delay: 0.3, ease: "power3.out",
-          scrollTrigger: { trigger, start: "top 68%", once: true },
+      // ── Ghost number parallax scrub ──────────────────────────────────────
+      if (ghostNumRef.current) {
+        gsap.fromTo(ghostNumRef.current, { opacity: 0, yPercent: 8 }, {
+          opacity: 1, yPercent: 0, ease: "none",
+          scrollTrigger: { trigger, start: "top bottom", end: "top 30%", scrub: 1.5 },
         });
       }
 
-      // Copper seam
+      // ── Copper hairline scaleX scrub ─────────────────────────────────────
+      if (hairlineRef.current) {
+        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger, start: "top 75%", end: "top 40%", scrub: 1.2 },
+        });
+      }
+
+      // ── Copper seam scaleY (event, once) ────────────────────────────────
       if (seamRef.current) {
         gsap.fromTo(seamRef.current, { scaleY: 0 }, {
-          scaleY: 1, duration: 0.9, delay: 0.5, ease: "power2.inOut", transformOrigin: "top",
-          scrollTrigger: { trigger, start: "top 68%", once: true },
+          scaleY: 1, duration: 1, delay: 0.3, ease: "power2.inOut", transformOrigin: "top",
+          scrollTrigger: { trigger, start: "top 65%", once: true },
         });
       }
 
-      // Detail grid stagger
-      const detailEls = detailRef.current?.querySelectorAll<HTMLElement>(".detail-cell");
-      if (detailEls?.length) {
-        gsap.fromTo(detailEls, { y: 24, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out",
-          scrollTrigger: { trigger: detailRef.current!, start: "top 80%", once: true },
+      // ── Text stagger (event, once) ───────────────────────────────────────
+      const revealEls = textRef.current?.querySelectorAll<HTMLElement>(".reveal-el");
+      if (revealEls?.length) {
+        gsap.fromTo(revealEls, { y: 24, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.65, stagger: 0.07, ease: "power3.out",
+          scrollTrigger: { trigger, start: "top 65%", once: true },
+        });
+      }
+
+      // ── Technique 2: SplitType char reveal SCRUB on tagline ─────────────
+      // (scrub-dominant pattern — chars reveal as you scroll)
+      if (taglineEl) {
+        const _el = taglineEl;
+        taglineSplitFrame = requestAnimationFrame(() => {
+          if (!mounted || !_el.isConnected) return;
+          const split = new SplitType(_el, { types: "chars" });
+          taglineSplit = split;
+          taglineSplitRef.current = split;
+          if (split.chars?.length) {
+            gsap.fromTo(
+              split.chars,
+              { yPercent: 110, opacity: 0 },
+              {
+                yPercent: 0, opacity: 1,
+                stagger: { each: 0.018, from: "start" },
+                ease: "none",
+                scrollTrigger: { trigger, start: "top 72%", end: "top 20%", scrub: 1.2 },
+              }
+            );
+          }
         });
       }
     }, rowRef);
 
-    return () => ctx.revert();
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(taglineSplitFrame);
+      if (taglineSplit && taglineEl?.isConnected) { try { taglineSplit.revert(); } catch {} }
+      taglineSplitRef.current = null;
+      ctx.revert();
+    };
   }, [detail.imageLeft]);
+
+  const isOnDark = detail.textOnDark;
+  const textPrimary = isOnDark ? "text-white" : "text-[#0a0a0a]";
+  const textSecondary = isOnDark ? "text-gray-400" : "text-gray-600";
+  const labelColor = isOnDark ? "text-gray-500" : "text-gray-500";
+  const bgText = isOnDark ? "bg-black" : "bg-white";
+  const bulletPrimary = "bg-[#B87333]";
+  const bulletSecondary = isOnDark ? "bg-white/20" : "bg-black/20";
 
   const imagePart = (
     <div
-      className="relative overflow-hidden flex-shrink-0 w-full md:w-[55%]"
-      style={{ minHeight: "clamp(380px, 55vw, 680px)" }}
+      className="relative flex-shrink-0 w-full md:w-[60%] self-stretch"
+      style={{ minHeight: "clamp(360px, 50vw, 100%)" }}
     >
-      <div ref={imagePaneRef} className="absolute inset-0">
+      {/* Clip-path container — overflow:hidden is on this div */}
+      <div ref={imagePaneRef} className="absolute inset-0 overflow-hidden">
         <div ref={imgRef} className="absolute left-0 right-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
             src={detail.image}
             alt={detail.imageAlt}
             fill
             className="object-cover"
-            style={{ filter: "contrast(1.06) saturate(1.05)" }}
-            sizes="(max-width: 768px) 100vw, 55vw"
+            style={{ filter: "contrast(1.05) saturate(1.08)" }}
+            sizes="(max-width: 768px) 100vw, 60vw"
           />
         </div>
+        {/* Edge gradient — blends into text panel */}
         <div
           className="absolute inset-0"
           style={{
             background: detail.imageLeft
-              ? "linear-gradient(to right, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%)"
-              : "linear-gradient(to left, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%)",
+              ? "linear-gradient(to right, rgba(0,0,0,0) 55%, rgba(0,0,0,0.35) 100%)"
+              : "linear-gradient(to left, rgba(0,0,0,0) 55%, rgba(0,0,0,0.35) 100%)",
           }}
         />
       </div>
 
-      {/* Ghost number — CSS ::before would be safer; using aria-hidden */}
+      {/* Ghost chapter number — parallax scrub in */}
       <div
+        ref={ghostNumRef}
         className="absolute z-10 pointer-events-none select-none font-numbers font-bold leading-none"
         aria-hidden="true"
         style={{
           fontSize: "clamp(6rem, 10vw, 9rem)",
-          color: "#B87333", opacity: 0.07,
-          bottom: 28,
-          ...(detail.imageLeft ? { right: 32 } : { left: 32 }),
+          color: "#B87333",
+          opacity: 0,
+          bottom: 32,
+          ...(detail.imageLeft ? { right: 28 } : { left: 28 }),
         }}
       >
         0{index + 1}
       </div>
 
-      {/* Copper seam */}
+      {/* Copper seam — vertical line at image/text border */}
       <div
         ref={seamRef}
-        className="absolute top-[15%] z-20 pointer-events-none"
+        className="absolute top-[12%] z-20 pointer-events-none"
         style={{
           [detail.imageLeft ? "right" : "left"]: 0,
-          width: 2, height: "70%",
-          background: "linear-gradient(to bottom, transparent 0%, #B87333 20%, #B87333 80%, transparent 100%)",
-          opacity: 0.5, transformOrigin: "top",
+          width: 2, height: "76%",
+          background: "linear-gradient(to bottom, transparent 0%, #B87333 18%, #B87333 82%, transparent 100%)",
+          opacity: 0.45, transformOrigin: "top",
         }}
       />
     </div>
   );
 
-  const isOnDark = detail.textOnDark;
-  const textPrimary = isOnDark ? "text-white" : "text-black";
-  const textSecondary = isOnDark ? "text-gray-400" : "text-gray-600";
-  const eyebrowColor = isOnDark ? "text-gray-400" : "text-gray-600";
-  const bgText = isOnDark ? "bg-black" : "bg-white";
-
   const textPart = (
-    <div ref={textRef} className={`flex flex-col justify-center flex-1 ${bgText} px-10 py-16 md:px-14 lg:px-16`}>
-      <span className={`reveal-el font-labels text-[10px] ${eyebrowColor} tracking-[0.22em] uppercase mb-4 block`}>
+    <div
+      ref={textRef}
+      className={`flex flex-col justify-center flex-1 ${bgText} px-10 py-16 md:px-14 lg:px-16`}
+      style={{ minHeight: "clamp(420px, 40vw, 100%)" }}
+    >
+      {/* Eyebrow */}
+      <span className={`reveal-el font-labels text-[10px] ${labelColor} tracking-[0.22em] uppercase mb-3 block`}>
         {service.short}
       </span>
+
+      {/* Tagline — SplitType char reveal scrub */}
       <h2
-        className={`reveal-el font-display font-bold ${textPrimary} tracking-tight leading-[0.92] mb-6 whitespace-pre-line`}
-        style={{ fontSize: "clamp(2rem, 3.5vw, 3.2rem)" }}
+        ref={taglineRef}
+        className={`font-display font-bold ${textPrimary} tracking-tight leading-[0.92] mb-5`}
+        style={{ fontSize: "clamp(2.2rem, 3.2vw, 3.6rem)" }}
       >
-        {detail.tagline}
+        {detail.tagline[0]}
+        {detail.tagline[1] && (
+          <span className="block" style={{ color: isOnDark ? "rgba(255,255,255,0.42)" : "rgba(0,0,0,0.42)" }}>
+            {detail.tagline[1]}
+          </span>
+        )}
       </h2>
-      <p className={`reveal-el ${textSecondary} leading-relaxed mb-8 max-w-sm`} style={{ fontSize: 15 }}>
-        {service.description}
+
+      {/* Copper hairline scrub */}
+      <div
+        ref={hairlineRef}
+        style={{
+          height: 1, background: "#B87333", opacity: 0.4,
+          transformOrigin: "left", maxWidth: 56, marginBottom: "1.5rem",
+        }}
+      />
+
+      {/* For who */}
+      <p className={`reveal-el text-sm leading-relaxed mb-6 max-w-[22rem] italic ${isOnDark ? "text-gray-500" : "text-gray-600"}`}>
+        &ldquo;{detail.forWho}&rdquo;
       </p>
-      <p className={`reveal-el ${isOnDark ? "text-gray-500" : "text-gray-600"} text-sm leading-relaxed mb-10 max-w-xs italic`}>
-        &ldquo;{detail.difference}&rdquo;
-      </p>
-      {/* ── Technique 8: MagneticButton on CTA ───────────────────────────── */}
-      <MagneticButton strength={0.25}>
-        <Link
-          href={`/services/${detail.slug}`}
-          className={`reveal-el group inline-flex items-center gap-3 font-labels text-[11px] ${isOnDark ? "text-gray-400 border-gray-700 hover:text-[#B87333] hover:border-[#B87333]" : "text-gray-600 border-gray-300 hover:text-black hover:border-black"} tracking-[0.18em] uppercase border-b pb-1 self-start transition-colors duration-300`}
-        >
-          Full {service.title} details
-          <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-        </Link>
-      </MagneticButton>
+
+      {/* Common problems */}
+      <div className="reveal-el mb-5">
+        <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>Common Problems We Solve</div>
+        <ul className="space-y-2">
+          {detail.problems.map((p) => (
+            <li key={p} className="flex items-start gap-2.5">
+              <span className={`w-px h-3 ${bulletPrimary} flex-shrink-0 mt-[3px] opacity-55`} />
+              <span className={`${textSecondary} text-xs leading-relaxed`}>{p}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* What's included */}
+      <div className="reveal-el mb-8">
+        <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>What&apos;s Included</div>
+        <ul className="space-y-2">
+          {service.details.slice(0, 4).map((d) => (
+            <li key={d} className="flex items-start gap-2.5">
+              <span className={`w-px h-3 ${bulletSecondary} flex-shrink-0 mt-[3px]`} />
+              <span className={`${textSecondary} text-xs leading-relaxed`}>{d}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* CTA — text link, no MagneticButton */}
+      <Link
+        href={`/services/${detail.slug}`}
+        className={`reveal-el group inline-flex items-center gap-2 font-labels text-[10px] tracking-[0.16em] uppercase border-b pb-0.5 self-start transition-colors duration-200 ${
+          isOnDark
+            ? "text-gray-400 border-gray-700 hover:text-[#B87333] hover:border-[#B87333]"
+            : "text-gray-600 border-gray-300 hover:text-black hover:border-black"
+        }`}
+      >
+        Full {service.title} details
+        <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+      </Link>
     </div>
   );
 
-  const detailBg = isOnDark ? "bg-[#0a0a0a] border-white/5" : "bg-gray-50 border-gray-100";
-  const detailLabel = isOnDark ? "text-gray-400" : "text-gray-600";
-  const detailText = isOnDark ? "text-gray-400" : "text-gray-600";
-  const detailBullet = isOnDark ? "bg-white/30" : "bg-gray-400";
-  const detailIncBullet = isOnDark ? "bg-[#B87333]" : "bg-black";
-
   return (
-    <div ref={rowRef} data-service={detail.slug} style={{ position: "relative", zIndex: 2 }}>
-      <div
-        className={`flex flex-col ${detail.imageLeft ? "md:flex-row" : "md:flex-row-reverse"} w-full`}
-        style={{ minHeight: "clamp(420px, 60vw, 680px)" }}
-      >
-        {imagePart}
-        {textPart}
-      </div>
-
-      <div ref={detailRef} className={`grid grid-cols-1 md:grid-cols-3 gap-px ${detailBg} border-t`}>
-        <div className={`detail-cell ${isOnDark ? "bg-[#0a0a0a]" : "bg-gray-50"} p-8 lg:p-10`}>
-          <div className={`font-labels text-[9px] ${detailLabel} tracking-[0.2em] uppercase mb-4`}>Best For</div>
-          <p className={`${detailText} text-sm leading-relaxed`}>{detail.forWho}</p>
-        </div>
-        <div className={`detail-cell ${isOnDark ? "bg-[#0a0a0a]" : "bg-gray-50"} p-8 lg:p-10`}>
-          <div className={`font-labels text-[9px] ${detailLabel} tracking-[0.2em] uppercase mb-4`}>Common Problems We Solve</div>
-          <ul className="space-y-2.5">
-            {detail.problems.map((p) => (
-              <li key={p} className="flex items-start gap-3">
-                <span className={`w-px h-3.5 ${detailBullet} flex-shrink-0 mt-[3px]`} />
-                <span className={`${detailText} text-sm leading-relaxed`}>{p}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className={`detail-cell ${isOnDark ? "bg-[#0a0a0a]" : "bg-gray-50"} p-8 lg:p-10`}>
-          <div className={`font-labels text-[9px] ${detailLabel} tracking-[0.2em] uppercase mb-4`}>What&apos;s Included</div>
-          <ul className="space-y-2.5">
-            {service.details.map((d) => (
-              <li key={d} className="flex items-start gap-3">
-                <span className={`w-px h-3.5 ${detailIncBullet} flex-shrink-0 mt-[3px]`} />
-                <span className={`${detailText} text-sm leading-relaxed`}>{d}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+    <div
+      ref={rowRef}
+      data-service={detail.slug}
+      className={`flex flex-col ${detail.imageLeft ? "md:flex-row" : "md:flex-row-reverse"} w-full`}
+      style={{ position: "relative", zIndex: 2, minHeight: "clamp(560px, 100vh, 100vh)" }}
+    >
+      {imagePart}
+      {textPart}
     </div>
   );
 }
@@ -697,7 +749,6 @@ function ServicesCTA() {
     let ctaSplit: SplitType | null = null;
     const ctaEl = headlineRef.current;
     const ctx = gsap.context(() => {
-      // ── Technique 10: Copper hairline scaleX scrub ──────────────────────
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -705,7 +756,6 @@ function ServicesCTA() {
         });
       }
 
-      // ── Technique 2: SplitType char reveal scrub ─────────────────────────
       if (ctaEl) {
         const _el = ctaEl;
         const _trigger = sectionRef.current;
@@ -747,7 +797,6 @@ function ServicesCTA() {
 
   return (
     <section ref={sectionRef} data-section="services-cta" className="bg-black py-28" style={{ position: "relative", zIndex: 2 }}>
-      {/* Copper hairline scrub */}
       <div
         ref={hairlineRef}
         className="max-w-7xl mx-auto px-6 lg:px-12 mb-16"
@@ -769,16 +818,14 @@ function ServicesCTA() {
           obligation, no pressure.
         </p>
         <div className="cta-el flex flex-col sm:flex-row gap-4">
-          <MagneticButton strength={0.3}>
-            <Link
-              href="/contact"
-              className="group relative inline-flex items-center justify-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
-            >
-              <span className="absolute inset-0 bg-[#B87333] translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out" aria-hidden="true" />
-              <span className="relative">Get Free Estimate</span>
-              <span className="relative transition-transform duration-200 group-hover:translate-x-1">→</span>
-            </Link>
-          </MagneticButton>
+          <Link
+            href="/contact"
+            className="group relative inline-flex items-center justify-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
+          >
+            <span className="absolute inset-0 bg-[#B87333] translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out" aria-hidden="true" />
+            <span className="relative">Get Free Estimate</span>
+            <span className="relative transition-transform duration-200 group-hover:translate-x-1">→</span>
+          </Link>
           <a
             href={SITE.phoneHref}
             className="inline-flex items-center justify-center border border-gray-700 text-gray-300 px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:border-white hover:text-white transition-colors font-numbers"
@@ -803,7 +850,7 @@ export default function ServicesContent() {
         <div key={detail.slug}>
           <ServiceSection detail={detail} index={i} />
           {i < serviceDetails.length - 1 && (
-            <div style={{ height: 1, background: "rgba(184,115,51,0.2)" }} />
+            <div style={{ height: 1, background: "rgba(184,115,51,0.15)" }} />
           )}
         </div>
       ))}
