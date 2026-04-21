@@ -679,7 +679,7 @@ function AboutPhilosophy() {
       const section = sectionRef.current!;
       const count = philosophyPanels.length;
 
-      // Set initial state: only panel 0 visible — all others opacity 0
+      // Initial state: panel 0 fully visible, all others hidden
       panelRefs.current.forEach((panel, i) => {
         if (panel) gsap.set(panel, { opacity: i === 0 ? 1 : 0 });
       });
@@ -687,44 +687,52 @@ function AboutPhilosophy() {
         if (dot) gsap.set(dot, { scale: i === 0 ? 2 : 1, opacity: i === 0 ? 1 : 0.25 });
       });
 
-      // Single ScrollTrigger — onUpdate snaps exactly one panel visible at a time.
-      // gsap.set() is instant (no duration) so two panels are never simultaneously readable.
+      // Track which panel is active — avoids re-firing tweens on every scroll tick
+      let activeIndex = 0;
+
       ScrollTrigger.create({
         trigger: section,
         start: "top top",
         end: "bottom bottom",
-        scrub: true,
         onUpdate: (self) => {
-          const activeIndex = Math.min(
-            Math.floor(self.progress * count),
-            count - 1
-          );
-          panelRefs.current.forEach((panel, i) => {
-            if (panel) gsap.set(panel, { opacity: i === activeIndex ? 1 : 0 });
+          const newIndex = Math.min(Math.floor(self.progress * count), count - 1);
+          if (newIndex === activeIndex) return;
+
+          const prev = activeIndex;
+          activeIndex = newIndex;
+
+          // True cross-dissolve: incoming fades in, outgoing fades out simultaneously
+          // Both directions work (forward and backward scroll)
+          gsap.to(panelRefs.current[newIndex], {
+            opacity: 1, duration: 0.5, ease: "power2.out", overwrite: true,
           });
-          dotRefs.current.forEach((dot, i) => {
-            if (dot) gsap.set(dot, {
-              scale: i === activeIndex ? 2 : 1,
-              opacity: i === activeIndex ? 1 : 0.25,
-            });
+          gsap.to(panelRefs.current[prev], {
+            opacity: 0, duration: 0.45, ease: "power2.in", overwrite: true,
+          });
+
+          // Dots: light incoming, dim outgoing simultaneously
+          gsap.to(dotRefs.current[prev], {
+            scale: 1, opacity: 0.25, duration: 0.35, ease: "power2.out", overwrite: true,
+          });
+          gsap.to(dotRefs.current[newIndex], {
+            scale: 2, opacity: 1, duration: 0.35, ease: "power2.out", overwrite: true,
           });
         },
       });
 
-      // Image scale scrub through each panel
+      // Image scale — slow parallax across full section
       section.querySelectorAll<HTMLElement>(".phil-img-inner").forEach((img) => {
         gsap.fromTo(img,
-          { scale: 1.1 },
+          { scale: 1.08 },
           {
-            scale: 1.0,
-            ease: "none",
-            scrollTrigger: { trigger: section, start: "top top", end: "bottom bottom", scrub: 2.5 },
+            scale: 1.0, ease: "none",
+            scrollTrigger: { trigger: section, start: "top top", end: "bottom bottom", scrub: 2 },
           }
         );
       });
-    }, sectionRef);
-    philCtxRef.current = ctx;
+    });
 
+    philCtxRef.current = ctx;
     return () => { philCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 

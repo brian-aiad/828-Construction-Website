@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -17,6 +17,8 @@ export default function ProjectsPreview() {
   const sectionRef = useRef<HTMLElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
@@ -101,7 +103,12 @@ export default function ProjectsPreview() {
       }
     }, sectionRef);
 
-    return () => ctx.revert();
+    ctxRef.current = ctx;
+
+    return () => {
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
   }, []);
 
   return (

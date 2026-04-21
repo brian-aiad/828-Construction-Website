@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, RefObject } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
@@ -38,6 +38,9 @@ export function useParallax({
   start = "top bottom",
   end = "bottom top",
 }: UseParallaxOptions) {
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
+
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !containerRef.current) return;
 
@@ -58,10 +61,12 @@ export function useParallax({
         },
       });
     });
+    ctxRef.current = ctx;
 
     return () => {
-      target.style.willChange = "auto";
-      ctx.revert();
+      ctxRef.current = null;
+      try { target.style.willChange = "auto"; } catch {}
+      try { ctx.revert(); } catch {}
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -83,6 +88,9 @@ export function useClipRevealFrom(
     start = "top 78%",
   }: { duration?: number; delay?: number; ease?: string; start?: string } = {}
 ) {
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
+
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !elementRef.current) return;
     const el = elementRef.current;
@@ -107,8 +115,9 @@ export function useClipRevealFrom(
         }
       );
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

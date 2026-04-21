@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
@@ -13,6 +13,9 @@ gsap.registerPlugin(ScrollTrigger);
  * CSS in globals.css defines the base styles (transform-origin: left, scaleX: 0).
  */
 export default function ScrollProgress() {
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
+
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
 
@@ -31,8 +34,9 @@ export default function ScrollProgress() {
         },
       });
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return <div id="scroll-progress" aria-hidden="true" />;

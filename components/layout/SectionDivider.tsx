@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
@@ -18,6 +18,8 @@ interface SectionDividerProps {
  */
 export default function SectionDivider({ opacity = 0.45 }: SectionDividerProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !ref.current) return;
@@ -39,8 +41,9 @@ export default function SectionDivider({ opacity = 0.45 }: SectionDividerProps) 
         }
       );
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (

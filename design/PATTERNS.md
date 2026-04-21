@@ -311,6 +311,37 @@ Verify: scroll the page and capture the 100vh immediately after each pin release
 
 ---
 
+### Fix 12 — Mobile hero two-state overlap (section 1 and section 2 visible simultaneously)
+
+**Symptom:** On mobile (< 768px), two hero headlines are visible on top of each other during the hero's scroll transition. Desktop is fine.
+
+**Root cause:** The hero uses a 200vh wrapper with a sticky inner panel containing two absolutely-positioned sections. Section 1's exit animation (GSAP SplitType char scatter) is gated behind `AnimationController.shouldAnimate()`, which returns `false` on mobile. Section 2's fade-in is NOT gated — it runs on all devices. So on mobile, section 1 never fades out but section 2 fades in, and both are visible simultaneously.
+
+**Fix:** Add a device-conditional fallback that fades the section 1 headline when `!shouldAnimate()`. Fade it out BEFORE section 2 starts fading in:
+
+```tsx
+// Mobile fallback: fade entire heading without SplitType
+if (headlineRef.current && !AnimationController.shouldAnimate()) {
+  gsap.to(headlineRef.current, {
+    opacity: 0,
+    ease: "none",
+    scrollTrigger: {
+      trigger: wrapperRef.current,
+      start: "10% top",
+      end: "33% top",   // ends before section 2 starts at 35%
+      scrub: 1,
+    },
+  });
+}
+
+// Desktop: char scatter (existing — keeps running unchanged)
+if (headlineRef.current && AnimationController.shouldAnimate()) { ... }
+```
+
+**General rule:** Any section with two or more absolutely-positioned content layers that transition via scroll must have an **explicit exit** for the outgoing layer on ALL devices, not relying solely on a `shouldAnimate()`-gated desktop path.
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:

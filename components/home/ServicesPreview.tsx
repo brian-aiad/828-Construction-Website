@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -66,6 +66,8 @@ function ServiceRow({
   const imgRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const seamRef = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -140,7 +142,12 @@ function ServiceRow({
       }
     }, rowRef);
 
-    return () => ctx.revert();
+    ctxRef.current = ctx;
+
+    return () => {
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
   }, [service.imageLeft]);
 
   const imagePart = (
@@ -268,6 +275,8 @@ function ServiceRow({
 export default function ServicesPreview() {
   const headerRef = useRef<HTMLDivElement>(null);
   const seamRef = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate()) return;
@@ -316,7 +325,12 @@ export default function ServicesPreview() {
       }
     });
 
-    return () => ctx.revert();
+    ctxRef.current = ctx;
+
+    return () => {
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
   }, []);
 
   return (

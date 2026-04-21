@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
@@ -13,6 +13,8 @@ if (typeof window !== "undefined") {
 /** Fade + slide up on scroll, fires once. Desktop only. */
 export function useFadeInUp<T extends HTMLElement = HTMLDivElement>(delay = 0) {
   const ref = useRef<T>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !ref.current) return;
@@ -32,8 +34,9 @@ export function useFadeInUp<T extends HTMLElement = HTMLDivElement>(delay = 0) {
         }
       );
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, [delay]);
 
   return ref;
@@ -42,6 +45,8 @@ export function useFadeInUp<T extends HTMLElement = HTMLDivElement>(delay = 0) {
 /** Stagger direct children on scroll. Desktop only. */
 export function useStaggerReveal(stagger = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !ref.current) return;
@@ -62,8 +67,9 @@ export function useStaggerReveal(stagger = 0.12) {
         }
       );
     }, ref);
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, [stagger]);
 
   return ref;
@@ -72,6 +78,8 @@ export function useStaggerReveal(stagger = 0.12) {
 /** Parallax — element scrolls at a different rate. Desktop only. */
 export function useParallax(speed = 0.25) {
   const ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !ref.current) return;
@@ -89,8 +97,9 @@ export function useParallax(speed = 0.25) {
         },
       });
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, [speed]);
 
   return ref;
@@ -99,6 +108,8 @@ export function useParallax(speed = 0.25) {
 /** Clip-reveal — wipes from bottom on scroll. Desktop only. */
 export function useClipReveal() {
   const ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !ref.current) return;
@@ -116,8 +127,9 @@ export function useClipReveal() {
         }
       );
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return ref;
@@ -126,6 +138,8 @@ export function useClipReveal() {
 /** Horizontal stagger — children slide in from left. Desktop only. */
 export function useSlideInLeft(stagger = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !ref.current) return;
@@ -146,8 +160,9 @@ export function useSlideInLeft(stagger = 0.1) {
         }
       );
     }, ref);
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, [stagger]);
 
   return ref;

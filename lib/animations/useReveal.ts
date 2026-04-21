@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, RefObject } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
@@ -40,6 +40,9 @@ export function useReveal({
   useClipPath = false,
   start = "top 72%",
 }: UseRevealOptions) {
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
+
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !elementRef.current) return;
 
@@ -82,8 +85,9 @@ export function useReveal({
         );
       }
     });
+    ctxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

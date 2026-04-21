@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -22,6 +22,11 @@ export default function HomeCTA() {
   const copperTagRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
@@ -139,12 +144,15 @@ export default function HomeCTA() {
       }
     }, sectionRef);
 
+    ctxRef.current = ctx;
+
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
       if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctx.revert();
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 

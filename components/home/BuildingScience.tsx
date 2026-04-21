@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -44,6 +44,8 @@ export default function BuildingScience() {
   const imagesRef = useRef<(HTMLDivElement | null)[]>([]);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
+  const pinCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
     if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
@@ -178,8 +180,9 @@ export default function BuildingScience() {
       tl.to({}, { duration: 1 });
 
     }, wrapperRef);
+    pinCtxRef.current = ctx;
 
-    return () => ctx.revert();
+    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (

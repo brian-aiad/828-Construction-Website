@@ -13,7 +13,13 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Skip Lenis on narrow viewports (phones)
+    // Kill all active ScrollTriggers from the departing page BEFORE scrolling.
+    // lenis.scrollTo(0, { immediate }) fires the "scroll" event which calls
+    // ScrollTrigger.update — executing every onUpdate callback. If React is
+    // simultaneously unmounting the old page, those callbacks run on detached
+    // nodes → "removeChild" NotFoundError. Killing first empties the queue.
+    ScrollTrigger.getAll().forEach((st) => st.kill());
+
     if (window.innerWidth < 768) {
       window.scrollTo(0, 0);
       return;

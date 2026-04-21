@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -26,6 +26,11 @@ export default function HeroSections() {
   const content2Ref = useRef<HTMLDivElement>(null);
   // ── SplitType cleanup ───────────────────────────────────────────────────
   const allSplitsRef = useRef<SplitType[]>([]);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    allSplitsRef.current.forEach(s => { try { s.revert(); } catch {} });
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -105,6 +110,21 @@ export default function HeroSections() {
       }
 
       // ── Section 1 exit: headline chars scatter + CTAs fade out ─────────────
+      // Mobile fallback: SplitType char scatter is desktop-only, so on mobile
+      // we fade the whole heading to prevent it overlapping section 2 as it fades in.
+      if (headlineRef.current && !AnimationController.shouldAnimate()) {
+        gsap.to(headlineRef.current, {
+          opacity: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: wrapperRef.current,
+            start: "10% top",
+            end: "33% top",
+            scrub: 1,
+          },
+        });
+      }
+
       if (headlineRef.current && AnimationController.shouldAnimate()) {
         const _headline = headlineRef.current;
         const _wrapper = wrapperRef.current;
@@ -191,6 +211,8 @@ export default function HeroSections() {
 
     }, wrapperRef);
 
+    ctxRef.current = ctx;
+
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
@@ -199,7 +221,8 @@ export default function HeroSections() {
       });
       localSplits = [];
       allSplitsRef.current = [];
-      ctx.revert();
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 
