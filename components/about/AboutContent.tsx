@@ -251,16 +251,22 @@ function AboutHero() {
         style={{
           top: "-15%",
           height: "130%",
-          backgroundImage: "url('/images/about/about-hero.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "contrast(1.08) saturate(1.15) brightness(1.05)",
           transformOrigin: "center center",
           willChange: "transform",
         }}
         role="presentation"
         aria-hidden="true"
-      />
+      >
+        <Image
+          src="/images/about/about-hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{ filter: "contrast(1.08) saturate(1.15) brightness(1.05)" }}
+        />
+      </div>
 
       {/* Gradient layers */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
@@ -341,7 +347,19 @@ function AboutFounder() {
   const hairlineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
+    if (!sectionRef.current) return;
+
+    // Fix 14: set GSAP initial state before shouldAnimate() gate so mobile
+    // branch can explicitly clear it — stat card renders on all breakpoints.
+    if (statCardRef.current) {
+      gsap.set(statCardRef.current, { opacity: 0, scale: 0.78 });
+    }
+
+    if (!AnimationController.shouldAnimate()) {
+      // Mobile: immediately show the stat card (no animation).
+      if (statCardRef.current) gsap.set(statCardRef.current, { opacity: 1, scale: 1 });
+      return;
+    }
 
     let mounted = true;
     let splitFrame = -1;
@@ -551,7 +569,6 @@ function AboutFounder() {
             <div
               ref={statCardRef}
               className="absolute -bottom-4 -left-4 lg:-left-8 bg-black text-white p-6 w-52 z-10"
-              style={{ opacity: 0 }}
             >
               <div className="font-numbers font-bold text-3xl text-white mb-1">20+</div>
               <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">

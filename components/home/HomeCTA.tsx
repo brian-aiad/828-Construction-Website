@@ -29,7 +29,7 @@ export default function HomeCTA() {
   }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
+    if (!sectionRef.current) return;
 
     let mounted = true;
     let splitFrame = -1;
@@ -38,6 +38,39 @@ export default function HomeCTA() {
 
     const ctx = gsap.context(() => {
       const trigger = sectionRef.current!;
+
+      // Set GSAP initial states here (Fix 14) — not in JSX — so mobile/error
+      // path can explicitly clear them instead of leaving elements permanently
+      // hidden. imageWrapRef and copperTagRef are inside "hidden lg:block" so
+      // they're CSS-display:none on mobile, but set the state properly anyway.
+      if (imageWrapRef.current) {
+        gsap.set(imageWrapRef.current, { clipPath: "inset(100% 0% 0% 0%)" });
+      }
+      if (copperTagRef.current) {
+        gsap.set(copperTagRef.current, { opacity: 0 });
+      }
+
+      if (!AnimationController.shouldAnimate()) {
+        // Mobile: clear the GSAP initial states and simple on-enter reveals.
+        // imageWrapRef / copperTagRef are hidden lg:block (display:none < 1024px)
+        // but clear them defensively in case breakpoints change.
+        if (imageWrapRef.current) gsap.set(imageWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
+        if (copperTagRef.current) gsap.set(copperTagRef.current, { opacity: 1, y: 0 });
+        const mobileEls: HTMLElement[] = [
+          sectionRef.current!.querySelector<HTMLElement>(".cta-label"),
+          headlineRef.current,
+          bodyRef.current,
+          ctasRef.current,
+          trustRef.current,
+        ].filter((el): el is HTMLElement => !!el);
+        mobileEls.forEach((el) => {
+          gsap.from(el, {
+            opacity: 0, y: 24, duration: 0.7, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          });
+        });
+        return;
+      }
 
       // ── Copper hairline: scaleX scrub ────────────────────────────────────
       if (hairlineRef.current) {
@@ -259,7 +292,7 @@ export default function HomeCTA() {
               <div
                 ref={imageWrapRef}
                 className="relative overflow-hidden"
-                style={{ aspectRatio: "4/5", clipPath: "inset(100% 0% 0% 0%)" }}
+                style={{ aspectRatio: "4/5" }}
               >
                 <Image
                   src="/images/projects/adu-interior-living.jpg"
@@ -281,7 +314,7 @@ export default function HomeCTA() {
               <div
                 ref={copperTagRef}
                 className="absolute -bottom-6 -right-6 bg-[#B87333] text-black p-6 w-40"
-                style={{ opacity: 0 }}
+                style={{ opacity: 1 }}
               >
                 <div className="font-numbers font-bold text-3xl leading-none mb-1">20+</div>
                 <div className="font-labels text-[8px] tracking-[0.18em] uppercase leading-relaxed opacity-80">

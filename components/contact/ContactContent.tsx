@@ -97,6 +97,7 @@ function ContactHero() {
       if (fadeEls?.length) {
         gsap.fromTo(fadeEls, { y: 20, opacity: 0 }, {
           y: 0, opacity: 1, duration: 0.7, stagger: 0.12, delay: 0.35, ease: "power3.out",
+          immediateRender: false,
         });
       }
     }, sectionRef);
@@ -121,16 +122,22 @@ function ContactHero() {
       <div
         ref={bgRef}
         className="absolute left-0 right-0"
-        style={{
-          top: "-15%", height: "130%",
-          backgroundImage: "url('/images/contact/contact-hero.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "contrast(1.08) saturate(0.75) brightness(0.3)",
-        }}
+        style={{ top: "-15%", height: "130%" }}
         role="presentation"
         aria-hidden="true"
-      />
+      >
+        <Image
+          src="/images/contact/contact-hero.jpg"
+          alt=""
+          fill
+          priority
+          style={{
+            objectFit: "cover",
+            objectPosition: "center",
+            filter: "contrast(1.08) saturate(0.9) brightness(0.92)",
+          }}
+        />
+      </div>
       <div
         ref={midRef}
         className="absolute inset-0"
@@ -208,7 +215,20 @@ function PinnedTrust() {
   useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
+    if (!wrapperRef.current) return;
+
+    // Set GSAP initial state here (Fix 14) — before shouldAnimate() gate so the
+    // mobile/error branch can explicitly clear it. imageWrapRef is hidden lg:block
+    // (display:none < 1024px) but set defensively.
+    if (imageWrapRef.current) {
+      gsap.set(imageWrapRef.current, { clipPath: "inset(100% 0% 0% 0%)" });
+    }
+
+    if (!AnimationController.shouldAnimate()) {
+      // Mobile: clear initial state so element is visible if breakpoint changes.
+      if (imageWrapRef.current) gsap.set(imageWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
+      return;
+    }
 
     const ctx = gsap.context(() => {
       // ── Technique 10: Copper hairline scaleX scrub ──────────────────────
@@ -289,7 +309,7 @@ function PinnedTrust() {
 
   return (
     <div ref={wrapperRef} data-section="contact-trust" style={{ minHeight: isMobile ? "auto" : "240vh", position: "relative", zIndex: 2 }}>
-      <div ref={stickyRef} className="bg-[#0a0a0a] overflow-hidden" style={{ minHeight: "100vh" }}>
+      <div ref={stickyRef} className="bg-[#0a0a0a]" style={{ minHeight: "100vh", overflowX: "clip" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
           {/* Copper hairline scrub */}
           <div
@@ -353,7 +373,7 @@ function PinnedTrust() {
               <div
                 ref={imageWrapRef}
                 className="relative overflow-hidden"
-                style={{ aspectRatio: "4/3", clipPath: "inset(100% 0% 0% 0%)" }}
+                style={{ aspectRatio: "4/3" }}
               >
                 <Image
                   src="/images/contact/map-detail.jpg"

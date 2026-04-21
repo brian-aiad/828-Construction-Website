@@ -342,6 +342,164 @@ if (headlineRef.current && AnimationController.shouldAnimate()) { ... }
 
 ---
 
+### Fix 13 — Photos invisible after mid-page refresh / page doesn't scroll to top on refresh
+
+**Symptom:** Refreshing the browser at any non-zero scroll position causes images to disappear (stuck with `opacity:0` or `clipPath: inset(8%)`). Also, page loads mid-scroll instead of returning to top.
+
+**Root cause:** Two-part race condition:
+1. Browser scroll restoration (`scrollRestoration='auto'`) fires and sets `window.scrollY` to the previous position BEFORE GSAP/Lenis initialise.
+2. GSAP's `fromTo()` default `immediateRender: true` applies the `from` state (opacity:0, clipPath hidden) to all elements immediately on context creation.
+3. `once: true` triggers whose `start` positions are now "already past" (because the page loaded mid-scroll) never re-fire → elements stay permanently invisible.
+
+**Fix — three-layer defence:**
+1. **Inline `<script>` in `app/layout.tsx` body** (runs synchronously before any JS/CSS):
+```tsx
+<script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
+```
+2. **`useEffect([], LenisProvider)`** — belt-and-suspenders after hydration:
+```ts
+useEffect(() => {
+  history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+}, []);
+```
+3. **Debounced resize + visibility-change handlers in LenisProvider** — prevents stale ScrollTrigger positions after window resize or tab switch:
+```ts
+window.addEventListener('resize', () => { lenis.resize(); ScrollTrigger.refresh(); }, { passive: true });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') ScrollTrigger.refresh(); });
+```
+
+**Files changed:** `app/layout.tsx`, `components/providers/LenisProvider.tsx`
+
+---
+
+### Fix 14 — Mobile photo invisible (hardcoded GSAP-driven clipPath in JSX)
+
+**Symptom:** Image never appears on mobile (or intermittently on desktop after a refresh). The image container in JSX has `style={{ clipPath: "inset(100% 0 0 0)" }}` and GSAP is expected to clear it — but GSAP's `shouldAnimate()` gate returns false on mobile so GSAP never runs, and the clip is never cleared.
+
+**Root cause:** An initial animation state (`clipPath: inset(100% ...)`, `opacity: 0`, `transform: translateY(100%)`) is set in JSX `style={{}}`. On mobile, `AnimationController.shouldAnimate()` returns false and the entire useEffect returns early without ever touching the element. The image stays permanently invisible.
+
+**Fix:** Move the initial state OUT of JSX into a `gsap.set()` inside the useEffect, BEFORE the conditional gate. On mobile, immediately clear the initial state with a second `gsap.set()`:
+
+```tsx
+useEffect(() => {
+  if (!wrapperRef.current) return;
+  const ctx = gsap.context(() => {
+    // Set initial state HERE, not in JSX:
+    gsap.set(imgRef.current, { clipPath: "inset(100% 0 0 0)" });
+
+    if (!AnimationController.shouldAnimate()) {
+      // Mobile: immediately clear — image visible, no animation
+      gsap.set(imgRef.current, { clipPath: "inset(0% 0 0 0)" });
+      // ... simple reveal animations for other elements ...
+      return;
+    }
+    // Desktop: scrub animation clears the initial state
+    gsap.fromTo(imgRef.current, { clipPath: "inset(100% 0 0 0)" }, { ... scrub ... });
+  }, wrapperRef);
+  return () => { try { ctx.revert(); } catch {} };
+}, []);
+```
+
+**JSX:** Remove all initial-state inline styles from elements that GSAP controls.
+
+**Prevention:** `grep -rn 'clipPath:.*inset' components/` and `grep -rn 'opacity: 0,' components/` to find suspect JSX style props.
+
+---
+
+### Fix 15 — Section feels static during scroll despite having animations
+
+**Symptom:** Section has scroll animations in code, but when the user scrolls through it, almost nothing appears to move. Motion happens in the first second of entry, then goes dead for the remaining 70-80% of scroll through the section.
+
+**Root cause:** All animations are `once: true` with time-based `duration` (0.7–1.0s). They play on enter and complete instantly. The remaining scroll through the section has no visual change — especially painful in tall sections (minHeight: 100vh per row, pillars stacked 3–4 rows deep).
+
+**Fix:** Convert at least one "sustained" animation per section from once-time-based to scrub-tied with `start`/`end` spanning a meaningful portion of the section's scroll range:
+
+```ts
+// BEFORE (once, all fires at once on enter):
+gsap.fromTo(rows, { opacity: 0, y: 28 }, {
+  opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: "power3.out",
+  scrollTrigger: { trigger: wrapperRef.current, start: "top 70%", once: true },
+});
+
+// AFTER (scrub-tied per row — each reveals as user scrolls past it):
+rows.forEach((row) => {
+  gsap.fromTo(row, { opacity: 0, y: 28 }, {
+    opacity: 1, y: 0, ease: "power2.out",
+    scrollTrigger: { trigger: row, start: "top 85%", end: "top 52%", scrub: 1.2 },
+  });
+});
+```
+
+For text panels in alternating-image rows (ServicesPreview pattern), convert the text stagger to scrub:
+
+```ts
+gsap.fromTo(textEls, { y: 32, opacity: 0 }, {
+  y: 0, opacity: 1,
+  stagger: { each: 0.06, from: "start" },
+  ease: "power3.out",
+  scrollTrigger: { trigger, start: "top 72%", end: "top 32%", scrub: 1.1 },
+});
+```
+
+**Prevention:** `functional-qa.mjs` motion-density check requires `movementRatio > 0.15` on desktop. Section density below that threshold fails QA automatically.
+
+---
+
+### Fix 16 — All images/elements invisible on hard refresh (ScrollTrigger killed on mount)
+
+**Symptom:** On browser refresh (F5/Ctrl+R), the entire page appears broken: all
+animated images are stuck invisible (clipPath hidden or opacity:0), no text reveals
+run, no counters animate. Tab switch and client-side navigation work fine. Only
+hard refresh breaks the page.
+
+**Root cause:** Two compounding bugs:
+
+1. **LenisProvider kills ALL ScrollTriggers on initial mount.** In React, children
+effects fire before parent effects. Page components create ScrollTriggers in their
+`useEffect`. Then LenisProvider's `[pathname]` effect runs (as a parent, it fires
+LAST) and calls `ScrollTrigger.getAll().forEach(st => st.kill())` — destroying all
+freshly-created triggers. Elements stay permanently at their GSAP `from` state.
+On client-side navigation this doesn't bite because Next.js Suspense means
+LenisProvider's effect fires before the new page's effects.
+
+2. **`window.scrollTo(0, 0)` in `useEffect` fires too late.** The scroll reset ran
+after GSAP triggers were already created. If the browser restored a non-zero scroll
+position first, `once: true` triggers whose start had been passed would never fire.
+
+**Fix — three layers in `LenisProvider.tsx`:**
+
+```ts
+const isFirstMount = useRef(true);
+
+// 1. useLayoutEffect fires synchronously BEFORE any useEffect (including children's
+//    GSAP setup). Guarantees window.scrollY = 0 when triggers are created.
+useLayoutEffect(() => {
+  history.scrollRestoration = "manual";
+  window.scrollTo(0, 0);
+}, []);
+
+// 2. [pathname] effect: skip trigger kill on initial mount.
+useEffect(() => {
+  if (isFirstMount.current) {
+    isFirstMount.current = false;
+    window.scrollTo(0, 0);
+    return;  // ← DO NOT kill triggers on first mount
+  }
+  ScrollTrigger.getAll().forEach((st) => st.kill());
+}, [pathname]);
+
+// 3. After Lenis connects, refresh all trigger positions.
+useEffect(() => {
+  // ... Lenis init ...
+  ScrollTrigger.refresh();
+}, []);
+```
+
+**Files changed:** `components/providers/LenisProvider.tsx`
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:
@@ -370,8 +528,8 @@ Each page has one animation moment that does not appear on any other page. These
 |------|------------------------|
 | Home (`/`) | **BuildingScience pinned cross-fade** — full-height pin where 4 philosophy panels dissolve through each other with opacity cross-fade while a large chapter number counts up. Triggered only on the homepage. No other page uses a 4-state cross-fade pin. |
 | About (`/about`) | **Timeline horizontal drift** — the 828 founding year and milestone markers scroll horizontally against a fixed viewport while the vertical scroll progresses. Creates a "reading a timeline on a wall" effect. Unique to the About page; no other page uses horizontal drift within a vertical scroll. |
-| Services (`/services`) | **3-panel decision pin with color-snap activation** — the "Scope it in 60 seconds" section pins for 1.6 viewport heights while the three service panels cycle active state via `gsap.set()` borderColor/backgroundColor snap (not opacity). The visitor literally "chooses" a panel by scrolling. No other page has a comparative choice structure pinned to scroll progress. |
+| Services (`/services`) | **ServiceChoiceCards clip-punch entry** — the "Scope it in 60 seconds" section presents three full-bleed image cards that punch in from a box-crop (`inset(8% 4% 8% 4%)` → `inset(0%)`) with staggered timing on scroll enter. Each card has an independent image parallax scrub. No pin, no dead zone. No other page uses the box-punch-in clip-path stagger on a set of cards. |
 | Process (`/process`) | **Pinned phase progression timeline** — a single 360vh pinned container where 4 project phases unlock sequentially via opacity snap. Ghost chapter number snaps 01→04 on each phase. Scrub progress bar tracks position 0→100%. Each phase image clips in from bottom (inset reveal) when phase activates. No other page has a chapter-progression structure with snapping ghost numerals + progress indicator. |
 | Services detail (`/services/{adu,remediation,consulting}`) | **PinnedWhy with copper border activation** — 280vh pinned section where 4 "Why 828" panels activate via border-color snap (copper on active, gray on inactive) rather than opacity. Counter in top-right snaps from "01" to "04". Shared signature across all three service detail pages — the template's unique moment. |
-| Projects (`/projects`) | **Animated filter toggle with composited exit/enter cycle** — when a visitor changes project category, Framer Motion's AnimatePresence `mode="wait"` fires a staged exit (all cards fade + y +24) then enters the filtered set (cards stagger in from y +24, 0.12s each). This "page turn" quality on filter change is unique to the Projects page and does not appear on any other page. |
+| Projects (`/projects`) | **Animated filter toggle with composited exit/enter cycle** — when a visitor changes project category, Framer Motion's `AnimatePresence mode="wait"` fires a staged exit (all cards fade + y +20) then enters the filtered set (cards stagger in from y +20 at 0.055s per card). Additionally: 15 individually-parallaxed card images (Pattern F per card) create continuous gallery motion during scroll. The `ProjectsHighlights` editorial spread (3 curated images with independent scrub clip-path reveals) is unique to this page. |
 | Contact (`/contact`) | **Form interaction quality as signature** (not a cinematic motion beat) — copper focus rings on all form inputs (`border-[#B87333]` on focus), labels positioned above fields (never floating), "What to Include" friction-reduction block, "What Happens After" process preview, response-time expectation stated explicitly. The 2004 establishment year counter (scrubs 0→2004) is the only place on the site this date appears as a scrub counter. |

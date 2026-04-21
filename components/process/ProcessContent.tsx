@@ -166,16 +166,20 @@ function ProcessHero() {
       <div
         ref={bgRef}
         className="absolute left-0 right-0"
-        style={{
-          top: "-15%", height: "130%",
-          backgroundImage: "url('/images/process/planning.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "contrast(1.05) saturate(0.8) brightness(0.44)",
-        }}
+        style={{ top: "-15%", height: "130%" }}
         role="presentation"
         aria-hidden="true"
-      />
+      >
+        <Image
+          src="/images/process/planning.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{ filter: "contrast(1.05) saturate(0.9) brightness(0.92)" }}
+        />
+      </div>
       <div
         ref={midRef}
         className="absolute inset-0"
@@ -716,7 +720,17 @@ function ProcessCTA() {
   useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    // Fix 14: set GSAP initial state before shouldAnimate() gate.
+    // imageWrapRef is inside hidden lg:block (display:none < 1024px) but we
+    // still set/clear defensively. Never put GSAP initial states in JSX.
+    if (imageWrapRef.current) {
+      gsap.set(imageWrapRef.current, { clipPath: "inset(100% 0% 0% 0%)" });
+    }
+
+    if (!AnimationController.shouldAnimate()) {
+      if (imageWrapRef.current) gsap.set(imageWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
+      return;
+    }
     let mounted = true;
     let splitFrame = -1;
     let ctaSplit: SplitType | null = null;
@@ -830,7 +844,7 @@ function ProcessCTA() {
             <div
               ref={imageWrapRef}
               className="relative overflow-hidden"
-              style={{ aspectRatio: "4/3", clipPath: "inset(100% 0% 0% 0%)" }}
+              style={{ aspectRatio: "4/3" }}
             >
               <Image
                 src="/images/process/final-detail.jpg"

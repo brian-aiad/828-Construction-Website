@@ -57,6 +57,7 @@ export default function HeroSections() {
           {
             scale: 1.1,
             ease: "none",
+            immediateRender: false,
             scrollTrigger: {
               trigger: wrapperRef.current,
               start: "top top",
@@ -191,7 +192,10 @@ export default function HeroSections() {
       }
 
       // ── Section 2 content: fade in + drift up from below ─────────────────
+      // Set initial state via gsap.set (Fix 14): never hardcode GSAP initial
+      // states in JSX — if GSAP doesn't run (mobile/error), element stays visible.
       if (content2Ref.current) {
+        gsap.set(content2Ref.current, { opacity: 0, y: 50 });
         gsap.fromTo(
           content2Ref.current,
           { opacity: 0, y: 50 },
@@ -199,6 +203,7 @@ export default function HeroSections() {
             opacity: 1,
             y: 0,
             ease: "none",
+            immediateRender: false,
             scrollTrigger: {
               trigger: wrapperRef.current,
               start: "35% top",
@@ -244,7 +249,7 @@ export default function HeroSections() {
             alt=""
             fill
             priority
-            quality={95}
+            sizes="100vw"
             className="object-cover"
             style={{ filter: "contrast(1.04) saturate(1.1) brightness(0.92)" }}
           />
@@ -370,7 +375,7 @@ export default function HeroSections() {
         <div
           ref={content2Ref}
           className="absolute inset-0 z-10"
-          style={{ opacity: 0, pointerEvents: "none" }}
+          style={{ pointerEvents: "none" }}
         >
           <div className="absolute inset-0 bg-black/25" aria-hidden="true" />
           <div
