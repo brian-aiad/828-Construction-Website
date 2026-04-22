@@ -49,6 +49,9 @@ export default function HomeCTA() {
       if (copperTagRef.current) {
         gsap.set(copperTagRef.current, { opacity: 0 });
       }
+      if (hairlineRef.current) {
+        gsap.set(hairlineRef.current, { scaleX: 0 });
+      }
 
       if (!AnimationController.shouldAnimate()) {
         // Mobile: clear the GSAP initial states and simple on-enter reveals.
@@ -56,6 +59,7 @@ export default function HomeCTA() {
         // but clear them defensively in case breakpoints change.
         if (imageWrapRef.current) gsap.set(imageWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
         if (copperTagRef.current) gsap.set(copperTagRef.current, { opacity: 1, y: 0 });
+        if (hairlineRef.current) gsap.set(hairlineRef.current, { scaleX: 1 });
         const mobileEls: HTMLElement[] = [
           sectionRef.current!.querySelector<HTMLElement>(".cta-label"),
           headlineRef.current,
@@ -218,7 +222,6 @@ export default function HomeCTA() {
             background: "#B87333",
             opacity: 0.45,
             transformOrigin: "left",
-            transform: "scaleX(0)",
             marginBottom: "3rem",
           }}
         />
@@ -313,11 +316,11 @@ export default function HomeCTA() {
               {/* Copper stat tag — emerge vertically (no x-axis) */}
               <div
                 ref={copperTagRef}
-                className="absolute -bottom-6 -right-6 bg-[#B87333] text-black p-6 w-40"
-                style={{ opacity: 1 }}
+                className="absolute -bottom-6 -right-6 bg-black text-white p-6 w-44 border-l-2"
+                style={{ opacity: 1, borderColor: "#B87333" }}
               >
-                <div className="font-numbers font-bold text-3xl leading-none mb-1">20+</div>
-                <div className="font-labels text-[8px] tracking-[0.18em] uppercase leading-relaxed opacity-80">
+                <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>20+</div>
+                <div className="font-labels text-[8px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
                   Years Building South Bay
                 </div>
               </div>
