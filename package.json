@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preflight": "node scripts/preflight.mjs --fast",
+    "preflight:full": "node scripts/preflight.mjs",
+    "preflight:desktop": "node scripts/preflight.mjs --fast --desktop",
+    "preflight:mobile": "node scripts/preflight.mjs --fast --mobile"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
