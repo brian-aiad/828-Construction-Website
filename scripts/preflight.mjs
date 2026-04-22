@@ -16,6 +16,7 @@ import { chromium } from 'playwright';
 import { execSync, spawn } from 'child_process';
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import http from 'http';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -64,10 +65,12 @@ let serverProcess = null;
 
 async function startServer() {
   console.log(`\n  Starting next start on :${PORT}...`);
-  serverProcess = spawn('npx', ['next', 'start', '-p', String(PORT)], {
-    shell: true,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  // Use node directly with explicit memory limit to prevent OOM crashes mid-test on Windows
+  serverProcess = spawn(
+    process.execPath,
+    ['--max-old-space-size=4096', 'node_modules/next/dist/bin/next', 'start', '-p', String(PORT)],
+    { stdio: ['ignore', 'pipe', 'pipe'], env: process.env }
+  );
 
   await new Promise((resolve, reject) => {
     const timeout = setTimeout(
@@ -87,14 +90,31 @@ async function startServer() {
   });
 
   // Extra buffer for GSAP/Lenis module loads
-  await sleep(1500);
+  await sleep(2500);
 }
 
 function stopServer() {
   if (serverProcess) {
     try { serverProcess.kill('SIGTERM'); } catch {}
+    try { serverProcess.kill('SIGKILL'); } catch {}
     serverProcess = null;
   }
+}
+
+// Quick TCP probe — returns true if the server is accepting connections
+function serverAlive() {
+  return new Promise((resolve) => {
+    const req = http.get(`http://localhost:${PORT}/`, { timeout: 2000 }, () => resolve(true));
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+  });
+}
+
+async function ensureServer() {
+  if (await serverAlive()) return;
+  stopServer();
+  await sleep(800);
+  await startServer();
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -122,24 +142,35 @@ async function testRoute(browser, routeObj, viewport) {
   const ctx  = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
   const page = await ctx.newPage();
 
+  // Silently mock third-party analytics scripts that 404 on localhost.
+  // Use fulfill(200) not abort() — abort logs ERR_FAILED to the console.
+  const mockAnalytics = (route) =>
+    route.fulfill({ status: 200, contentType: 'text/javascript', body: '' });
+  await page.route('**/_vercel/insights/**', mockAnalytics);
+  await page.route('**/va.vercel-scripts.com/**', mockAnalytics);
+
   // ── Collect runtime errors ────────────────────────────────────────────────
   page.on('pageerror', (e) => result.errors.push(`JS: ${e.message}`));
   page.on('console',   (m) => {
     if (m.type() === 'error') {
       const txt = m.text();
-      // Ignore known benign Next.js hydration hints and GA noise
-      if (!txt.includes('google-analytics') && !txt.includes('gtag')) {
-        result.errors.push(`Console: ${txt}`);
-      }
+      const isThirdPartyNoise =
+        txt.includes('google-analytics') ||
+        txt.includes('gtag') ||
+        txt.includes('_vercel/insights') ||
+        txt.includes('va.vercel-scripts.com');
+      if (!isThirdPartyNoise) result.errors.push(`Console: ${txt}`);
     }
   });
 
-  // ── Collect image 404s ────────────────────────────────────────────────────
+  // ── Collect image 404s + any 500s from local server ─────────────────────
   page.on('response', (res) => {
     const u   = res.url();
     const st  = res.status();
     const isImg = /\.(jpg|jpeg|png|webp|gif|svg|avif)(\?|$)/i.test(u) || u.includes('/images/');
     if (st === 404 && isImg) result.image404s.push(u.split('/').slice(-3).join('/'));
+    // Capture 500s from localhost so we can identify the failing resource
+    if (st === 500 && u.includes('localhost')) result.errors.push(`HTTP 500: ${u}`);
   });
 
   try {
@@ -168,8 +199,9 @@ async function testRoute(browser, routeObj, viewport) {
       return Array.from(document.querySelectorAll('img'))
         .filter((img) => {
           const rect = img.getBoundingClientRect();
-          // Only check images in the top 1.5 viewports
-          if (rect.top > vpH * 1.5 || rect.bottom < -100) return false;
+          // Only check images above the fold (within 1 viewport height).
+          // Images below the fold may be intentionally hidden by scroll-reveal animations.
+          if (rect.top >= vpH || rect.bottom < -100) return false;
           if (rect.width === 0 || rect.height === 0)       return false;
 
           const cs = getComputedStyle(img);
@@ -189,10 +221,13 @@ async function testRoute(browser, routeObj, viewport) {
     }, viewport.height);
 
     // ── Broken counters (shows "0" or blank) ─────────────────────────────
+    // aria-hidden elements are decorative ghost counters — skip them (they
+    // intentionally start at 0 and animate to their target during scroll).
     result.brokenCounters = await page.evaluate(() => {
       const els = Array.from(document.querySelectorAll('.font-numbers, [data-counter]'));
       return els
         .filter((el) => {
+          if (el.getAttribute('aria-hidden') === 'true') return false;
           const t = (el.textContent ?? '').trim();
           return t === '0' || t === '0+' || t === '0%' || t === '';
         })
@@ -344,9 +379,12 @@ async function main() {
 
     for (const route of routes) {
       for (const vp of viewports) {
+        // Verify server is still up; restart if it crashed (Windows OOM guard)
+        if (!FAST) await ensureServer();
         process.stdout.write(`      ${route.name.padEnd(15)} @ ${vp.name.padEnd(8)}  `);
         const result = await testRoute(browser, route, vp);
         routeResults.push(result);
+        await sleep(500); // Brief gap between tests to avoid saturating the prod server
 
         if (result.PASS) {
           process.stdout.write('✅\n');
