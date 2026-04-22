@@ -387,33 +387,40 @@ export default function HeroSections() {
                 Torrance · Redondo Beach · Manhattan Beach
               </span>
               <h2
-                className="font-display font-bold text-white tracking-tight leading-[0.88] mb-10"
+                className="font-display font-bold text-white tracking-tight leading-[0.88] mb-8"
                 style={{ fontSize: "clamp(3.2rem, 8vw, 8rem)", textShadow: "0 2px 20px rgba(0,0,0,0.6)" }}
               >
                 South Bay&apos;s contractor
                 <br />
                 for work that lasts.
               </h2>
-              <div className="flex flex-col sm:flex-row gap-3 items-start">
-                <MagneticButton strength={0.28}>
-                  <Link
-                    href="/contact"
-                    className="btn-shine btn-lift inline-flex items-center gap-2 bg-white text-black px-8 py-4
-                      font-labels text-[10px] tracking-[0.18em] uppercase
-                      hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    Request Estimate →
-                  </Link>
-                </MagneticButton>
-                <Link
-                  href="/about"
-                  className="inline-flex items-center gap-2 border border-white/30 text-white px-8 py-4
-                    font-labels text-[10px] tracking-[0.18em] uppercase
-                    hover:border-white/70 transition-colors duration-200"
-                >
-                  About 828
-                </Link>
+
+              {/* Credibility proof — 3 signals that Section 1 didn't give */}
+              <div className="flex flex-wrap gap-x-10 gap-y-4 mb-10">
+                <div>
+                  <div className="font-numbers font-bold text-white leading-none" style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}>20+</div>
+                  <div className="font-labels text-white/40 tracking-[0.2em] uppercase mt-1" style={{ fontSize: 9 }}>Years South Bay</div>
+                </div>
+                <div>
+                  <div className="font-numbers font-bold text-white leading-none" style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}>150+</div>
+                  <div className="font-labels text-white/40 tracking-[0.2em] uppercase mt-1" style={{ fontSize: 9 }}>Projects</div>
+                </div>
+                <div>
+                  <div className="font-numbers font-bold leading-none" style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)", color: "#B87333" }}>#1141119</div>
+                  <div className="font-labels text-white/40 tracking-[0.2em] uppercase mt-1" style={{ fontSize: 9 }}>CA License</div>
+                </div>
               </div>
+
+              <MagneticButton strength={0.28}>
+                <Link
+                  href="/contact"
+                  className="btn-shine btn-lift inline-flex items-center gap-2 bg-white text-black px-8 py-4
+                    font-labels text-[10px] tracking-[0.18em] uppercase
+                    hover:bg-gray-100 transition-colors duration-200"
+                >
+                  Request Estimate →
+                </Link>
+              </MagneticButton>
             </div>
           </div>
         </div>

@@ -70,16 +70,29 @@ function ServiceRow({
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
     if (!rowRef.current || !imagePaneRef.current || !textRef.current) return;
 
     const ctx = gsap.context(() => {
       const trigger = rowRef.current!;
 
+      if (!AnimationController.shouldAnimate()) {
+        // Mobile: simple on-enter reveals, no clip/scrub
+        const textEls = textRef.current!.querySelectorAll<HTMLElement>(
+          ".reveal-heading, .reveal-tagline, .reveal-tag, .reveal-cta"
+        );
+        textEls.forEach((el) => {
+          gsap.from(el, {
+            opacity: 0, y: 20, duration: 0.65, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          });
+        });
+        return;
+      }
+
       // 1. Image pane clip-path reveal (from outside edge inward)
       const clipFrom = service.imageLeft
-        ? "inset(0% 100% 0% 0%)" // reveals left→right
-        : "inset(0% 0% 0% 100%)"; // reveals right→left
+        ? "inset(0% 100% 0% 0%)"
+        : "inset(0% 0% 0% 100%)";
 
       gsap.fromTo(
         imagePaneRef.current,
@@ -97,16 +110,11 @@ function ServiceRow({
         gsap.to(imgRef.current, {
           yPercent: -12,
           ease: "none",
-          scrollTrigger: {
-            trigger,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-          },
+          scrollTrigger: { trigger, start: "top bottom", end: "bottom top", scrub: true },
         });
       }
 
-      // 3. Text content: stagger reveal after clip
+      // 3. Fix 16: Text panel — scrub-tied reveal (not once-time)
       const textEls = textRef.current!.querySelectorAll<HTMLElement>(
         ".reveal-num, .reveal-heading, .reveal-tagline, .reveal-tag, .reveal-cta"
       );
@@ -117,11 +125,9 @@ function ServiceRow({
         {
           y: 0,
           opacity: 1,
-          duration: 0.7,
-          stagger: 0.08,
-          delay: 0.25,
+          stagger: { each: 0.06, from: "start" },
           ease: "power3.out",
-          scrollTrigger: { trigger, start: "top 68%", once: true },
+          scrollTrigger: { trigger, start: "top 72%", end: "top 32%", scrub: 1.1 },
         }
       );
 
@@ -183,8 +189,9 @@ function ServiceRow({
         />
       </div>
 
-      {/* Ghost number inside image pane */}
+      {/* Ghost number inside image pane — aria-hidden: purely decorative */}
       <div
+        aria-hidden="true"
         className="absolute z-10 pointer-events-none select-none font-numbers font-bold leading-none"
         style={{
           fontSize: "clamp(6rem, 10vw, 9rem)",
@@ -220,6 +227,15 @@ function ServiceRow({
       className="svc-text-panel flex flex-col justify-center flex-1 bg-black px-10 py-16 md:px-16 lg:px-20 relative overflow-hidden"
       data-num={service.num}
     >
+      {/* Chapter number */}
+      <div
+        className="reveal-num font-numbers font-bold leading-none mb-6 select-none"
+        aria-hidden="true"
+        style={{ fontSize: "clamp(3rem, 5vw, 4.5rem)", color: "#B87333", opacity: 0.28 }}
+      >
+        {service.num}
+      </div>
+
       {/* Heading */}
       <h3
         className="reveal-heading font-display font-bold text-white tracking-tight leading-[0.95] mb-5"
@@ -279,13 +295,25 @@ export default function ServicesPreview() {
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
-
     const ctx = gsap.context(() => {
-      // Header label + title stagger
       const headEls = headerRef.current?.querySelectorAll<HTMLElement>(
         ".hdr-label, .hdr-line, .hdr-link"
       );
+
+      if (!AnimationController.shouldAnimate()) {
+        // Mobile: simple reveals on header elements
+        if (headEls?.length) {
+          headEls.forEach((el) => {
+            gsap.from(el, {
+              opacity: 0, y: 20, duration: 0.65, ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 88%", once: true },
+            });
+          });
+        }
+        return;
+      }
+
+      // Desktop: stagger + seam
       if (headEls?.length) {
         gsap.fromTo(
           headEls,
@@ -296,16 +324,11 @@ export default function ServicesPreview() {
             duration: 0.65,
             stagger: 0.1,
             ease: "power3.out",
-            scrollTrigger: {
-              trigger: headerRef.current,
-              start: "top 82%",
-              once: true,
-            },
+            scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
           }
         );
       }
 
-      // Copper seam scaleX 0 → 1
       if (seamRef.current) {
         gsap.fromTo(
           seamRef.current,
@@ -315,11 +338,7 @@ export default function ServicesPreview() {
             duration: 0.85,
             ease: "power2.inOut",
             transformOrigin: "left",
-            scrollTrigger: {
-              trigger: headerRef.current,
-              start: "top 82%",
-              once: true,
-            },
+            scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
           }
         );
       }
