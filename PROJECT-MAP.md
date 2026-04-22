@@ -9,7 +9,7 @@ _Last generated: 2026-04-21_
 | Route | Page File | Content Component | Perf | A11y | Status |
 |-------|-----------|-------------------|------|------|--------|
 | `/` | `app/page.tsx` | `components/home/*` | 99 | 100 | revamped v2 |
-| `/about` | `app/about/page.tsx` | `components/about/AboutContent.tsx` | 85 | 100 | master audit |
+| `/about` | `app/about/page.tsx` | `components/about/AboutContent.tsx` | 100 | 96 | revamped v2 |
 | `/services` | `app/services/page.tsx` | `components/services/ServicesContent.tsx` | 98 | 96 | revamped v4 |
 | `/services/adu` | `app/services/[slug]/page.tsx` | `components/services/ServiceDetailContent.tsx` | 87 | 96 | master audit |
 | `/services/remediation` | `app/services/[slug]/page.tsx` | `components/services/ServiceDetailContent.tsx` | 87 | 96 | master audit |

@@ -68,7 +68,7 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 | Page | Status | Date |
 |------|--------|------|
 | Home (`/`) | revamped v2 — Perf=99, A11y=100, HomeInterstitial editorial section, BuildingScience dual-image, Fix 14 copper bars, Fix 8 stat tag | 2026-04-21 |
-| About (`/about`) | master audit complete — Perf=85, A11y=100 | 2026-04-21 |
+| About (`/about`) | revamped v2 — Perf=100, A11y=96, founder rewrite, credential card, SelectiveWork section, "2004" drift signature | 2026-04-22 |
 | Services (`/services`) | revamped v4 — Perf=98, A11y=96, 13 images, no dead zone | 2026-04-21 |
 | Services/ADU (`/services/adu`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
 | Services/Remediation (`/services/remediation`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
