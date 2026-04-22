@@ -500,6 +500,44 @@ useEffect(() => {
 
 ---
 
+### Fix 17 — Preflight false-positive invisible images (GSAP-managed initially-hidden elements)
+
+**Symptom:** `npm run preflight:full` reports invisible images on Services and Projects desktop routes, even though the images correctly reveal on scroll and there is no Fix 14 violation. The preflight's invisible image check was walking up the ancestor chain looking for `clipPath: inset(100%)` and flagging intentional GSAP scroll-reveal images.
+
+**Root cause:** The preflight's invisible image check uses `gsap.fromTo()` with `immediateRender: true` (default), which sets the element's initial clipPath to `inset(100%)` at page load. At the time the Playwright check runs (after page load + 2500ms wait), the element IS in the viewport range (within 1.5 viewport heights) and IS invisible. The check correctly detected the clipPath but had no way to know GSAP would reveal it on scroll.
+
+The `data-pin-image` attribute used for PinnedTimeline images was already skipping pin-phase images, but non-pin scroll-reveal images were not marked.
+
+**Fix — add `data-gsap-reveal="true"` to GSAP-managed image wrappers:**
+
+```tsx
+// ServicesContent.tsx — image mosaic wrappers
+<div ref={img1Ref} data-gsap-reveal="true" className="relative overflow-hidden flex-[3]" ...>
+<div ref={img2Ref} data-gsap-reveal="true" className="relative overflow-hidden flex-[2]" ...>
+
+// ProjectsGallery.tsx — editorial image wrapper
+<div ref={img3WrapRef} data-gsap-reveal="true" className="relative overflow-hidden flex-1" ...>
+```
+
+**Fix — update preflight's invisible image clipPath check to honor the attribute on the element that holds the clipPath (not an ancestor walk via closest()):**
+
+```js
+let el = img;
+for (let i = 0; i < 6; i++) {
+  const cp = getComputedStyle(el).clipPath;
+  if (cp && cp.startsWith('inset(100%')) {
+    if (el.hasAttribute('data-pin-image') || el.hasAttribute('data-gsap-reveal')) return false;
+    return true;
+  }
+  if (!el.parentElement) break;
+  el = el.parentElement;
+}
+```
+
+**Files changed:** `components/services/ServicesContent.tsx`, `components/gallery/ProjectsGallery.tsx`, `.claude-work/scripts/preflight.mjs`
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:
@@ -529,7 +567,7 @@ Each page has one animation moment that does not appear on any other page. These
 | Home (`/`) | **HomeInterstitial dual-layer ghost counter** — ghost watermark counter scrubs 0→150 behind SplitType headline chars on a full-bleed editorial section. Two simultaneous scrub-tied layers (large semi-transparent number in background + headline chars revealing at different rate) create a depth effect unique to the home page. No other page has this dual-layer typographic scrub. |
 | About (`/about`) | **"2004" founding year horizontal drift** — a large semi-transparent watermark of the founding year (`clamp(5rem, 14vw, 12rem)`, copper at 4% opacity) drifts left (`xPercent: -28`) via scrub as the Founder section scrolls. The visual reads as a monument date receding into the background — reinforces establishment credibility without adding explicit copy. No other page uses this typographic watermark + horizontal scrub combination. |
 | Services (`/services`) | **ServiceChoiceCards clip-punch entry** — the "Scope it in 60 seconds" section presents three full-bleed image cards that punch in from a box-crop (`inset(8% 4% 8% 4%)` → `inset(0%)`) with staggered timing on scroll enter. Each card has an independent image parallax scrub. No pin, no dead zone. No other page uses the box-punch-in clip-path stagger on a set of cards. |
-| Process (`/process`) | **Pinned phase progression timeline** — a single 360vh pinned container where 4 project phases unlock sequentially via opacity snap. Ghost chapter number snaps 01→04 on each phase. Scrub progress bar tracks position 0→100%. Each phase image clips in from bottom (inset reveal) when phase activates. No other page has a chapter-progression structure with snapping ghost numerals + progress indicator. |
+| Process (`/process`) | **Pinned phase progression timeline + vertical copper rule** — a single 460vh pinned container where 4 project phases unlock sequentially via opacity snap. Ghost chapter number snaps 01→04 on each phase transition. Copper progress bar tracks position 0→100% via scrub. Each phase image clips in from `inset(100%)` → `inset(0%)` when phase activates. Below the pin, `EditorialStandards` has a vertical copper rule that grows top→bottom (scaleY 0→1, scrub-tied to section scroll range) as the reader progresses through the 4 standards rows — functions as a live reading progress indicator. No other page combines a chapter-snapping pinned timeline with a vertical scrub rule. |
 | Services detail (`/services/{adu,remediation,consulting}`) | **PinnedWhy with copper border activation** — 280vh pinned section where 4 "Why 828" panels activate via border-color snap (copper on active, gray on inactive) rather than opacity. Counter in top-right snaps from "01" to "04". Shared signature across all three service detail pages — the template's unique moment. |
 | Projects (`/projects`) | **Animated filter toggle with composited exit/enter cycle** — when a visitor changes project category, Framer Motion's `AnimatePresence mode="wait"` fires a staged exit (all cards fade + y +20) then enters the filtered set (cards stagger in from y +20 at 0.055s per card). Additionally: 15 individually-parallaxed card images (Pattern F per card) create continuous gallery motion during scroll. The `ProjectsHighlights` editorial spread (3 curated images with independent scrub clip-path reveals) is unique to this page. |
 | Contact (`/contact`) | **Form interaction quality as signature** (not a cinematic motion beat) — copper focus rings on all form inputs (`border-[#B87333]` on focus), labels positioned above fields (never floating), "What to Include" friction-reduction block, "What Happens After" process preview, response-time expectation stated explicitly. The 2004 establishment year counter (scrubs 0→2004) is the only place on the site this date appears as a scrub counter. |

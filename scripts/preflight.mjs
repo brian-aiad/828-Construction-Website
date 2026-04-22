@@ -113,8 +113,22 @@ function serverAlive() {
 async function ensureServer() {
   if (await serverAlive()) return;
   stopServer();
-  await sleep(800);
+  await sleep(1000);
   await startServer();
+  // After restart, warm up parameterized routes — /services/[slug] needs extra
+  // time beyond the root "/" that serverAlive() checks.
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const ok = await new Promise((resolve) => {
+      const req = http.get(`http://localhost:${PORT}/services/adu`, { timeout: 3000 }, (res) => {
+        res.resume();
+        resolve(res.statusCode === 200);
+      });
+      req.on('error', () => resolve(false));
+      req.on('timeout', () => { req.destroy(); resolve(false); });
+    });
+    if (ok) break;
+    await sleep(500);
+  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

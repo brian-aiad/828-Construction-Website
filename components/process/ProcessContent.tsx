@@ -138,12 +138,8 @@ function ProcessHero() {
         }
       });
 
-      const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
-      if (fadeEls?.length) {
-        gsap.fromTo(fadeEls, { y: 20, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.7, stagger: 0.12, delay: 0.35, ease: "power3.out",
-        });
-      }
+      // hero-fade elements render immediately from SSR — no opacity:0 initial state
+      // (PATTERNS.md Fix 14: above-fold text must not start invisible, kills LCP)
     }, sectionRef);
     ctxRef.current = ctx;
 
@@ -435,7 +431,7 @@ function PinnedTimeline() {
           {/* Phase labels */}
           <div className="flex mt-2 mb-0">
             {steps.map((step) => (
-              <div key={step.number} className="flex-1 font-labels text-[8px] text-gray-600 tracking-[0.2em] uppercase">
+              <div key={step.number} aria-hidden="true" className="flex-1 font-labels text-[8px] text-gray-600 tracking-[0.2em] uppercase">
                 {step.number}
               </div>
             ))}

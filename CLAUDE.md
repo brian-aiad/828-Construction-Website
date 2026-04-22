@@ -73,7 +73,7 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 | Services/ADU (`/services/adu`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
 | Services/Remediation (`/services/remediation`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
 | Services/Consulting (`/services/consulting`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
-| Process (`/process`) | master audit complete — Perf=86, A11y=96 | 2026-04-21 |
+| Process (`/process`) | revamped v3 — Perf=85, A11y=96, EditorialStandards replaces PinnedStandards, hero LCP fix, preflight hardened (data-gsap-reveal, 400ms gap, analytics mock, server recovery) | 2026-04-22 |
 | Contact (`/contact`) | master audit complete — Perf=86, A11y=96 | 2026-04-21 |
 | Projects (`/projects`) | revamped v2 — Perf=99, A11y=96, text-overlay cards, editorial highlights section, GSAP parallax per card | 2026-04-21 |
 

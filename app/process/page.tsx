@@ -10,12 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function ProcessPage() {
-  return (
-    <>
-      {/* Preload hero image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <link rel="preload" as="image" href="/images/process/quality-check.jpg" />
-      <ProcessContent />
-    </>
-  );
+  return <ProcessContent />;
 }
