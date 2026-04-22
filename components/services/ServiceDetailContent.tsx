@@ -169,8 +169,9 @@ function DetailHero({
             once: true,
           },
           onUpdate: () => {
-            if (counterRef.current)
-              counterRef.current.textContent = Math.round(obj.val) + "+";
+            const v = Math.round(obj.val);
+            if (counterRef.current && v > 0)
+              counterRef.current.textContent = v + "+";
           },
         });
       }

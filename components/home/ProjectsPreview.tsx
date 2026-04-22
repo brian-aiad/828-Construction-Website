@@ -21,10 +21,30 @@ export default function ProjectsPreview() {
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !sectionRef.current) return;
+    if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
       const trigger = sectionRef.current!;
+
+      // Fix 14: set initial states via gsap.set — never hardcode in JSX
+      trigger.querySelectorAll<HTMLElement>(".copper-bar").forEach((bar) => {
+        gsap.set(bar, { scaleX: 0, transformOrigin: "left" });
+      });
+
+      if (!AnimationController.shouldAnimate()) {
+        // Mobile: simple on-enter reveals
+        const mobileEls = trigger.querySelectorAll<HTMLElement>(
+          ".proj-label, .proj-headline, .proj-counter, .proj-card"
+        );
+        mobileEls.forEach((el) => {
+          gsap.from(el, {
+            opacity: 0, y: 24, duration: 0.65, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          });
+        });
+        return;
+      }
+
       const triggerStart = "top 78%";
 
       // ── Section header: label + headline clip reveal ─────────────────────
@@ -132,7 +152,7 @@ export default function ProjectsPreview() {
                 className="proj-headline font-display font-bold text-white tracking-tight leading-[0.9]"
                 style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)" }}
               >
-                Built with Intent.
+                Proof of Craft.
               </h2>
             </div>
           </div>
@@ -190,7 +210,7 @@ export default function ProjectsPreview() {
                   </h3>
                   <p className="font-labels text-[9px] text-white/40 tracking-wide hidden md:block">{featured.spec}</p>
                 </div>
-                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transformOrigin: "left" }} />
               </Link>
             </div>
           )}
@@ -219,7 +239,7 @@ export default function ProjectsPreview() {
                   <span className="font-labels text-[9px] text-white/45 tracking-[0.18em] uppercase block mb-1">{secondary1.category}</span>
                   <h3 className="font-display font-bold text-white text-base leading-tight">{secondary1.title}</h3>
                 </div>
-                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transformOrigin: "left" }} />
               </Link>
             </div>
           )}
@@ -249,7 +269,7 @@ export default function ProjectsPreview() {
                   <h3 className="font-display font-bold text-white text-base leading-tight">{secondary2.title}</h3>
                   <p className="font-labels text-[9px] text-white/35 tracking-wide mt-1">{secondary2.location}</p>
                 </div>
-                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transformOrigin: "left" }} />
               </Link>
             </div>
           )}
@@ -283,7 +303,7 @@ export default function ProjectsPreview() {
                     {wide.title}
                   </h3>
                 </div>
-                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transform: "scaleX(0)", transformOrigin: "left" }} />
+                <div className="copper-bar absolute bottom-0 left-0 right-0" style={{ height: 2, background: "#B87333", transformOrigin: "left" }} />
               </Link>
             </div>
           )}

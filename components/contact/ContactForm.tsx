@@ -73,7 +73,7 @@ export default function ContactForm() {
             name="name"
             type="text"
             required
-            className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+            className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors"
             placeholder="John Smith"
           />
         </div>
@@ -89,7 +89,7 @@ export default function ContactForm() {
             name="phone"
             type="tel"
             required
-            className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+            className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors"
             placeholder="(310) 555-0000"
           />
         </div>
@@ -106,7 +106,7 @@ export default function ContactForm() {
           id="email"
           name="email"
           type="email"
-          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors"
           placeholder="john@example.com"
         />
       </div>
@@ -122,7 +122,7 @@ export default function ContactForm() {
           id="service"
           name="service"
           required
-          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors bg-white"
+          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors bg-white"
         >
           <option value="">Select a service...</option>
           {SERVICES.map((s) => (
@@ -146,7 +146,7 @@ export default function ContactForm() {
           name="message"
           required
           rows={6}
-          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors resize-none"
+          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors resize-none"
           placeholder="Tell us about your project — location, scope, timeline, and any specific concerns..."
         />
       </div>

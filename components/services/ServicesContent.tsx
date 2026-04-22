@@ -8,17 +8,18 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE, SERVICES } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
-import { useMobile } from "@/hooks/useMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const decisionAid = [
+const choiceCards = [
   {
     num: "01",
     service: "ADU Construction",
     slug: "adu",
+    image: "/images/projects/adu-framing.jpg",
+    imageAlt: "ADU framing — 828 Construction",
     when: [
       "Adding a detached or attached unit",
       "Converting a garage or storage space",
@@ -30,6 +31,8 @@ const decisionAid = [
     num: "02",
     service: "Remediation",
     slug: "remediation",
+    image: "/images/projects/remediation-active.jpg",
+    imageAlt: "Remediation work — 828 Construction",
     when: [
       "Water damage or repeated leaks",
       "Structural failures or defects",
@@ -41,6 +44,8 @@ const decisionAid = [
     num: "03",
     service: "Consulting",
     slug: "consulting",
+    image: "/images/projects/consulting-inspection.jpg",
+    imageAlt: "Consulting inspection — 828 Construction",
     when: [
       "Pre-purchase property evaluation",
       "Getting a second opinion on scope or bid",
@@ -64,10 +69,10 @@ const serviceDetails = [
     difference:
       "We approach every ADU with building science fundamentals — envelope performance, moisture management, structural load paths — before aesthetics.",
     image: "/images/projects/adu-exterior-new.jpg",
+    imageSecondary: "/images/projects/adu-interior-living.jpg",
     imageAlt: "ADU Construction — 828 Construction Torrance CA",
+    imageSecondaryAlt: "ADU interior living space — 828 Construction",
     imageLeft: true,
-    bg: "bg-black",
-    textOnDark: true,
   },
   {
     slug: "remediation",
@@ -82,10 +87,10 @@ const serviceDetails = [
     difference:
       "Remediation requires understanding why a system failed, not just what failed. 20+ years of building science means we trace failures to their origin.",
     image: "/images/projects/remediation-after.jpg",
+    imageSecondary: "/images/projects/waterproofing-membrane.jpg",
     imageAlt: "Remediation — 828 Construction Torrance CA",
+    imageSecondaryAlt: "Waterproofing membrane application — 828 Construction",
     imageLeft: false,
-    bg: "bg-[#0f0f0f]",
-    textOnDark: true,
   },
   {
     slug: "consulting",
@@ -100,16 +105,14 @@ const serviceDetails = [
     difference:
       "We represent the owner's interests — not a material supplier, not a subcontractor. Our consulting gives you the information to make confident decisions.",
     image: "/images/projects/consulting-blueprints.jpg",
+    imageSecondary: "/images/projects/consulting-plans.jpg",
     imageAlt: "Consulting — 828 Construction Torrance CA",
+    imageSecondaryAlt: "Consulting plans review — 828 Construction",
     imageLeft: true,
-    bg: "bg-black",
-    textOnDark: true,
   },
 ];
 
 // ─── Section: Hero ────────────────────────────────────────────────────────────
-// Variation C winner: service index strip at bottom, chapter eyebrow at top,
-// brightness fixed to 0.92 (was 0.88 — CLAUDE.md violation)
 
 function ServicesHero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -118,14 +121,31 @@ function ServicesHero() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
+  useLayoutEffect(() => () => {
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    const shouldAnimate = AnimationController.shouldAnimate();
+
+    if (!shouldAnimate) {
+      // Mobile: fade in hero content once
+      const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
+      if (fadeEls?.length) {
+        gsap.fromTo(Array.from(fadeEls),
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out", delay: 0.2 }
+        );
+      }
+      return;
+    }
+
     let mounted = true;
     let splitFrame = -1;
-    let heroLineEl: HTMLElement | null = null;
     let heroSplit: SplitType | null = null;
+    let heroLineEl: HTMLElement | null = null;
+
     const ctx = gsap.context(() => {
       // Triple-layer parallax scrub
       if (bgRef.current) {
@@ -147,7 +167,7 @@ function ServicesHero() {
         });
       }
 
-      // SplitType char scatter EXIT on "One Standard." — 4-guard cleanup
+      // SplitType char scatter EXIT — 4-guard cleanup (Fix 1)
       splitFrame = requestAnimationFrame(() => {
         if (!mounted) return;
         const heroLine = sectionRef.current?.querySelector<HTMLElement>(".svc-hero-line");
@@ -161,10 +181,7 @@ function ServicesHero() {
             yPercent: -80, opacity: 0,
             stagger: { each: 0.014, from: "random" },
             ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "30% top", end: "bottom top", scrub: 1.2,
-            },
+            scrollTrigger: { trigger: sectionRef.current, start: "30% top", end: "bottom top", scrub: 1.2 },
           });
           const lcpLine = headlineRef.current?.querySelector(".svc-lcp-line");
           if (lcpLine) {
@@ -178,7 +195,7 @@ function ServicesHero() {
 
       const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
       if (fadeEls?.length) {
-        gsap.fromTo(fadeEls,
+        gsap.fromTo(Array.from(fadeEls),
           { y: 18, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, delay: 0.3, ease: "power3.out" }
         );
@@ -191,7 +208,8 @@ function ServicesHero() {
       cancelAnimationFrame(splitFrame);
       if (heroSplit && heroLineEl?.isConnected) { try { heroSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctxRef.current = null; try { ctx.revert(); } catch {}
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -202,38 +220,36 @@ function ServicesHero() {
       className="relative h-screen overflow-hidden bg-black"
       style={{ position: "relative", zIndex: 1 }}
     >
-      {/* Layer 1: Background — brightness 0.92 (Fix 3: was 0.88, below 0.9 threshold) */}
       <div
         ref={bgRef}
         className="absolute left-0 right-0"
-        style={{
-          top: "-15%", height: "130%",
-          backgroundImage: "url('/images/services/services-hero.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "contrast(1.06) saturate(1.1) brightness(0.92)",
-        }}
+        style={{ top: "-15%", height: "130%" }}
         role="presentation"
         aria-hidden="true"
-      />
-      {/* Layer 2: Mid gradient — max from-black/65 */}
+      >
+        <Image
+          src="/images/services/services-hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{ filter: "contrast(1.06) saturate(1.1) brightness(0.92)" }}
+        />
+      </div>
       <div
         ref={midRef}
         className="absolute inset-0"
-        style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.65) 100%)",
-        }}
+        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.65) 100%)" }}
         aria-hidden="true"
       />
 
-      {/* Layer 3: Top eyebrow */}
       <div className="hero-fade absolute top-0 left-0 right-0 z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-28 lg:pt-32">
         <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase">
           Services — CA Lic #1141119
         </span>
       </div>
 
-      {/* Layer 4: Bottom content — headline + service index */}
       <div className="relative z-10 h-full flex flex-col justify-end max-w-7xl mx-auto px-6 lg:px-12 pb-8 lg:pb-14">
         <h1
           ref={headlineRef}
@@ -251,17 +267,13 @@ function ServicesHero() {
           </span>
         </h1>
 
-        {/* Service index strip — Variation C pattern */}
         <div
           className="hero-fade border-t flex flex-row flex-wrap gap-x-8 gap-y-2 pt-5"
           style={{ borderColor: "rgba(255,255,255,0.08)" }}
         >
-          {decisionAid.map((item) => (
+          {choiceCards.map((item) => (
             <div key={item.slug} className="flex items-center gap-2">
-              <span
-                className="font-numbers text-[9px] tracking-[0.2em] font-bold"
-                style={{ color: "#B87333" }}
-              >
+              <span className="font-numbers text-[9px] tracking-[0.2em] font-bold" style={{ color: "#B87333" }}>
                 {item.num}
               </span>
               <span className="font-labels text-[8px] text-white/40 tracking-[0.16em] uppercase whitespace-nowrap">
@@ -303,29 +315,53 @@ function ServiceStrip() {
   );
 }
 
-// ─── Section: Services Intro (new) ───────────────────────────────────────────
-// Editorial chapter between marquee strip and decision aid.
-// Establishes WHY building science expertise before asking visitors to self-select.
-// Scrub ratio for this section: 3 SCRUB (headline chars, hairline, ghost parallax) : 1 EVENT (proof items)
+// ─── Section: Services Intro ──────────────────────────────────────────────────
+// Two-column: left=text+stats, right=image mosaic (2 stacked photos)
+// Ghost number opacity set via gsap.set(), NOT hardcoded in JSX (Fix 14)
 
 function ServicesIntro() {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
+  const img1Ref = useRef<HTMLDivElement>(null);
+  const img2Ref = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
+  useLayoutEffect(() => () => {
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    const shouldAnimate = AnimationController.shouldAnimate();
+
+    // Set ghost number initial state via gsap.set (Fix 14: not in JSX)
+    if (ghostRef.current) {
+      gsap.set(ghostRef.current, { opacity: 0, yPercent: 12 });
+    }
+
+    if (!shouldAnimate) {
+      // Mobile branch (Fix 15): simple reveals
+      if (ghostRef.current) gsap.set(ghostRef.current, { opacity: 0.06, yPercent: 0 });
+      const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>(".intro-reveal");
+      if (revealEls?.length) {
+        gsap.fromTo(Array.from(revealEls),
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", once: true } }
+        );
+      }
+      return;
+    }
+
     let mounted = true;
     let splitFrame = -1;
     let introSplit: SplitType | null = null;
     const headlineEl = headlineRef.current;
 
     const ctx = gsap.context(() => {
-      // Copper hairline scaleX scrub (Pattern D)
+      // Copper hairline scaleX scrub
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -333,15 +369,31 @@ function ServicesIntro() {
         });
       }
 
-      // Ghost number parallax scrub — caps at 0.07 so it stays decorative
+      // Ghost number parallax scrub
       if (ghostRef.current) {
-        gsap.fromTo(ghostRef.current, { yPercent: 12, opacity: 0 }, {
+        gsap.to(ghostRef.current, {
           yPercent: 0, opacity: 0.07, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "top 20%", scrub: 1.5 },
         });
       }
 
-      // SplitType char scrub on headline — 4-guard cleanup
+      // Image mosaic: clip-path scrub reveals
+      if (img1Ref.current) {
+        gsap.fromTo(img1Ref.current,
+          { clipPath: "inset(100% 0% 0% 0%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", ease: "none",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 75%", end: "top 25%", scrub: 1.4 } }
+        );
+      }
+      if (img2Ref.current) {
+        gsap.fromTo(img2Ref.current,
+          { clipPath: "inset(100% 0% 0% 0%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", ease: "none",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 65%", end: "top 15%", scrub: 1.4 } }
+        );
+      }
+
+      // SplitType char scrub on headline — 4-guard (Fix 1)
       if (headlineEl) {
         const _el = headlineEl;
         splitFrame = requestAnimationFrame(() => {
@@ -363,10 +415,10 @@ function ServicesIntro() {
         });
       }
 
-      // Proof items — event, stagger (once)
+      // Proof items — event once
       const proofEls = sectionRef.current?.querySelectorAll<HTMLElement>(".proof-el");
       if (proofEls?.length) {
-        gsap.fromTo(proofEls, { y: 20, opacity: 0 }, {
+        gsap.fromTo(Array.from(proofEls), { y: 20, opacity: 0 }, {
           y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power3.out",
           scrollTrigger: { trigger: sectionRef.current, start: "top 60%", once: true },
         });
@@ -379,7 +431,8 @@ function ServicesIntro() {
       cancelAnimationFrame(splitFrame);
       if (introSplit && headlineEl?.isConnected) { try { introSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctxRef.current = null; try { ctx.revert(); } catch {}
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -390,254 +443,324 @@ function ServicesIntro() {
       className="bg-black relative"
       style={{ position: "relative", zIndex: 2, paddingTop: "clamp(5rem, 10vw, 8rem)", paddingBottom: "clamp(5rem, 10vw, 8rem)" }}
     >
-      {/* Ghost number — decorative 20 (for 20+ years) */}
+      {/* Ghost number — opacity controlled via gsap.set, never hardcoded */}
       <div
         ref={ghostRef}
-        className="absolute right-6 lg:right-12 pointer-events-none select-none font-numbers font-bold leading-none"
+        className="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 pointer-events-none select-none font-numbers font-bold leading-none hidden lg:block"
         aria-hidden="true"
-        style={{
-          top: "50%", transform: "translateY(-50%)",
-          fontSize: "clamp(6rem, 12vw, 12rem)",
-          color: "#B87333",
-          opacity: 0,
-        }}
+        style={{ fontSize: "clamp(6rem, 12vw, 12rem)", color: "#B87333" }}
       >
         20
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative">
-        <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-6">
-          Building Science Expertise
-        </span>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-16 lg:gap-24 items-start">
 
-        {/* Copper hairline */}
-        <div
-          ref={hairlineRef}
-          style={{
-            height: 1, background: "#B87333", opacity: 0.5,
-            transformOrigin: "left", maxWidth: 80, marginBottom: "2rem",
-          }}
-        />
+          {/* Left: label + headline + stats */}
+          <div className="lg:col-span-2">
+            <span className="intro-reveal font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-6">
+              Building Science Expertise
+            </span>
 
-        <h2
-          ref={headlineRef}
-          className="font-display font-bold text-white tracking-tight leading-[0.9] mb-10"
-          style={{ fontSize: "clamp(2.6rem, 5vw, 4.5rem)", maxWidth: "16ch" }}
-        >
-          <span className="block">Twenty years.</span>
-          <span className="block" style={{ color: "rgba(255,255,255,0.45)" }}>Three services.</span>
-          <span className="block" style={{ color: "rgba(255,255,255,0.28)" }}>One standard.</span>
-        </h2>
+            <div
+              ref={hairlineRef}
+              style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", maxWidth: 80, marginBottom: "2rem" }}
+            />
 
-        {/* Proof items */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-12 pt-8 border-t border-white/5 max-w-2xl">
-          <div className="proof-el">
-            <div className="font-numbers font-bold text-[#B87333] leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
-              20+
-            </div>
-            <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
-              Years field experience
+            <h2
+              ref={headlineRef}
+              className="font-display font-bold text-white tracking-tight leading-[0.9] mb-10"
+              style={{ fontSize: "clamp(2.6rem, 5vw, 4.5rem)", maxWidth: "16ch" }}
+            >
+              <span className="block">Building science.</span>
+              <span className="block" style={{ color: "rgba(255,255,255,0.45)" }}>Not guesswork.</span>
+              <span className="block" style={{ color: "rgba(255,255,255,0.28)" }}>Twenty years.</span>
+            </h2>
+
+            <div className="grid grid-cols-3 gap-8 pt-8 border-t border-white/5 max-w-lg">
+              <div className="proof-el">
+                <div className="font-numbers font-bold text-[#B87333] leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
+                  20+
+                </div>
+                <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
+                  Years field experience
+                </div>
+              </div>
+              <div className="proof-el">
+                <div className="font-numbers font-bold text-white leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
+                  3
+                </div>
+                <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
+                  Services. Carefully chosen.
+                </div>
+              </div>
+              <div className="proof-el">
+                <div className="font-numbers font-bold text-white leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
+                  1
+                </div>
+                <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
+                  Standard. No exceptions.
+                </div>
+              </div>
             </div>
           </div>
-          <div className="proof-el">
-            <div className="font-numbers font-bold text-white leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
-              3
+
+          {/* Right: image mosaic — 2 stacked photos */}
+          <div className="hidden lg:flex flex-col gap-3 self-stretch">
+            {/* Top image */}
+            <div
+              ref={img1Ref}
+              data-gsap-reveal="true"
+              className="relative overflow-hidden flex-[3]"
+              style={{ minHeight: "clamp(160px, 18vw, 260px)" }}
+            >
+              <Image
+                src="/images/projects/adu-construction.jpg"
+                alt="ADU construction site — 828 Construction"
+                fill
+                className="object-cover"
+                style={{ filter: "contrast(1.05) saturate(1.08)" }}
+                sizes="25vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
             </div>
-            <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
-              Services. Carefully chosen.
+            {/* Bottom image */}
+            <div
+              ref={img2Ref}
+              data-gsap-reveal="true"
+              className="relative overflow-hidden flex-[2]"
+              style={{ minHeight: "clamp(110px, 12vw, 180px)" }}
+            >
+              <Image
+                src="/images/projects/outdoor-patio-pergola.jpg"
+                alt="Outdoor construction — 828 Construction"
+                fill
+                className="object-cover"
+                style={{ filter: "contrast(1.06) saturate(1.1)" }}
+                sizes="25vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             </div>
+            {/* Copper accent line */}
+            <div style={{ height: 2, background: "#B87333", opacity: 0.35 }} />
           </div>
-          <div className="proof-el">
-            <div className="font-numbers font-bold text-white leading-none mb-2" style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)" }}>
-              1
-            </div>
-            <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase leading-relaxed">
-              Standard. No exceptions.
-            </div>
-          </div>
+
         </div>
       </div>
     </section>
   );
 }
 
-// ─── Section: Pinned Decision Aid ─────────────────────────────────────────────
-// Counter animation removed (Fix 4: was causing "3"→"0"→"3" jump).
-// Static "3" in JSX is the correct behavior — ghost numbers on service rows provide counter decoration.
+// ─── Section: Service Choice Cards (replaces PinnedDecisionAid) ───────────────
+// Three full-bleed image cards — NO PIN. Staggered clip-path reveals.
+// Eliminates black dead zone (Fix 11) and snappy panel transitions entirely.
 
-function PinnedDecisionAid() {
-  const isMobile = useMobile();
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const numRefs = useRef<(HTMLSpanElement | null)[]>([]);
+function ServiceChoiceCards() {
+  const sectionRef = useRef<HTMLElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
-  const pinCtxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
-    const isMobileWindow = window.innerWidth < 1024;
+    const shouldAnimate = AnimationController.shouldAnimate();
+
+    if (!shouldAnimate) {
+      // Mobile: stagger reveal
+      const cards = cardsRef.current?.querySelectorAll<HTMLElement>(".choice-card");
+      if (cards?.length) {
+        gsap.fromTo(Array.from(cards),
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 0.65, stagger: 0.15, ease: "power3.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", once: true } }
+        );
+      }
+      return;
+    }
 
     const ctx = gsap.context(() => {
-      // Copper hairline scaleX scrub
+      // Copper hairline scrub
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
+          scrollTrigger: { trigger: sectionRef.current, start: "top 88%", end: "top 60%", scrub: 1.2 },
         });
       }
 
-      if (isMobileWindow) {
-        const panels = wrapperRef.current!.querySelectorAll<HTMLElement>(".decision-panel");
-        gsap.fromTo(panels, { opacity: 0, y: 28 }, {
-          opacity: 1, y: 0, duration: 0.7, stagger: 0.2, ease: "power3.out",
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 72%", once: true },
-        });
-        return;
+      // Header text reveals — once:true (these are section labels, not scrub content)
+      const headerEls = sectionRef.current?.querySelectorAll<HTMLElement>(".choice-header-el");
+      if (headerEls?.length) {
+        gsap.fromTo(Array.from(headerEls),
+          { yPercent: 110, opacity: 0 },
+          {
+            yPercent: 0, opacity: 1, duration: 0.75,
+            stagger: 0.1, ease: "power3.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 82%", once: true },
+          }
+        );
       }
 
-      // Desktop: Pinned scroll — explicit color snap (Fix 2: no panel-level opacity;
-      // panel opacity caused text to fail a11y contrast — use per-element color dimming instead)
-      const setActive = (activeIndex: number) => {
-        decisionAid.forEach((_, i) => {
-          const panel = panelRefs.current[i];
-          const num = numRefs.current[i];
-          if (!panel || !num) return;
-          const isActive = i === activeIndex;
-          // Panel: border and bg change only — NO opacity on wrapper
-          gsap.set(panel, {
-            borderColor: isActive ? "#B87333" : "rgba(255,255,255,0.04)",
-            backgroundColor: isActive ? "#0d0d0d" : "#070707",
-          });
-          // Number: explicit color change, no opacity (aria-hidden but still needs contrast)
-          gsap.set(num, {
-            color: isActive ? "#B87333" : "#666",
-            scale: isActive ? 1.05 : 0.95,
-          });
-          // List items: dim via color, not opacity
-          const listItems = panel.querySelectorAll<HTMLElement>(".panel-item-text");
-          listItems.forEach(el => {
-            gsap.set(el, { color: isActive ? "#9ca3af" : "#555" });
-          });
-          // CTA link
-          const link = panel.querySelector<HTMLElement>(".panel-cta");
-          if (link) gsap.set(link, { color: isActive ? "#9ca3af" : "#555", borderColor: isActive ? "transparent" : "transparent" });
-        });
-      };
+      // Cards: clip-path punch-in — once:true (Pattern B). Scrub on a card section
+      // with readable text content creates lag where cards look empty too long.
+      const cards = cardsRef.current?.querySelectorAll<HTMLElement>(".choice-card");
+      if (cards?.length) {
+        gsap.fromTo(Array.from(cards),
+          { clipPath: "inset(8% 4% 8% 4%)", opacity: 0 },
+          {
+            clipPath: "inset(0% 0% 0% 0%)", opacity: 1,
+            duration: 1.05,
+            stagger: { each: 0.15, from: "start" },
+            ease: "power3.out",
+            scrollTrigger: { trigger: cardsRef.current, start: "top 85%", once: true },
+          }
+        );
+      }
 
-      setActive(0);
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          pin: stickyRef.current,
-          start: "top top",
-          end: "+=" + window.innerHeight * 1.6,
-          scrub: 0.8,
-          pinSpacing: false,
-          onUpdate: (self) => {
-            const p = self.progress;
-            if (p < 0.38) setActive(0);
-            else if (p < 0.72) setActive(1);
-            else setActive(2);
+      // Image parallax per card
+      imgRefs.current.forEach((imgInner) => {
+        if (!imgInner) return;
+        gsap.to(imgInner, {
+          yPercent: -10, ease: "none",
+          scrollTrigger: {
+            trigger: imgInner.closest(".choice-card"),
+            start: "top bottom", end: "bottom top", scrub: true,
           },
-        },
+        });
       });
-      tl.to({}, { duration: 1 });
-    }, wrapperRef);
-    pinCtxRef.current = ctx;
+    }, sectionRef);
+    ctxRef.current = ctx;
 
-    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
-    <div
-      ref={wrapperRef}
+    <section
+      ref={sectionRef}
       data-section="services-decision"
-      style={{ minHeight: isMobile ? "auto" : "260vh", position: "relative", zIndex: 2 }}
+      className="bg-black py-20 lg:py-28"
+      style={{ position: "relative", zIndex: 2 }}
     >
-      <div ref={stickyRef} className="bg-black" style={{ minHeight: "100vh", overflowX: "clip" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
-          <div className="mb-14">
-            <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
-              Which service fits your project?
-            </span>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 mb-12">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <div className="overflow-hidden mb-3">
+              <span className="choice-header-el font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block">
+                Which service fits your project?
+              </span>
+            </div>
             <div
               ref={hairlineRef}
-              style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", maxWidth: 80, marginBottom: "2rem" }}
+              style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", maxWidth: 80, marginBottom: "1.25rem" }}
             />
-            <h2
-              className="font-display font-bold text-white tracking-tight leading-[0.9]"
-              style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
-            >
-              Scope it in{" "}
-              <span style={{ color: "rgba(255,255,255,0.58)" }}>60 seconds.</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px">
-            {decisionAid.map((item, i) => {
-              const service = SERVICES.find((s) => s.slug === item.slug);
-              return (
-                <div
-                  key={item.slug}
-                  ref={(el) => { panelRefs.current[i] = el; }}
-                  className="decision-panel border p-10 lg:p-12"
-                  style={{ borderColor: i === 0 ? "#B87333" : "rgba(255,255,255,0.04)", backgroundColor: i === 0 ? "#0d0d0d" : "#070707" }}
-                >
-                  <span
-                    ref={(el) => { numRefs.current[i] = el; }}
-                    aria-hidden="true"
-                    className="font-numbers font-bold leading-none block mb-6 select-none"
-                    style={{
-                      fontSize: "clamp(2.5rem, 3.5vw, 3.5rem)",
-                      color: i === 0 ? "#B87333" : "#666",
-                    }}
-                  >
-                    {item.num}
-                  </span>
-                  <h3
-                    className="font-display font-bold text-white tracking-tight leading-tight mb-6"
-                    style={{ fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)" }}
-                  >
-                    {item.service}
-                  </h3>
-                  <ul className="space-y-3 mb-10">
-                    {item.when.map((w) => (
-                      <li key={w} className="flex items-start gap-3">
-                        <span className="w-px h-3.5 bg-[#B87333] flex-shrink-0 mt-[3px] opacity-60" />
-                        <span className="panel-item-text text-sm leading-relaxed" style={{ color: i === 0 ? "#9ca3af" : "#555" }}>{w}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href={`/services/${item.slug}`}
-                    className="panel-cta group inline-flex items-center gap-2 font-labels text-[10px] tracking-[0.16em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5"
-                    style={{ color: i === 0 ? "#9ca3af" : "#555" }}
-                  >
-                    {service?.short ?? item.service}
-                    <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                  </Link>
-                </div>
-              );
-            })}
+            <div className="overflow-hidden">
+              <h2
+                className="choice-header-el font-display font-bold text-white tracking-tight leading-[0.9]"
+                style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
+              >
+                Scope it in{" "}
+                <span style={{ color: "rgba(255,255,255,0.5)" }}>60 seconds.</span>
+              </h2>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Three image cards */}
+      <div
+        ref={cardsRef}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-[3px]"
+      >
+        {choiceCards.map((card, i) => {
+          const service = SERVICES.find((s) => s.slug === card.slug);
+          return (
+            <div
+              key={card.slug}
+              className="choice-card relative overflow-hidden group"
+              style={{ minHeight: "clamp(380px, 55vw, 520px)" }}
+            >
+              {/* Background image */}
+              <div
+                ref={(el) => { imgRefs.current[i] = el; }}
+                className="absolute left-0 right-0"
+                style={{ top: "-7.5%", height: "115%", willChange: "transform" }}
+              >
+                <Image
+                  src={card.image}
+                  alt={card.imageAlt}
+                  fill
+                  className="object-cover"
+                  style={{ filter: "contrast(1.06) saturate(1.08)" }}
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                />
+              </div>
+
+              {/* Dark overlay — heavier at bottom for text legibility */}
+              <div
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.85) 100%)" }}
+              />
+
+              {/* Copper top accent line */}
+              <div
+                className="absolute top-0 left-0 right-0"
+                style={{ height: 2, background: "#B87333", opacity: i === 0 ? 0.7 : 0.25, transition: "opacity 0.3s" }}
+              />
+
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-10">
+                {/* Number */}
+                <span
+                  className="font-numbers font-bold leading-none mb-4 select-none"
+                  aria-hidden="true"
+                  style={{ fontSize: "clamp(2rem, 2.8vw, 2.8rem)", color: "#B87333" }}
+                >
+                  {card.num}
+                </span>
+
+                <h3
+                  className="font-display font-bold text-white tracking-tight leading-[0.92] mb-5"
+                  style={{ fontSize: "clamp(1.4rem, 2vw, 1.8rem)" }}
+                >
+                  {card.service}
+                </h3>
+
+                {/* When to use — shown on hover on desktop, always visible on mobile */}
+                <ul className="space-y-2 mb-6 lg:max-h-0 lg:overflow-hidden lg:group-hover:max-h-40 transition-all duration-500">
+                  {card.when.slice(0, 3).map((w) => (
+                    <li key={w} className="flex items-start gap-2.5">
+                      <span className="w-px h-3 bg-[#B87333] flex-shrink-0 mt-[3px] opacity-60" />
+                      <span className="text-gray-300 text-xs leading-relaxed">{w}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={`/services/${card.slug}`}
+                  className="group/link inline-flex items-center gap-2 font-labels text-[10px] text-gray-300 tracking-[0.16em] uppercase border-b border-white/20 hover:text-[#B87333] hover:border-[#B87333] pb-0.5 transition-colors duration-200 self-start"
+                >
+                  {service?.short ?? card.service}
+                  <span className="transition-transform duration-200 group-hover/link:translate-x-1">→</span>
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
 // ─── Section: Service row ─────────────────────────────────────────────────────
-// v3 upgrade: body text now scrub-parallaxed (yPercent), not event-fired.
-// Ghost number opacity reduced (0 → 0.08) — was overbrighted at 1.
-// Remediation bg changed from white to #0f0f0f — eliminates jarring light flash.
+// Enhanced: main image + secondary inset (absolute, bottom corner)
+// Fixes: opacity:0 removed from JSX (Fix 14), mobile branch added (Fix 15),
+//        clip-path starts at top 115% so image isn't black on entry
 
 function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0]; index: number }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const imagePaneRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
+  const secondaryRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const seamRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
@@ -646,12 +769,35 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
   const bodyTextRef = useRef<HTMLDivElement>(null);
   const taglineSplitRef = useRef<SplitType | null>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (taglineSplitRef.current) { try { taglineSplitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
+  useLayoutEffect(() => () => {
+    if (taglineSplitRef.current) { try { taglineSplitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   const service = SERVICES.find((s) => s.slug === detail.slug)!;
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    // Set ghost number initial state via gsap.set (Fix 14: not in JSX)
+    if (ghostNumRef.current) {
+      gsap.set(ghostNumRef.current, { opacity: 0, yPercent: 8 });
+    }
+
+    const shouldAnimate = AnimationController.shouldAnimate();
+
+    if (!shouldAnimate) {
+      // Mobile branch (Fix 15): set ghost to final state, reveal elements
+      if (ghostNumRef.current) gsap.set(ghostNumRef.current, { opacity: 0.06, yPercent: 0 });
+      const revealEls = [imagePaneRef.current, secondaryRef.current, textRef.current].filter(Boolean);
+      if (revealEls.length) {
+        gsap.fromTo(revealEls,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.65, stagger: 0.12, ease: "power3.out",
+            scrollTrigger: { trigger: rowRef.current, start: "top 85%", once: true } }
+        );
+      }
+      return;
+    }
+
     let mounted = true;
     let taglineSplitFrame = -1;
     let taglineSplit: SplitType | null = null;
@@ -660,17 +806,28 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
     const ctx = gsap.context(() => {
       const trigger = rowRef.current!;
 
-      // Scrubbed clip-path on image pane (Pattern B)
+      // Main image: clip-path scrub — starts at top 115% so reveal begins as section enters (fixes black flash)
       const clipFrom = detail.imageLeft ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)";
       gsap.fromTo(imagePaneRef.current,
         { clipPath: clipFrom },
         {
           clipPath: "inset(0% 0% 0% 0%)", ease: "none",
-          scrollTrigger: { trigger, start: "top 80%", end: "top 25%", scrub: 1.2 },
+          scrollTrigger: { trigger, start: "top 115%", end: "top 30%", scrub: 1.4 },
         }
       );
 
-      // Image parallax yPercent (Pattern F)
+      // Secondary image: clip-path from bottom
+      if (secondaryRef.current) {
+        gsap.fromTo(secondaryRef.current,
+          { clipPath: "inset(100% 0% 0% 0%)" },
+          {
+            clipPath: "inset(0% 0% 0% 0%)", ease: "none",
+            scrollTrigger: { trigger, start: "top 85%", end: "top 30%", scrub: 1.6 },
+          }
+        );
+      }
+
+      // Main image parallax yPercent
       if (imgRef.current) {
         gsap.to(imgRef.current, {
           yPercent: -12, ease: "none",
@@ -678,7 +835,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // Scale-through-scroll (Pattern 4)
+      // Image scale-through-scroll
       const imgEl = imagePaneRef.current?.querySelector("img");
       if (imgEl) {
         gsap.fromTo(imgEl, { scale: 1.08 }, {
@@ -687,15 +844,15 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // Ghost number parallax — opacity caps at 0.08 (was 1, too bright)
+      // Ghost number parallax
       if (ghostNumRef.current) {
-        gsap.fromTo(ghostNumRef.current, { opacity: 0, yPercent: 8 }, {
+        gsap.to(ghostNumRef.current, {
           opacity: 0.08, yPercent: 0, ease: "none",
           scrollTrigger: { trigger, start: "top bottom", end: "top 30%", scrub: 1.5 },
         });
       }
 
-      // Copper hairline scaleX scrub (Pattern D)
+      // Copper hairline scaleX scrub
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -703,7 +860,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // Copper seam scaleY (event, once — Pattern E)
+      // Copper seam scaleY (event, once)
       if (seamRef.current) {
         gsap.fromTo(seamRef.current, { scaleY: 0 }, {
           scaleY: 1, duration: 1, delay: 0.3, ease: "power2.inOut", transformOrigin: "top",
@@ -711,25 +868,23 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         });
       }
 
-      // Body text — scrub yPercent (v3 upgrade: was event-only, now scrubbed)
+      // Body text scrub parallax
       if (bodyTextRef.current) {
         const bodyEls = bodyTextRef.current.querySelectorAll<HTMLElement>(".body-scrub");
-        if (bodyEls.length) {
-          bodyEls.forEach((el, i) => {
-            gsap.fromTo(el, { yPercent: 8, opacity: 0 }, {
-              yPercent: 0, opacity: 1, ease: "none",
-              scrollTrigger: {
-                trigger,
-                start: `top ${72 - i * 4}%`,
-                end: `top ${35 - i * 3}%`,
-                scrub: 1.2,
-              },
-            });
+        bodyEls.forEach((el, i) => {
+          gsap.fromTo(el, { yPercent: 8, opacity: 0 }, {
+            yPercent: 0, opacity: 1, ease: "none",
+            scrollTrigger: {
+              trigger,
+              start: `top ${72 - i * 4}%`,
+              end: `top ${35 - i * 3}%`,
+              scrub: 1.2,
+            },
           });
-        }
+        });
       }
 
-      // SplitType char reveal SCRUB on tagline — 4-guard cleanup
+      // SplitType char reveal SCRUB on tagline — 4-guard (Fix 1)
       if (taglineEl) {
         const _el = taglineEl;
         taglineSplitFrame = requestAnimationFrame(() => {
@@ -758,20 +913,17 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
       cancelAnimationFrame(taglineSplitFrame);
       if (taglineSplit && taglineEl?.isConnected) { try { taglineSplit.revert(); } catch {} }
       taglineSplitRef.current = null;
-      ctxRef.current = null; try { ctx.revert(); } catch {}
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, [detail.imageLeft]);
 
-  // All service rows now dark — eliminates jarring white flash between black sections
-  const textPrimary = "text-white";
-  const textSecondary = "text-gray-400";
-  const labelColor = "text-gray-500";
-
   const imagePart = (
     <div
-      className="relative flex-shrink-0 w-full md:w-[60%] self-stretch"
-      style={{ minHeight: "clamp(360px, 50vw, 100%)" }}
+      className="relative flex-shrink-0 w-full lg:w-[58%] self-stretch"
+      style={{ minHeight: "clamp(380px, 52vw, 100%)" }}
     >
+      {/* Main image */}
       <div ref={imagePaneRef} className="absolute inset-0 overflow-hidden">
         <div ref={imgRef} className="absolute left-0 right-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
@@ -780,7 +932,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
             fill
             className="object-cover"
             style={{ filter: "contrast(1.05) saturate(1.08)" }}
-            sizes="(max-width: 768px) 100vw, 60vw"
+            sizes="(max-width: 1024px) 100vw, 58vw"
           />
         </div>
         {/* Edge gradient */}
@@ -788,13 +940,40 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
           className="absolute inset-0"
           style={{
             background: detail.imageLeft
-              ? "linear-gradient(to right, rgba(0,0,0,0) 55%, rgba(0,0,0,0.35) 100%)"
-              : "linear-gradient(to left, rgba(0,0,0,0) 55%, rgba(0,0,0,0.35) 100%)",
+              ? "linear-gradient(to right, rgba(0,0,0,0) 55%, rgba(0,0,0,0.30) 100%)"
+              : "linear-gradient(to left, rgba(0,0,0,0) 55%, rgba(0,0,0,0.30) 100%)",
           }}
         />
       </div>
 
-      {/* Ghost chapter number */}
+      {/* Secondary image inset — absolute, bottom corner, 40%×42% of pane */}
+      <div
+        ref={secondaryRef}
+        className="absolute z-10 overflow-hidden border border-white/10"
+        style={{
+          width: "40%",
+          aspectRatio: "4/3",
+          bottom: "1.5rem",
+          ...(detail.imageLeft ? { right: "1.5rem" } : { left: "1.5rem" }),
+        }}
+      >
+        <Image
+          src={detail.imageSecondary}
+          alt={detail.imageSecondaryAlt}
+          fill
+          className="object-cover"
+          style={{ filter: "contrast(1.06) saturate(1.1)" }}
+          sizes="(max-width: 1024px) 40vw, 23vw"
+        />
+        <div className="absolute inset-0 bg-black/15" />
+        {/* Copper corner accent */}
+        <div
+          className="absolute top-0 left-0 right-0"
+          style={{ height: 2, background: "#B87333", opacity: 0.55 }}
+        />
+      </div>
+
+      {/* Ghost chapter number — opacity controlled via gsap.set (Fix 14) */}
       <div
         ref={ghostNumRef}
         className="absolute z-10 pointer-events-none select-none font-numbers font-bold leading-none"
@@ -802,9 +981,8 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         style={{
           fontSize: "clamp(6rem, 10vw, 9rem)",
           color: "#B87333",
-          opacity: 0,
-          bottom: 32,
-          ...(detail.imageLeft ? { right: 28 } : { left: 28 }),
+          top: 32,
+          ...(detail.imageLeft ? { left: 28 } : { right: 28 }),
         }}
       >
         0{index + 1}
@@ -827,18 +1005,16 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
   const textPart = (
     <div
       ref={textRef}
-      className={`flex flex-col justify-center flex-1 ${detail.bg} px-10 py-16 md:px-14 lg:px-16`}
-      style={{ minHeight: "clamp(420px, 40vw, 100%)" }}
+      className="flex flex-col justify-center flex-1 bg-black px-10 py-16 lg:px-14 lg:py-20"
+      style={{ minHeight: "clamp(420px, 42vw, 100%)" }}
     >
-      {/* Eyebrow */}
-      <span className={`font-labels text-[10px] ${labelColor} tracking-[0.22em] uppercase mb-3 block`}>
+      <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase mb-3 block">
         {service.short}
       </span>
 
-      {/* Tagline — SplitType char scrub */}
       <h2
         ref={taglineRef}
-        className={`font-display font-bold ${textPrimary} tracking-tight leading-[0.92] mb-5`}
+        className="font-display font-bold text-white tracking-tight leading-[0.92] mb-5"
         style={{ fontSize: "clamp(2.2rem, 3.2vw, 3.6rem)" }}
       >
         {detail.tagline[0]}
@@ -849,54 +1025,45 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
         )}
       </h2>
 
-      {/* Copper hairline scrub */}
       <div
         ref={hairlineRef}
-        style={{
-          height: 1, background: "#B87333", opacity: 0.4,
-          transformOrigin: "left", maxWidth: 56, marginBottom: "1.5rem",
-        }}
+        style={{ height: 1, background: "#B87333", opacity: 0.4, transformOrigin: "left", maxWidth: 56, marginBottom: "1.5rem" }}
       />
 
-      {/* Body text — scrub yPercent parallax */}
       <div ref={bodyTextRef}>
-        {/* For who */}
-        <p className={`body-scrub text-sm leading-relaxed mb-6 max-w-[22rem] italic ${textSecondary}`}>
+        <p className="body-scrub text-sm leading-relaxed mb-6 max-w-[22rem] italic text-gray-400">
           &ldquo;{detail.forWho}&rdquo;
         </p>
 
-        {/* Common problems */}
         <div className="body-scrub mb-5">
-          <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>
+          <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase mb-2.5">
             Common Problems We Solve
           </div>
           <ul className="space-y-2">
             {detail.problems.map((p) => (
               <li key={p} className="flex items-start gap-2.5">
                 <span className="w-px h-3 bg-[#B87333] flex-shrink-0 mt-[3px] opacity-55" />
-                <span className={`${textSecondary} text-xs leading-relaxed`}>{p}</span>
+                <span className="text-gray-400 text-xs leading-relaxed">{p}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* What's included */}
         <div className="body-scrub mb-8">
-          <div className={`font-labels text-[9px] ${labelColor} tracking-[0.2em] uppercase mb-2.5`}>
+          <div className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase mb-2.5">
             What&apos;s Included
           </div>
           <ul className="space-y-2">
             {service.details.slice(0, 4).map((d) => (
               <li key={d} className="flex items-start gap-2.5">
                 <span className="w-px h-3 bg-white/20 flex-shrink-0 mt-[3px]" />
-                <span className={`${textSecondary} text-xs leading-relaxed`}>{d}</span>
+                <span className="text-gray-400 text-xs leading-relaxed">{d}</span>
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      {/* CTA */}
       <Link
         href={`/services/${detail.slug}`}
         className="group inline-flex items-center gap-2 font-labels text-[10px] tracking-[0.16em] uppercase border-b pb-0.5 self-start transition-colors duration-200 text-gray-400 border-gray-700 hover:text-[#B87333] hover:border-[#B87333]"
@@ -911,7 +1078,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
     <div
       ref={rowRef}
       data-service={detail.slug}
-      className={`flex flex-col ${detail.imageLeft ? "md:flex-row" : "md:flex-row-reverse"} w-full`}
+      className={`flex flex-col ${detail.imageLeft ? "lg:flex-row" : "lg:flex-row-reverse"} w-full`}
       style={{ position: "relative", zIndex: 2, minHeight: "clamp(560px, 100vh, 100vh)" }}
     >
       {imagePart}
@@ -921,7 +1088,6 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
 }
 
 // ─── Section: CTA ─────────────────────────────────────────────────────────────
-// v3 upgrade: larger headline clamp(3rem, 6vw, 5.5rem), stronger eyebrow, tighter copy
 
 function ServicesCTA() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -929,10 +1095,26 @@ function ServicesCTA() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (splitRef.current) { try { splitRef.current.revert(); } catch {} } try { ctxRef.current?.revert(); } catch {} }, []);
+  useLayoutEffect(() => () => {
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    const shouldAnimate = AnimationController.shouldAnimate();
+
+    if (!shouldAnimate) {
+      const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>(".cta-el");
+      if (revealEls?.length) {
+        gsap.fromTo(Array.from(revealEls),
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", once: true } }
+        );
+      }
+      return;
+    }
+
     let mounted = true;
     let splitFrame = -1;
     let ctaSplit: SplitType | null = null;
@@ -946,7 +1128,6 @@ function ServicesCTA() {
         });
       }
 
-      // SplitType 4-guard cleanup
       if (ctaEl) {
         const _el = ctaEl;
         const _trigger = sectionRef.current;
@@ -971,7 +1152,7 @@ function ServicesCTA() {
 
       const els = sectionRef.current?.querySelectorAll<HTMLElement>(".cta-el");
       if (els?.length) {
-        gsap.fromTo(els, { y: 28, opacity: 0 }, {
+        gsap.fromTo(Array.from(els), { y: 28, opacity: 0 }, {
           y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: "power3.out",
           scrollTrigger: { trigger: sectionRef.current, start: "top 78%", once: true },
         });
@@ -984,7 +1165,8 @@ function ServicesCTA() {
       cancelAnimationFrame(splitFrame);
       if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
       splitRef.current = null;
-      ctxRef.current = null; try { ctx.revert(); } catch {}
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
     };
   }, []);
 
@@ -1041,7 +1223,7 @@ export default function ServicesContent() {
       <ServicesHero />
       <ServiceStrip />
       <ServicesIntro />
-      <PinnedDecisionAid />
+      <ServiceChoiceCards />
       {serviceDetails.map((detail, i) => (
         <div key={detail.slug}>
           <ServiceSection detail={detail} index={i} />

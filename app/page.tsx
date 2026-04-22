@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import HeroSections from "@/components/home/HeroSections";
-import ServicesPreview from "@/components/home/ServicesPreview";
-import AboutPreview from "@/components/home/AboutPreview";
-import ProjectsPreview from "@/components/home/ProjectsPreview";
 import BuildingScience from "@/components/home/BuildingScience";
+import ServicesPreview from "@/components/home/ServicesPreview";
+import HomeInterstitial from "@/components/home/HomeInterstitial";
+import ProjectsPreview from "@/components/home/ProjectsPreview";
 import HomeCTA from "@/components/home/HomeCTA";
 import SectionDivider from "@/components/layout/SectionDivider";
 import JsonLd from "@/components/shared/JsonLd";
@@ -51,23 +51,22 @@ export default function HomePage() {
       {/* Hero — 200vh with sticky parallax panel */}
       <HeroSections />
 
-      {/* Hero → Services: black-to-black, copper seam */}
-      <SectionDivider opacity={0.5} />
-      <ServicesPreview />
-
-      {/* Services → About: black-to-white, copper seam */}
-      <SectionDivider opacity={0.6} />
-      <AboutPreview />
-
-      {/* About → Projects: white-to-dark, copper seam */}
-      <SectionDivider opacity={0.5} />
-      <ProjectsPreview />
-
-      {/* Projects → Building Science: dark-to-white, copper seam */}
+      {/* Hero → Differentiator: black-to-white — WHY before WHAT */}
       <SectionDivider opacity={0.6} />
       <BuildingScience />
 
-      {/* Building Science → CTA: white-to-black, copper seam */}
+      {/* Differentiator → Services: white-to-black, copper seam */}
+      <SectionDivider opacity={0.5} />
+      <ServicesPreview />
+
+      {/* Services → Interstitial → Projects */}
+      <HomeInterstitial />
+
+      {/* Services → Projects: black-to-dark, copper seam */}
+      <SectionDivider opacity={0.5} />
+      <ProjectsPreview />
+
+      {/* Projects → CTA: dark-to-black, copper seam */}
       <SectionDivider opacity={0.6} />
       <HomeCTA />
     </>

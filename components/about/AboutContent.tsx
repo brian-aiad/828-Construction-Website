@@ -75,11 +75,42 @@ const cityCards = [
   { city: "Hawthorne", tag: "Active", note: "Remediation work and ADU consulting for South Bay homeowners." },
 ];
 
-const statItems = [
-  { target: 20, suffix: "+", label: "Years\nfield experience" },
-  { target: 100, suffix: "%", label: "Root-cause\napproach" },
-  { target: 1, suffix: "", label: "Standard —\nright or not at all" },
-  { target: 3, suffix: "", label: "Core service\ndisciplines" },
+const takeOnItems = [
+  {
+    label: "ADU Construction",
+    detail: "Detached units, garage conversions, JADUs — full-build from permit to finish.",
+  },
+  {
+    label: "Structural Remediation",
+    detail: "Water intrusion, envelope failures, construction defects. Root-cause investigation, not cosmetic repair.",
+  },
+  {
+    label: "Pre-Construction Consulting",
+    detail: "Feasibility analysis, contractor vetting, defect review. Know what you’re getting into before you commit.",
+  },
+  {
+    label: "Building Science Projects",
+    detail: "Complex work that rewards diagnostics. If the problem matters more than the surface, it’s a fit.",
+  },
+];
+
+const dontTakeItems = [
+  {
+    label: "Cosmetic-Only Scope",
+    detail: "Paint, fixture swaps, surface finishes — work where the building science doesn’t matter.",
+  },
+  {
+    label: "Predetermined Solutions",
+    detail: "If you need us to confirm a decision already made rather than evaluate the problem, we’re not the right firm.",
+  },
+  {
+    label: "Race-to-Bottom Bids",
+    detail: "If price is the only question, we’ll lose to someone who cuts corners. That’s intentional.",
+  },
+  {
+    label: "More Than Full Attention Allows",
+    detail: "We take fewer projects so each gets full focus. If we’re at capacity, we’ll tell you.",
+  },
 ];
 
 // ─── Section: Hero — triple-layer parallax + SplitType char exit ───────────────
@@ -345,18 +376,19 @@ function AboutFounder() {
   }, []);
   const statCardRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
+  const driftRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
     // Fix 14: set GSAP initial state before shouldAnimate() gate so mobile
-    // branch can explicitly clear it — stat card renders on all breakpoints.
+    // branch can explicitly clear it — credential card renders on all breakpoints.
     if (statCardRef.current) {
       gsap.set(statCardRef.current, { opacity: 0, scale: 0.78 });
     }
 
     if (!AnimationController.shouldAnimate()) {
-      // Mobile: immediately show the stat card (no animation).
+      // Mobile: immediately show the credential card (no animation).
       if (statCardRef.current) gsap.set(statCardRef.current, { opacity: 1, scale: 1 });
       return;
     }
@@ -377,6 +409,21 @@ function AboutFounder() {
             scrollTrigger: { trigger, start: "top 85%", end: "top 50%", scrub: 1 },
           }
         );
+      }
+
+      // "2004" founding year watermark — drifts horizontally as section scrolls
+      // About page signature moment: horizontal drift of founding year
+      if (driftRef.current) {
+        gsap.to(driftRef.current, {
+          xPercent: -28,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            end: "bottom 15%",
+            scrub: 1.5,
+          },
+        });
       }
 
       // SplitType on story h2 — chars animate IN via scrub
@@ -482,6 +529,27 @@ function AboutFounder() {
         style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", transform: "scaleX(0)" }}
       />
 
+      {/* About page signature: "2004" founding year watermark drifts horizontally with scroll */}
+      <div
+        ref={driftRef}
+        aria-hidden="true"
+        className="absolute pointer-events-none select-none"
+        style={{
+          top: "32%",
+          right: "5%",
+          fontSize: "clamp(5rem, 14vw, 12rem)",
+          color: "#B87333",
+          opacity: 0.04,
+          fontFamily: "var(--font-ibm-plex-mono)",
+          fontWeight: 700,
+          lineHeight: 1,
+          willChange: "transform",
+          whiteSpace: "nowrap",
+        }}
+      >
+        2004
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 lg:pt-28">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
 
@@ -515,19 +583,21 @@ function AboutFounder() {
 
             <div className="story-body space-y-5 text-gray-500 leading-relaxed text-[15px] mb-10">
               <p>
-                828 Construction was founded by Joe P — a builder with over 20 years of
-                hands-on experience in construction, building science, and project management
-                across Southern California.
+                Joe founded 828 in 2004 — a builder with over 20 years of hands-on field
+                experience and a single conviction: that most construction failures start as
+                diagnostic failures. Someone didn&apos;t measure. Someone assumed. Someone fixed
+                what was visible instead of what was actually failing.
               </p>
               <p>
-                828 was built to change that. Every project is approached with the full weight
-                of building science knowledge — understanding how materials perform, how
-                structures behave under real conditions, and how to build things that last
-                rather than just things that look good at handoff.
+                828 exists to be different. Every project is approached with the full weight
+                of building science knowledge — understanding how materials actually perform,
+                how structures behave under real conditions, and how to build things that last
+                rather than things that merely look good at handoff.
               </p>
               <p>
-                We&apos;re selective about the work we take on — because quality requires
-                attention, and attention has limits. That&apos;s not a compromise. That&apos;s the standard.
+                We&apos;re selective about the work we take on — because quality requires full
+                attention, and attention has limits. Fewer projects means each one gets the
+                diagnostic rigor it deserves. That&apos;s not a constraint. That&apos;s the standard.
               </p>
             </div>
 
@@ -565,14 +635,17 @@ function AboutFounder() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
             </div>
 
-            {/* Stat card — scale-pop emerge */}
+            {/* Credential card — scale-pop emerge */}
             <div
               ref={statCardRef}
-              className="absolute -bottom-4 -left-4 lg:-left-8 bg-black text-white p-6 w-52 z-10"
+              className="absolute -bottom-4 -left-4 lg:-left-8 bg-black text-white p-6 z-10"
+              style={{ width: "13rem" }}
             >
-              <div className="font-numbers font-bold text-3xl text-white mb-1">20+</div>
-              <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
-                Years of Field<br />Experience
+              <div className="font-labels text-[8px] text-[#B87333] tracking-[0.2em] uppercase mb-2">CA License</div>
+              <div className="font-numbers font-bold text-xl text-white mb-3">#{SITE.license}</div>
+              <div style={{ height: 1, background: "#B87333", opacity: 0.4, marginBottom: "0.75rem" }} />
+              <div className="font-labels text-[8px] text-white/45 tracking-[0.18em] uppercase leading-relaxed">
+                Est. 2004 · {SITE.address.city}, {SITE.address.state}
               </div>
             </div>
           </div>
@@ -582,63 +655,72 @@ function AboutFounder() {
   );
 }
 
-// ─── Section: Stats — GSAP scrub counters ─────────────────────────────────────
+// ─── Section: Selective Work — What fits 828 / What doesn't ──────────────────
 
-function AboutStats() {
+function AboutSelectiveWork() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const numRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const statsCtxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { try { statsCtxRef.current?.revert(); } catch {} }, []);
+  const selectiveCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { try { selectiveCtxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      const cells = sectionRef.current!.querySelectorAll<HTMLElement>(".stat-cell");
+      const takeItems = sectionRef.current!.querySelectorAll<HTMLElement>(".take-on-item");
+      const dontItems = sectionRef.current!.querySelectorAll<HTMLElement>(".dont-take-item");
+      const headEls = sectionRef.current!.querySelectorAll<HTMLElement>(".scope-head");
 
-      // Scale + emerge stagger (always fires — no shouldAnimate gate for basic reveals)
       if (AnimationController.shouldAnimate()) {
-        gsap.fromTo(cells,
-          { y: 28, opacity: 0, scale: 0.92 },
+        // Section heads: scrub in
+        gsap.fromTo(headEls,
+          { y: 22, opacity: 0 },
           {
-            y: 0, opacity: 1, scale: 1,
-            duration: 0.8, stagger: 0.1, ease: "back.out(1.2)",
-            scrollTrigger: { trigger: sectionRef.current, start: "top 88%", once: true },
+            y: 0, opacity: 1,
+            stagger: 0.18, ease: "power2.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 75%", end: "top 45%", scrub: 1.2 },
+          }
+        );
+        // Take-on items: scrub stagger
+        gsap.fromTo(takeItems,
+          { y: 28, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            stagger: { each: 0.12, from: "start" },
+            ease: "power2.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 65%", end: "top 25%", scrub: 1.3 },
+          }
+        );
+        // Don't-take items: scrub stagger, slightly delayed offset
+        gsap.fromTo(dontItems,
+          { y: 28, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            stagger: { each: 0.12, from: "start" },
+            ease: "power2.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 60%", end: "top 20%", scrub: 1.3 },
+          }
+        );
+      } else {
+        // Mobile: simple on-enter reveals
+        gsap.fromTo([...Array.from(headEls), ...Array.from(takeItems), ...Array.from(dontItems)],
+          { y: 20, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.6, stagger: 0.06, ease: "power3.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 82%", once: true },
           }
         );
       }
-
-      // Fix 10: once:true — counters fire once on enter and never reverse
-      statItems.forEach((stat, i) => {
-        const el = numRefs.current[i];
-        if (!el) return;
-
-        const obj = { val: 0 };
-        gsap.to(obj, {
-          val: stat.target,
-          duration: 2,
-          ease: "power2.out",
-          immediateRender: false,
-          onUpdate: () => {
-            el.textContent = Math.round(obj.val) + stat.suffix;
-          },
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-            once: true,
-          },
-        });
-      });
     }, sectionRef);
-    statsCtxRef.current = ctx;
+    selectiveCtxRef.current = ctx;
 
-    return () => { statsCtxRef.current = null; try { ctx.revert(); } catch {} };
+    return () => { selectiveCtxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
     <div
       ref={sectionRef}
-      data-section="about-stats"
+      data-section="about-selective-work"
       style={{
         background: "#000",
         borderTop: "1px solid rgba(184,115,51,0.4)",
@@ -647,33 +729,76 @@ function AboutStats() {
         zIndex: 2,
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-2 md:grid-cols-4">
-          {statItems.map((s, i) => (
-            <div
-              key={i}
-              className="stat-cell py-10 lg:py-14"
-              style={{
-                borderRight: i < statItems.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                paddingLeft: i > 0 ? "2rem" : 0,
-                paddingRight: i < statItems.length - 1 ? "2rem" : 0,
-              }}
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-20 lg:py-28">
+
+        <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-12 lg:mb-16">
+          Scope of Work
+        </span>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-0">
+
+          {/* Left: What fits */}
+          <div className="lg:pr-16">
+            <h2
+              className="scope-head font-display font-bold text-white tracking-tight leading-[0.92] mb-10"
+              style={{ fontSize: "clamp(1.8rem, 3.2vw, 2.8rem)" }}
             >
-              <div
-                className="font-numbers font-bold text-[#B87333] leading-none mb-2"
-                style={{ fontSize: "clamp(2.8rem, 4vw, 4.5rem)", letterSpacing: "-0.04em" }}
-              >
-                <span
-                  ref={(el) => { numRefs.current[i] = el; }}
-                >
-                  {s.target}{s.suffix}
-                </span>
-              </div>
-              <div className="font-labels text-[9px] text-white/55 tracking-[0.18em] uppercase leading-relaxed whitespace-pre-line">
-                {s.label}
-              </div>
+              What fits<br />
+              <span style={{ color: "rgba(255,255,255,0.38)" }}>828.</span>
+            </h2>
+
+            <div className="space-y-9">
+              {takeOnItems.map((item, i) => (
+                <div key={i} className="take-on-item flex items-start gap-5">
+                  <span
+                    className="font-numbers font-bold leading-none flex-shrink-0 mt-[3px]"
+                    style={{ fontSize: "0.9rem", color: "#B87333", letterSpacing: "-0.02em" }}
+                  >
+                    0{i + 1}
+                  </span>
+                  <div>
+                    <div className="font-labels text-[10px] text-white tracking-[0.18em] uppercase mb-2">
+                      {item.label}
+                    </div>
+                    <p className="text-white/45 text-[13px] leading-relaxed">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Right: What doesn't fit */}
+          <div className="lg:pl-16 lg:border-l" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+            <h2
+              className="scope-head font-display font-bold text-white tracking-tight leading-[0.92] mb-10"
+              style={{ fontSize: "clamp(1.8rem, 3.2vw, 2.8rem)" }}
+            >
+              What doesn&apos;t<br />
+              <span style={{ color: "rgba(255,255,255,0.38)" }}>fit.</span>
+            </h2>
+
+            <div className="space-y-9">
+              {dontTakeItems.map((item, i) => (
+                <div key={i} className="dont-take-item flex items-start gap-5">
+                  <span
+                    className="flex-shrink-0 mt-[7px]"
+                    style={{
+                      width: 5, height: 5, borderRadius: "50%",
+                      background: "rgba(255,255,255,0.15)",
+                      display: "block",
+                    }}
+                  />
+                  <div>
+                    <div className="font-labels text-[10px] text-white/55 tracking-[0.18em] uppercase mb-2">
+                      {item.label}
+                    </div>
+                    <p className="text-white/30 text-[13px] leading-relaxed">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -1001,7 +1126,7 @@ function AboutCraft() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 pb-6">
         <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block">
-          The Work
+          Proof of Work
         </span>
       </div>
 
@@ -1335,8 +1460,9 @@ function AboutCTA() {
           <span style={{ color: "rgba(255,255,255,0.42)" }}>who knows what they&apos;re doing?</span>
         </h2>
 
-        <p className="cta-sub text-gray-400 mb-12 max-w-sm mx-auto text-sm leading-relaxed">
-          Start with a conversation. First consultation is free.
+        <p className="cta-sub text-gray-400 mb-12 max-w-md mx-auto text-sm leading-relaxed">
+          Start with a conversation. First consultation is free. You&apos;ll get Joe&apos;s
+          direct attention and 20+ years of building science applied to your project.
         </p>
 
         {/* Actions with MagneticButton on primary CTA */}
@@ -1371,7 +1497,7 @@ export default function AboutContent() {
     <>
       <AboutHero />
       <AboutFounder />
-      <AboutStats />
+      <AboutSelectiveWork />
       <AboutPhilosophy />
       <AboutCraft />
       <AboutSouthBay />

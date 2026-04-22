@@ -6,7 +6,6 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
-import { useMobile } from "@/hooks/useMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,31 +27,51 @@ const pillars = [
   },
 ];
 
-// Three images for cross-fade as pillars advance
-const pillarImages = [
-  { src: "/images/about/building-science.jpg", alt: "Building science precision measurement" },
-  { src: "/images/about/tools.jpg", alt: "Quality construction tools" },
-  { src: "/images/about/contract.jpg", alt: "Scope and contract precision" },
-];
-
 export default function BuildingScience() {
-  const isMobile = useMobile();
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const numbersRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const pillarsElRef = useRef<(HTMLDivElement | null)[]>([]);
-  const imagesRef = useRef<(HTMLDivElement | null)[]>([]);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
-  const pinCtxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
+  const imgRef = useRef<HTMLDivElement>(null);
+  const img2Ref = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => { if (ctxRef.current) { try { ctxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
-
-    const isMobile = window.innerWidth < 1024;
+    if (!wrapperRef.current) return;
 
     const ctx = gsap.context(() => {
+      // Fix 14/15: set initial clips via GSAP (not JSX)
+      if (imgRef.current) {
+        gsap.set(imgRef.current, { clipPath: "inset(100% 0 0 0)" });
+      }
+      if (img2Ref.current) {
+        gsap.set(img2Ref.current, { clipPath: "inset(0% 0% 100% 0%)" });
+      }
+
+      if (!AnimationController.shouldAnimate()) {
+        // Mobile: immediately show images, then simple on-enter reveals
+        if (imgRef.current) {
+          gsap.set(imgRef.current, { clipPath: "inset(0% 0 0 0)" });
+        }
+        if (img2Ref.current) {
+          gsap.set(img2Ref.current, { clipPath: "inset(0% 0% 0% 0%)" });
+        }
+        const mobileEls: HTMLElement[] = [
+          headlineRef.current,
+          bodyRef.current,
+          ...Array.from(wrapperRef.current!.querySelectorAll<HTMLElement>(".pillar-row, .bs-link")),
+        ].filter((el): el is HTMLElement => !!el);
+        mobileEls.forEach((el) => {
+          gsap.from(el, {
+            opacity: 0, y: 24, duration: 0.7, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          });
+        });
+        return;
+      }
+
+      // ── DESKTOP ──────────────────────────────────────────────────────────
+
       // ── Headline line reveal ─────────────────────────────────────────────
       if (headlineRef.current) {
         const lines = headlineRef.current.querySelectorAll<HTMLElement>(".hl");
@@ -90,108 +109,100 @@ export default function BuildingScience() {
         );
       });
 
-      if (isMobile) {
-        // ── Mobile: simple stagger reveal, no pin ───────────────────────────
-        const rows = wrapperRef.current!.querySelectorAll<HTMLElement>(".pillar-row");
+      // ── Fix 16: Pillars — per-row scrub reveal (not single stagger-once) ─
+      const rows = wrapperRef.current!.querySelectorAll<HTMLElement>(".pillar-row");
+      rows.forEach((row) => {
         gsap.fromTo(
-          rows,
+          row,
           { opacity: 0, y: 28 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power3.out",
-            scrollTrigger: { trigger: wrapperRef.current, start: "top 70%", once: true },
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: row,
+              start: "top 85%",
+              end: "top 52%",
+              scrub: 1.2,
+            },
           }
         );
-        return;
-      }
-
-      // ── Desktop: PINNED SCROLL — 300vh pin ──────────────────────────────
-      // Set initial state: pillar 01 active, 02 and 03 dim
-      // Uses color tweens instead of opacity to keep text contrast accessible
-      const setActive = (activeIndex: number) => {
-        pillars.forEach((_, i) => {
-          const pillarEl = pillarsElRef.current[i];
-          const numEl = numbersRef.current[i];
-          const imgEl = imagesRef.current[i];
-
-          if (!pillarEl || !numEl) return;
-
-          const isActive = i === activeIndex;
-
-          // Tween heading color (black active, gray-600 inactive) — body text stays gray-500
-          const pillarHeading = pillarEl.querySelector<HTMLElement>(".pillar-heading");
-          if (pillarHeading) {
-            gsap.to(pillarHeading, { color: isActive ? "#000000" : "#4b5563", duration: 0.4 });
-          }
-
-          gsap.to(numEl, {
-            scale: isActive ? 1.1 : 0.95,
-            opacity: isActive ? 1 : 0.2,
-            color: isActive ? "#B87333" : "#666",
-            duration: 0.4,
-          });
-          // copper accent bar
-          const accent = pillarEl.querySelector<HTMLElement>(".pillar-accent");
-          if (accent) {
-            gsap.to(accent, {
-              scaleX: isActive ? 1 : 0,
-              opacity: isActive ? 1 : 0,
-              duration: 0.35,
-            });
-          }
-          // image cross-fade
-          if (imgEl) {
-            gsap.to(imgEl, {
-              opacity: isActive ? 1 : 0,
-              duration: 0.6,
-              ease: "power2.inOut",
-            });
-          }
-        });
-      };
-
-      // Initialize state
-      setActive(0);
-
-      // Create the scrubbed timeline
-      // pinSpacing: false — we give wrapperRef explicit height so GSAP doesn't add a spacer div
-      // This prevents the ghost whitespace that appears below the section after pinning ends
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          pin: stickyRef.current,
-          start: "top top",
-          end: "+=" + window.innerHeight * 1.8,
-          scrub: 0.8,
-          pinSpacing: false,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            if (progress < 0.38) setActive(0);
-            else if (progress < 0.72) setActive(1);
-            else setActive(2);
-          },
-        },
       });
 
-      // Keep timeline alive (GSAP needs at least one tween)
-      tl.to({}, { duration: 1 });
+      // ── Main image: scrub clip-path reveal + parallax ────────────────────
+      if (imgRef.current) {
+        gsap.fromTo(imgRef.current,
+          { clipPath: "inset(100% 0 0 0)" },
+          {
+            clipPath: "inset(0% 0 0 0)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: wrapperRef.current!,
+              start: "top 85%",
+              end: "top 30%",
+              scrub: 1.2,
+            },
+          }
+        );
+        const imgInner = imgRef.current.querySelector<HTMLElement>(".bs-img-inner");
+        if (imgInner) {
+          gsap.fromTo(imgInner,
+            { scale: 1.08 },
+            {
+              scale: 1.0,
+              ease: "none",
+              scrollTrigger: {
+                trigger: wrapperRef.current!,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.5,
+              },
+            }
+          );
+        }
+      }
 
+      // ── Secondary image: staggered clip-path from bottom ─────────────────
+      if (img2Ref.current) {
+        gsap.fromTo(img2Ref.current,
+          { clipPath: "inset(0% 0% 100% 0%)" },
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: wrapperRef.current!,
+              start: "top 65%",
+              end: "top 15%",
+              scrub: 1.2,
+            },
+          }
+        );
+        const img2Inner = img2Ref.current.querySelector<HTMLElement>(".bs-img2-inner");
+        if (img2Inner) {
+          gsap.fromTo(img2Inner,
+            { scale: 1.08 },
+            {
+              scale: 1.0,
+              ease: "none",
+              scrollTrigger: {
+                trigger: wrapperRef.current!,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.5,
+              },
+            }
+          );
+        }
+      }
     }, wrapperRef);
-    pinCtxRef.current = ctx;
+    ctxRef.current = ctx;
 
-    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
+    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
-    <div ref={wrapperRef} data-section="building-science" style={{ minHeight: isMobile ? "auto" : "280vh" }}>
-      <div
-        ref={stickyRef}
-        className="bg-white overflow-hidden"
-        style={{ minHeight: "100vh" }}
-      >
+    <div ref={wrapperRef} data-section="building-science">
+      <div className="bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-36">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
 
@@ -221,50 +232,34 @@ export default function BuildingScience() {
                 from habit or assumption.
               </p>
 
-              {/* Pillars */}
+              {/* All three pillars visible simultaneously */}
               <div className="border-t border-gray-100">
                 {pillars.map((p, i) => (
                   <div
                     key={p.num}
-                    ref={(el) => { pillarsElRef.current[i] = el; }}
                     className="pillar-row py-7 border-b border-gray-100 grid grid-cols-[4.5rem_1fr] gap-6 items-start"
                   >
                     {/* Number */}
                     <span
-                      ref={(el) => { numbersRef.current[i] = el; }}
                       aria-hidden="true"
                       className="font-numbers font-bold leading-none select-none"
                       style={{
                         fontSize: "3.5rem",
-                        color: i === 0 ? "#B87333" : "#666",
+                        color: i === 0 ? "#B87333" : "#8a8a8a",
                         letterSpacing: "-0.03em",
                         lineHeight: 1,
-                        opacity: i === 0 ? 1 : 0,
                       }}
                     >
                       {p.num}
                     </span>
 
-                    <div className="pt-1 relative">
-                      {/* Copper accent bar — left of label */}
-                      <div
-                        className="pillar-accent absolute left-0 top-[0.15rem] w-0.5 h-4 bg-[#B87333]"
-                        style={{
-                          transform: i === 0 ? "scaleX(1)" : "scaleX(0)",
-                          transformOrigin: "left",
-                          opacity: i === 0 ? 1 : 0,
-                          marginLeft: -16,
-                        }}
-                      />
-                      <div className="pillar-body">
-                        <h3
-                          className="pillar-heading font-display font-bold text-base mb-2 leading-snug"
-                          style={{ color: i === 0 ? "#000000" : "#4b5563" }}
-                        >
-                          {p.label}
-                        </h3>
-                        <p className="text-gray-500 text-sm leading-relaxed">{p.body}</p>
-                      </div>
+                    <div className="pt-1">
+                      <h3
+                        className="font-display font-bold text-black text-base mb-2 leading-snug"
+                      >
+                        {p.label}
+                      </h3>
+                      <p className="text-gray-500 text-sm leading-relaxed">{p.body}</p>
                     </div>
                   </div>
                 ))}
@@ -279,25 +274,23 @@ export default function BuildingScience() {
               </Link>
             </div>
 
-            {/* Right: cross-fading images */}
+            {/* Right: dual-image editorial composition */}
             <div className="relative">
-              <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                {pillarImages.map((img, i) => (
-                  <div
-                    key={img.src}
-                    ref={(el) => { imagesRef.current[i] = el; }}
-                    className="absolute inset-0"
-                    style={{ opacity: i === 0 ? 1 : 0 }}
-                  >
-                    <Image
-                      src={img.src}
-                      alt={img.alt}
-                      fill
-                      className="object-cover saturate-[1.12] contrast-[1.06]"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                ))}
+              {/* Main image */}
+              <div
+                ref={imgRef}
+                className="relative overflow-hidden bg-gray-100"
+                style={{ aspectRatio: "4/3" }}
+              >
+                <div className="bs-img-inner absolute inset-0" style={{ willChange: "transform" }}>
+                  <Image
+                    src="/images/about/building-science.jpg"
+                    alt="828 Construction — building science diagnostics, Torrance CA"
+                    fill
+                    className="object-cover saturate-[1.12] contrast-[1.06]"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                </div>
                 <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm px-3 py-1.5">
                   <span className="font-labels text-[9px] text-gray-300 tracking-[0.18em] uppercase">
                     Structural Precision · Building Science
@@ -305,11 +298,31 @@ export default function BuildingScience() {
                 </div>
               </div>
 
-              {/* Floating stat card */}
-              <div className="absolute -bottom-8 -right-4 lg:-right-8 bg-black text-white p-6 w-44">
-                <div className="font-numbers font-bold text-3xl text-white mb-1">20+</div>
-                <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
-                  Years of Field Experience
+              {/* Bottom row: stat card + secondary image */}
+              <div className="grid grid-cols-2 gap-[3px] mt-[3px]">
+                {/* Stat card */}
+                <div className="bg-black text-white p-6 flex flex-col justify-end" style={{ minHeight: 150 }}>
+                  <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>20+</div>
+                  <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
+                    Years of Field Experience
+                  </div>
+                </div>
+
+                {/* Secondary image */}
+                <div
+                  ref={img2Ref}
+                  className="relative overflow-hidden bg-gray-200"
+                  style={{ minHeight: 150 }}
+                >
+                  <div className="bs-img2-inner absolute inset-0" style={{ willChange: "transform" }}>
+                    <Image
+                      src="/images/about/craftsmanship.jpg"
+                      alt="828 Construction — craftsmanship detail"
+                      fill
+                      className="object-cover saturate-[1.1] contrast-[1.05]"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

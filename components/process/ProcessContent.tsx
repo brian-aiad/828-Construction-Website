@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -171,13 +171,13 @@ function ProcessHero() {
         aria-hidden="true"
       >
         <Image
-          src="/images/process/planning.jpg"
+          src="/images/process/quality-check.jpg"
           alt=""
           fill
           priority
           sizes="100vw"
           className="object-cover"
-          style={{ filter: "contrast(1.05) saturate(0.9) brightness(0.92)" }}
+          style={{ filter: "contrast(1.06) saturate(1.0) brightness(0.92)" }}
         />
       </div>
       <div
@@ -258,7 +258,6 @@ function PinnedTimeline() {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const pinCtxRef = useRef<gsap.Context | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
 
   useEffect(() => {
@@ -305,8 +304,6 @@ function PinnedTimeline() {
           let newIndex = Math.min(phaseCount - 1, Math.floor(p / threshold));
           // Last 5% of progress stays on last panel
           if (p >= 0.98) newIndex = phaseCount - 1;
-
-          setActiveIndex(newIndex);
 
           // Ghost number counter (01→04) via snap
           if (ghostNumRef.current) {
@@ -503,6 +500,7 @@ function PinnedTimeline() {
                   <div className="col-span-12 lg:col-span-7">
                     <div
                       ref={(el) => { imgRefs.current[i] = el; }}
+                      data-pin-image="true"
                       className="relative"
                       style={{
                         height: "clamp(340px, 42vw, 560px)",
@@ -544,24 +542,34 @@ function PinnedTimeline() {
   );
 }
 
-// ─── Section: Pinned standards ────────────────────────────────────────────────
+// ─── Section: Editorial Standards (replaces PinnedStandards) ─────────────────
+// Natural scroll — no pin. Each row reveals via per-row scrub trigger.
+// Vertical copper rule grows top→bottom as user reads through the section
+// (distinct from the timeline's horizontal progress bar).
 
-function PinnedStandards() {
-  const isMobile = useMobile();
+function EditorialStandards() {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
+  const vertRuleRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const pinCtxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => { if (pinCtxRef.current) { try { pinCtxRef.current.revert(); } catch {} } }, []);
+  const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !wrapperRef.current) return;
+    if (!AnimationController.shouldAnimate()) return;
 
-    const isMobileW = window.innerWidth < 1024;
+    let mounted = true;
+    let splitFrame = -1;
+    let headlineSplit: SplitType | null = null;
 
     const ctx = gsap.context(() => {
+      // Copper hairline reveal (Pattern D)
       if (hairlineRef.current) {
         gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
           scaleX: 1, ease: "none",
@@ -569,6 +577,50 @@ function PinnedStandards() {
         });
       }
 
+      // Vertical copper rule — grows from top as user reads through the section
+      if (vertRuleRef.current) {
+        gsap.fromTo(vertRuleRef.current, { scaleY: 0 }, {
+          scaleY: 1, ease: "none",
+          transformOrigin: "top",
+          scrollTrigger: { trigger: wrapperRef.current, start: "top 55%", end: "bottom 55%", scrub: 1.2 },
+        });
+      }
+
+      // Headline char scrub reveal (Fix 1 — 4-guard SplitType cleanup)
+      const headEl = headlineRef.current;
+      if (headEl) {
+        splitFrame = requestAnimationFrame(() => {
+          if (!mounted || !headEl.isConnected) return;
+          const split = new SplitType(headEl, { types: "chars" });
+          headlineSplit = split;
+          splitRef.current = split;
+          if (split.chars?.length) {
+            gsap.fromTo(split.chars,
+              { yPercent: 110, opacity: 0 },
+              {
+                yPercent: 0, opacity: 1,
+                stagger: { each: 0.018, from: "start" }, ease: "none",
+                scrollTrigger: { trigger: wrapperRef.current, start: "top 82%", end: "top 45%", scrub: 1.1 },
+              }
+            );
+          }
+        });
+      }
+
+      // Per-row scrub reveals — each standard activates independently as user scrolls to it
+      // (Fix 15: converted from once-on-enter to per-row scrub)
+      rowRefs.current.forEach((row) => {
+        if (!row) return;
+        gsap.fromTo(row,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1, y: 0, ease: "power2.out",
+            scrollTrigger: { trigger: row, start: "top 88%", end: "top 52%", scrub: 1.2 },
+          }
+        );
+      });
+
+      // Years counter — fires once when section is well into view (Fix 4: immediateRender:false)
       if (counterRef.current) {
         const el = counterRef.current;
         const obj = { val: 0 };
@@ -576,135 +628,114 @@ function PinnedStandards() {
           val: 20, duration: 2, ease: "power2.out",
           immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 80%", once: true },
+          scrollTrigger: { trigger: wrapperRef.current, start: "75% 80%", once: true },
         });
       }
-
-      if (isMobileW) {
-        const rows = wrapperRef.current!.querySelectorAll<HTMLElement>(".standard-row");
-        gsap.fromTo(rows, { opacity: 0, y: 24 }, {
-          opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out",
-          scrollTrigger: { trigger: wrapperRef.current, start: "top 72%", once: true },
-        });
-        return;
-      }
-
-      const setActive = (activeIndex: number) => {
-        standards.forEach((_, i) => {
-          const row = rowRefs.current[i];
-          if (!row) return;
-          const isActive = i === activeIndex;
-          const heading = row.querySelector<HTMLElement>(".std-heading");
-          const body = row.querySelector<HTMLElement>(".std-body");
-          const num = row.querySelector<HTMLElement>(".std-num");
-          if (heading) gsap.to(heading, { color: isActive ? "#ffffff" : "#374151", duration: 0.35 });
-          if (body) gsap.to(body, { opacity: isActive ? 1 : 0.3, duration: 0.35 });
-          if (num) gsap.to(num, { color: isActive ? "#B87333" : "#374151", opacity: isActive ? 1 : 0.3, duration: 0.35 });
-        });
-      };
-
-      setActive(0);
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          pin: stickyRef.current,
-          start: "top top",
-          end: "+=" + window.innerHeight * 1.8,
-          scrub: 0.8,
-          pinSpacing: false,
-          onUpdate: (self) => {
-            const p = self.progress;
-            if (p < 0.28) setActive(0);
-            else if (p < 0.53) setActive(1);
-            else if (p < 0.78) setActive(2);
-            else setActive(3);
-          },
-        },
-      });
-      tl.to({}, { duration: 1 });
     }, wrapperRef);
-    pinCtxRef.current = ctx;
 
-    return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
+    ctxRef.current = ctx;
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(splitFrame);
+      if (headlineSplit && headlineRef.current?.isConnected) {
+        try { headlineSplit.revert(); } catch {}
+      }
+      splitRef.current = null;
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
   }, []);
 
   return (
-    <div ref={wrapperRef} data-section="process-standards" style={{ minHeight: isMobile ? "auto" : "280vh", position: "relative", zIndex: 2 }}>
-      <div ref={stickyRef} className="bg-black" style={{ minHeight: "100vh", overflowX: "clip" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 lg:py-32">
+    <section
+      ref={wrapperRef}
+      data-section="process-standards"
+      className="bg-[#0a0a0a] py-24 lg:py-36"
+      style={{ position: "relative", zIndex: 2, overflowX: "clip" }}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        {/* Copper hairline */}
+        <div
+          ref={hairlineRef}
+          style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", marginBottom: "4rem" }}
+        />
 
+        {/* Section header */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mb-16 lg:mb-20">
+          <div className="lg:col-span-5">
+            <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-5">
+              Across Every Project
+            </span>
+            <h2
+              ref={headlineRef}
+              className="font-display font-bold text-white tracking-tight leading-[0.9]"
+              style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}
+            >
+              What doesn&apos;t{" "}
+              <span style={{ color: "rgba(255,255,255,0.40)" }}>change.</span>
+            </h2>
+          </div>
+          <div className="lg:col-span-7 flex items-end">
+            <p className="text-gray-400 leading-relaxed max-w-md" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
+              Structure varies project to project. Standards don&apos;t.
+              These four principles apply to every engagement.
+            </p>
+          </div>
+        </div>
+
+        {/* Standards rows with vertical rule */}
+        <div className="relative">
+          {/* Vertical copper rule — grows as user reads through (section signature) */}
           <div
-            ref={hairlineRef}
-            style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", marginBottom: "4rem" }}
+            ref={vertRuleRef}
+            className="hidden lg:block absolute left-0 top-0 h-full"
+            style={{ width: 1, background: "#B87333", opacity: 0.35, transformOrigin: "top", transform: "scaleY(0)" }}
+            aria-hidden="true"
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <div className="lg:col-span-5">
-              <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
-                Across Every Project
-              </span>
-              <h2
-                className="font-display font-bold text-white tracking-tight leading-[0.9] mb-8"
-                style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
+          <div className="lg:pl-8">
+            {standards.map((item, i) => (
+              <div
+                key={item.title}
+                ref={(el) => { rowRefs.current[i] = el; }}
+                className="py-8 lg:py-10 border-t border-white/5"
               >
-                What doesn&apos;t{" "}
-                <span style={{ color: "rgba(255,255,255,0.40)" }}>change.</span>
-              </h2>
-              <p className="text-gray-400 leading-relaxed max-w-sm mb-10">
-                Structure varies project to project. Standards don&apos;t.
-                These four principles apply to every engagement.
-              </p>
-              <div className="border-t border-white/5 pt-8">
-                <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(3rem, 5vw, 4rem)" }}>
-                  <span ref={counterRef}>20+</span>
-                </div>
-                <div className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase mt-2">
-                  Years Building South Bay
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 border-t border-white/5">
-              {standards.map((item, i) => (
-                <div
-                  key={item.title}
-                  ref={(el) => { rowRefs.current[i] = el; }}
-                  className="standard-row py-7 border-b border-white/5 grid grid-cols-[4rem_1fr] gap-6"
-                >
+                <div className="grid grid-cols-[3rem_1fr] gap-5">
                   <span
-                    className="std-num font-numbers font-bold leading-none select-none"
+                    className="font-numbers font-bold leading-none text-[#B87333] select-none"
                     aria-hidden="true"
-                    style={{
-                      fontSize: "2.5rem",
-                      color: i === 0 ? "#B87333" : "#374151",
-                      opacity: i === 0 ? 1 : 0.3,
-                      letterSpacing: "-0.03em",
-                    }}
+                    style={{ fontSize: "clamp(1.5rem, 2.2vw, 2rem)", opacity: 0.75, letterSpacing: "-0.03em", paddingTop: "0.15em" }}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <div>
+                  <div className="lg:grid lg:grid-cols-[1fr_1.8fr] lg:gap-10 items-start">
                     <h3
-                      className="std-heading font-display font-bold text-base mb-2 leading-snug"
-                      style={{ color: i === 0 ? "#ffffff" : "#374151" }}
+                      className="font-display font-bold text-white leading-tight mb-3 lg:mb-0"
+                      style={{ fontSize: "clamp(1rem, 1.5vw, 1.2rem)" }}
                     >
                       {item.title}
                     </h3>
-                    <p
-                      className="std-body text-gray-400 text-sm leading-relaxed"
-                      style={{ opacity: i === 0 ? 1 : 0.3 }}
-                    >
+                    <p className="text-gray-400 leading-relaxed" style={{ fontSize: "clamp(0.875rem, 1.2vw, 0.95rem)" }}>
                       {item.body}
                     </p>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
+
+            {/* Years counter — below the last standard row */}
+            <div className="py-8 border-t border-white/5">
+              <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(2.5rem, 4vw, 3.5rem)" }}>
+                <span ref={counterRef}>20+</span>
+              </div>
+              <div className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase mt-2">
+                Years Building South Bay
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -871,7 +902,7 @@ export default function ProcessContent() {
       <ProcessHero />
       <ProcessStrip />
       <PinnedTimeline />
-      <PinnedStandards />
+      <EditorialStandards />
       <ProcessCTA />
     </>
   );

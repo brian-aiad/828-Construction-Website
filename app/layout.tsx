@@ -82,6 +82,10 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-black font-body">
+        {/* Disable browser scroll restoration before any JS runs.
+            Prevents the race where the browser restores a mid-page Y position
+            before GSAP initialises, which leaves photos stuck at opacity:0. */}
+        <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
         {/* Skip to main content — keyboard accessibility */}
         <a href="#main-content" className="skip-link">
           Skip to main content
@@ -96,7 +100,7 @@ export default function RootLayout({
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
         </LenisProvider>
-        <Analytics />
+        {process.env.VERCEL && <Analytics />}
         <GoogleAnalytics />
       </body>
     </html>
