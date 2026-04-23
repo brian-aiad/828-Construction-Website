@@ -466,6 +466,7 @@ async function main() {
     console.log(`  Screenshots: ${outDir}/screenshots/`);
     if (exitCode === 0) {
       console.log('\n  ✅  PREFLIGHT PASSED — safe to push\n');
+      writeFileSync(join(process.cwd(), '.preflight-passed'), new Date().toISOString());
     } else {
       console.log('\n  ❌  PREFLIGHT FAILED — fix issues above before pushing\n');
     }
