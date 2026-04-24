@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -16,6 +17,7 @@ export default function FooterRevealWrapper({
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const el = ref.current;
@@ -45,7 +47,7 @@ export default function FooterRevealWrapper({
     }, ref);
 
     return () => { try { ctx.revert(); } catch {} };
-  }, []);
+  }, [pathname]);
 
   return <div ref={ref}>{children}</div>;
 }

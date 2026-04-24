@@ -137,14 +137,21 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
         window.addEventListener("load", doRefresh, { once: true });
       }
 
-      return;
+      // Cleanup runs when navigating away from the initial page.
+      // Must be in CLEANUP (not body) so it fires BEFORE the new page's
+      // children useEffects create their ScrollTriggers.
+      return () => {
+        window.scrollTo(0, 0);
+        ScrollTrigger.getAll().forEach((st) => st.kill());
+      };
     }
 
     // ── Client-side navigation ────────────────────────────────────────────
-    // Kill departing page's triggers BEFORE scrolling (prevents removeChild errors
-    // from onUpdate callbacks firing on detached nodes).
-    ScrollTrigger.getAll().forEach((st) => st.kill());
-
+    // Triggers from the departing page were already killed in the CLEANUP of the
+    // previous effect run (see return below). This effect body only needs to scroll
+    // to top and schedule the post-mount refresh — it must NOT kill triggers here
+    // because the new page's children useEffects have already run and created their
+    // ScrollTriggers by the time this parent effect body executes.
     if (window.innerWidth < 768) {
       window.scrollTo(0, 0);
     } else if (lenisRef.current) {
@@ -153,11 +160,6 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       window.scrollTo(0, 0);
     }
 
-    // After navigation: new page mounts and creates ScrollTriggers in its own
-    // useEffects. Those effects fire AFTER this one (children before parents on
-    // initial mount; but here we need to wait for the NEW page's effects, which
-    // run asynchronously after React commits the new tree).
-    // 300ms is enough for React to finish rendering + all component useEffects.
     const refreshTimer = setTimeout(() => {
       if (lenisRef.current) lenisRef.current.resize();
       ScrollTrigger.refresh(true);
@@ -169,6 +171,10 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
 
     return () => {
       clearTimeout(refreshTimer);
+      // Kill departing page's triggers in CLEANUP so they're gone before the
+      // next page's children effects run and create fresh triggers.
+      window.scrollTo(0, 0);
+      ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, [pathname]);
 

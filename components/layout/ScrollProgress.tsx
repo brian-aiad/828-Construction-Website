@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
@@ -14,6 +15,7 @@ gsap.registerPlugin(ScrollTrigger);
  */
 export default function ScrollProgress() {
   const ctxRef = useRef<gsap.Context | null>(null);
+  const pathname = usePathname();
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export default function ScrollProgress() {
     ctxRef.current = ctx;
 
     return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
-  }, []);
+  }, [pathname]);
 
   return <div id="scroll-progress" aria-hidden="true" />;
 }
