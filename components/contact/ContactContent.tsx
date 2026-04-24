@@ -503,9 +503,9 @@ function ContactMain() {
   );
 }
 
-// ─── Section: Trust signals (dark, 2004 counter — page signature) ─────────────
+// ─── Section: Trust signals (dark, 2025 counter — page signature) ─────────────
 // This section answers "are you real?" for visitors who scrolled past the form.
-// Signature: 2004 scrub counter — the only place on the site this date appears
+// Signature: 2025 scrub counter — the only place on the site this date appears
 // as a count-up. Defined in design/PATTERNS.md Per-Page Signatures.
 
 function ContactTrust() {
@@ -541,12 +541,12 @@ function ContactTrust() {
         });
       }
 
-      // Signature: 2004 establishment year counter (Fix 10: once:true, never reverses)
+      // Signature: 2025 establishment year counter (Fix 10: once:true, never reverses)
       if (yearRef.current) {
         const el = yearRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 2004, duration: 2.5, ease: "power2.out",
+          val: 2025, duration: 2.5, ease: "power2.out",
           immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val).toString(); },
           scrollTrigger: { trigger: wrapperRef.current, start: "top 72%", once: true },
@@ -558,7 +558,7 @@ function ContactTrust() {
         const el = yearsRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, duration: 2, ease: "power2.out",
+          val: 25, duration: 2, ease: "power2.out",
           immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
           scrollTrigger: { trigger: wrapperRef.current, start: "top 72%", once: true },
@@ -625,22 +625,22 @@ function ContactTrust() {
               style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
             >
               South Bay roots.{" "}
-              <span style={{ color: "rgba(255,255,255,0.38)" }}>20 years in.</span>
+              <span style={{ color: "rgba(255,255,255,0.38)" }}>25 years in.</span>
             </h2>
             <p className="trust-el text-gray-400 leading-relaxed max-w-md mb-12">
               Joe P has been diagnosing and solving construction problems across the South Bay
-              since 2004. Licensed general contractor, personally involved in every project —
+              since 2025. Licensed general contractor, personally involved in every project —
               not a call center, not a franchise.
             </p>
 
-            {/* Stats grid — 2004 counter (signature) + 20+ years */}
+            {/* Stats grid — 2025 counter (signature) + 25+ years */}
             <div className="trust-el grid grid-cols-2 gap-0 border border-white/10 mb-8">
               <div className="p-6 border-r border-white/10">
                 <div
                   className="font-numbers font-bold text-white leading-none mb-2"
                   style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
                 >
-                  <span ref={yearsRef}>20+</span>
+                  <span ref={yearsRef}>25+</span>
                 </div>
                 <div className="font-labels text-[9px] text-gray-400 tracking-[0.2em] uppercase">
                   Years Experience
@@ -651,8 +651,8 @@ function ContactTrust() {
                   className="font-numbers font-bold text-white leading-none mb-2"
                   style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
                 >
-                  {/* Signature: 2004 scrub counter — only place on site */}
-                  <span ref={yearRef}>2004</span>
+                  {/* Signature: 2025 scrub counter — only place on site */}
+                  <span ref={yearRef}>2025</span>
                 </div>
                 <div className="font-labels text-[9px] text-gray-400 tracking-[0.2em] uppercase">
                   Est. · Torrance, CA
