@@ -104,12 +104,14 @@ function ContactHero() {
         }
       });
 
-      // Hero meta + phone fade in (immediateRender: false — JSX visible by default)
+      // Hero meta + phone fade in — anchored to viewport entry via scrollTrigger
+      // rather than a bare delay() so the reveal fires reliably on navigation too.
       const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
       if (fadeEls?.length) {
         gsap.fromTo(fadeEls, { y: 20, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.7, stagger: 0.12, delay: 0.35, ease: "power3.out",
+          y: 0, opacity: 1, duration: 0.7, stagger: 0.12, ease: "power3.out",
           immediateRender: false,
+          scrollTrigger: { trigger: sectionRef.current, start: "top 95%", once: true },
         });
       }
     }, sectionRef);
@@ -168,7 +170,7 @@ function ContactHero() {
       />
 
       <div className="relative z-10 h-full flex flex-col justify-end max-w-7xl mx-auto px-6 lg:px-12 pb-16 lg:pb-24">
-        <span className="hero-fade font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase mb-6 block">
+        <span className="hero-fade font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase mb-6 block" data-gsap-reveal="true">
           Get in Touch
         </span>
 
@@ -189,7 +191,7 @@ function ContactHero() {
         </h1>
 
         {/* Subline + phone CTA row — phone visible in hero for "is this real?" users */}
-        <div className="hero-fade flex flex-col sm:flex-row sm:items-end gap-6 sm:gap-10">
+        <div className="hero-fade flex flex-col sm:flex-row sm:items-end gap-6 sm:gap-10" data-gsap-reveal="true">
           <p
             className="text-gray-300 max-w-md leading-relaxed"
             style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}

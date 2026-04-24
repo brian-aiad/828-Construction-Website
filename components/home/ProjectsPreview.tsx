@@ -23,6 +23,11 @@ export default function ProjectsPreview() {
   useEffect(() => {
     if (!sectionRef.current) return;
 
+    // Hover handlers stored outside ctx so they can be removed in cleanup.
+    // ctx.revert() kills GSAP tweens but NOT DOM event listeners — storing
+    // named refs here is the only way to reliably remove them on unmount.
+    const hoverCleanups: Array<() => void> = [];
+
     const ctx = gsap.context(() => {
       const trigger = sectionRef.current!;
 
@@ -107,25 +112,33 @@ export default function ProjectsPreview() {
         });
 
         // ── Hover: image saturation + copper border ──────────────────────────
-        cards.forEach((card) => {
-          const img = card.querySelector<HTMLImageElement>("img");
-          const copperBar = card.querySelector<HTMLElement>(".copper-bar");
-
-          card.addEventListener("mouseenter", () => {
-            if (img) gsap.to(img, { filter: "contrast(1.1) saturate(1.3)", scale: 1.03, duration: 0.45, ease: "power2.out" });
-            if (copperBar) gsap.to(copperBar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+        if (window.matchMedia("(hover: hover)").matches) {
+          cards.forEach((card) => {
+            const img = card.querySelector<HTMLImageElement>("img");
+            const copperBar = card.querySelector<HTMLElement>(".copper-bar");
+            const onEnter = () => {
+              if (img) gsap.to(img, { filter: "contrast(1.1) saturate(1.3)", scale: 1.03, duration: 0.45, ease: "power2.out" });
+              if (copperBar) gsap.to(copperBar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+            };
+            const onLeave = () => {
+              if (img) gsap.to(img, { filter: "contrast(1.06) saturate(1.1)", scale: 1, duration: 0.45, ease: "power2.out" });
+              if (copperBar) gsap.to(copperBar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
+            };
+            card.addEventListener("mouseenter", onEnter);
+            card.addEventListener("mouseleave", onLeave);
+            hoverCleanups.push(() => {
+              card.removeEventListener("mouseenter", onEnter);
+              card.removeEventListener("mouseleave", onLeave);
+            });
           });
-          card.addEventListener("mouseleave", () => {
-            if (img) gsap.to(img, { filter: "contrast(1.06) saturate(1.1)", scale: 1, duration: 0.45, ease: "power2.out" });
-            if (copperBar) gsap.to(copperBar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
-          });
-        });
+        }
       }
     }, sectionRef);
 
     ctxRef.current = ctx;
 
     return () => {
+      hoverCleanups.forEach((fn) => fn());
       ctxRef.current = null;
       try { ctx.revert(); } catch {}
     };

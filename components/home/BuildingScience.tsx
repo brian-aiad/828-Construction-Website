@@ -42,12 +42,15 @@ export default function BuildingScience() {
     if (!wrapperRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Fix 14/15: set initial clips via GSAP (not JSX)
+      // Fix 14/15: set ALL initial states via GSAP (never in JSX)
       if (imgRef.current) {
         gsap.set(imgRef.current, { clipPath: "inset(100% 0 0 0)" });
       }
       if (img2Ref.current) {
         gsap.set(img2Ref.current, { clipPath: "inset(0% 0% 100% 0%)" });
+      }
+      if (pillarRuleRef.current) {
+        gsap.set(pillarRuleRef.current, { scaleY: 0 });
       }
 
       // Stat counter — runs on all devices, once:true (Fix 10)
@@ -63,13 +66,10 @@ export default function BuildingScience() {
       }
 
       if (!AnimationController.shouldAnimate()) {
-        // Mobile: immediately show images, then simple on-enter reveals
-        if (imgRef.current) {
-          gsap.set(imgRef.current, { clipPath: "inset(0% 0 0 0)" });
-        }
-        if (img2Ref.current) {
-          gsap.set(img2Ref.current, { clipPath: "inset(0% 0% 0% 0%)" });
-        }
+        // Mobile: immediately show all elements that started hidden (Fix 14)
+        if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(0% 0 0 0)" });
+        if (img2Ref.current) gsap.set(img2Ref.current, { clipPath: "inset(0% 0% 0% 0%)" });
+        if (pillarRuleRef.current) gsap.set(pillarRuleRef.current, { scaleY: 1 });
         const mobileEls: HTMLElement[] = [
           headlineRef.current,
           bodyRef.current,
@@ -118,6 +118,7 @@ export default function BuildingScience() {
             duration: 0.65,
             delay: 0.3 + i * 0.12,
             ease: "power3.out",
+            immediateRender: false,
             scrollTrigger: { trigger: wrapperRef.current!, start: "top 75%", once: true },
           }
         );
@@ -135,7 +136,9 @@ export default function BuildingScience() {
         );
       }
 
-      // ── Fix 16: Pillars — per-row scrub reveal (not single stagger-once) ─
+      // ── Pillars — per-row scrub reveal ───────────────────────────────────
+      // immediateRender:false keeps rows visible at CSS default until trigger
+      // fires — prevents white-content if ScrollTrigger position is stale.
       const rows = wrapperRef.current!.querySelectorAll<HTMLElement>(".pillar-row");
       rows.forEach((row) => {
         gsap.fromTo(
@@ -145,6 +148,7 @@ export default function BuildingScience() {
             opacity: 1,
             y: 0,
             ease: "power2.out",
+            immediateRender: false,
             scrollTrigger: {
               trigger: row,
               start: "top 85%",
@@ -251,7 +255,7 @@ export default function BuildingScience() {
                 </span>
               </h2>
 
-              <p ref={bodyRef} className="text-gray-500 leading-relaxed max-w-md mb-12">
+              <p ref={bodyRef} className="text-gray-500 leading-relaxed max-w-md mb-12" data-gsap-reveal="true">
                 Most contractors know how to build. Fewer understand why buildings
                 fail — and fewer still can prevent it before it happens. Every
                 decision at 828 starts from how buildings actually perform, not
@@ -264,7 +268,7 @@ export default function BuildingScience() {
                 <div
                   ref={pillarRuleRef}
                   className="hidden lg:block absolute left-0 top-0 h-full"
-                  style={{ width: 2, background: "#B87333", opacity: 0.4, transformOrigin: "top", transform: "scaleY(0)" }}
+                  style={{ width: 2, background: "#B87333", opacity: 0.4, transformOrigin: "top" }}
                   aria-hidden="true"
                 />
                 <div className="lg:pl-5">
@@ -272,6 +276,7 @@ export default function BuildingScience() {
                     <div
                       key={p.num}
                       className="pillar-row group py-7 border-b border-gray-100 grid grid-cols-[4.5rem_1fr] gap-6 items-start transition-colors duration-300 hover:bg-gray-50 cursor-default"
+                      data-gsap-reveal="true"
                     >
                       {/* Number */}
                       <span
@@ -314,6 +319,7 @@ export default function BuildingScience() {
                 ref={imgRef}
                 className="relative overflow-hidden bg-gray-100"
                 style={{ aspectRatio: "4/3" }}
+                data-gsap-reveal="true"
               >
                 <div className="bs-img-inner absolute inset-0" style={{ willChange: "transform" }}>
                   <Image
@@ -346,6 +352,7 @@ export default function BuildingScience() {
                   ref={img2Ref}
                   className="relative overflow-hidden bg-gray-200"
                   style={{ minHeight: 150 }}
+                  data-gsap-reveal="true"
                 >
                   <div className="bs-img2-inner absolute inset-0" style={{ willChange: "transform" }}>
                     <Image

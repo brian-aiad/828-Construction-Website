@@ -146,6 +146,7 @@ function ServiceRow({
           opacity: 1,
           stagger: { each: 0.06, from: "start" },
           ease: "power3.out",
+          immediateRender: false,
           scrollTrigger: { trigger, start: "top 72%", end: "top 32%", scrub: 1.1 },
         }
       );
@@ -185,7 +186,7 @@ function ServiceRow({
       style={{ minHeight: "clamp(320px, 55vw, 700px)" }}
     >
       {/* Clipping wrapper — clip-path animates on this */}
-      <div ref={imagePaneRef} className="absolute inset-0">
+      <div ref={imagePaneRef} className="absolute inset-0" data-gsap-reveal="true">
         {/* Parallax wrapper: 115% tall, offset -7.5% top, GSAP moves this */}
         <div
           ref={imgRef as React.RefObject<HTMLDivElement>}

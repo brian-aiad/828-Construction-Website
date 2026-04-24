@@ -296,6 +296,7 @@ export default function HomeCTA() {
                 ref={imageWrapRef}
                 className="relative overflow-hidden"
                 style={{ aspectRatio: "4/5" }}
+                data-gsap-reveal="true"
               >
                 <Image
                   src="/images/projects/adu-interior-living.jpg"
