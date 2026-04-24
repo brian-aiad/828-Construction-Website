@@ -209,7 +209,7 @@ export default function HomeInterstitial() {
           ref={labelRef}
           className="font-labels text-[10px] text-white/45 tracking-[0.3em] uppercase mb-6"
         >
-          South Bay · Torrance CA · Since 2004
+          South Bay · Torrance CA · Since 2025
         </div>
 
         {/* Copper hairline */}

@@ -231,7 +231,7 @@ export default function HomeCTA() {
           {/* Left: copy + CTAs */}
           <div className="lg:col-span-6">
             <span className="cta-label font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-6">
-              Torrance, CA · Est. 2004
+              Torrance, CA · Est. 2025
             </span>
 
             <h2

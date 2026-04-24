@@ -53,7 +53,7 @@ export default function Hero() {
           </span>
           <span className="w-px h-3 bg-white/20" />
           <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
-            Est. 2004
+            Est. 2025
           </span>
         </motion.div>
 

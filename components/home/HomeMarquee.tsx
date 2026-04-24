@@ -5,13 +5,13 @@
 const ITEMS = [
   "ADU Specialists",
   "South Bay",
-  "20+ Years",
+  "25+ Years",
   "Torrance CA",
   "CA License #1141119",
   "Building Science First",
   "Remediation",
   "Free Consultation",
-  "Est. 2004",
+  "Est. 2025",
   "Structural Integrity",
 ];
 
