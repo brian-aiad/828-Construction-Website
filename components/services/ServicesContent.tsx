@@ -924,7 +924,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
       style={{ minHeight: "clamp(380px, 52vw, 100%)" }}
     >
       {/* Main image */}
-      <div ref={imagePaneRef} className="absolute inset-0 overflow-hidden">
+      <div ref={imagePaneRef} className="absolute inset-0 overflow-hidden" data-gsap-reveal="true">
         <div ref={imgRef} className="absolute left-0 right-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
             src={detail.image}
@@ -950,6 +950,7 @@ function ServiceSection({ detail, index }: { detail: (typeof serviceDetails)[0];
       <div
         ref={secondaryRef}
         className="absolute z-10 overflow-hidden border border-white/10"
+        data-gsap-reveal="true"
         style={{
           width: "40%",
           aspectRatio: "4/3",

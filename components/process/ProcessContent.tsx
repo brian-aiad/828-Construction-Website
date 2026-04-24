@@ -269,9 +269,14 @@ function PinnedTimeline() {
         });
       }
 
-      // Image clip-path reveals — each phase photo clips in from bottom as phase activates
+      // Fix 14: Set initial image clip states here, NOT in JSX.
+      // JSX-hardcoded clipPath survives navigation and is never cleared if
+      // the onUpdate callback hasn't fired yet — causing permanently invisible images.
       imgRefs.current.forEach((imgWrap, i) => {
         if (!imgWrap) return;
+        gsap.set(imgWrap, {
+          clipPath: i === 0 ? "inset(0% 0% 0% 0%)" : "inset(100% 0% 0% 0%)",
+        });
         // Scale-through-scroll on image inner
         const inner = imgInnerRefs.current[i];
         if (inner) {
@@ -500,9 +505,9 @@ function PinnedTimeline() {
                       className="relative"
                       style={{
                         height: "clamp(340px, 42vw, 560px)",
-                        clipPath: i === 0 ? "inset(0% 0% 0% 0%)" : "inset(100% 0% 0% 0%)",
                         overflow: "hidden",
                       }}
+                      data-gsap-reveal="true"
                     >
                       <div
                         ref={(el) => { imgInnerRefs.current[i] = el; }}

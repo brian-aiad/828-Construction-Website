@@ -110,6 +110,7 @@ function ProjectCard({ project, index, onClick }: { project: Project; index: num
         ref={wrapRef}
         className="group relative cursor-pointer bg-[#111] overflow-hidden"
         onClick={() => onClick(project)}
+        data-gsap-reveal="true"
       >
         {/* Parallax image wrapper */}
         <div className="relative overflow-hidden" style={{ aspectRatio: "4/3" }}>
@@ -233,6 +234,7 @@ function FeaturedCard({ project, index, onClick }: { project: Project; index: nu
         ref={wrapRef}
         className="group relative cursor-pointer bg-[#111] overflow-hidden"
         onClick={() => onClick(project)}
+        data-gsap-reveal="true"
       >
         <div className="relative overflow-hidden" style={{ aspectRatio: "16/7" }}>
           <div
@@ -687,6 +689,7 @@ function ProjectsHighlights() {
             ref={img1WrapRef}
             className="relative overflow-hidden"
             style={{ minHeight: "clamp(280px, 48vw, 580px)" }}
+            data-gsap-reveal="true"
           >
             <div
               ref={img1InnerRef}
@@ -722,6 +725,7 @@ function ProjectsHighlights() {
               ref={img2WrapRef}
               className="relative overflow-hidden flex-1"
               style={{ minHeight: "clamp(135px, 22vw, 288px)" }}
+              data-gsap-reveal="true"
             >
               <div
                 ref={img2InnerRef}
