@@ -146,6 +146,8 @@ function ContactHero() {
           alt=""
           fill
           priority
+          fetchPriority="high"
+          sizes="100vw"
           style={{
             objectFit: "cover",
             objectPosition: "center",
@@ -455,19 +457,31 @@ function ContactMain() {
               <div className="font-labels text-[9px] text-gray-500 tracking-[0.22em] uppercase mb-5">
                 What Happens After You Send a Message
               </div>
-              <div className="space-y-4">
-                {nextSteps.map((item) => (
-                  <div key={item.step} className="flex items-start gap-4">
-                    <span
-                      className="font-numbers font-bold leading-none flex-shrink-0 w-8"
-                      style={{ color: "#B87333", fontSize: "clamp(1.1rem, 2vw, 1.4rem)" }}
-                      aria-hidden="true"
-                    >
-                      {item.step}
-                    </span>
-                    <p className="text-gray-600 text-sm leading-relaxed pt-0.5">{item.text}</p>
-                  </div>
-                ))}
+              <div className="relative">
+                {/* Vertical connector — gradient fades bottom */}
+                <div
+                  className="absolute left-4 top-6"
+                  style={{
+                    width: 1,
+                    bottom: "1.5rem",
+                    background: "linear-gradient(to bottom, rgba(184,115,51,0.55), rgba(184,115,51,0.06))",
+                  }}
+                  aria-hidden="true"
+                />
+                <div className="space-y-5">
+                  {nextSteps.map((item) => (
+                    <div key={item.step} className="flex items-start gap-4 relative">
+                      <span
+                        className="font-numbers font-bold leading-none flex-shrink-0 w-8 bg-white relative z-10"
+                        style={{ color: "#B87333", fontSize: "clamp(1.1rem, 2vw, 1.4rem)", paddingRight: "0.2rem" }}
+                        aria-hidden="true"
+                      >
+                        {item.step}
+                      </span>
+                      <p className="text-gray-600 text-sm leading-relaxed pt-0.5">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

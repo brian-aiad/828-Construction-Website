@@ -40,6 +40,12 @@ export default function HeroSections() {
 
     const ctx = gsap.context(() => {
 
+      // Mobile: hero is exactly 100vh (no sticky scroll space).
+      // CSS keyframe animations handle the entry. Skip all GSAP scroll-driven work.
+      if (!AnimationController.shouldAnimate()) {
+        return;
+      }
+
       // ── LAYER 1: Background — fastest parallax + scale (same bg) ─────────
       if (bgRef.current) {
         gsap.to(bgRef.current, {
@@ -110,23 +116,9 @@ export default function HeroSections() {
         });
       }
 
-      // ── Section 1 exit: headline chars scatter + CTAs fade out ─────────────
-      // Mobile fallback: SplitType char scatter is desktop-only, so on mobile
-      // we fade the whole heading to prevent it overlapping section 2 as it fades in.
-      if (headlineRef.current && !AnimationController.shouldAnimate()) {
-        gsap.to(headlineRef.current, {
-          opacity: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: wrapperRef.current,
-            start: "10% top",
-            end: "33% top",
-            scrub: 1,
-          },
-        });
-      }
-
-      if (headlineRef.current && AnimationController.shouldAnimate()) {
+      // ── Section 1 exit: headline chars scatter ───────────────────────────────
+      // (desktop only — mobile returns early above)
+      if (headlineRef.current) {
         const _headline = headlineRef.current;
         const _wrapper = wrapperRef.current;
         splitFrame = requestAnimationFrame(() => {
@@ -232,8 +224,8 @@ export default function HeroSections() {
   }, []);
 
   return (
-    /* Wrapper spans 200vh — provides scroll distance for the sticky panel */
-    <div ref={wrapperRef} style={{ height: "200vh", position: "relative", zIndex: 1 }}>
+    /* Wrapper spans 200vh desktop / 140vh mobile — scroll distance for sticky panel */
+    <div ref={wrapperRef} style={{ height: "var(--home-hero-height, 200vh)", position: "relative", zIndex: 1 }}>
       {/* Sticky panel — stays pinned while user scrolls through wrapper */}
       <div className="sticky top-0 h-screen overflow-hidden">
 
@@ -245,10 +237,11 @@ export default function HeroSections() {
           aria-hidden="true"
         >
           <Image
-            src="/images/hero/hero-night.png"
+            src="/images/hero/hero-night.jpg"
             alt=""
             fill
             priority
+            fetchPriority="high"
             sizes="100vw"
             className="object-cover"
             style={{ filter: "contrast(1.04) saturate(1.1) brightness(0.92)" }}
@@ -372,9 +365,10 @@ export default function HeroSections() {
         {/* ══════════════════════════════════════════════════════════════════
             SECTION 2 — fades in on scroll
         ══════════════════════════════════════════════════════════════════ */}
+        {/* Section 2 hidden on mobile (hero is 100vh — no scroll space to reveal it) */}
         <div
           ref={content2Ref}
-          className="absolute inset-0 z-10"
+          className="absolute inset-0 z-10 hidden md:block"
           style={{ pointerEvents: "none" }}
         >
           <div className="absolute inset-0 bg-black/25" aria-hidden="true" />

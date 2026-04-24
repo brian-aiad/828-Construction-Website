@@ -72,11 +72,30 @@ function ServiceRow({
   useEffect(() => {
     if (!rowRef.current || !imagePaneRef.current || !textRef.current) return;
 
+    // Hover handlers defined outside ctx so they can be removed in cleanup
+    const imgEl = imgRef.current?.querySelector<HTMLImageElement>("img");
+    const onEnter = () => {
+      if (imgEl) gsap.to(imgEl, { filter: "contrast(1.1) saturate(1.25) brightness(1.02)", scale: 1.03, duration: 0.5, ease: "power2.out" });
+    };
+    const onLeave = () => {
+      if (imgEl) gsap.to(imgEl, { filter: "contrast(1.06) saturate(1.1)", scale: 1, duration: 0.5, ease: "power2.out" });
+    };
+    const supportsHover = typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
+    if (supportsHover && rowRef.current) {
+      rowRef.current.addEventListener("mouseenter", onEnter);
+      rowRef.current.addEventListener("mouseleave", onLeave);
+    }
+
     const ctx = gsap.context(() => {
       const trigger = rowRef.current!;
 
+      // Fix 14: set GSAP initial state before the shouldAnimate gate
+      const revealNum = textRef.current!.querySelector<HTMLElement>(".reveal-num");
+      if (revealNum) gsap.set(revealNum, { opacity: 0 });
+
       if (!AnimationController.shouldAnimate()) {
         // Mobile: simple on-enter reveals, no clip/scrub
+        // reveal-num stays hidden on mobile (decorative chapter number, not needed on small screens)
         const textEls = textRef.current!.querySelectorAll<HTMLElement>(
           ".reveal-heading, .reveal-tagline, .reveal-tag, .reveal-cta"
         );
@@ -151,6 +170,10 @@ function ServiceRow({
     ctxRef.current = ctx;
 
     return () => {
+      if (supportsHover && rowRef.current) {
+        rowRef.current.removeEventListener("mouseenter", onEnter);
+        rowRef.current.removeEventListener("mouseleave", onLeave);
+      }
       ctxRef.current = null;
       try { ctx.revert(); } catch {}
     };
@@ -231,7 +254,7 @@ function ServiceRow({
       <div
         className="reveal-num font-numbers font-bold leading-none mb-6 select-none"
         aria-hidden="true"
-        style={{ fontSize: "clamp(3rem, 5vw, 4.5rem)", color: "#B87333", opacity: 0.28 }}
+        style={{ fontSize: "clamp(3rem, 5vw, 4.5rem)", color: "#B87333" }}
       >
         {service.num}
       </div>
@@ -296,14 +319,14 @@ export default function ServicesPreview() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const headEls = headerRef.current?.querySelectorAll<HTMLElement>(
-        ".hdr-label, .hdr-line, .hdr-link"
-      );
+      const labelEls = headerRef.current?.querySelectorAll<HTMLElement>(".hdr-label, .hdr-link");
+      const hlLines = headerRef.current?.querySelectorAll<HTMLElement>(".hdr-line");
 
       if (!AnimationController.shouldAnimate()) {
-        // Mobile: simple reveals on header elements
-        if (headEls?.length) {
-          headEls.forEach((el) => {
+        // Mobile: simple reveals
+        const allEls = headerRef.current?.querySelectorAll<HTMLElement>(".hdr-label, .hdr-line, .hdr-link");
+        if (allEls?.length) {
+          allEls.forEach((el) => {
             gsap.from(el, {
               opacity: 0, y: 20, duration: 0.65, ease: "power3.out",
               scrollTrigger: { trigger: el, start: "top 88%", once: true },
@@ -313,34 +336,27 @@ export default function ServicesPreview() {
         return;
       }
 
-      // Desktop: stagger + seam
-      if (headEls?.length) {
-        gsap.fromTo(
-          headEls,
-          { y: 24, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.65,
-            stagger: 0.1,
-            ease: "power3.out",
-            scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
-          }
-        );
+      // Label + link: fade up
+      if (labelEls?.length) {
+        gsap.fromTo(labelEls, { y: 24, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.65, stagger: 0.1, ease: "power3.out",
+          scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
+        });
+      }
+
+      // Headline lines: Pattern C clip-from-below reveal
+      if (hlLines?.length) {
+        gsap.fromTo(hlLines, { yPercent: 110 }, {
+          yPercent: 0, duration: 0.75, stagger: 0.1, ease: "power3.out",
+          scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
+        });
       }
 
       if (seamRef.current) {
-        gsap.fromTo(
-          seamRef.current,
-          { scaleX: 0 },
-          {
-            scaleX: 1,
-            duration: 0.85,
-            ease: "power2.inOut",
-            transformOrigin: "left",
-            scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
-          }
-        );
+        gsap.fromTo(seamRef.current, { scaleX: 0 }, {
+          scaleX: 1, duration: 0.85, ease: "power2.inOut", transformOrigin: "left",
+          scrollTrigger: { trigger: headerRef.current, start: "top 82%", once: true },
+        });
       }
     });
 
@@ -366,12 +382,16 @@ export default function ServicesPreview() {
               Services
             </span>
             <h2
-              className="font-display font-bold text-white tracking-tight leading-[0.9]"
+              className="svc-headline font-display font-bold text-white tracking-tight leading-[0.9]"
               style={{ fontSize: "clamp(2.8rem, 6vw, 5rem)" }}
             >
-              <span className="hdr-line block">Three services.</span>
-              <span className="hdr-line block" style={{ color: "rgba(255,255,255,0.40)" }}>
-                One standard.
+              <span className="block overflow-hidden">
+                <span className="hdr-line block">Three services.</span>
+              </span>
+              <span className="block overflow-hidden">
+                <span className="hdr-line block" style={{ color: "rgba(255,255,255,0.40)" }}>
+                  One standard.
+                </span>
               </span>
             </h2>
           </div>

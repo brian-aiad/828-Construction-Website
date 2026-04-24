@@ -6,6 +6,17 @@
   --accent-copper: #B87333;
   --accent-copper-light: #D4A574;
   --accent-copper-dark: #8B5A2B;
+  --home-hero-height: 200vh;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --home-hero-height: 100vh;
+  }
+  /* Remove forced vh min-height on service rows — let content size naturally on mobile */
+  [data-service] {
+    min-height: auto !important;
+  }
 }
 
 @theme inline {
@@ -73,6 +84,15 @@ body {
 @keyframes marqueeScroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+/* ── Ken Burns — slow breathing zoom for portrait/editorial images ────── */
+@keyframes kenBurns {
+  0%   { transform: scale(1.0); }
+  100% { transform: scale(1.03); }
+}
+.ken-burns-img {
+  animation: kenBurns 18s ease-in-out infinite alternate;
 }
 
 /* Scroll wheel indicator animation */

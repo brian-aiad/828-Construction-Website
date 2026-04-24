@@ -5,6 +5,8 @@ import ServicesPreview from "@/components/home/ServicesPreview";
 import HomeInterstitial from "@/components/home/HomeInterstitial";
 import ProjectsPreview from "@/components/home/ProjectsPreview";
 import HomeCTA from "@/components/home/HomeCTA";
+import HomeMarquee from "@/components/home/HomeMarquee";
+import SplashScreen from "@/components/home/SplashScreen";
 import SectionDivider from "@/components/layout/SectionDivider";
 import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
@@ -46,6 +48,9 @@ const jsonLd = {
 export default function HomePage() {
   return (
     <>
+      {/* Cinematic intro splash — plays once per session */}
+      <SplashScreen />
+
       <JsonLd data={jsonLd} />
 
       {/* Hero — 200vh with sticky parallax panel */}
@@ -69,6 +74,9 @@ export default function HomePage() {
       {/* Projects → CTA: dark-to-black, copper seam */}
       <SectionDivider opacity={0.6} />
       <HomeCTA />
+
+      {/* Second marquee — reversed direction, slower, above footer */}
+      <HomeMarquee />
     </>
   );
 }

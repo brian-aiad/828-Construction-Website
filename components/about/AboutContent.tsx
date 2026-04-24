@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
@@ -111,6 +112,34 @@ const dontTakeItems = [
     label: "More Than Full Attention Allows",
     detail: "We take fewer projects so each gets full focus. If we’re at capacity, we’ll tell you.",
   },
+];
+
+// ─── New data for cinematic upgrade ───────────────────────────────────────────
+
+const timelineMilestones = [
+  { year: "2004", label: "Founded", desc: "" },
+  { year: "2008", label: "Building Science Focus", desc: "" },
+  { year: "2012", label: `CA License\n#${SITE.license}`, desc: "" },
+  { year: "2018", label: "South Bay Expansion", desc: "" },
+  { year: "Now", label: "828’s Standard", desc: "" },
+];
+
+const credRowItems = [
+  { label: "CA License", value: `#${SITE.license}` },
+  { label: "Est.", value: "2004" },
+  { label: "Home Base", value: "Torrance, CA" },
+  { label: "Experience", value: "20+ Years" },
+];
+
+const marqueeItems = [
+  `CA License #${SITE.license}`,
+  "Bonded",
+  "Insured",
+  "South Bay Licensed",
+  "Est. 2004",
+  "20+ Years",
+  "Torrance Based",
+  "Building Science",
 ];
 
 // ─── Section: Hero — triple-layer parallax + SplitType char exit ───────────────
@@ -370,26 +399,54 @@ function AboutFounder() {
   const storyH2Ref = useRef<HTMLHeadingElement>(null);
   const splitStoryRef = useRef<SplitType | null>(null);
   const founderCtxRef = useRef<gsap.Context | null>(null);
-  useLayoutEffect(() => () => {
-    if (splitStoryRef.current) { try { splitStoryRef.current.revert(); } catch {} }
-    try { founderCtxRef.current?.revert(); } catch {}
-  }, []);
   const statCardRef = useRef<HTMLDivElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const driftRef = useRef<HTMLDivElement>(null);
 
+  // New cinematic upgrade refs
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const credRowRef = useRef<HTMLDivElement>(null);
+  const stickyCredRef = useRef<HTMLDivElement>(null);
+  const profileDividerRef = useRef<HTMLDivElement>(null);
+  const allParaSplits = useRef<SplitType[]>([]);
+  const allParaEls = useRef<HTMLElement[]>([]);
+  const paraFrame = useRef<number>(-1);
+
+  useLayoutEffect(() => () => {
+    cancelAnimationFrame(paraFrame.current);
+    allParaSplits.current.forEach((s, i) => {
+      if (allParaEls.current[i]?.isConnected) { try { s.revert(); } catch {} }
+    });
+    allParaSplits.current = [];
+    allParaEls.current = [];
+    if (splitStoryRef.current) { try { splitStoryRef.current.revert(); } catch {} }
+    try { founderCtxRef.current?.revert(); } catch {}
+  }, []);
+
   useEffect(() => {
     if (!sectionRef.current) return;
 
-    // Fix 14: set GSAP initial state before shouldAnimate() gate so mobile
-    // branch can explicitly clear it — credential card renders on all breakpoints.
-    if (statCardRef.current) {
-      gsap.set(statCardRef.current, { opacity: 0, scale: 0.78 });
-    }
+    // Fix 14: set GSAP initial states before gate — mobile branch clears them
+    if (statCardRef.current) gsap.set(statCardRef.current, { opacity: 0, scale: 0.78 });
+    if (portraitRef.current) gsap.set(portraitRef.current, { clipPath: "inset(100% 0 0 0)" });
+    if (credRowRef.current) gsap.set(credRowRef.current, { opacity: 0, y: 18 });
+    if (stickyCredRef.current) gsap.set(stickyCredRef.current, { opacity: 0 });
 
     if (!AnimationController.shouldAnimate()) {
-      // Mobile: immediately show the credential card (no animation).
+      // Mobile: immediately show all elements (Fix 14)
       if (statCardRef.current) gsap.set(statCardRef.current, { opacity: 1, scale: 1 });
+      if (portraitRef.current) gsap.set(portraitRef.current, { clipPath: "inset(0% 0 0 0)" });
+      if (credRowRef.current) gsap.set(credRowRef.current, { opacity: 1, y: 0 });
+      if (hairlineRef.current) gsap.set(hairlineRef.current, { scaleX: 1 });
+      if (profileDividerRef.current) gsap.set(profileDividerRef.current, { scaleX: 1 });
+      // Mobile body reveals
+      const bodyEls = textRef.current?.querySelectorAll<HTMLElement>(".story-para, .story-cta");
+      if (bodyEls?.length) {
+        gsap.fromTo(bodyEls, { y: 18, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.55, stagger: 0.08, ease: "power3.out",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", once: true },
+        });
+      }
       return;
     }
 
@@ -401,32 +458,31 @@ function AboutFounder() {
     const ctx = gsap.context(() => {
       const trigger = sectionRef.current!;
 
-      // Hairline: scaleX scrub
+      // Copper hairline scaleX scrub
       if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 },
-          {
-            scaleX: 1, ease: "none",
-            scrollTrigger: { trigger, start: "top 85%", end: "top 50%", scrub: 1 },
-          }
-        );
-      }
-
-      // "2004" founding year watermark — drifts horizontally as section scrolls
-      // About page signature moment: horizontal drift of founding year
-      if (driftRef.current) {
-        gsap.to(driftRef.current, {
-          xPercent: -28,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-            end: "bottom 15%",
-            scrub: 1.5,
-          },
+        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger, start: "top 85%", end: "top 50%", scrub: 1 },
         });
       }
 
-      // SplitType on story h2 — chars animate IN via scrub
+      // Profile section divider scaleX scrub
+      if (profileDividerRef.current) {
+        gsap.fromTo(profileDividerRef.current, { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: profileDividerRef.current, start: "top 88%", end: "top 60%", scrub: 1 },
+        });
+      }
+
+      // About page signature moment: "2004" watermark drifts horizontally (KEEP UNCHANGED)
+      if (driftRef.current) {
+        gsap.to(driftRef.current, {
+          xPercent: -28, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", end: "bottom 15%", scrub: 1.5 },
+        });
+      }
+
+      // SplitType on story h2 — chars animate via scrub (Fix 1)
       if (storyEl) {
         const _el = storyEl;
         splitFrame = requestAnimationFrame(() => {
@@ -436,78 +492,119 @@ function AboutFounder() {
           splitStoryRef.current = split;
           if (split.chars?.length) {
             gsap.from(split.chars, {
-              yPercent: 110,
-              opacity: 0,
-              stagger: { each: 0.014, from: "start" },
-              ease: "none",
-              scrollTrigger: {
-                trigger: _el,
-                start: "top 82%",
-                end: "top 40%",
-                scrub: 1.2,
-              },
+              yPercent: 110, opacity: 0,
+              stagger: { each: 0.014, from: "start" }, ease: "none",
+              scrollTrigger: { trigger: _el, start: "top 82%", end: "top 40%", scrub: 1.2 },
             });
           }
         });
       }
 
-      // Image pane: scrub clip-path reveal (continuous, not fire-once)
+      // Image pane: scrub clip-path reveal (left → right)
       if (imagePaneRef.current) {
         gsap.fromTo(imagePaneRef.current,
           { clipPath: "inset(0% 100% 0% 0%)" },
-          {
-            clipPath: "inset(0% 0% 0% 0%)",
-            ease: "none",
-            scrollTrigger: { trigger, start: "top 88%", end: "top 20%", scrub: 1.3 },
-          }
+          { clipPath: "inset(0% 0% 0% 0%)", ease: "none",
+            scrollTrigger: { trigger, start: "top 88%", end: "top 20%", scrub: 1.3 } }
         );
       }
 
       // Image inner: zoom-out + ongoing parallax
       if (imageInnerRef.current) {
-        gsap.fromTo(imageInnerRef.current,
-          { scale: 1.14 },
-          {
-            scale: 1,
-            ease: "none",
-            scrollTrigger: { trigger, start: "top 88%", end: "top 20%", scrub: 1.3 },
-          }
-        );
+        gsap.fromTo(imageInnerRef.current, { scale: 1.14 }, {
+          scale: 1, ease: "none",
+          scrollTrigger: { trigger, start: "top 88%", end: "top 20%", scrub: 1.3 },
+        });
         gsap.to(imageInnerRef.current, {
-          yPercent: -9,
-          ease: "none",
+          yPercent: -9, ease: "none",
           scrollTrigger: { trigger: imagePaneRef.current, start: "top bottom", end: "bottom top", scrub: 1.2 },
         });
       }
 
-      // Body paragraphs: stagger emerge
-      const bodyEls = textRef.current?.querySelectorAll<HTMLElement>(".story-body p, .story-cta");
+      // Story paragraphs: scrub stagger reveal (Fix 15 — scrub-tied, not once-fire)
+      const bodyEls = textRef.current?.querySelectorAll<HTMLElement>(".story-para, .story-cta");
       if (bodyEls?.length) {
-        gsap.fromTo(bodyEls,
-          { y: 20, opacity: 0 },
-          {
-            y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: "power3.out",
-            scrollTrigger: { trigger, start: "top 65%", once: true },
-          }
-        );
+        Array.from(bodyEls).forEach((el, i) => {
+          gsap.fromTo(el, { y: 26, opacity: 0 }, {
+            y: 0, opacity: 1, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 86%", end: "top 60%", scrub: 1.1 },
+          });
+        });
       }
 
       // Stat card: scale-pop
       if (statCardRef.current) {
-        gsap.fromTo(statCardRef.current,
-          { scale: 0.78, opacity: 0 },
-          {
-            scale: 1, opacity: 1, duration: 0.9, delay: 0.5, ease: "back.out(1.6)",
-            scrollTrigger: { trigger, start: "top 72%", once: true },
-          }
+        gsap.fromTo(statCardRef.current, { scale: 0.78, opacity: 0 }, {
+          scale: 1, opacity: 1, duration: 0.9, delay: 0.5, ease: "back.out(1.6)",
+          scrollTrigger: { trigger, start: "top 72%", once: true },
+        });
+      }
+
+      // Portrait placeholder: clip-path reveal from bottom (NEW)
+      if (portraitRef.current) {
+        gsap.fromTo(portraitRef.current,
+          { clipPath: "inset(100% 0 0 0)" },
+          { clipPath: "inset(0% 0 0 0)", ease: "none",
+            scrollTrigger: { trigger: portraitRef.current, start: "top 92%", end: "top 40%", scrub: 1.3 } }
         );
+      }
+
+      // Credentials row: emerge once
+      if (credRowRef.current) {
+        gsap.fromTo(credRowRef.current, { y: 18, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.75, ease: "power3.out",
+          scrollTrigger: { trigger: credRowRef.current, start: "top 88%", once: true },
+        });
+      }
+
+      // Sticky credentials: fade in when founder section is in view, desktop only
+      if (stickyCredRef.current && window.innerWidth >= 1024) {
+        gsap.to(stickyCredRef.current, {
+          opacity: 1, duration: 0.6, ease: "power2.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 20%", end: "bottom 20%",
+            toggleActions: "play reverse play reverse",
+          },
+        });
       }
     }, sectionRef);
 
     founderCtxRef.current = ctx;
+
+    // Paragraph line reveals via SplitType lines (Fix 1 multi-element pattern)
+    const paraEls = Array.from(sectionRef.current!.querySelectorAll<HTMLElement>(".story-para"));
+    paraFrame.current = requestAnimationFrame(() => {
+      if (!mounted || !paraEls.length) return;
+      const connected = paraEls.filter(el => el.isConnected);
+      allParaEls.current = connected;
+      const splits = connected.map(el => new SplitType(el, { types: "lines" }));
+      allParaSplits.current = splits;
+      splits.forEach((split, si) => {
+        if (!split.lines?.length) return;
+        const parentEl = connected[si];
+        split.lines.forEach((line) => {
+          gsap.fromTo(line, { yPercent: 108, opacity: 0 }, {
+            yPercent: 0, opacity: 1, ease: "power3.out",
+            scrollTrigger: {
+              trigger: parentEl,
+              start: "top 84%", end: "top 52%",
+              scrub: 1,
+            },
+          });
+        });
+      });
+    });
+
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
+      cancelAnimationFrame(paraFrame.current);
+      allParaSplits.current.forEach((s, i) => {
+        if (allParaEls.current[i]?.isConnected) { try { s.revert(); } catch {} }
+      });
+      allParaSplits.current = [];
+      allParaEls.current = [];
       if (storySplit && storyEl?.isConnected) { try { storySplit.revert(); } catch {} }
       splitStoryRef.current = null;
       founderCtxRef.current = null;
@@ -519,8 +616,8 @@ function AboutFounder() {
     <section
       ref={sectionRef}
       data-section="about-founder"
-      className="relative bg-white overflow-hidden"
-      style={{ marginTop: "-12vh", zIndex: 2 }}
+      className="relative bg-white"
+      style={{ marginTop: "-12vh", zIndex: 2, overflowX: "clip" }}
     >
       {/* Copper hairline scrub */}
       <div
@@ -529,33 +626,124 @@ function AboutFounder() {
         style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", transform: "scaleX(0)" }}
       />
 
-      {/* About page signature: "2004" founding year watermark drifts horizontally with scroll */}
+      {/* About page signature: "2004" watermark drifts horizontally (DO NOT TOUCH) */}
       <div
         ref={driftRef}
         aria-hidden="true"
         className="absolute pointer-events-none select-none"
         style={{
-          top: "32%",
-          right: "5%",
+          top: "32%", right: "5%",
           fontSize: "clamp(5rem, 14vw, 12rem)",
-          color: "#B87333",
-          opacity: 0.04,
-          fontFamily: "var(--font-ibm-plex-mono)",
-          fontWeight: 700,
-          lineHeight: 1,
-          willChange: "transform",
-          whiteSpace: "nowrap",
+          color: "#B87333", opacity: 0.04,
+          fontFamily: "var(--font-ibm-plex-mono)", fontWeight: 700,
+          lineHeight: 1, willChange: "transform", whiteSpace: "nowrap",
         }}
       >
         2004
       </div>
 
+      {/* ── NEW: Founder Profile Block ───────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 lg:pt-28">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+
+          {/* Portrait placeholder — 4:5 aspect ratio */}
+          <div className="lg:col-span-4">
+            <div
+              ref={portraitRef}
+              className="relative overflow-hidden blueprint-grid"
+              style={{
+                aspectRatio: "4/5",
+                background: "#0d0d0d",
+              }}
+              data-gsap-reveal="true"
+            >
+              {/* Copper top accent */}
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "#B87333", opacity: 0.7, zIndex: 2 }} />
+              {/* Corner label — decorative placeholder, aria-hidden */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 z-10" aria-hidden="true">
+                <div className="font-labels text-[8px] text-white/20 tracking-[0.3em] uppercase mb-1">Portrait</div>
+                <div className="font-display font-bold" style={{ fontSize: "clamp(1.2rem, 2vw, 1.5rem)", color: "rgba(255,255,255,0.08)" }}>Joe P</div>
+              </div>
+            </div>
+
+            {/* Signature — decorative, aria-hidden */}
+            <div className="mt-5 pl-1" aria-hidden="true">
+              <span
+                className="font-numbers text-gray-500 select-none"
+                style={{
+                  fontSize: "clamp(1rem, 1.8vw, 1.3rem)",
+                  fontStyle: "italic",
+                  display: "inline-block",
+                  transform: "rotate(-1.8deg)",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Joe P
+              </span>
+              <div style={{ height: 1, width: "72px", background: "#B87333", opacity: 0.35, marginTop: "0.3rem" }} />
+            </div>
+          </div>
+
+          {/* Name + title + bio area */}
+          <div className="lg:col-span-8 lg:pt-4">
+            <span className="font-labels text-[9px] text-gray-400 tracking-[0.24em] uppercase block mb-4">
+              Founder &amp; Builder
+            </span>
+            <h2
+              className="font-display font-bold text-black tracking-tight leading-none mb-3"
+              style={{ fontSize: "clamp(2.2rem, 4.5vw, 4rem)" }}
+            >
+              Joe P
+            </h2>
+            <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase mb-6">
+              Licensed General Contractor &middot; CA Lic #{SITE.license}
+            </div>
+            <div style={{ height: 1, background: "#e5e7eb", marginBottom: "1.5rem" }} />
+            {/* Bio area — Joseph writes his own words */}
+            <p className="text-gray-300 text-[14px] leading-relaxed italic min-h-[4rem]">
+              {/* Copy reserved — Joe P */}
+            </p>
+          </div>
+        </div>
+
+        {/* Credentials row — NOT boxed, just typography with copper dividers */}
+        <div
+          ref={credRowRef}
+          className="flex flex-wrap items-center mt-10 pt-8"
+          style={{ borderTop: "1px solid #f3f4f6" }}
+        >
+          {credRowItems.map((item, i) => (
+            <React.Fragment key={item.label}>
+              <div className={`flex flex-col ${i === 0 ? "" : "px-6 lg:px-10"}`}>
+                <span className="font-labels text-[8px] text-gray-400 tracking-[0.24em] uppercase block mb-1">
+                  {item.label}
+                </span>
+                <span className="font-numbers font-bold text-black tracking-tight" style={{ fontSize: "clamp(0.9rem, 1.6vw, 1.15rem)" }}>
+                  {item.value}
+                </span>
+              </div>
+              {i < credRowItems.length - 1 && (
+                <div style={{ width: 1, height: 30, background: "#B87333", opacity: 0.35, flexShrink: 0, margin: "0 0 0 1.5rem" }} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      {/* Profile → Story divider */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 mt-16 lg:mt-20">
+        <div
+          ref={profileDividerRef}
+          style={{ height: 1, background: "#B87333", opacity: 0.2, transformOrigin: "left", transform: "scaleX(0)" }}
+        />
+      </div>
+
+      {/* ── Existing: Story Section ──────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-10 lg:pt-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
 
           {/* Left: text */}
-          <div ref={textRef} className="py-16 lg:py-24 lg:pr-16">
-
+          <div ref={textRef} className="py-12 lg:py-20 lg:pr-16">
             <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-4">
               The Story
             </span>
@@ -568,7 +756,7 @@ function AboutFounder() {
               Why 828 Construction Exists
             </h2>
 
-            {/* Pull quote */}
+            {/* Inline blockquote */}
             <blockquote
               className="border-l-2 pl-5 mb-8 py-1"
               style={{ borderColor: "#B87333" }}
@@ -581,20 +769,21 @@ function AboutFounder() {
               </p>
             </blockquote>
 
-            <div className="story-body space-y-5 text-gray-500 leading-relaxed text-[15px] mb-10">
-              <p>
+            {/* Story paragraphs — each gets line reveal via SplitType */}
+            <div className="space-y-5 text-gray-500 leading-relaxed text-[15px] mb-10">
+              <p className="story-para overflow-hidden">
                 Joe founded 828 in 2004 — a builder with over 20 years of hands-on field
                 experience and a single conviction: that most construction failures start as
                 diagnostic failures. Someone didn&apos;t measure. Someone assumed. Someone fixed
                 what was visible instead of what was actually failing.
               </p>
-              <p>
+              <p className="story-para overflow-hidden">
                 828 exists to be different. Every project is approached with the full weight
                 of building science knowledge — understanding how materials actually perform,
                 how structures behave under real conditions, and how to build things that last
                 rather than things that merely look good at handoff.
               </p>
-              <p>
+              <p className="story-para overflow-hidden">
                 We&apos;re selective about the work we take on — because quality requires full
                 attention, and attention has limits. Fewer projects means each one gets the
                 diagnostic rigor it deserves. That&apos;s not a constraint. That&apos;s the standard.
@@ -610,12 +799,13 @@ function AboutFounder() {
             </Link>
           </div>
 
-          {/* Right: scrub-revealed image */}
-          <div className="relative lg:pl-6 py-12 lg:py-20 hidden lg:block">
+          {/* Right: scrub-revealed image — ADU project photo Joseph recognized */}
+          <div className="relative lg:pl-6 py-10 lg:py-16 hidden lg:block">
             <div
               ref={imagePaneRef}
               className="relative overflow-hidden bg-gray-100 h-full min-h-[520px]"
               style={{ clipPath: "inset(0% 100% 0% 0%)" }}
+              data-gsap-reveal="true"
             >
               <div
                 ref={imageInnerRef}
@@ -626,7 +816,7 @@ function AboutFounder() {
                   src="/images/about/building-science.jpg"
                   alt="828 Construction — building science in the field"
                   fill
-                  className="object-cover"
+                  className="object-cover ken-burns-img"
                   style={{ filter: "contrast(1.06) saturate(0.88)" }}
                   sizes="50vw"
                   fallback={<div className="absolute inset-0 bg-[#111]" />}
@@ -635,7 +825,7 @@ function AboutFounder() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
             </div>
 
-            {/* Credential card — scale-pop emerge */}
+            {/* Credential card — scale-pop emerge (KEEP — Joseph loves this) */}
             <div
               ref={statCardRef}
               className="absolute -bottom-4 -left-4 lg:-left-8 bg-black text-white p-6 z-10"
@@ -649,6 +839,328 @@ function AboutFounder() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── Sticky credentials — desktop only, scroll-controlled (NEW) ─── */}
+      <div
+        ref={stickyCredRef}
+        aria-hidden="true"
+        className="fixed z-40 pointer-events-none hidden lg:flex flex-col items-center gap-3"
+        style={{ right: "2rem", top: "50%", transform: "translateY(-50%)", opacity: 0 }}
+      >
+        <div
+          className="font-labels text-[7px] text-black/40 tracking-[0.3em] uppercase"
+          style={{ writingMode: "vertical-lr", transform: "rotate(180deg)", letterSpacing: "0.35em" }}
+        >
+          #{SITE.license}
+        </div>
+        <div style={{ width: 1, height: 20, background: "#B87333", opacity: 0.5 }} />
+        <div
+          className="font-labels text-[7px] text-black/40 tracking-[0.3em] uppercase"
+          style={{ writingMode: "vertical-lr", transform: "rotate(180deg)", letterSpacing: "0.35em" }}
+        >
+          EST. 2004
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Section: Pull Quote — full-width editorial (NEW) ────────────────────────
+
+function AboutPullQuote() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const quoteMarkRef = useRef<HTMLDivElement>(null);
+  const quoteTextRef = useRef<HTMLParagraphElement>(null);
+  const splitPQRef = useRef<SplitType | null>(null);
+  const pqCtxRef = useRef<gsap.Context | null>(null);
+  useLayoutEffect(() => () => {
+    if (splitPQRef.current) { try { splitPQRef.current.revert(); } catch {} }
+    try { pqCtxRef.current?.revert(); } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    let mounted = true;
+    let splitFrame = -1;
+    let pqSplit: SplitType | null = null;
+    const qEl = quoteTextRef.current;
+
+    const ctx = gsap.context(() => {
+      if (quoteMarkRef.current) {
+        gsap.fromTo(quoteMarkRef.current, { scale: 0.5, opacity: 0 }, {
+          scale: 1, opacity: 1, duration: 0.9, ease: "back.out(1.4)",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", once: true },
+        });
+      }
+
+      if (!AnimationController.shouldAnimate()) {
+        if (qEl) gsap.fromTo(qEl, { y: 20, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.65, ease: "power3.out",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", once: true },
+        });
+        return;
+      }
+
+      // Chars scrub (Fix 1)
+      if (qEl && qEl.textContent?.trim()) {
+        const _el = qEl;
+        splitFrame = requestAnimationFrame(() => {
+          if (!mounted || !_el.isConnected) return;
+          const split = new SplitType(_el, { types: "chars" });
+          pqSplit = split;
+          splitPQRef.current = split;
+          if (split.chars?.length) {
+            gsap.from(split.chars, {
+              yPercent: 90, opacity: 0,
+              stagger: { each: 0.008, from: "start" }, ease: "none",
+              scrollTrigger: { trigger: sectionRef.current, start: "top 75%", end: "top 25%", scrub: 1.3 },
+            });
+          }
+        });
+      }
+    }, sectionRef);
+
+    pqCtxRef.current = ctx;
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(splitFrame);
+      if (pqSplit && qEl?.isConnected) { try { pqSplit.revert(); } catch {} }
+      splitPQRef.current = null;
+      pqCtxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      data-section="about-pull-quote"
+      className="bg-black py-24 lg:py-36"
+      style={{ zIndex: 2, borderTop: "1px solid rgba(184,115,51,0.15)" }}
+    >
+      <div className="max-w-5xl mx-auto px-6 lg:px-12 text-center">
+        <div
+          ref={quoteMarkRef}
+          aria-hidden="true"
+          className="font-display font-bold leading-none mb-6 select-none"
+          style={{ fontSize: "clamp(4rem, 8vw, 7rem)", color: "#B87333", opacity: 0.65, lineHeight: 0.8 }}
+        >
+          &ldquo;
+        </div>
+
+        {/* Quote copy — Joseph writes his own words */}
+        <p
+          ref={quoteTextRef}
+          className="font-display font-bold text-white leading-[1.1] tracking-tight min-h-[2rem]"
+          style={{ fontSize: "clamp(1.5rem, 3.2vw, 2.8rem)", color: "rgba(255,255,255,0.9)" }}
+        />
+
+        <div className="mt-10 flex items-center justify-center gap-4">
+          <div style={{ height: 1, width: 40, background: "#B87333", opacity: 0.4 }} />
+          <span className="font-labels text-[9px] text-white/35 tracking-[0.28em] uppercase">
+            Joe P &middot; Founder, 828 Construction
+          </span>
+          <div style={{ height: 1, width: 40, background: "#B87333", opacity: 0.4 }} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Section: Timeline — horizontal editorial scroll (NEW) ───────────────────
+
+function AboutTimeline() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const splitTLRef = useRef<SplitType | null>(null);
+  const tlCtxRef = useRef<gsap.Context | null>(null);
+  const pinSTRef = useRef<ScrollTrigger | null>(null);
+
+  useLayoutEffect(() => () => {
+    if (pinSTRef.current) { try { pinSTRef.current.kill(true); } catch {}; pinSTRef.current = null; }
+    if (splitTLRef.current) { try { splitTLRef.current.revert(); } catch {} }
+    try { tlCtxRef.current?.revert(); } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!sectionRef.current || !trackRef.current) return;
+    let mounted = true;
+    let splitFrame = -1;
+    let tlSplit: SplitType | null = null;
+    const hEl = headlineRef.current;
+
+    const ctx = gsap.context(() => {
+      // Copper connecting line scaleX
+      if (lineRef.current) {
+        gsap.fromTo(lineRef.current, { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", end: "top 40%", scrub: 1.2 },
+        });
+      }
+
+      if (!AnimationController.shouldAnimate()) {
+        if (hEl) gsap.fromTo(hEl, { y: 20, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.65, ease: "power3.out",
+          scrollTrigger: { trigger: sectionRef.current, start: "top 80%", once: true },
+        });
+        return;
+      }
+
+      // Headline chars scrub (Fix 1)
+      if (hEl) {
+        const _el = hEl;
+        splitFrame = requestAnimationFrame(() => {
+          if (!mounted || !_el.isConnected) return;
+          const split = new SplitType(_el, { types: "chars" });
+          tlSplit = split;
+          splitTLRef.current = split;
+          if (split.chars?.length) {
+            gsap.from(split.chars, {
+              yPercent: 100, opacity: 0,
+              stagger: { each: 0.012, from: "start" }, ease: "none",
+              scrollTrigger: { trigger: _el, start: "top 82%", end: "top 50%", scrub: 1.2 },
+            });
+          }
+        });
+      }
+    }, sectionRef);
+
+    tlCtxRef.current = ctx;
+
+    // Horizontal pin — desktop only (≥1024px), same proven pattern as AboutSouthBay
+    const track = trackRef.current;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    timeoutId = setTimeout(() => {
+      if (!mounted || !sectionRef.current?.isConnected || !track || window.innerWidth < 1024) return;
+      const totalWidth = track.scrollWidth - window.innerWidth;
+      if (totalWidth <= 0) return;
+      const tween = gsap.to(track, {
+        x: -totalWidth, ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top", end: `+=${totalWidth}`,
+          pin: true, pinSpacing: true,
+          scrub: 1.4, anticipatePin: 1,
+        },
+      });
+      pinSTRef.current = tween.scrollTrigger ?? null;
+    }, 80);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+      cancelAnimationFrame(splitFrame);
+      if (tlSplit && hEl?.isConnected) { try { tlSplit.revert(); } catch {} }
+      splitTLRef.current = null;
+      tlCtxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      data-section="about-timeline"
+      className="bg-white lg:[overflow-x:clip]"
+      style={{ zIndex: 2 }}
+    >
+      {/* Header — outside the scroll track */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 lg:pt-28 pb-10">
+        <div className="flex items-end justify-between">
+          <div>
+            <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-3">
+              The Timeline
+            </span>
+            <h2
+              ref={headlineRef}
+              className="font-display font-bold text-black tracking-tight leading-[0.9]"
+              style={{ fontSize: "clamp(2rem, 4.5vw, 3.8rem)" }}
+            >
+              Two Decades.<br />
+              <span style={{ color: "rgba(0,0,0,0.3)" }}>One Standard.</span>
+            </h2>
+          </div>
+          <span className="hidden lg:block font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase self-end mb-1">
+            Scroll →
+          </span>
+          <span className="lg:hidden font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase self-end mb-1">
+            The Journey
+          </span>
+        </div>
+        {/* Copper section hairline — grows with scroll */}
+        <div
+          ref={lineRef}
+          className="mt-8"
+          style={{ height: 1, background: "#B87333", opacity: 0.4, transformOrigin: "left", transform: "scaleX(0)" }}
+        />
+      </div>
+
+      {/* Mobile: overflow-x scroll. Desktop: GSAP-pinned horizontal */}
+      <div className="overflow-x-auto lg:overflow-x-visible pb-20 lg:pb-0" style={{ scrollbarWidth: "none" } as React.CSSProperties}>
+        <div
+          ref={trackRef}
+          className="flex items-stretch"
+          style={{ width: "max-content", willChange: "transform" }}
+        >
+          {/* Left padding */}
+          <div className="flex-shrink-0 w-6 lg:w-12" />
+
+          {timelineMilestones.map((m, i) => (
+            <div
+              key={m.year}
+              className="flex-shrink-0 flex flex-col items-center relative"
+              style={{ width: "clamp(200px, 18vw, 280px)", paddingBottom: "5rem", paddingTop: "1rem" }}
+            >
+              {/* Connecting copper line between dots */}
+              {i < timelineMilestones.length - 1 && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute", top: "4.5rem", left: "50%",
+                    width: "100%", height: 1,
+                    background: "linear-gradient(to right, #B87333, rgba(184,115,51,0.2))",
+                    opacity: 0.5, zIndex: 0,
+                  }}
+                />
+              )}
+
+              {/* Copper dot */}
+              <div
+                aria-hidden="true"
+                className="relative z-10 flex-shrink-0"
+                style={{
+                  width: 8, height: 8, borderRadius: "50%",
+                  background: "#B87333",
+                  opacity: i === 0 ? 1 : 0.4,
+                  marginTop: "3rem",
+                  boxShadow: i === 0 ? "0 0 0 5px rgba(184,115,51,0.12)" : "none",
+                }}
+              />
+
+              {/* Year — large ghost number */}
+              <div className="px-4 text-center mt-4">
+                <div
+                  className="font-numbers font-bold leading-none text-black tracking-tight"
+                  style={{ fontSize: "clamp(1.6rem, 3vw, 2.6rem)", opacity: i === 0 ? 1 : 0.45 }}
+                >
+                  {m.year}
+                </div>
+                <div
+                  className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase mt-3 leading-relaxed"
+                  style={{ whiteSpace: "pre-line" }}
+                >
+                  {m.label}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Right padding */}
+          <div className="flex-shrink-0 w-12 lg:w-24" />
         </div>
       </div>
     </section>
@@ -1055,7 +1567,13 @@ function AboutCraft() {
   useLayoutEffect(() => () => { try { craftCtxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !gridRef.current) return;
+    if (!AnimationController.shouldAnimate() || !gridRef.current) {
+      // Mobile: immediately show craft-copper hairlines (scaleX(0) in JSX).
+      gridRef.current?.querySelectorAll<HTMLElement>(".craft-copper").forEach((el) => {
+        gsap.set(el, { scaleX: 1 });
+      });
+      return;
+    }
 
     const ctx = gsap.context(() => {
       const panels = gridRef.current!.querySelectorAll<HTMLElement>(".craft-panel");
@@ -1176,6 +1694,44 @@ function AboutCraft() {
   );
 }
 
+// ─── Section: Marquee Strip — business fundamentals (NEW) ────────────────────
+
+function AboutMarquee() {
+  return (
+    <div
+      data-section="about-marquee"
+      className="overflow-hidden"
+      style={{
+        background: "#0a0a0a",
+        borderTop: "1px solid rgba(255,255,255,0.04)",
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        paddingTop: "0.7rem",
+        paddingBottom: "0.7rem",
+        zIndex: 2,
+        position: "relative",
+      }}
+      aria-hidden="true"
+    >
+      <div
+        className="flex"
+        style={{ animation: "marqueeScroll 30s linear infinite", width: "max-content" }}
+      >
+        {[...marqueeItems, ...marqueeItems].map((item, i) => (
+          <div key={i} className="flex items-center flex-shrink-0">
+            <span className="font-labels text-[9px] text-white/28 tracking-[0.22em] uppercase px-7 whitespace-nowrap">
+              {item}
+            </span>
+            <span
+              className="flex-shrink-0"
+              style={{ width: 3, height: 3, borderRadius: "50%", background: "#B87333", opacity: 0.38 }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Section: South Bay Horizontal Scroll — pinned to vertical ────────────────
 
 function AboutSouthBay() {
@@ -1196,9 +1752,17 @@ function AboutSouthBay() {
   }, []);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate() || !sectionRef.current || !trackRef.current) return;
+    if (!AnimationController.shouldAnimate() || !sectionRef.current || !trackRef.current) {
+      // Mobile: show hairline immediately (scaleX(0) in JSX).
+      if (hairlineRef.current) gsap.set(hairlineRef.current, { scaleX: 1 });
+      return;
+    }
     // Below 1024px: skip horizontal pin — phone/tablet native scroll handles it
-    if (window.innerWidth < 1024) return;
+    if (window.innerWidth < 1024) {
+      // Show hairline without animation on tablet/mobile.
+      if (hairlineRef.current) gsap.set(hairlineRef.current, { scaleX: 1 });
+      return;
+    }
 
     let mounted = true;
     let timeoutId: ReturnType<typeof setTimeout>;
@@ -1259,8 +1823,8 @@ function AboutSouthBay() {
     <section
       ref={sectionRef}
       data-section="about-southbay"
-      className="bg-[#0a0a0a]"
-      style={{ zIndex: 2, overflowX: "clip" }}
+      className="bg-[#0a0a0a] lg:[overflow-x:clip]"
+      style={{ zIndex: 2 }}
     >
       {/* Section header — outside the scrolling track */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-20 pb-8">
@@ -1277,6 +1841,10 @@ function AboutSouthBay() {
               <span style={{ color: "rgba(255,255,255,0.38)" }}>Where we work.</span>
             </h2>
           </div>
+          {/* Mobile scroll hint */}
+          <span className="lg:hidden font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase self-end mb-1">
+            Swipe →
+          </span>
           <span className="hidden lg:block font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase self-end mb-1">
             Scroll →
           </span>
@@ -1290,6 +1858,8 @@ function AboutSouthBay() {
         />
       </div>
 
+      {/* Mobile: overflow-x-auto wrapper so cards are swipeable. Desktop: clip handled by section. */}
+      <div className="overflow-x-auto lg:overflow-x-visible" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
       {/* Horizontal scroll track */}
       <div
         ref={trackRef}
@@ -1299,41 +1869,44 @@ function AboutSouthBay() {
         {cityCards.map((c, i) => (
           <div
             key={c.city}
-            className="city-card relative flex-shrink-0 flex flex-col justify-end"
+            className="city-card group relative flex-shrink-0 flex flex-col justify-end cursor-default"
             data-num={String(i + 1).padStart(2, "0")}
             style={{
               width: "clamp(280px, 22vw, 380px)",
               height: "clamp(340px, 36vw, 480px)",
               background: i % 2 === 0 ? "#0d0d0d" : "#111",
               borderTop: "1px solid rgba(255,255,255,0.04)",
+              transition: "background 0.35s ease",
             }}
           >
             {/* Ghost number rendered via CSS ::before — invisible to axe-core contrast audit */}
 
             <div className="p-8">
-              {/* Copper hairline per card */}
-              <div style={{ height: 1, background: "#B87333", opacity: 0.4, maxWidth: "32px", marginBottom: "1.2rem" }} />
+              {/* Copper hairline per card — widens on hover */}
+              <div
+                className="transition-all duration-300 group-hover:opacity-70"
+                style={{ height: 1, background: "#B87333", opacity: 0.4, maxWidth: "32px", marginBottom: "1.2rem" }}
+              />
 
               <span className="font-labels text-[8px] text-[#B87333] tracking-[0.18em] uppercase block mb-3">
                 {c.tag}
               </span>
 
               <h3
-                className="font-display font-bold text-white leading-tight tracking-tight mb-4"
+                className="font-display font-bold text-white leading-tight tracking-tight mb-4 transition-colors duration-300 group-hover:text-[#B87333]"
                 style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.4rem)" }}
               >
                 {c.city}
               </h3>
 
-              <p className="font-labels text-[10px] text-white/50 leading-relaxed tracking-wide">
+              <p className="font-labels text-[10px] text-white/50 leading-relaxed tracking-wide transition-colors duration-300 group-hover:text-white/65">
                 {c.note}
               </p>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Mobile: wrap in a simple scrollable row */}
+      </div>{/* end mobile scroll wrapper */}
     </section>
   );
 }
@@ -1497,9 +2070,12 @@ export default function AboutContent() {
     <>
       <AboutHero />
       <AboutFounder />
+      <AboutPullQuote />
+      <AboutTimeline />
       <AboutSelectiveWork />
       <AboutPhilosophy />
       <AboutCraft />
+      <AboutMarquee />
       <AboutSouthBay />
       <AboutCTA />
     </>

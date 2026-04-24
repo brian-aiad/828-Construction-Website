@@ -33,6 +33,8 @@ export default function BuildingScience() {
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
   const img2Ref = useRef<HTMLDivElement>(null);
+  const pillarRuleRef = useRef<HTMLDivElement>(null);
+  const bsStatRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
   useLayoutEffect(() => () => { if (ctxRef.current) { try { ctxRef.current.revert(); } catch {} } }, []);
 
@@ -46,6 +48,18 @@ export default function BuildingScience() {
       }
       if (img2Ref.current) {
         gsap.set(img2Ref.current, { clipPath: "inset(0% 0% 100% 0%)" });
+      }
+
+      // Stat counter — runs on all devices, once:true (Fix 10)
+      if (bsStatRef.current) {
+        const el = bsStatRef.current;
+        const obj = { val: 0 };
+        gsap.to(obj, {
+          val: 20, duration: 2.5, ease: "power2.out",
+          immediateRender: false,
+          onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
+          scrollTrigger: { trigger: wrapperRef.current!, start: "top 55%", once: true },
+        });
       }
 
       if (!AnimationController.shouldAnimate()) {
@@ -108,6 +122,18 @@ export default function BuildingScience() {
           }
         );
       });
+
+      // ── Vertical copper rule grows as user reads through pillars ────────
+      if (pillarRuleRef.current) {
+        gsap.fromTo(pillarRuleRef.current,
+          { scaleY: 0 },
+          {
+            scaleY: 1, ease: "none",
+            transformOrigin: "top",
+            scrollTrigger: { trigger: wrapperRef.current!, start: "top 55%", end: "bottom 30%", scrub: 1.5 },
+          }
+        );
+      }
 
       // ── Fix 16: Pillars — per-row scrub reveal (not single stagger-once) ─
       const rows = wrapperRef.current!.querySelectorAll<HTMLElement>(".pillar-row");
@@ -233,36 +259,43 @@ export default function BuildingScience() {
               </p>
 
               {/* All three pillars visible simultaneously */}
-              <div className="border-t border-gray-100">
-                {pillars.map((p, i) => (
-                  <div
-                    key={p.num}
-                    className="pillar-row py-7 border-b border-gray-100 grid grid-cols-[4.5rem_1fr] gap-6 items-start"
-                  >
-                    {/* Number */}
-                    <span
-                      aria-hidden="true"
-                      className="font-numbers font-bold leading-none select-none"
-                      style={{
-                        fontSize: "3.5rem",
-                        color: i === 0 ? "#B87333" : "#8a8a8a",
-                        letterSpacing: "-0.03em",
-                        lineHeight: 1,
-                      }}
+              <div className="border-t border-gray-100 relative">
+                {/* Vertical copper rule — grows as user reads through pillars */}
+                <div
+                  ref={pillarRuleRef}
+                  className="hidden lg:block absolute left-0 top-0 h-full"
+                  style={{ width: 2, background: "#B87333", opacity: 0.4, transformOrigin: "top", transform: "scaleY(0)" }}
+                  aria-hidden="true"
+                />
+                <div className="lg:pl-5">
+                  {pillars.map((p, i) => (
+                    <div
+                      key={p.num}
+                      className="pillar-row group py-7 border-b border-gray-100 grid grid-cols-[4.5rem_1fr] gap-6 items-start transition-colors duration-300 hover:bg-gray-50 cursor-default"
                     >
-                      {p.num}
-                    </span>
-
-                    <div className="pt-1">
-                      <h3
-                        className="font-display font-bold text-black text-base mb-2 leading-snug"
+                      {/* Number */}
+                      <span
+                        aria-hidden="true"
+                        className="font-numbers font-bold leading-none select-none transition-colors duration-300 group-hover:text-[#B87333]"
+                        style={{
+                          fontSize: "3.5rem",
+                          color: i === 0 ? "#B87333" : "#8a8a8a",
+                          letterSpacing: "-0.03em",
+                          lineHeight: 1,
+                        }}
                       >
-                        {p.label}
-                      </h3>
-                      <p className="text-gray-500 text-sm leading-relaxed">{p.body}</p>
+                        {p.num}
+                      </span>
+
+                      <div className="pt-1">
+                        <h3 className="font-display font-bold text-black text-base mb-2 leading-snug group-hover:text-gray-900 transition-colors duration-300">
+                          {p.label}
+                        </h3>
+                        <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-600 transition-colors duration-300">{p.body}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               <Link
@@ -302,7 +335,7 @@ export default function BuildingScience() {
               <div className="grid grid-cols-2 gap-[3px] mt-[3px]">
                 {/* Stat card */}
                 <div className="bg-black text-white p-6 flex flex-col justify-end" style={{ minHeight: 150 }}>
-                  <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>20+</div>
+                  <div ref={bsStatRef} className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>20+</div>
                   <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
                     Years of Field Experience
                   </div>

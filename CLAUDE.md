@@ -41,6 +41,7 @@ A page is not done until ALL of these are true:
 5. The page has been scrolled end-to-end at both viewports with no dead zones, overflow, or stacked content
 6. Memory or page status in this file has been updated
 7. Phase 4.5 visual audit: every major section has a PASS file with all 5 questions answered affirmatively, AND the functional-qa duplicateHeadings array is empty.
+8. **/design-critique and /accessibility-review run as subagents** — block deploy if A11y score drops below 95
 
 ## Autonomous mode
 
@@ -67,15 +68,15 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 
 | Page | Status | Date |
 |------|--------|------|
-| Home (`/`) | revamped v2 — Perf=99, A11y=100, HomeInterstitial editorial section, BuildingScience dual-image, Fix 14 copper bars, Fix 8 stat tag | 2026-04-21 |
-| About (`/about`) | revamped v2 — Perf=100, A11y=96, founder rewrite, credential card, SelectiveWork section, "2004" drift signature | 2026-04-22 |
-| Services (`/services`) | revamped v4 — Perf=98, A11y=96, 13 images, no dead zone | 2026-04-21 |
-| Services/ADU (`/services/adu`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
-| Services/Remediation (`/services/remediation`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
-| Services/Consulting (`/services/consulting`) | master audit complete — Perf=87, A11y=96 | 2026-04-21 |
-| Process (`/process`) | revamped v3 — Perf=85, A11y=96, EditorialStandards replaces PinnedStandards, hero LCP fix, preflight hardened (data-gsap-reveal, 400ms gap, analytics mock, server recovery) | 2026-04-22 |
-| Contact (`/contact`) | master audit complete — Perf=86, A11y=96 | 2026-04-21 |
-| Projects (`/projects`) | revamped v2 — Perf=99, A11y=96, text-overlay cards, editorial highlights section, GSAP parallax per card | 2026-04-21 |
+| Home (`/`) | cinematic upgrade — Perf=99, A11y=96, SplashScreen (828+CONSTRUCTION GSAP stagger + copper underline + sessionStorage skip), second HomeMarquee reversed 60s, FooterRevealWrapper opacity scrub reveal, live Torrance time in header, copper cursor trail, CustomCursor copper ring on image hover | 2026-04-24 |
+| About (`/about`) | cinematic upgrade — Perf=99, A11y=96, founder profile block (portrait placeholder + signature + credentials row), pull quote section, horizontal editorial timeline, marquee strip, Ken Burns on ADU photo, sticky credentials on scroll, paragraph line reveals (SplitType lines) | 2026-04-24 |
+| Services (`/services`) | v3 polish — Perf=99, A11y=96, service row GSAP hover (image brightness + scale), Pattern C headline reveal | 2026-04-23 |
+| Services/ADU (`/services/adu`) | v4 revamp — Perf=99, A11y=96, qualifier + featured work + process snapshot + embedded form (service_type hidden field) + related services footer | 2026-04-24 |
+| Services/Remediation (`/services/remediation`) | v4 revamp — Perf=98, A11y=96, same template as ADU — qualifier + featured work + process snapshot + embedded form + related services | 2026-04-24 |
+| Services/Consulting (`/services/consulting`) | v4 revamp — Perf=99, A11y=96, same template as ADU — 1 featured project (consulting only), embedded form + related services | 2026-04-24 |
+| Process (`/process`) | v3 polish — Perf=99, A11y=96, EditorialStandards row hover (number + body), scrub rule | 2026-04-23 |
+| Contact (`/contact`) | v3 polish — Perf=99, A11y=96, vertical step connector line with copper gradient | 2026-04-23 |
+| Projects (`/projects`) | v3 polish — Perf=99, A11y=96, filter tab copper hover hint | 2026-04-23 |
 
 ## Project context
 
@@ -84,6 +85,13 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 - **Reference aesthetic:** NS Builders (Boston) — editorial, photography-first, scrub-dominant motion
 - **Client:** Joe P, 828 Construction, Torrance CA (CA License #1141119, est. 2004)
 - **Logo:** `828logo.png` + `828logo_trans.png` exist in project root — wire non-transparent version in Header
+
+## Living Docs (read at session start)
+
+`.claude/project-context/` — update after every session:
+- `CURRENT_STATUS.md` — page Lighthouse scores, what's done vs pending
+- `RECENT_CHANGES.md` — append newest-first after any change
+- `OUTSTANDING_ITEMS.md` — todos and known bugs
 
 ## Known pending client items
 

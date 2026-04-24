@@ -245,7 +245,7 @@ export default function HomeInterstitial() {
         {/* Stats */}
         <div ref={statsRef} className="flex flex-col sm:flex-row items-center gap-10 sm:gap-16 lg:gap-20">
           {STATS.map((stat, i) => (
-            <div key={stat.label} className="stat-item text-center">
+            <div key={stat.label} className="stat-item text-center relative">
               {i > 0 && (
                 <div
                   aria-hidden="true"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
 import ContactContent from "@/components/contact/ContactContent";
+import PhoneCopyToast from "@/components/ui/PhoneCopyToast";
 
 export const metadata: Metadata = {
   title: "Contact 828 Construction | Free Estimate - Torrance, CA",
@@ -39,6 +40,8 @@ export default function ContactPage() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <link rel="preload" as="image" href="/images/contact/contact-hero.jpg" />
       <ContactContent />
+      {/* Easter egg: clicking the phone number copies it to clipboard */}
+      <PhoneCopyToast />
     </>
   );
 }

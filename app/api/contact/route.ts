@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, phone, email, service, message } = body;
+    const { name, phone, email, service, message, address } = body;
 
     // Basic validation
     if (!name || !phone || !service || !message) {
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     const safeEmail = sanitize(email || "");
     const safeService = sanitize(service);
     const safeMessage = sanitize(message);
+    const safeAddress = address ? sanitize(address) : "";
 
     const apiKey = process.env.RESEND_API_KEY;
     const toEmail = process.env.CONTACT_EMAIL || "joe@828constructions.com";
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
         phone: safePhone,
         email: safeEmail,
         service: safeService,
+        address: safeAddress,
         message: safeMessage,
       });
       return NextResponse.json({ ok: true });
@@ -67,6 +69,14 @@ export async function POST(request: NextRequest) {
               <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Service</td>
               <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 16px;">${safeService}</td>
             </tr>
+            ${
+              safeAddress
+                ? `<tr>
+              <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Address</td>
+              <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 16px;">${safeAddress}</td>
+            </tr>`
+                : ""
+            }
           </table>
           <div style="margin-top: 24px;">
             <div style="font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Message</div>

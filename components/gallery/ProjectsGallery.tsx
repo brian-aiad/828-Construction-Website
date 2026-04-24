@@ -430,21 +430,25 @@ function ProjectsHero() {
       className="relative bg-black overflow-hidden"
       style={{ minHeight: "55vh" }}
     >
-      {/* Bg parallax layer */}
+      {/* Bg parallax layer — Next.js Image for preload + LCP optimization */}
       <div
         ref={bgRef}
         className="absolute left-0 right-0"
-        style={{
-          top: "-15%",
-          height: "130%",
-          backgroundImage: "url('/images/projects/service-adu.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center 30%",
-          filter: "contrast(1.05) saturate(1.1) brightness(0.92)",
-        }}
+        style={{ top: "-15%", height: "130%" }}
         role="presentation"
         aria-hidden="true"
-      />
+      >
+        <Image
+          src="/images/projects/service-adu.jpg"
+          alt=""
+          fill
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          className="object-cover object-[center_30%]"
+          style={{ filter: "contrast(1.05) saturate(1.1) brightness(0.92)" }}
+        />
+      </div>
       {/* Mid gradient parallax */}
       <div
         ref={midRef}
@@ -803,10 +807,10 @@ export default function ProjectsGallery() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`py-4 px-5 font-labels text-[10px] tracking-[0.18em] uppercase whitespace-nowrap border-b-2 transition-all duration-200 ${
+                className={`py-4 px-5 font-labels text-[10px] tracking-[0.18em] uppercase whitespace-nowrap border-b-2 transition-all duration-300 ${
                   activeCategory === cat
                     ? "text-white border-[#B87333]"
-                    : "text-gray-500 border-transparent hover:text-white"
+                    : "text-gray-500 border-transparent hover:text-gray-300 hover:border-white/20"
                 }`}
               >
                 {cat}

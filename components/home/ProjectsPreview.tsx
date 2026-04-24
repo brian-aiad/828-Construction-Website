@@ -158,7 +158,7 @@ export default function ProjectsPreview() {
           </div>
           <Link
             href="/projects"
-            className="proj-counter group inline-flex items-center gap-2 font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5 flex-shrink-0 self-start mt-2"
+            className="proj-counter group inline-flex items-center gap-2 font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5 pt-3 flex-shrink-0 self-start"
           >
             All Projects
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>

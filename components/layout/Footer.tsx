@@ -31,10 +31,10 @@ export default function Footer() {
               20+ years serving South Bay homeowners and investors.
             </p>
             <div className="space-y-2">
-              <a href={SITE.phoneHref} className="font-numbers text-white text-xl tracking-wide hover:text-gray-300 transition-colors duration-200 block">
+              <a href={SITE.phoneHref} className="font-numbers text-white text-xl tracking-wide hover:text-[#B87333] transition-colors duration-200 block">
                 {SITE.phone}
               </a>
-              <a href={`mailto:${SITE.email}`} className="font-labels text-[10px] text-gray-400 tracking-[0.15em] uppercase hover:text-gray-200 transition-colors duration-200 block">
+              <a href={`mailto:${SITE.email}`} className="font-labels text-[10px] text-gray-400 tracking-[0.15em] uppercase hover:text-[#B87333] transition-colors duration-200 block">
                 {SITE.email}
               </a>
             </div>
@@ -54,7 +54,7 @@ export default function Footer() {
                   { href: "/contact", label: "Contact" },
                 ].map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="font-labels text-[11px] text-gray-400 tracking-[0.12em] uppercase hover:text-white transition-colors duration-200">
+                    <Link href={link.href} className="font-labels text-[11px] text-gray-400 tracking-[0.12em] uppercase hover:text-[#B87333] transition-colors duration-200">
                       {link.label}
                     </Link>
                   </li>
@@ -66,7 +66,7 @@ export default function Footer() {
               <ul className="space-y-3">
                 {SERVICES.map((service) => (
                   <li key={service.slug}>
-                    <Link href={`/services/${service.slug}`} className="font-labels text-[11px] text-gray-400 tracking-[0.12em] uppercase hover:text-white transition-colors duration-200">
+                    <Link href={`/services/${service.slug}`} className="font-labels text-[11px] text-gray-400 tracking-[0.12em] uppercase hover:text-[#B87333] transition-colors duration-200">
                       {service.title}
                     </Link>
                   </li>
@@ -142,7 +142,7 @@ export default function Footer() {
             <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
               Navigate
             </span>
-            <nav className="flex flex-wrap gap-x-4 gap-y-2">
+            <nav className="flex flex-wrap gap-x-4 gap-y-0">
               {[
                 { href: "/", label: "Home" },
                 { href: "/about", label: "About" },
@@ -154,7 +154,7 @@ export default function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-white transition-colors duration-200"
+                  className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-[#B87333] transition-colors duration-200 py-2"
                 >
                   {link.label}
                 </Link>
@@ -167,12 +167,12 @@ export default function Footer() {
             <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
               Services
             </span>
-            <nav className="flex flex-wrap gap-x-4 gap-y-2">
+            <nav className="flex flex-wrap gap-x-4 gap-y-0">
               {SERVICES.map((service) => (
                 <Link
                   key={service.slug}
                   href={`/services/${service.slug}`}
-                  className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-white transition-colors duration-200"
+                  className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-[#B87333] transition-colors duration-200 py-2"
                 >
                   {service.title}
                 </Link>

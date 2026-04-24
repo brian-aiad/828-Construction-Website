@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk, Space_Mono, IBM_Plex_Mono } from "next/font/googl
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import FooterRevealWrapper from "@/components/layout/FooterRevealWrapper";
 import ScrollProgress from "@/components/layout/ScrollProgress";
 import LenisProvider from "@/components/providers/LenisProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
@@ -19,7 +20,7 @@ const inter = Inter({
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  display: "swap",
+  display: "optional",
 });
 
 const spaceMono = Space_Mono({
@@ -98,7 +99,9 @@ export default function RootLayout({
         <LenisProvider>
           <Header />
           <main id="main-content" className="flex-1">{children}</main>
-          <Footer />
+          <FooterRevealWrapper>
+            <Footer />
+          </FooterRevealWrapper>
         </LenisProvider>
         {process.env.VERCEL && <Analytics />}
         <GoogleAnalytics />

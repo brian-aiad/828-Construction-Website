@@ -694,11 +694,11 @@ function EditorialStandards() {
               <div
                 key={item.title}
                 ref={(el) => { rowRefs.current[i] = el; }}
-                className="py-8 lg:py-10 border-t border-white/5"
+                className="py-8 lg:py-10 border-t border-white/5 group cursor-default transition-colors duration-300 hover:bg-white/[0.015]"
               >
                 <div className="grid grid-cols-[3rem_1fr] gap-5">
                   <span
-                    className="font-numbers font-bold leading-none text-[#B87333] select-none"
+                    className="font-numbers font-bold leading-none text-[#B87333] select-none transition-opacity duration-300 group-hover:opacity-100"
                     aria-hidden="true"
                     style={{ fontSize: "clamp(1.5rem, 2.2vw, 2rem)", opacity: 0.75, letterSpacing: "-0.03em", paddingTop: "0.15em" }}
                   >
@@ -706,12 +706,12 @@ function EditorialStandards() {
                   </span>
                   <div className="lg:grid lg:grid-cols-[1fr_1.8fr] lg:gap-10 items-start">
                     <h3
-                      className="font-display font-bold text-white leading-tight mb-3 lg:mb-0"
+                      className="font-display font-bold text-white leading-tight mb-3 lg:mb-0 transition-colors duration-300 group-hover:text-white/95"
                       style={{ fontSize: "clamp(1rem, 1.5vw, 1.2rem)" }}
                     >
                       {item.title}
                     </h3>
-                    <p className="text-gray-400 leading-relaxed" style={{ fontSize: "clamp(0.875rem, 1.2vw, 0.95rem)" }}>
+                    <p className="text-gray-400 leading-relaxed transition-colors duration-300 group-hover:text-gray-300" style={{ fontSize: "clamp(0.875rem, 1.2vw, 0.95rem)" }}>
                       {item.body}
                     </p>
                   </div>
