@@ -102,7 +102,7 @@ export default function HomeCTA() {
         const _trigger = trigger;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !ctaEl.isConnected) return;
-          const split = new SplitType(ctaEl, { types: "chars" });
+          const split = new SplitType(ctaEl, { types: "words,chars" });
           ctaSplit = split;
           splitRef.current = split;
           if (split.chars?.length) {

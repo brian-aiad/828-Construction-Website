@@ -242,7 +242,7 @@ function AboutHero() {
 
           splitEls = lineEls;
           // Split each .line span individually — collect all chars
-          const splits = lineEls.map(el => new SplitType(el, { types: "chars" }));
+          const splits = lineEls.map(el => new SplitType(el, { types: "words,chars" }));
           localSplits = splits;
           allSplitsRef.current = splits;
           splitRef.current = splits[0];
@@ -487,7 +487,7 @@ function AboutFounder() {
         const _el = storyEl;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "chars" });
+          const split = new SplitType(_el, { types: "words,chars" });
           storySplit = split;
           splitStoryRef.current = split;
           if (split.chars?.length) {
@@ -902,7 +902,7 @@ function AboutPullQuote() {
         const _el = qEl;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "chars" });
+          const split = new SplitType(_el, { types: "words,chars" });
           pqSplit = split;
           splitPQRef.current = split;
           if (split.chars?.length) {
@@ -1009,7 +1009,7 @@ function AboutTimeline() {
         const _el = hEl;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "chars" });
+          const split = new SplitType(_el, { types: "words,chars" });
           tlSplit = split;
           splitTLRef.current = split;
           if (split.chars?.length) {
@@ -1946,7 +1946,7 @@ function AboutCTA() {
         const _el = ctaEl;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "chars" });
+          const split = new SplitType(_el, { types: "words,chars" });
           ctaSplit = split;
           splitCtaRef.current = split;
           if (split.chars?.length) {

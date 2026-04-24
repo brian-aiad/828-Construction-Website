@@ -130,7 +130,7 @@ export default function HeroSections() {
           );
           if (lineEls.length > 0) {
             splitEls = lineEls;
-            const splits = lineEls.map(el => new SplitType(el, { types: "chars" }));
+            const splits = lineEls.map(el => new SplitType(el, { types: "words,chars" }));
             localSplits = splits;
             allSplitsRef.current = splits;
             const allChars = splits.flatMap(s => s.chars ?? []);

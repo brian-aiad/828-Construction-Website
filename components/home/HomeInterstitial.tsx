@@ -97,7 +97,7 @@ export default function HomeInterstitial() {
       if (headEl) {
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !headEl.isConnected) return;
-          const split = new SplitType(headEl, { types: "chars" });
+          const split = new SplitType(headEl, { types: "words,chars" });
           localSplit = split;
           splitRef.current = split;
           if (split.chars?.length) {

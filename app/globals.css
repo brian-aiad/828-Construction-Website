@@ -173,6 +173,19 @@ body {
   background: linear-gradient(160deg, #1c1c1c 0%, #0d0d0d 100%);
 }
 
+/* ── Typography baseline — prevent mid-word breaks on display text ──────── */
+/* SplitType wraps individual chars as inline-block — without word containers
+   these chars can reflow mid-word. This CSS ensures the browser never
+   hyphenates or breaks within words at the heading level. */
+h1, h2, h3 {
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  text-wrap: balance;
+}
+
 /* ── Text utilities ─────────────────────────────────────────────────────── */
 .text-balance {
   text-wrap: balance;

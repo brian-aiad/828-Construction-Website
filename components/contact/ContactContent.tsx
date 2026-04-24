@@ -85,7 +85,7 @@ function ContactHero() {
         const heroLine = sectionRef.current?.querySelector<HTMLElement>(".ctct-hero-line");
         if (heroLine && heroLine.isConnected) {
           heroLineEl = heroLine;
-          const split = new SplitType(heroLine, { types: "chars" });
+          const split = new SplitType(heroLine, { types: "words,chars" });
           heroSplit = split;
           splitRef.current = split;
           const chars = split.chars ?? [];
@@ -291,7 +291,7 @@ function ContactMain() {
         const _trigger = sectionRef.current;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "chars" });
+          const split = new SplitType(_el, { types: "words,chars" });
           ctaSplit = split;
           splitRef.current = split;
           if (split.chars?.length) {

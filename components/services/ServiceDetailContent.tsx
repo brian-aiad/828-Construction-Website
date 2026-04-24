@@ -238,7 +238,7 @@ function DetailHero({
         const locLine = sectionRef.current?.querySelector<HTMLElement>(".loc-line");
         if (!locLine || !locLine.isConnected) return;
         locLineEl = locLine;
-        const split = new SplitType(locLine, { types: "chars" });
+        const split = new SplitType(locLine, { types: "words,chars" });
         locSplit = split;
         splitRef.current = split;
         if (split.chars?.length) {
@@ -604,7 +604,7 @@ function DetailContent({
         const _h2 = h2El;
         h2SplitFrame = requestAnimationFrame(() => {
           if (!mounted || !_h2.isConnected) return;
-          const split = new SplitType(_h2, { types: "chars" });
+          const split = new SplitType(_h2, { types: "words,chars" });
           h2LocalSplit = split;
           h2SplitRef.current = split;
           if (split.chars?.length) {
@@ -832,7 +832,7 @@ function QualifierSection({ slug }: { slug: string }) {
         const _el = headlineEl;
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "chars" });
+          const split = new SplitType(_el, { types: "words,chars" });
           headlineSplit = split;
           splitRef.current = split;
           if (split.chars?.length) {

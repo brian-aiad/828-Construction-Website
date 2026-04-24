@@ -390,7 +390,7 @@ function ProjectsHero() {
         const heroLine = sectionRef.current?.querySelector<HTMLElement>(".proj-hero-line");
         if (heroLine && heroLine.isConnected) {
           heroLineEl = heroLine;
-          const split = new SplitType(heroLine, { types: "chars" });
+          const split = new SplitType(heroLine, { types: "words,chars" });
           herSplit = split;
           splitRef.current = split;
           const chars = split.chars ?? [];

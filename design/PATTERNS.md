@@ -664,6 +664,48 @@ This pattern is already used correctly in `ServicesPreview.tsx`. Apply it to any
 
 ---
 
+### Fix 21 — Mid-word line breaks on display text (SplitType + Typography)
+
+**Symptom:** Hero headlines and section display text break mid-word (e.g., "Construc/tion", "E/xists", "wit/h") across multiple pages at mobile and tablet viewports. The text reads as amateur and the break can occur at any letter, not just at spaces.
+
+**Root cause:** SplitType `{ types: "chars" }` wraps each character in an independent `display: inline-block` div. Without word containers, these char divs reflow freely — the browser has no word-boundary information and can place a line break between any two adjacent chars. When a line's remaining space is exactly one character wide, that character moves to the next line, creating a 1-letter orphan at the start of a word.
+
+**Fix — two layers:**
+
+1. **Change all SplitType instances from `types: "chars"` to `types: "words,chars"`**
+   
+   This creates `.word` wrapper divs (`display: inline-block; white-space: nowrap`) around each word's chars. Word containers are atomic units — their chars never split. Animation code targeting `split.chars` is unaffected since `split.chars` returns the same char elements regardless of word wrapping.
+   
+   ```ts
+   // Before (mid-word breaks possible):
+   const split = new SplitType(el, { types: "chars" });
+   
+   // After (word-boundary only breaks):
+   const split = new SplitType(el, { types: "words,chars" });
+   // split.chars still works identically for all GSAP animations
+   ```
+
+2. **Add CSS baseline to all h1/h2/h3 in `globals.css`:**
+   
+   ```css
+   h1, h2, h3 {
+     word-break: normal;          /* only break at normal break points */
+     overflow-wrap: break-word;   /* break within words only as last resort */
+     hyphens: none;               /* never insert hyphens */
+     -webkit-hyphens: none;
+     -ms-hyphens: none;
+     text-wrap: balance;          /* progressive enhancement: even line lengths */
+   }
+   ```
+   
+   `text-wrap: balance` prevents single-word orphans on the last line by distributing text more evenly across available lines. Supported in Chrome 114+, Firefox 121+, Safari 17+. Falls back gracefully (browsers without support get default wrapping, but the SplitType fix above prevents mid-word breaks regardless of `text-wrap` support).
+
+**Files changed:** `app/globals.css`, all 9 component files using SplitType.
+
+**Affected files:** `components/about/AboutContent.tsx`, `components/contact/ContactContent.tsx`, `components/gallery/ProjectsGallery.tsx`, `components/home/HeroSections.tsx`, `components/home/HomeCTA.tsx`, `components/home/HomeInterstitial.tsx`, `components/process/ProcessContent.tsx`, `components/services/ServiceDetailContent.tsx`, `components/services/ServicesContent.tsx`
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:
