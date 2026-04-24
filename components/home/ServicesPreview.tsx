@@ -182,7 +182,7 @@ function ServiceRow({
 
   const imagePart = (
     <div
-      className="relative overflow-hidden flex-shrink-0 w-full md:w-[58%]"
+      className="relative overflow-hidden flex-shrink-0 w-full md:w-1/2 lg:w-[58%]"
       style={{ minHeight: "clamp(320px, 55vw, 700px)" }}
     >
       {/* Clipping wrapper — clip-path animates on this */}
@@ -248,7 +248,7 @@ function ServiceRow({
   const textPart = (
     <div
       ref={textRef}
-      className="svc-text-panel flex flex-col justify-center flex-1 bg-black px-10 py-16 md:px-16 lg:px-20 relative overflow-hidden"
+      className="svc-text-panel flex flex-col justify-center flex-1 bg-black px-8 py-16 md:px-10 lg:px-16 xl:px-20 relative overflow-hidden"
       data-num={service.num}
     >
       {/* Chapter number */}
