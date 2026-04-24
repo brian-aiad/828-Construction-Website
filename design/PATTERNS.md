@@ -538,6 +538,132 @@ for (let i = 0; i < 6; i++) {
 
 ---
 
+### Fix 18 — Invisible elements after client-side navigation (ScrollTrigger stale positions)
+
+**Symptom:** After navigating between pages, images and animated elements stay permanently invisible (`opacity: 0`, `clipPath: inset(100%)`). Hard refresh fixes it. Cold first visit works. The bug appears progressively — the more you navigate, the more elements are stuck.
+
+**Root cause:** LenisProvider kills ScrollTrigger instances on route change but does NOT call `ScrollTrigger.refresh()` after the new page's triggers are created. Trigger positions are calculated against the wrong layout (images still loading, DOM unsettled). `once: true` triggers that fire at the wrong position either never fire or fire instantly with wrong state — leaving elements permanently in their GSAP initial state (invisible).
+
+**Fix — three layers in `LenisProvider.tsx`:**
+
+1. **Two-pass `ScrollTrigger.refresh()` after navigation** — first pass at 300ms (React effects settled), second pass at 700ms (images loaded):
+```ts
+// In [pathname] effect, after killing old triggers:
+const refreshTimer = setTimeout(() => {
+  if (lenisRef.current) lenisRef.current.resize();
+  ScrollTrigger.refresh(true);
+  // Re-attach failsafe observer for new page
+  failsafeObserverRef.current?.disconnect();
+  failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+}, 300);
+return () => clearTimeout(refreshTimer);
+```
+
+2. **`window.load` refresh on initial mount** — fires after all images have loaded and layout is final:
+```ts
+// In isFirstMount branch:
+const doRefresh = () => {
+  if (lenisRef.current) lenisRef.current.resize();
+  ScrollTrigger.refresh(true);
+  failsafeObserverRef.current?.disconnect();
+  failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+};
+if (document.readyState === "complete") {
+  requestAnimationFrame(() => requestAnimationFrame(doRefresh));
+} else {
+  window.addEventListener("load", doRefresh, { once: true });
+}
+```
+
+3. **IntersectionObserver failsafe** — 2.5s grace window after any GSAP-hidden element enters viewport. If still invisible after grace period, force-reveals it:
+```ts
+function attachRevealFailsafe() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target as HTMLElement;
+      observer.unobserve(el);
+      setTimeout(() => {
+        if (!el.isConnected) return;
+        const clip = window.getComputedStyle(el).clipPath;
+        const opacity = parseFloat(window.getComputedStyle(el).opacity);
+        const stuck = opacity < 0.08 || clip?.includes("inset(100%") || clip?.includes("inset(0% 100%");
+        if (stuck) gsap.to(el, { opacity: 1, clipPath: "inset(0%)", y: 0, scale: 1, duration: 0.55, overwrite: true });
+      }, 2500);
+    });
+  }, { threshold: 0.05 });
+  // Watch explicit targets AND any inline-styled opacity:0 / clipPath:inset() elements
+  document.querySelectorAll("[data-gsap-reveal], [style]").forEach(el => {
+    const s = (el as HTMLElement).style;
+    if (el.getAttribute("aria-hidden") === "true") return;
+    if (s.clipPath?.includes("inset(100%") || s.clipPath?.includes("inset(0% 100%") || s.opacity === "0") {
+      observer.observe(el as HTMLElement);
+    }
+  });
+  document.querySelectorAll("[data-gsap-reveal]").forEach(el => observer.observe(el as HTMLElement));
+  return observer;
+}
+```
+
+**Prevention:** On every element that GSAP starts invisible (`gsap.set(el, { opacity: 0 })` or `gsap.set(el, { clipPath: "inset(100%)" })`), add `data-gsap-reveal="true"` to the JSX element so the failsafe can explicitly watch it.
+
+**Files changed:** `components/providers/LenisProvider.tsx`
+
+---
+
+### Fix 19 — Double-animation conflict on SplitType paragraphs (blank white space)
+
+**Symptom:** After navigating to the About page, large empty white areas appear where paragraph text should be. The paragraph container is visible but contains no visible text.
+
+**Root cause:** The `AboutFounder` section applied TWO simultaneous GSAP animations to the same paragraph elements:
+1. Container animation in `gsap.context()`: `gsap.fromTo(el, { y:26, opacity:0 }, ...)` — makes the whole `<p>` invisible
+2. SplitType RAF: `gsap.fromTo(line, { yPercent:108, opacity:0 }, ...)` — makes the individual text lines invisible
+
+When the container animation revealed the paragraph (opacity:1), the lines inside were still at `yPercent:108, opacity:0`. User saw an empty paragraph container — white space where text should be.
+
+**Fix:** Remove the container-level scrub animation. Let only SplitType's line reveals handle paragraph text. With SplitType, paragraph containers default to `opacity:1` (CSS), and lines slide in from below via their own triggers. Single animation system, no conflict.
+
+**Files changed:** `components/about/AboutContent.tsx`
+
+---
+
+### Fix 20 — Hover event listeners not removed on unmount (memory/error leak)
+
+**Symptom:** After navigating away from a page with card hover effects, stale `mouseenter`/`mouseleave` listeners remain on detached DOM nodes. GSAP tweens on detached nodes produce errors in the animation queue. Accumulates across navigations.
+
+**Root cause:** Hover event listeners added inside `gsap.context()` callbacks are NOT removed by `ctx.revert()`. Only GSAP tweens and ScrollTriggers are reverted — DOM event listeners are unaffected by GSAP cleanup.
+
+**Fix:** Store hover handlers as named functions outside the context, `addEventListener` them explicitly, and `removeEventListener` them in the cleanup `return` function:
+
+```ts
+const hoverCleanups: Array<() => void> = [];
+
+// INSIDE gsap.context():
+cards.forEach((card) => {
+  if (!window.matchMedia("(hover: hover)").matches) return;
+  const onEnter = () => { /* gsap tweens */ };
+  const onLeave = () => { /* gsap tweens */ };
+  card.addEventListener("mouseenter", onEnter);
+  card.addEventListener("mouseleave", onLeave);
+  hoverCleanups.push(() => {
+    card.removeEventListener("mouseenter", onEnter);
+    card.removeEventListener("mouseleave", onLeave);
+  });
+});
+
+// In useEffect cleanup:
+return () => {
+  hoverCleanups.forEach(fn => fn());
+  try { ctx.revert(); } catch {}
+};
+```
+
+This pattern is already used correctly in `ServicesPreview.tsx`. Apply it to any component that adds DOM hover listeners inside a GSAP context.
+
+**Files changed:** `components/home/ProjectsPreview.tsx`
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:

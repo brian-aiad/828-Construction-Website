@@ -8,35 +8,99 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ── Global animation failsafe ──────────────────────────────────────────────────
+// Elements with data-gsap-reveal="true" start at opacity:0 or clipPath:hidden via
+// GSAP. If their ScrollTrigger fires correctly, they reveal as intended. If the
+// trigger misfires (stale positions, navigation race, etc.), this observer gives
+// them a 2s grace window while in-viewport, then force-reveals them so users
+// never see permanently invisible content on a live production site.
+function attachRevealFailsafe() {
+  if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
+
+  const GRACE_MS = 2500;
+
+  const shouldForceReveal = (el: HTMLElement): boolean => {
+    if (!el.isConnected) return false;
+    const style = window.getComputedStyle(el);
+    const opacity = parseFloat(style.opacity);
+    const clip = style.clipPath;
+    // Invisible: opacity near 0 OR fully clipped via inset
+    if (opacity < 0.08) return true;
+    if (clip && (
+      clip.includes("inset(100%") ||
+      clip.includes("inset(0% 100%") ||
+      clip.includes("inset(0% 0% 100%")
+    )) return true;
+    return false;
+  };
+
+  const forceReveal = (el: HTMLElement) => {
+    gsap.to(el, {
+      opacity: 1,
+      clipPath: "inset(0% 0% 0% 0%)",
+      y: 0,
+      x: 0,
+      yPercent: 0,
+      xPercent: 0,
+      scale: 1,
+      duration: 0.55,
+      ease: "power2.out",
+      overwrite: true,
+    });
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        observer.unobserve(el);
+
+        setTimeout(() => {
+          if (shouldForceReveal(el)) forceReveal(el);
+        }, GRACE_MS);
+      });
+    },
+    { threshold: 0.05, rootMargin: "0px 0px -5% 0px" }
+  );
+
+  // Explicit data-gsap-reveal targets
+  document.querySelectorAll<HTMLElement>("[data-gsap-reveal]").forEach((el) => observer.observe(el));
+
+  // Broader catch: any element with GSAP-applied inline clipPath or opacity:0
+  // This catches elements that weren't tagged but still need recovery.
+  document.querySelectorAll<HTMLElement>("[style]").forEach((el) => {
+    const s = el.style;
+    if (!s) return;
+    // Skip aria-hidden decorative elements (ghost numbers, watermarks)
+    if (el.getAttribute("aria-hidden") === "true") return;
+    const hasHiddenClip = s.clipPath && (
+      s.clipPath.includes("inset(100%") ||
+      s.clipPath.includes("inset(0% 100%") ||
+      s.clipPath.includes("inset(0% 0% 100%")
+    );
+    const hasZeroOpacity = s.opacity === "0";
+    if (hasHiddenClip || hasZeroOpacity) {
+      observer.observe(el);
+    }
+  });
+
+  return observer;
+}
+
 export default function LenisProvider({ children }: { children: ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
   const pathname = usePathname();
-
-  // Tracks whether this is the initial mount vs a client-side navigation.
-  // On initial mount (hard refresh) React fires children effects BEFORE parent
-  // effects. Page components create ScrollTriggers first, then LenisProvider's
-  // [pathname] effect runs — and without this guard it would kill all those
-  // freshly-created triggers, leaving every image stuck at opacity:0/clipPath
-  // hidden forever. On navigation Next.js renders new page content behind a
-  // Suspense boundary, so the [pathname] effect fires before the new page's
-  // effects and the kill is safe.
   const isFirstMount = useRef(true);
+  const failsafeObserverRef = useRef<IntersectionObserver | null>(null);
 
-  // ── Scroll restoration — useLayoutEffect fires BEFORE all useEffects ─────
-  // useLayoutEffect is synchronous and runs after React's DOM commit but before
-  // the browser paints. Crucially, it runs before ANY useEffect (including
-  // children's GSAP setup). This guarantees window.scrollY = 0 when page
-  // components create their ScrollTriggers in their own useEffects.
-  //
-  // The original useEffect version ran AFTER GSAP was already initialised —
-  // too late if the browser had restored a mid-page scroll position.
+  // ── Scroll restoration — fires synchronously before any useEffect ──────────
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
     history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
   }, []);
 
-  // ── Belt-and-suspenders useEffect version (preserved for SSR edge-cases) ──
   useEffect(() => {
     if (typeof window === "undefined") return;
     history.scrollRestoration = "manual";
@@ -44,13 +108,10 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Initial mount: skip the trigger kill.
-    // Triggers were just created by page-component effects (children before
-    // parents in React's effect order). Killing here would destroy them and
-    // leave the page permanently broken until a full reload or navigation.
     if (isFirstMount.current) {
       isFirstMount.current = false;
-      // Still reset scroll position as belt-and-suspenders.
+
+      // Scroll reset
       if (window.innerWidth < 768) {
         window.scrollTo(0, 0);
       } else if (lenisRef.current) {
@@ -58,26 +119,57 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       } else {
         window.scrollTo(0, 0);
       }
+
+      // On hard refresh: trigger positions are calculated before images finish
+      // loading. Refresh after window.load so layout is final.
+      const doRefresh = () => {
+        if (lenisRef.current) lenisRef.current.resize();
+        ScrollTrigger.refresh(true);
+        // Attach failsafe after refresh so all elements exist in DOM
+        failsafeObserverRef.current?.disconnect();
+        failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+      };
+
+      if (document.readyState === "complete") {
+        // Already loaded — refresh on next frame (after this effect batch)
+        requestAnimationFrame(() => requestAnimationFrame(doRefresh));
+      } else {
+        window.addEventListener("load", doRefresh, { once: true });
+      }
+
       return;
     }
 
-    // Navigation: kill all active ScrollTriggers from the departing page
-    // BEFORE scrolling. lenis.scrollTo(0, { immediate }) fires the "scroll"
-    // event which calls ScrollTrigger.update — executing every onUpdate
-    // callback. If React is simultaneously unmounting the old page, those
-    // callbacks run on detached nodes → "removeChild" NotFoundError.
+    // ── Client-side navigation ────────────────────────────────────────────
+    // Kill departing page's triggers BEFORE scrolling (prevents removeChild errors
+    // from onUpdate callbacks firing on detached nodes).
     ScrollTrigger.getAll().forEach((st) => st.kill());
 
     if (window.innerWidth < 768) {
       window.scrollTo(0, 0);
-      return;
-    }
-
-    if (lenisRef.current) {
+    } else if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true });
     } else {
       window.scrollTo(0, 0);
     }
+
+    // After navigation: new page mounts and creates ScrollTriggers in its own
+    // useEffects. Those effects fire AFTER this one (children before parents on
+    // initial mount; but here we need to wait for the NEW page's effects, which
+    // run asynchronously after React commits the new tree).
+    // 300ms is enough for React to finish rendering + all component useEffects.
+    const refreshTimer = setTimeout(() => {
+      if (lenisRef.current) lenisRef.current.resize();
+      ScrollTrigger.refresh(true);
+
+      // Re-attach failsafe for new page's elements
+      failsafeObserverRef.current?.disconnect();
+      failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+    }, 300);
+
+    return () => {
+      clearTimeout(refreshTimer);
+    };
   }, [pathname]);
 
   useEffect(() => {
@@ -97,24 +189,25 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
-    // After Lenis connects, refresh all ScrollTrigger positions. Page
-    // components' triggers were created before Lenis was wired in; this
-    // ensures they reflect the correct scroll origin (Y=0 after the
-    // useLayoutEffect reset above).
+    // Initial refresh — fires after all children useEffects have created their
+    // ScrollTriggers. Recalculates positions with correct scroll origin (Y=0).
     ScrollTrigger.refresh();
 
-    // ── Resize: ScrollTrigger positions go stale after window resize ─────
+    // ── Resize ───────────────────────────────────────────────────────────────
     let resizeTimer: ReturnType<typeof setTimeout> | undefined;
     const onResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         lenis.resize();
-        ScrollTrigger.refresh();
-      }, 150);
+        ScrollTrigger.refresh(true);
+        // Re-observe after resize in case new elements appeared
+        failsafeObserverRef.current?.disconnect();
+        failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+      }, 200);
     };
     window.addEventListener("resize", onResize, { passive: true });
 
-    // ── Visibility: tab switch back can leave Lenis out of sync ──────────
+    // ── Visibility change ─────────────────────────────────────────────────────
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
         ScrollTrigger.refresh();
@@ -126,6 +219,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);
+      failsafeObserverRef.current?.disconnect();
       lenis.destroy();
       lenisRef.current = null;
       gsap.ticker.remove(tick);
