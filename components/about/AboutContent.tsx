@@ -521,16 +521,9 @@ function AboutFounder() {
         });
       }
 
-      // Story paragraphs: scrub stagger reveal (Fix 15 — scrub-tied, not once-fire)
-      const bodyEls = textRef.current?.querySelectorAll<HTMLElement>(".story-para, .story-cta");
-      if (bodyEls?.length) {
-        Array.from(bodyEls).forEach((el, i) => {
-          gsap.fromTo(el, { y: 26, opacity: 0 }, {
-            y: 0, opacity: 1, ease: "power3.out",
-            scrollTrigger: { trigger: el, start: "top 86%", end: "top 60%", scrub: 1.1 },
-          });
-        });
-      }
+      // Story paragraphs: revealed via SplitType lines in the RAF block below.
+      // Do NOT also animate the paragraph container — dual opacity:0 states create
+      // invisible-container bug (white space). Let SplitType lines handle the reveal.
 
       // Stat card: scale-pop
       if (statCardRef.current) {
@@ -711,6 +704,7 @@ function AboutFounder() {
           ref={credRowRef}
           className="flex flex-wrap items-center mt-10 pt-8"
           style={{ borderTop: "1px solid #f3f4f6" }}
+          data-gsap-reveal="true"
         >
           {credRowItems.map((item, i) => (
             <React.Fragment key={item.label}>
@@ -804,13 +798,12 @@ function AboutFounder() {
             <div
               ref={imagePaneRef}
               className="relative overflow-hidden bg-gray-100 h-full min-h-[520px]"
-              style={{ clipPath: "inset(0% 100% 0% 0%)" }}
               data-gsap-reveal="true"
             >
               <div
                 ref={imageInnerRef}
                 className="absolute inset-0 overflow-hidden"
-                style={{ willChange: "transform", transform: "scale(1.14)" }}
+                style={{ willChange: "transform" }}
               >
                 <ImageWithFallback
                   src="/images/about/building-science.jpg"
@@ -830,6 +823,7 @@ function AboutFounder() {
               ref={statCardRef}
               className="absolute -bottom-4 -left-4 lg:-left-8 bg-black text-white p-6 z-10"
               style={{ width: "13rem" }}
+              data-gsap-reveal="true"
             >
               <div className="font-labels text-[8px] text-[#B87333] tracking-[0.2em] uppercase mb-2">CA License</div>
               <div className="font-numbers font-bold text-xl text-white mb-3">#{SITE.license}</div>
@@ -847,7 +841,7 @@ function AboutFounder() {
         ref={stickyCredRef}
         aria-hidden="true"
         className="fixed z-40 pointer-events-none hidden lg:flex flex-col items-center gap-3"
-        style={{ right: "2rem", top: "50%", transform: "translateY(-50%)", opacity: 0 }}
+        style={{ right: "2rem", top: "50%", transform: "translateY(-50%)" }}
       >
         <div
           className="font-labels text-[7px] text-black/40 tracking-[0.3em] uppercase"
