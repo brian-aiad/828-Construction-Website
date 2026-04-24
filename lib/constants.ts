@@ -2,7 +2,7 @@ export const SITE = {
   name: "828 Construction",
   tagline: "Built with Intent. Not by Accident.",
   description:
-    "20+ years of building science expertise. Specializing in ADU construction, remediation, and consulting in Torrance and South Bay, CA.",
+    "25+ years of building science expertise. Specializing in ADU construction, remediation, and consulting in Torrance and South Bay, CA.",
   phone: "213-828-2388",
   phoneHref: "tel:+12138282388",
   email: "joe@828constructions.com",
@@ -305,7 +305,7 @@ export const PROCESS_STEPS = [
     number: "02",
     title: "Planning",
     description:
-      "Detailed planning using 20+ years of building science knowledge. Every decision is intentional — no guesswork, no surprises.",
+      "Detailed planning using 25+ years of building science knowledge. Every decision is intentional — no guesswork, no surprises.",
   },
   {
     number: "03",

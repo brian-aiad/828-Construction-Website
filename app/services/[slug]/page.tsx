@@ -30,7 +30,7 @@ const serviceMeta: Record<
   adu: {
     title: "ADU Builder Torrance | Accessory Dwelling Units | 828 Construction",
     description:
-      "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. 20+ years experience. CA License #1141119. Free consultation.",
+      "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. 25+ years experience. CA License #1141119. Free consultation.",
     keywords: [
       "ADU builder Torrance",
       "accessory dwelling unit Torrance",
@@ -44,7 +44,7 @@ const serviceMeta: Record<
   remediation: {
     title: "Construction Remediation Torrance | Structural Repair | 828 Construction",
     description:
-      "Expert remediation services in Torrance: foundation repair, structural damage, water damage, and building defect correction. 20+ years building science. CA License #1141119.",
+      "Expert remediation services in Torrance: foundation repair, structural damage, water damage, and building defect correction. 25+ years building science. CA License #1141119.",
     keywords: [
       "remediation contractor Torrance",
       "foundation repair Torrance",
@@ -57,7 +57,7 @@ const serviceMeta: Record<
   consulting: {
     title: "Construction Consulting Torrance | Building Science Expert | 828 Construction",
     description:
-      "Professional construction consulting in Torrance. Pre-construction advisory, project feasibility, and building science expertise. 20+ years experience. CA License #1141119.",
+      "Professional construction consulting in Torrance. Pre-construction advisory, project feasibility, and building science expertise. 25+ years experience. CA License #1141119.",
     keywords: [
       "construction consulting Torrance",
       "building science consultant",
