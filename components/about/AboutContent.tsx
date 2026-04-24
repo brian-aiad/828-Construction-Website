@@ -117,7 +117,7 @@ const dontTakeItems = [
 // ─── New data for cinematic upgrade ───────────────────────────────────────────
 
 const timelineMilestones = [
-  { year: "2004", label: "Founded", desc: "" },
+  { year: "2025", label: "Founded", desc: "" },
   { year: "2008", label: "Building Science Focus", desc: "" },
   { year: "2012", label: `CA License\n#${SITE.license}`, desc: "" },
   { year: "2018", label: "South Bay Expansion", desc: "" },
@@ -126,9 +126,9 @@ const timelineMilestones = [
 
 const credRowItems = [
   { label: "CA License", value: `#${SITE.license}` },
-  { label: "Est.", value: "2004" },
+  { label: "Est.", value: "2025" },
   { label: "Home Base", value: "Torrance, CA" },
-  { label: "Experience", value: "20+ Years" },
+  { label: "Experience", value: "25+ Years" },
 ];
 
 const marqueeItems = [
@@ -136,8 +136,8 @@ const marqueeItems = [
   "Bonded",
   "Insured",
   "South Bay Licensed",
-  "Est. 2004",
-  "20+ Years",
+  "Est. 2025",
+  "25+ Years",
   "Torrance Based",
   "Building Science",
 ];
@@ -357,7 +357,7 @@ function AboutHero() {
           <span className="w-px h-3 bg-white/15" />
           <span className="font-labels text-[9px] text-white/30 tracking-[0.2em] uppercase">CA License #{SITE.license}</span>
           <span className="w-px h-3 bg-white/15" />
-          <span className="font-labels text-[9px] text-white/30 tracking-[0.2em] uppercase">Est. 2004</span>
+          <span className="font-labels text-[9px] text-white/30 tracking-[0.2em] uppercase">Est. 2025</span>
         </div>
       </div>
 
@@ -474,7 +474,7 @@ function AboutFounder() {
         });
       }
 
-      // About page signature moment: "2004" watermark drifts horizontally (KEEP UNCHANGED)
+      // About page signature moment: "2025" watermark drifts horizontally (KEEP UNCHANGED)
       if (driftRef.current) {
         gsap.to(driftRef.current, {
           xPercent: -28, ease: "none",
@@ -619,7 +619,7 @@ function AboutFounder() {
         style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left", transform: "scaleX(0)" }}
       />
 
-      {/* About page signature: "2004" watermark drifts horizontally (DO NOT TOUCH) */}
+      {/* About page signature: "2025" watermark drifts horizontally (DO NOT TOUCH) */}
       <div
         ref={driftRef}
         aria-hidden="true"
@@ -632,7 +632,7 @@ function AboutFounder() {
           lineHeight: 1, willChange: "transform", whiteSpace: "nowrap",
         }}
       >
-        2004
+        2025
       </div>
 
       {/* ── NEW: Founder Profile Block ───────────────────────────────────── */}
@@ -766,7 +766,7 @@ function AboutFounder() {
             {/* Story paragraphs — each gets line reveal via SplitType */}
             <div className="space-y-5 text-gray-500 leading-relaxed text-[15px] mb-10">
               <p className="story-para overflow-hidden">
-                Joe founded 828 in 2004 — a builder with over 20 years of hands-on field
+                Joe founded 828 in 2025 — a builder with over 25 years of hands-on field
                 experience and a single conviction: that most construction failures start as
                 diagnostic failures. Someone didn&apos;t measure. Someone assumed. Someone fixed
                 what was visible instead of what was actually failing.
@@ -829,7 +829,7 @@ function AboutFounder() {
               <div className="font-numbers font-bold text-xl text-white mb-3">#{SITE.license}</div>
               <div style={{ height: 1, background: "#B87333", opacity: 0.4, marginBottom: "0.75rem" }} />
               <div className="font-labels text-[8px] text-white/45 tracking-[0.18em] uppercase leading-relaxed">
-                Est. 2004 · {SITE.address.city}, {SITE.address.state}
+                Est. 2025 · {SITE.address.city}, {SITE.address.state}
               </div>
             </div>
           </div>
@@ -854,7 +854,7 @@ function AboutFounder() {
           className="font-labels text-[7px] text-black/40 tracking-[0.3em] uppercase"
           style={{ writingMode: "vertical-lr", transform: "rotate(180deg)", letterSpacing: "0.35em" }}
         >
-          EST. 2004
+          EST. 2025
         </div>
       </div>
     </section>
@@ -2029,7 +2029,7 @@ function AboutCTA() {
 
         <p className="cta-sub text-gray-400 mb-12 max-w-md mx-auto text-sm leading-relaxed">
           Start with a conversation. First consultation is free. You&apos;ll get Joe&apos;s
-          direct attention and 20+ years of building science applied to your project.
+          direct attention and 25+ years of building science applied to your project.
         </p>
 
         {/* Actions with MagneticButton on primary CTA */}
