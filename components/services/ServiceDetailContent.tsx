@@ -96,7 +96,7 @@ const QUALIFIER_ITEMS: Record<string, string[]> = {
     "You're buying or investing in a property and want to know what you're really getting into",
     "You're reviewing contractor bids and need independent expert verification",
     "You want feasibility analysis before committing to design or permits",
-    "You have a complex project and need an owner's representative with 20+ years of experience",
+    "You have a complex project and need an owner's representative with 25+ years of experience",
   ],
 };
 
@@ -157,7 +157,7 @@ const SERVICE_PROCESS: Record<
     {
       num: "02",
       title: "On-Site Assessment",
-      desc: "We walk the property with 20 years of pattern recognition. We look where others don't.",
+      desc: "We walk the property with 25 years of pattern recognition. We look where others don't.",
     },
     {
       num: "03",

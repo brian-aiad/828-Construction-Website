@@ -85,7 +85,7 @@ const serviceDetails = [
       "Unclear scope for insurance claims or legal documentation",
     ],
     difference:
-      "Remediation requires understanding why a system failed, not just what failed. 20+ years of building science means we trace failures to their origin.",
+      "Remediation requires understanding why a system failed, not just what failed. 25+ years of building science means we trace failures to their origin.",
     image: "/images/projects/remediation-after.jpg",
     imageSecondary: "/images/projects/waterproofing-membrane.jpg",
     imageAlt: "Remediation — 828 Construction Torrance CA",
