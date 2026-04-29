@@ -262,27 +262,35 @@ export default function HomeCTA() {
                   <span className="relative transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </Link>
               </MagneticButton>
+              {/* Phone pill — desktop only. Footer carries the primary phone on mobile. */}
               <a
                 href={SITE.phoneHref}
-                className="inline-flex items-center justify-center border border-gray-800 text-gray-400 px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:border-gray-600 hover:text-gray-200 transition-colors font-numbers"
+                className="hidden sm:inline-flex items-center justify-center border border-gray-800 text-gray-400 px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:border-gray-600 hover:text-gray-200 transition-colors font-numbers"
               >
                 {SITE.phone}
               </a>
             </div>
 
+            {/* Trust strip — flat horizontal row on mobile, vertical-stacked on desktop */}
             <div ref={trustRef} className="mt-10 pt-10 border-t border-gray-900">
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-row sm:flex-col flex-wrap gap-x-5 gap-y-3 items-center sm:items-start">
                 {[
-                  `CA License #${SITE.license}`,
+                  `CA #${SITE.license}`,
                   "Torrance · South Bay",
-                  "Free Initial Consultation",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="flex-shrink-0">
+                  "Free Consultation",
+                ].map((item, i) => (
+                  <div key={item} className="flex items-center gap-2 sm:gap-3">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="flex-shrink-0 sm:hidden">
+                      <circle cx="7" cy="7" r="6.5" stroke="#B87333" strokeOpacity="0.4" />
+                    </svg>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="hidden sm:block flex-shrink-0">
                       <circle cx="7" cy="7" r="6.5" stroke="#B87333" strokeOpacity="0.4" />
                       <path d="M4.5 7L6.2 8.7L9.5 5.3" stroke="#B87333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <span className="font-labels text-[10px] text-gray-400 tracking-[0.15em] uppercase">{item}</span>
+                    <span className="font-labels text-[9px] sm:text-[10px] text-gray-400 tracking-[0.15em] uppercase whitespace-nowrap">{item}</span>
+                    {i < 2 && (
+                      <span aria-hidden="true" className="sm:hidden text-gray-700 text-[9px] ml-2 select-none">·</span>
+                    )}
                   </div>
                 ))}
               </div>

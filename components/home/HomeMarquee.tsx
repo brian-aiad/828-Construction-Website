@@ -48,7 +48,7 @@ export default function HomeMarquee() {
 
   return (
     <div
-      className="bg-[#0a0a0a] overflow-hidden py-3.5 border-t border-white/[0.04]"
+      className="hidden lg:block bg-[#0a0a0a] overflow-hidden py-3.5 border-t border-white/[0.04]"
       aria-hidden="true"
     >
       <div

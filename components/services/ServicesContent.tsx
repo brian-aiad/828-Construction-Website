@@ -1204,9 +1204,10 @@ function ServicesCTA() {
             <span className="relative">Get Free Estimate</span>
             <span className="relative transition-transform duration-200 group-hover:translate-x-1">→</span>
           </Link>
+          {/* Phone pill — desktop only. Footer carries the primary phone on mobile. */}
           <a
             href={SITE.phoneHref}
-            className="inline-flex items-center justify-center border border-gray-700 text-gray-300 px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:border-white hover:text-white transition-colors font-numbers"
+            className="hidden sm:inline-flex items-center justify-center border border-gray-700 text-gray-300 px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:border-white hover:text-white transition-colors font-numbers"
           >
             {SITE.phone}
           </a>

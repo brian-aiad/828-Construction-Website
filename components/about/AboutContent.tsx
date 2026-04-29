@@ -2043,10 +2043,11 @@ function AboutCTA() {
             </Link>
           </MagneticButton>
 
+          {/* Phone pill — desktop only. Footer carries the primary phone on mobile. */}
           <MagneticButton strength={0.22}>
             <a
               href={SITE.phoneHref}
-              className="inline-flex items-center justify-center border border-gray-700 text-white px-10 py-4 font-labels text-[10px] tracking-[0.18em] uppercase hover:border-white transition-colors duration-200 font-numbers"
+              className="hidden sm:inline-flex items-center justify-center border border-gray-700 text-white px-10 py-4 font-labels text-[10px] tracking-[0.18em] uppercase hover:border-white transition-colors duration-200 font-numbers"
             >
               {SITE.phone}
             </a>
