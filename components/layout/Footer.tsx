@@ -85,7 +85,7 @@ export default function Footer() {
             <div className="mb-8">
               <h3 className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase mb-3">Service Area</h3>
               <p className="font-labels text-[10px] text-gray-400 tracking-[0.1em] leading-relaxed">
-                {SITE.serviceArea.slice(0, 5).join(" · ")}
+                {SITE.serviceArea.join(" · ")}
               </p>
             </div>
             <Link
@@ -99,10 +99,11 @@ export default function Footer() {
         </div>
 
         {/* ── MOBILE layout (<lg) ──────────────────────────────────────────── */}
+        {/* Variation A: Stacked editorial — large phone, clear hierarchy, copper accents */}
         <div className="lg:hidden">
 
           {/* Logo + tagline */}
-          <div className="pt-10 pb-8 border-b border-white/10">
+          <div className="pt-10 pb-7 border-b border-white/5">
             <Link href="/" className="inline-block mb-5">
               <Image
                 src="/images/logo/828logo_trans.png"
@@ -117,14 +118,14 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Contact — large phone as primary anchor */}
-          <div className="py-8 border-b border-white/10">
-            <span className="font-labels text-[9px] tracking-[0.22em] uppercase block mb-3" style={{ color: "rgba(184,115,51,0.65)" }}>
+          {/* Contact — large phone number as anchor */}
+          <div className="py-7 border-b border-white/5">
+            <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3">
               Contact
             </span>
             <a
               href={SITE.phoneHref}
-              className="font-numbers text-[1.9rem] font-bold text-white tracking-tight hover:text-[#B87333] transition-colors duration-200 block mb-2 leading-none"
+              className="font-numbers text-[1.75rem] font-bold text-white tracking-tight hover:text-[#B87333] transition-colors duration-200 block mb-2 leading-none"
             >
               {SITE.phone}
             </a>
@@ -136,52 +137,54 @@ export default function Footer() {
             </a>
           </div>
 
-          {/* Navigate + Services — side-by-side columns, vertical stacked lists */}
-          <div className="py-8 border-b border-white/10 grid grid-cols-2 gap-8">
-            <div>
-              <span className="font-labels text-[9px] tracking-[0.22em] uppercase block mb-4" style={{ color: "rgba(184,115,51,0.65)" }}>
-                Navigate
-              </span>
-              <nav className="flex flex-col gap-3">
-                {[
-                  { href: "/", label: "Home" },
-                  { href: "/about", label: "About" },
-                  { href: "/services", label: "Services" },
-                  { href: "/projects", label: "Projects" },
-                  { href: "/process", label: "Process" },
-                  { href: "/contact", label: "Contact" },
-                ].map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-[#B87333] transition-colors duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-            <div>
-              <span className="font-labels text-[9px] tracking-[0.22em] uppercase block mb-4" style={{ color: "rgba(184,115,51,0.65)" }}>
-                Services
-              </span>
-              <nav className="flex flex-col gap-3">
-                {SERVICES.map((service) => (
-                  <Link
-                    key={service.slug}
-                    href={`/services/${service.slug}`}
-                    className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-[#B87333] transition-colors duration-200"
-                  >
-                    {service.title}
-                  </Link>
-                ))}
-              </nav>
+          {/* Navigation + Services — 2-col grid for clean tap targets */}
+          <div className="py-6 border-b border-white/5">
+            <div className="grid grid-cols-2 gap-x-6">
+              <div>
+                <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
+                  Navigate
+                </span>
+                <nav className="space-y-0">
+                  {[
+                    { href: "/", label: "Home" },
+                    { href: "/about", label: "About" },
+                    { href: "/services", label: "Services" },
+                    { href: "/projects", label: "Projects" },
+                    { href: "/process", label: "Process" },
+                    { href: "/contact", label: "Contact" },
+                  ].map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-[#B87333] transition-colors duration-200 flex items-center min-h-[44px]"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+              <div>
+                <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
+                  Services
+                </span>
+                <nav className="space-y-0">
+                  {SERVICES.map((service) => (
+                    <Link
+                      key={service.slug}
+                      href={`/services/${service.slug}`}
+                      className="font-labels text-[11px] text-gray-400 tracking-[0.1em] uppercase hover:text-[#B87333] transition-colors duration-200 flex items-center min-h-[44px]"
+                    >
+                      {service.title}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
             </div>
           </div>
 
           {/* Address */}
-          <div className="py-8 border-b border-white/10">
-            <span className="font-labels text-[9px] tracking-[0.22em] uppercase block mb-3" style={{ color: "rgba(184,115,51,0.65)" }}>
+          <div className="py-6 border-b border-white/5">
+            <span className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3">
               Location
             </span>
             <address className="text-[12px] text-gray-400 not-italic leading-relaxed">
@@ -190,11 +193,11 @@ export default function Footer() {
             </address>
           </div>
 
-          {/* CTA — full-width white button with copper hover */}
-          <div className="py-7">
+          {/* CTA button */}
+          <div className="py-6">
             <Link
               href="/contact"
-              className="flex items-center justify-between w-full bg-white text-black px-5 py-4 font-labels text-[11px] tracking-[0.22em] uppercase hover:bg-[#B87333] hover:text-white transition-colors duration-300 group"
+              className="flex items-center justify-between bg-white text-black px-5 py-4 font-labels text-[11px] tracking-[0.18em] uppercase hover:bg-[#B87333] hover:text-white transition-colors duration-300 group"
             >
               <span>Get a Free Estimate</span>
               <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>

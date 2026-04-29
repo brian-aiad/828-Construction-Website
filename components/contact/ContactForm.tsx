@@ -1,28 +1,99 @@
 "use client";
 
-import { useState } from "react";
-import { SERVICES } from "@/lib/constants";
+import { useState, useRef } from "react";
+import { SERVICES, SITE } from "@/lib/constants";
 
 type FormState = "idle" | "loading" | "success" | "error";
+type FieldErrors = Partial<Record<"name" | "phone" | "email" | "service" | "message", string>>;
+
+function validate(data: Record<string, string>): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!data.name || data.name.trim().length < 2) errors.name = "Full name required";
+  if (!data.phone || !/^\+?[\d\s\-(). ]{7,}$/.test(data.phone)) errors.phone = "Valid phone number required";
+  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Enter a valid email address";
+  if (!data.service) errors.service = "Please select a service";
+  if (!data.message || data.message.trim().length < 20) errors.message = "Please describe your project (min 20 characters)";
+  return errors;
+}
+
+function CheckmarkSVG() {
+  return (
+    <svg
+      viewBox="0 0 52 52"
+      className="w-16 h-16 mx-auto"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="26"
+        cy="26"
+        r="23"
+        stroke="#B87333"
+        strokeWidth="2"
+        strokeDasharray="145"
+        strokeDashoffset="145"
+        style={{ animation: "drawCircle 0.55s ease forwards" }}
+      />
+      <polyline
+        points="14,26 23,35 38,18"
+        stroke="#B87333"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray="36"
+        strokeDashoffset="36"
+        style={{ animation: "drawCheck 0.4s ease forwards 0.45s" }}
+      />
+    </svg>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg
+      className="w-4 h-4 animate-spin inline-block mr-2"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
+      <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function ContactForm() {
   const [state, setState] = useState<FormState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const submittingRef = useRef(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setState("loading");
-    setErrorMsg("");
+    if (submittingRef.current) return;
 
     const form = e.currentTarget;
-    const data = {
-      name: (form.elements.namedItem("name") as HTMLInputElement).value,
-      phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
-      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+    const data: Record<string, string> = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value.trim(),
+      phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim(),
+      email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
       service: (form.elements.namedItem("service") as HTMLSelectElement).value,
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement)
-        .value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
+      website: (form.elements.namedItem("website") as HTMLInputElement).value,
     };
+
+    const errors = validate(data);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const firstField = form.querySelector<HTMLElement>("[aria-invalid='true']");
+      firstField?.focus();
+      return;
+    }
+    setFieldErrors({});
+
+    submittingRef.current = true;
+    setState("loading");
+    setErrorMsg("");
 
     try {
       const res = await fetch("/api/contact", {
@@ -33,144 +104,272 @@ export default function ContactForm() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
+        if (res.status === 429) throw new Error("Too many requests. Please try again in a few minutes or call us directly.");
+        if (body.errors) {
+          setFieldErrors(body.errors);
+          setState("idle");
+          submittingRef.current = false;
+          return;
+        }
         throw new Error(body.error || "Something went wrong");
       }
 
       setState("success");
     } catch (err) {
       setState("error");
-      setErrorMsg(err instanceof Error ? err.message : "Something went wrong");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please call us directly.");
+    } finally {
+      submittingRef.current = false;
     }
   }
 
+  const inputBase = "w-full bg-transparent border text-white px-4 py-3.5 text-sm focus:outline-none transition-colors placeholder:text-white/25";
+  const inputClass = (field: keyof FieldErrors) =>
+    `${inputBase} ${fieldErrors[field] ? "border-red-400/60" : "border-white/20 focus:border-[#B87333]"}`;
+
   if (state === "success") {
     return (
-      <div className="border border-gray-200 p-12 text-center">
-        <div className="text-4xl mb-4">✓</div>
-        <h3 className="font-[var(--font-space-grotesk)] font-bold text-2xl text-black mb-4">
+      <div className="flex flex-col items-center justify-center py-16 px-6 text-center min-h-[420px]">
+        <CheckmarkSVG />
+        <h3
+          className="font-display font-bold text-white mt-8 mb-4 tracking-tight"
+          style={{ fontSize: "clamp(1.4rem, 3vw, 1.8rem)" }}
+        >
           Message Received
         </h3>
-        <p className="text-gray-500 leading-relaxed">
-          Thank you for reaching out. We&apos;ll review your project details and get
-          back to you within 24 hours.
+        <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+          Joe will review your details and respond within 24 hours. For urgent
+          work, call{" "}
+          <a
+            href={SITE.phoneHref}
+            className="text-[#B87333] hover:text-white transition-colors"
+          >
+            {SITE.phone}
+          </a>{" "}
+          directly.
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="space-y-6"
+      aria-label="Contact form"
+    >
+      {/* Honeypot — traps bots, invisible to real users */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <input
+          name="website"
+          type="text"
+          autoComplete="off"
+          tabIndex={-1}
+        />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label
-            htmlFor="name"
-            className="block text-xs font-bold tracking-widest uppercase text-gray-600 mb-2"
+            htmlFor="cf-name"
+            className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
           >
-            Full Name *
+            Full Name <span className="text-[#B87333]">*</span>
           </label>
           <input
-            id="name"
+            id="cf-name"
             name="name"
             type="text"
             required
-            className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors"
+            autoComplete="name"
+            aria-invalid={!!fieldErrors.name || undefined}
+            aria-describedby={fieldErrors.name ? "cf-name-err" : undefined}
+            className={inputClass("name")}
             placeholder="John Smith"
           />
+          {fieldErrors.name && (
+            <p
+              id="cf-name-err"
+              role="alert"
+              className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
+            >
+              {fieldErrors.name}
+            </p>
+          )}
         </div>
         <div>
           <label
-            htmlFor="phone"
-            className="block text-xs font-bold tracking-widest uppercase text-gray-600 mb-2"
+            htmlFor="cf-phone"
+            className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
           >
-            Phone *
+            Phone <span className="text-[#B87333]">*</span>
           </label>
           <input
-            id="phone"
+            id="cf-phone"
             name="phone"
             type="tel"
             required
-            className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors"
+            autoComplete="tel"
+            aria-invalid={!!fieldErrors.phone || undefined}
+            aria-describedby={fieldErrors.phone ? "cf-phone-err" : undefined}
+            className={inputClass("phone")}
             placeholder="(310) 555-0000"
           />
+          {fieldErrors.phone && (
+            <p
+              id="cf-phone-err"
+              role="alert"
+              className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
+            >
+              {fieldErrors.phone}
+            </p>
+          )}
         </div>
       </div>
 
       <div>
         <label
-          htmlFor="email"
-          className="block text-xs font-bold tracking-widest uppercase text-gray-600 mb-2"
+          htmlFor="cf-email"
+          className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
         >
-          Email
+          Email{" "}
+          <span className="text-gray-600 normal-case tracking-normal font-body text-xs">
+            — optional
+          </span>
         </label>
         <input
-          id="email"
+          id="cf-email"
           name="email"
           type="email"
-          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors"
+          autoComplete="email"
+          aria-invalid={!!fieldErrors.email || undefined}
+          aria-describedby={fieldErrors.email ? "cf-email-err" : undefined}
+          className={inputClass("email")}
           placeholder="john@example.com"
         />
+        {fieldErrors.email && (
+          <p
+            id="cf-email-err"
+            role="alert"
+            className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
+          >
+            {fieldErrors.email}
+          </p>
+        )}
       </div>
 
       <div>
         <label
-          htmlFor="service"
-          className="block text-xs font-bold tracking-widest uppercase text-gray-600 mb-2"
+          htmlFor="cf-service"
+          className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
         >
-          Service Needed *
+          Service Needed <span className="text-[#B87333]">*</span>
         </label>
         <select
-          id="service"
+          id="cf-service"
           name="service"
           required
-          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors bg-white"
+          aria-invalid={!!fieldErrors.service || undefined}
+          aria-describedby={fieldErrors.service ? "cf-service-err" : undefined}
+          className={`${inputClass("service")} bg-[#0a0a0a] cursor-pointer`}
         >
-          <option value="">Select a service...</option>
+          <option value="" className="bg-[#0a0a0a]">
+            Select a service…
+          </option>
           {SERVICES.map((s) => (
-            <option key={s.slug} value={s.title}>
+            <option key={s.slug} value={s.title} className="bg-[#0a0a0a]">
               {s.title}
             </option>
           ))}
-          <option value="Not sure">Not sure yet</option>
+          <option value="Not sure" className="bg-[#0a0a0a]">
+            Not sure yet
+          </option>
         </select>
+        {fieldErrors.service && (
+          <p
+            id="cf-service-err"
+            role="alert"
+            className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
+          >
+            {fieldErrors.service}
+          </p>
+        )}
       </div>
 
       <div>
         <label
-          htmlFor="message"
-          className="block text-xs font-bold tracking-widest uppercase text-gray-600 mb-2"
+          htmlFor="cf-message"
+          className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
         >
-          Project Description *
+          Project Description <span className="text-[#B87333]">*</span>
         </label>
         <textarea
-          id="message"
+          id="cf-message"
           name="message"
           required
           rows={6}
-          className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-[#B87333] transition-colors resize-none"
-          placeholder="Tell us about your project — location, scope, timeline, and any specific concerns..."
+          aria-invalid={!!fieldErrors.message || undefined}
+          aria-describedby={fieldErrors.message ? "cf-message-err" : undefined}
+          className={`${inputClass("message")} resize-none`}
+          placeholder="Location, scope, timeline, and any specific concerns…"
         />
+        {fieldErrors.message && (
+          <p
+            id="cf-message-err"
+            role="alert"
+            className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
+          >
+            {fieldErrors.message}
+          </p>
+        )}
       </div>
 
       {state === "error" && (
-        <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {errorMsg || "Something went wrong. Please call us directly."}
+        <div
+          role="alert"
+          className="border border-red-400/40 bg-red-950/20 px-4 py-3 text-sm text-red-300"
+        >
+          {errorMsg}
         </div>
       )}
 
       <button
         type="submit"
         disabled={state === "loading"}
-        className="w-full bg-black text-white py-4 text-xs font-bold tracking-widest uppercase hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-white text-black py-4 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-[#B87333] hover:text-white transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed group flex items-center justify-center"
       >
-        {state === "loading" ? "Sending..." : "Send Message"}
+        {state === "loading" ? (
+          <>
+            <Spinner />
+            Sending…
+          </>
+        ) : (
+          <>
+            Send Message
+            <span className="ml-2 transition-transform duration-200 group-hover:translate-x-1">
+              →
+            </span>
+          </>
+        )}
       </button>
 
-      <p className="text-xs text-gray-600 text-center">
-        We typically respond within 24 hours. For immediate assistance, call{" "}
-        <a href="tel:+12138282388" className="underline">
-          213-828-2388
+      <p className="text-[10px] text-gray-600 text-center font-labels tracking-wide">
+        Typically respond within 24 hours · For urgent work, call{" "}
+        <a
+          href={SITE.phoneHref}
+          className="text-gray-500 hover:text-[#B87333] transition-colors"
+        >
+          {SITE.phone}
         </a>
-        .
       </p>
     </form>
   );

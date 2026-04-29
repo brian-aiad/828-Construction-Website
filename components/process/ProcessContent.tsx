@@ -626,7 +626,7 @@ function EditorialStandards() {
         const el = counterRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, duration: 2, ease: "power2.out",
+          val: 25, duration: 2, ease: "power2.out",
           immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
           scrollTrigger: { trigger: wrapperRef.current, start: "75% 80%", once: true },
@@ -727,7 +727,7 @@ function EditorialStandards() {
             {/* Years counter — below the last standard row */}
             <div className="py-8 border-t border-white/5">
               <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(2.5rem, 4vw, 3.5rem)" }}>
-                <span ref={counterRef}>20+</span>
+                <span ref={counterRef}>25+</span>
               </div>
               <div className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase mt-2">
                 Years Building South Bay

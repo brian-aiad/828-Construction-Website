@@ -95,6 +95,14 @@ body {
   animation: kenBurns 18s ease-in-out infinite alternate;
 }
 
+/* ── Contact form checkmark draw animation ──────────────────────────────── */
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
 /* Scroll wheel indicator animation */
 @keyframes scrollWheel {
   0%   { transform: translate(-50%, 0); opacity: 1; }

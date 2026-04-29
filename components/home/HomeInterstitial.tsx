@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
 // Dual-layer typographic scrub unique to the home page.
 
 const STATS = [
-  { value: "20+", label: "Years South Bay" },
+  { value: "25+", label: "Years South Bay" },
   { value: "150+", label: "Projects Completed" },
   { value: "3", label: "Core Services" },
 ];

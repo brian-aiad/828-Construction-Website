@@ -284,7 +284,7 @@ export default function HeroSections() {
             </span>
             <span className="w-px h-3 bg-white/20" aria-hidden="true" />
             <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
-              Est. 2025
+              Est. 2004
             </span>
           </div>
         </div>
@@ -350,7 +350,7 @@ export default function HeroSections() {
         {/* ── Scroll indicator ────────────────────────────────────────────── */}
         <div
           ref={scrollLineRef}
-          className="hero-meta-animate absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden sm:flex flex-col items-center gap-3 pointer-events-none"
+          className="hero-meta-animate absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 pointer-events-none"
           style={{ animationDelay: "1.4s" }}
         >
           <span className="font-labels text-[8px] text-white/30 tracking-[0.3em] uppercase">Scroll</span>
@@ -393,7 +393,7 @@ export default function HeroSections() {
               <div className="flex flex-wrap gap-x-10 gap-y-4 mb-10">
                 <div>
                   <div className="font-numbers font-bold text-white leading-none" style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}>25+</div>
-                  <div className="font-labels text-white/40 tracking-[0.2em] uppercase mt-1" style={{ fontSize: 9 }}>Years Experience</div>
+                  <div className="font-labels text-white/40 tracking-[0.2em] uppercase mt-1" style={{ fontSize: 9 }}>Years South Bay</div>
                 </div>
                 <div>
                   <div className="font-numbers font-bold text-white leading-none" style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}>150+</div>

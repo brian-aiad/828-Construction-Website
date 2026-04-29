@@ -616,7 +616,7 @@ function ProjectsHighlights() {
         const el = stat1Ref.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, duration: 2, ease: "power2.out", immediateRender: false,
+          val: 25, duration: 2, ease: "power2.out", immediateRender: false,
           onUpdate: () => { if (el) el.textContent = Math.round(obj.val) + "+"; },
           scrollTrigger: { trigger: sectionRef.current, start: "top 72%", once: true },
         });
@@ -669,7 +669,7 @@ function ProjectsHighlights() {
             />
             <div className="text-right">
               <div className="font-numbers font-bold text-[#B87333] leading-none" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>
-                <span ref={stat1Ref}>20+</span>
+                <span ref={stat1Ref}>25+</span>
               </div>
               <div className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase mt-1">Years Active</div>
             </div>

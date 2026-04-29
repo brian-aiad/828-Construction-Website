@@ -58,7 +58,7 @@ export default function BuildingScience() {
         const el = bsStatRef.current;
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, duration: 2.5, ease: "power2.out",
+          val: 25, duration: 2.5, ease: "power2.out",
           immediateRender: false,
           onUpdate: () => { el.textContent = Math.round(obj.val) + "+"; },
           scrollTrigger: { trigger: wrapperRef.current!, start: "top 55%", once: true },
@@ -341,7 +341,7 @@ export default function BuildingScience() {
               <div className="grid grid-cols-2 gap-[3px] mt-[3px]">
                 {/* Stat card */}
                 <div className="bg-black text-white p-6 flex flex-col justify-end" style={{ minHeight: 150 }}>
-                  <div ref={bsStatRef} className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>20+</div>
+                  <div ref={bsStatRef} className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>25+</div>
                   <div className="font-labels text-[9px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
                     Years of Field Experience
                   </div>

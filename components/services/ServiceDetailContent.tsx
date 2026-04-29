@@ -75,7 +75,7 @@ const STRIP_LABELS: Record<string, string[]> = {
     "Expert Advisory",
     "Site Assessment",
     "CA Licensed",
-    "20+ Years",
+    "25+ Years",
   ],
 };
 
@@ -225,7 +225,7 @@ function DetailHero({
       if (counterRef.current) {
         const obj = { val: 0 };
         gsap.to(obj, {
-          val: 20, duration: 2, ease: "power2.out", immediateRender: false,
+          val: 25, duration: 2, ease: "power2.out", immediateRender: false,
           scrollTrigger: { trigger: sectionRef.current, start: "top 70%", once: true },
           onUpdate: () => {
             const v = Math.round(obj.val);
@@ -328,7 +328,7 @@ function DetailHero({
             className="font-numbers font-bold text-[#B87333]"
             style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)", lineHeight: 1 }}
           >
-            20+
+            25+
           </span>
           <span className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase">
             Years Experience
@@ -375,7 +375,7 @@ function DetailStrip({ slug }: { slug: string }) {
 const WHY_PANELS = [
   {
     num: "01",
-    title: "20+ Years Experience",
+    title: "25+ Years Experience",
     body: "Decades of hands-on building science knowledge applied to your project.",
   },
   {

@@ -320,7 +320,7 @@ export default function HomeCTA() {
                 className="absolute -bottom-6 -right-6 bg-black text-white p-6 w-44 border-l-2"
                 style={{ opacity: 1, borderColor: "#B87333" }}
               >
-                <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>20+</div>
+                <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>25+</div>
                 <div className="font-labels text-[8px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
                   Years Building South Bay
                 </div>
