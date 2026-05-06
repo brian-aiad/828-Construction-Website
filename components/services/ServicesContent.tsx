@@ -357,34 +357,51 @@ function ServicesAsymmetricTiles() {
         }
       });
 
-      // Hover: image scale + maroon bar + magnetic tile shift (Fix 20: explicit removeEventListener)
+      // Hover: 3D tilt + image scale + maroon shadow + magnetic (Fix 20)
       if (window.matchMedia("(hover: hover)").matches) {
         tileRefs.current.forEach((tile, i) => {
           if (!tile) return;
           const imgInner = imgInnerRefs.current[i];
           const bar = barRefs.current[i];
 
-          // Magnetic quickTo for tile
-          const xTo = window.matchMedia("(pointer: coarse)").matches
-            ? null
-            : gsap.quickTo(tile, "x", { duration: 0.7, ease: "expo.out" });
-          const yTo = window.matchMedia("(pointer: coarse)").matches
-            ? null
-            : gsap.quickTo(tile, "y", { duration: 0.7, ease: "expo.out" });
+          // Set initial boxShadow so GSAP can interpolate
+          gsap.set(tile, { boxShadow: "0 0px 0px 0px rgba(123,45,38,0)" });
+
+          // 3D tilt quickTo (rotateX/Y)
+          const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+          const rotateXTo = isCoarse ? null : gsap.quickTo(tile, "rotateX", { duration: 0.55, ease: "expo.out" });
+          const rotateYTo = isCoarse ? null : gsap.quickTo(tile, "rotateY", { duration: 0.55, ease: "expo.out" });
+
+          // Magnetic translation
+          const xTo = isCoarse ? null : gsap.quickTo(tile, "x", { duration: 0.7, ease: "expo.out" });
+          const yTo = isCoarse ? null : gsap.quickTo(tile, "y", { duration: 0.7, ease: "expo.out" });
 
           const onEnter = () => {
-            if (imgInner) gsap.to(imgInner, { scale: 1.05, duration: 0.7, ease: "power2.out" });
+            if (imgInner) gsap.to(imgInner, { scale: 1.08, duration: 0.7, ease: "power2.out" });
             if (bar) gsap.to(bar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+            gsap.to(tile, {
+              boxShadow: "0 40px 80px -20px rgba(123,45,38,0.6)",
+              duration: 0.5, ease: "power2.out",
+            });
           };
           const onMove = (e: MouseEvent) => {
-            if (!xTo || !yTo) return;
             const rect = tile.getBoundingClientRect();
-            xTo((e.clientX - (rect.left + rect.width / 2)) * 0.12);
-            yTo((e.clientY - (rect.top + rect.height / 2)) * 0.12);
+            const nx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+            const ny = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+            if (rotateXTo) rotateXTo(-ny * 10);
+            if (rotateYTo) rotateYTo(nx * 10);
+            if (xTo) xTo((e.clientX - (rect.left + rect.width / 2)) * 0.12);
+            if (yTo) yTo((e.clientY - (rect.top + rect.height / 2)) * 0.12);
           };
           const onLeave = () => {
             if (imgInner) gsap.to(imgInner, { scale: 1.0, duration: 0.7, ease: "power2.out" });
             if (bar) gsap.to(bar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
+            gsap.to(tile, {
+              boxShadow: "0 0px 0px 0px rgba(123,45,38,0)",
+              duration: 0.5, ease: "power2.in",
+            });
+            if (rotateXTo) rotateXTo(0);
+            if (rotateYTo) rotateYTo(0);
             if (xTo) xTo(0);
             if (yTo) yTo(0);
           };
@@ -415,15 +432,16 @@ function ServicesAsymmetricTiles() {
       className="relative bg-black py-16 lg:py-20"
       style={{ position: "relative", zIndex: 2 }}
     >
-      {/* Construction-line silhouette — low-opacity drafting backdrop */}
+      {/* Construction-line silhouette — visible drafting backdrop with slow rotate */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
       >
-        <ConstructionLineSilhouette
-          className="w-full max-w-6xl"
-          style={{ color: "white", opacity: 0.04 }}
-        />
+        <div style={{ animation: "compassSpinInner 240s linear infinite", width: "100%", maxWidth: "52rem" }}>
+          <ConstructionLineSilhouette
+            style={{ color: "white", opacity: 0.10, width: "100%", height: "auto" }}
+          />
+        </div>
       </div>
       {/* Section header */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 mb-10">
@@ -437,7 +455,7 @@ function ServicesAsymmetricTiles() {
       </div>
 
       {/* Asymmetric mosaic: ADU left (60%) + Remediation/Consulting stacked right (40%) */}
-      <div className="flex flex-col gap-[3px] lg:flex-row">
+      <div className="flex flex-col gap-[3px] lg:flex-row" style={{ perspective: "1200px" }}>
         {/* Left: ADU — large tile */}
         <div
           ref={(el) => { tileRefs.current[0] = el; }}
@@ -687,7 +705,7 @@ function ServicesBookCTA() {
             <button
               onClick={() => setCallOpen(!callOpen)}
               aria-expanded={callOpen}
-              className="group relative inline-flex items-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
+              className="pulse-glow group relative inline-flex items-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
             >
               <span
                 className="absolute inset-0 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out"

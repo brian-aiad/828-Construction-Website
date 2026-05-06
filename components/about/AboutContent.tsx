@@ -1007,7 +1007,7 @@ function AboutCTA() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
         >
           {/* BOOK CALL asterisk dropdown */}
-          <div className="relative">
+          <div className="relative pulse-glow">
             <button
               onClick={() => setCtaOpen(!ctaOpen)}
               aria-expanded={ctaOpen}

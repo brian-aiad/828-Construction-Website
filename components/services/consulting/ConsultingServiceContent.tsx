@@ -641,7 +641,9 @@ function ConsultingCTA() {
               Precision begins with understanding. Let&rsquo;s explore what your project requires.
             </p>
             <div className="cta-el flex items-center gap-4 flex-wrap">
-              <BookCallDropdown />
+              <div className="pulse-glow">
+                <BookCallDropdown />
+              </div>
               <Link
                 href="/contact"
                 className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"

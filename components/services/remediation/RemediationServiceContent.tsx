@@ -17,6 +17,92 @@ import {
   LevelSilhouette,
 } from "@/components/system/silhouettes";
 
+// Shared FAQ with word-cascade animation on open
+function FaqAccordion({
+  items,
+  idPrefix,
+  onLight = true,
+}: {
+  items: { q: string; a: string }[];
+  idPrefix: string;
+  onLight?: boolean;
+}) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const answerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const splitRefs = useRef<(SplitType | null)[]>([]);
+
+  const handleToggle = (i: number) => {
+    const isOpening = openIndex !== i;
+    setOpenIndex(isOpening ? i : null);
+    if (isOpening && answerRefs.current[i]) {
+      const el = answerRefs.current[i]!;
+      requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        if (splitRefs.current[i]) { try { splitRefs.current[i]!.revert(); } catch {} splitRefs.current[i] = null; }
+        const split = new SplitType(el.querySelector("p") ?? el, { types: "words" });
+        splitRefs.current[i] = split;
+        const words = split.words ?? [];
+        if (words.length) {
+          gsap.fromTo(words,
+            { opacity: 0, y: 8 },
+            { opacity: 1, y: 0, stagger: 0.024, duration: 0.35, ease: "power2.out" }
+          );
+        }
+      });
+    }
+  };
+
+  return (
+    <div className={`border-t ${onLight ? "border-gray-200" : "border-white/10"}`}>
+      {items.map((item, i) => {
+        const isOpen = openIndex === i;
+        return (
+          <div key={i} className={`faq-item border-b ${onLight ? "border-gray-200" : "border-white/10"}`}>
+            <button
+              onClick={() => handleToggle(i)}
+              aria-expanded={isOpen}
+              aria-controls={`${idPrefix}-${i}`}
+              className="w-full flex items-center justify-between py-5 text-left group"
+            >
+              <span className={`font-labels text-[11px] tracking-[0.12em] uppercase transition-colors duration-200 pr-4 ${onLight ? "text-black group-hover:text-gray-600" : "text-white group-hover:text-gray-300"}`}>
+                {String(i + 1).padStart(2, "0")} — {item.q}
+              </span>
+              <span
+                aria-hidden="true"
+                style={{
+                  display: "inline-block", flexShrink: 0,
+                  transition: "transform 0.22s ease",
+                  transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
+                  color: "var(--color-accent)", fontWeight: 300,
+                  fontSize: "1.5rem", lineHeight: 1, width: "1.5rem", textAlign: "center",
+                }}
+              >
+                +
+              </span>
+            </button>
+            <div
+              id={`${idPrefix}-${i}`}
+              style={{
+                overflow: "hidden",
+                maxHeight: isOpen ? "400px" : "0",
+                transition: "max-height 0.4s cubic-bezier(0.16,1,0.3,1)",
+              }}
+            >
+              <div ref={(el) => { answerRefs.current[i] = el; }}>
+                <GlassCard tone={onLight ? "light" : "dark"} className="p-4 mt-2 mb-4">
+                  <p className={`text-sm leading-relaxed pr-4 ${onLight ? "text-gray-600" : "text-gray-400"}`}>
+                    {item.a}
+                  </p>
+                </GlassCard>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 gsap.registerPlugin(ScrollTrigger);
 
 // ─── Shared: BOOK CALL asterisk dropdown ─────────────────────────────────────
@@ -258,7 +344,6 @@ const REMEDIATION_FAQ = [
 ];
 
 function RemediationNeed() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
@@ -352,56 +437,7 @@ function RemediationNeed() {
           </div>
 
           <div className="lg:col-span-7">
-            <div className="border-t border-gray-200">
-              {REMEDIATION_FAQ.map((item, i) => {
-                const isOpen = openIndex === i;
-                return (
-                  <div key={i} className="faq-item border-b border-gray-200">
-                    <button
-                      onClick={() => setOpenIndex(isOpen ? null : i)}
-                      aria-expanded={isOpen}
-                      aria-controls={`rem-faq-${i}`}
-                      className="w-full flex items-center justify-between py-5 text-left group"
-                    >
-                      <span className="font-labels text-[11px] text-black tracking-[0.12em] uppercase group-hover:text-gray-600 transition-colors duration-200 pr-4">
-                        {String(i + 1).padStart(2, "0")} — {item.q}
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          display: "inline-block",
-                          flexShrink: 0,
-                          transition: "transform 0.3s ease",
-                          transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
-                          color: "var(--color-accent)",
-                          fontWeight: 300,
-                          fontSize: "1.5rem",
-                          lineHeight: 1,
-                          width: "1.5rem",
-                          textAlign: "center",
-                        }}
-                      >
-                        +
-                      </span>
-                    </button>
-                    <div
-                      id={`rem-faq-${i}`}
-                      style={{
-                        overflow: "hidden",
-                        maxHeight: isOpen ? "300px" : "0",
-                        transition: "max-height 0.4s cubic-bezier(0.16,1,0.3,1)",
-                      }}
-                    >
-                      <GlassCard tone="light" className="p-4 mt-2 mb-4">
-                        <p className="text-gray-600 text-sm leading-relaxed pr-4">
-                          {item.a}
-                        </p>
-                      </GlassCard>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <FaqAccordion items={REMEDIATION_FAQ} idPrefix="rem-faq" onLight={true} />
           </div>
         </div>
       </div>
@@ -882,7 +918,9 @@ function RemediationStartHere() {
               Above all else, your peace of mind is paramount. We understand the disruption and urgency that follows damage — from restoring environmental integrity to complete reconstruction. 828 Construction delivers a seamless, disciplined process from remediation through completion.
             </p>
             <div className="start-el flex items-center gap-4 flex-wrap">
-              <BookCallDropdown />
+              <div className="pulse-glow">
+                <BookCallDropdown />
+              </div>
               <Link
                 href="/contact"
                 className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"

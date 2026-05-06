@@ -123,9 +123,9 @@ export default function ContactForm() {
     }
   }
 
-  const inputBase = "w-full bg-transparent border text-white px-4 py-3.5 text-sm focus:outline-none transition-colors placeholder:text-white/25";
+  const inputBase = "w-full bg-transparent border text-white px-4 py-3.5 text-sm focus:outline-none transition-colors duration-[240ms] placeholder:text-white/25 focus:[border-color:var(--color-accent)]";
   const inputClass = (field: keyof FieldErrors) =>
-    `${inputBase} ${fieldErrors[field] ? "border-red-400/60" : "border-white/20 focus:border-[#B87333]"}`;
+    `${inputBase} ${fieldErrors[field] ? "border-red-400/60" : "border-white/20"}`;
 
   if (state === "success") {
     return (

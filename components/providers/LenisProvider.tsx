@@ -182,8 +182,8 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     if (window.innerWidth < 768) return;
 
     const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.4,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -8 * t)),
       smoothWheel: true,
       touchMultiplier: 1.5,
     });

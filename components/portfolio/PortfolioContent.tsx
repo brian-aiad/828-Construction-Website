@@ -11,6 +11,7 @@ import Lightbox from "@/components/gallery/Lightbox";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
 import { AnimationController } from "@/utils/animationControl";
 import { CompassSilhouette } from "@/components/system/silhouettes";
+import PortfolioCinemaRow from "@/components/portfolio/PortfolioCinemaRow";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,22 +21,28 @@ gsap.registerPlugin(ScrollTrigger);
 
 type RowLayout =
   | { type: "split21"; wide: Project; narrow: Project }
-  | { type: "full"; project: Project }
   | { type: "triple"; a: Project; b: Project; c: Project }
   | { type: "split12"; narrow: Project; wide: Project };
 
 const P = PROJECTS;
 
+// "full" row (P[2]) removed — now lives in PortfolioCinemaRow + PortfolioFeatured
 const galleryRows: RowLayout[] = [
-  { type: "split21", wide: P[10], narrow: P[0] },      // ADU exterior (large) + Bath herringbone
-  { type: "full",    project: P[2] },                  // South Bay Outdoor (full-width banner)
-  { type: "triple",  a: P[11], b: P[9],  c: P[8] },   // Garage + Remediation + Consulting
-  { type: "split12", narrow: P[7], wide: P[12] },      // Outdoor patio + Kitchen dark (large)
-  { type: "triple",  a: P[3],  b: P[1],  c: P[4] },   // Shower + Bath geometric + Bath LED
-  { type: "split21", wide: P[13], narrow: P[6] },      // Foundation (large) + Bath warm
+  { type: "split21", wide: P[10], narrow: P[0] },
+  { type: "triple",  a: P[11], b: P[9],  c: P[8] },
+  { type: "split12", narrow: P[7], wide: P[12] },
+  { type: "triple",  a: P[3],  b: P[1],  c: P[4] },
+  { type: "split21", wide: P[13], narrow: P[6] },
 ];
 
-// ─── Gallery image tile ───────────────────────────────────────────────────────
+// Photos for the horizontal cinema strip (Task 1)
+const cinemaPhotos = [
+  { image: P[2].image,  title: P[2].title,  location: P[2].location,  category: P[2].category  },
+  { image: P[8].image,  title: P[8].title,  location: P[8].location,  category: P[8].category  },
+  { image: P[9].image,  title: P[9].title,  location: P[9].location,  category: P[9].category  },
+];
+
+// ─── Gallery image tile (Task 2 upgrades) ────────────────────────────────────
 
 function GalleryTile({
   project,
@@ -51,29 +58,39 @@ function GalleryTile({
   const wrapRef = useRef<HTMLDivElement>(null);
   const imgInnerRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
+  const captionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
     const inner = imgInnerRef.current;
     const bar = barRef.current;
+    const caption = captionRef.current;
     if (!wrap || !inner || !bar) return;
 
     // Fix 14: set initial states before gate
-    gsap.set(wrap, { clipPath: "inset(100% 0% 0% 0%)", opacity: 0 });
+    gsap.set(wrap, { clipPath: "inset(100% 0% 0% 0%)", opacity: 0, y: 0,
+      boxShadow: "0 0px 0px 0px rgba(123, 45, 38, 0)" });
     gsap.set(bar, { scaleX: 0, transformOrigin: "left" });
+    if (caption) gsap.set(caption, { y: 0, opacity: 0.85 });
 
     if (!AnimationController.shouldAnimate()) {
       // Fix 15: mobile — clear immediately
       gsap.set(wrap, { clipPath: "inset(0%)", opacity: 1 });
+      if (caption) gsap.set(caption, { opacity: 1 });
       return;
     }
 
     const ctx = gsap.context(() => {
+      // Task 2: curtain reveal scrub-tied (Fix 15 pattern)
       gsap.to(wrap, {
         clipPath: "inset(0% 0% 0% 0%)", opacity: 1,
-        duration: 1.1, ease: "power3.out",
-        delay: (tileIndex % 3) * 0.1,
-        scrollTrigger: { trigger: wrap, start: "top 92%", once: true },
+        ease: "none",
+        scrollTrigger: {
+          trigger: wrap,
+          start: "top 95%",
+          end: "top 52%",
+          scrub: 1.2,
+        },
       });
 
       // Pattern F: parallax image inner
@@ -83,13 +100,24 @@ function GalleryTile({
       });
     }, wrapRef);
 
+    // Task 2: hover lift + ghost shadow + caption slide
     const onEnter = () => {
-      gsap.to(inner, { scale: 1.04, duration: 0.7, ease: "power2.out" });
+      gsap.to(inner, { scale: 1.06, duration: 0.7, ease: "power2.out" });
       gsap.to(bar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+      gsap.to(wrap, {
+        y: -6, duration: 0.5, ease: "power2.out",
+        boxShadow: "0 30px 60px -20px rgba(123, 45, 38, 0.5)",
+      });
+      if (caption) gsap.to(caption, { y: -8, opacity: 1, duration: 0.5, ease: "power2.out" });
     };
     const onLeave = () => {
       gsap.to(inner, { scale: 1.0, duration: 0.7, ease: "power2.out" });
       gsap.to(bar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
+      gsap.to(wrap, {
+        y: 0, duration: 0.5, ease: "power2.out",
+        boxShadow: "0 0px 0px 0px rgba(123, 45, 38, 0)",
+      });
+      if (caption) gsap.to(caption, { y: 0, opacity: 0.85, duration: 0.5, ease: "power2.out" });
     };
 
     if (window.matchMedia("(hover: hover)").matches) {
@@ -146,8 +174,8 @@ function GalleryTile({
         </span>
       </div>
 
-      {/* Project info */}
-      <div className="absolute bottom-0 left-0 right-0 p-5">
+      {/* Project info — caption slides on hover */}
+      <div ref={captionRef} className="absolute bottom-0 left-0 right-0 p-5">
         <div className="font-labels text-[8px] text-white/40 tracking-[0.2em] uppercase mb-1">
           {project.location}
         </div>
@@ -170,6 +198,175 @@ function GalleryTile({
         aria-hidden="true"
       />
     </div>
+  );
+}
+
+// ─── Section: Featured full-screen project (Task 3) ───────────────────────────
+
+function PortfolioFeatured({ onOpen }: { onOpen: (p: Project) => void }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const hairlineRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const splitRef = useRef<SplitType | null>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useLayoutEffect(() => () => {
+    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
+    try { ctxRef.current?.revert(); } catch {}
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const bg = bgRef.current;
+    const hairline = hairlineRef.current;
+    const headlineEl = headlineRef.current;
+    if (!section) return;
+
+    if (!AnimationController.shouldAnimate()) {
+      if (headlineEl) gsap.set(headlineEl, { opacity: 1, y: 0 });
+      return;
+    }
+
+    let mounted = true;
+    let splitFrame = -1;
+    let featSplit: SplitType | null = null;
+
+    const ctx = gsap.context(() => {
+      // Scale 1.05 → 1.0 "settling" on entry
+      if (bg) {
+        gsap.fromTo(bg,
+          { scale: 1.05 },
+          {
+            scale: 1.0, ease: "power2.out",
+            scrollTrigger: { trigger: section, start: "top 75%", end: "top 10%", scrub: 1.5 },
+          }
+        );
+      }
+
+      // Maroon hairline grow
+      if (hairline) {
+        gsap.fromTo(hairline, { scaleX: 0 }, {
+          scaleX: 1, ease: "none", transformOrigin: "left",
+          scrollTrigger: { trigger: section, start: "top 85%", end: "top 55%", scrub: 1.2 },
+        });
+      }
+
+      // Char-by-char curtain reveal on headline
+      if (headlineEl) {
+        gsap.set(headlineEl, { opacity: 0 });
+        splitFrame = requestAnimationFrame(() => {
+          if (!mounted || !headlineEl.isConnected) return;
+          gsap.set(headlineEl, { opacity: 1 });
+          const split = new SplitType(headlineEl, { types: "words,chars" });
+          featSplit = split;
+          splitRef.current = split;
+          if (split.chars?.length) {
+            gsap.fromTo(split.chars,
+              { yPercent: 110, opacity: 0 },
+              {
+                yPercent: 0, opacity: 1,
+                stagger: { each: 0.022, from: "start" }, ease: "none",
+                scrollTrigger: { trigger: section, start: "top 80%", end: "top 30%", scrub: 1.1 },
+              }
+            );
+          }
+        });
+      }
+
+      // Supporting text
+      const textEls = section.querySelectorAll<HTMLElement>(".featured-fade");
+      if (textEls.length) {
+        gsap.fromTo(Array.from(textEls), { y: 16, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 78%", once: true },
+        });
+      }
+    }, sectionRef);
+
+    ctxRef.current = ctx;
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(splitFrame);
+      if (featSplit && headlineEl?.isConnected) { try { featSplit.revert(); } catch {} }
+      splitRef.current = null;
+      ctxRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
+  }, []);
+
+  const project = P[2]; // South Bay Outdoor Living
+
+  return (
+    <section
+      ref={sectionRef}
+      data-section="portfolio-featured"
+      className="relative bg-black cursor-pointer overflow-hidden"
+      style={{ minHeight: "100svh", position: "relative", zIndex: 2 }}
+      onClick={() => onOpen(project)}
+      aria-label={`Featured project: ${project.title}`}
+    >
+      {/* Full-screen image with settling scale */}
+      <div
+        ref={bgRef}
+        className="absolute inset-0 will-change-transform"
+        style={{ transformOrigin: "center" }}
+      >
+        <Image
+          src={project.image}
+          alt={project.title}
+          fill
+          priority={false}
+          className="object-cover"
+          style={{ filter: "contrast(1.06) saturate(1.1) brightness(0.88)" }}
+          sizes="100vw"
+        />
+      </div>
+      {/* Dark overlay — lower 50% */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.30) 45%, rgba(0,0,0,0.88) 100%)" }}
+        aria-hidden="true"
+      />
+
+      {/* Text overlay — lower-left third */}
+      <div className="absolute bottom-0 left-0 right-0 max-w-7xl mx-auto px-6 lg:px-12 pb-14 lg:pb-20">
+        {/* Maroon hairline grow */}
+        <div
+          ref={hairlineRef}
+          className="mb-8"
+          style={{ height: 1, background: "var(--color-accent)", opacity: 0.6, transformOrigin: "left", maxWidth: 120 }}
+          aria-hidden="true"
+        />
+
+        <p className="featured-fade font-labels text-[10px] text-white/55 tracking-[0.22em] uppercase mb-4">
+          {project.location} · {project.category}
+        </p>
+        <h2
+          ref={headlineRef}
+          className="font-display font-bold text-white tracking-tight leading-[0.88] mb-6"
+          style={{ fontSize: "clamp(2.8rem, 6vw, 6rem)", maxWidth: "20ch" }}
+        >
+          {project.title}
+        </h2>
+        <p className="featured-fade text-white/50 max-w-md leading-relaxed" style={{ fontSize: "clamp(0.9rem, 1.3vw, 1rem)" }}>
+          {project.spec}
+        </p>
+
+        {/* Tap to view hint */}
+        <div className="featured-fade mt-8 inline-flex items-center gap-3 font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase">
+          <span>View Project</span>
+          <span className="w-10 h-px bg-white/20" aria-hidden="true" />
+        </div>
+      </div>
+
+      {/* "Featured" label — top right */}
+      <div className="absolute top-8 right-6 lg:right-12">
+        <span className="font-labels text-[8px] text-white/35 tracking-[0.28em] uppercase border border-white/15 px-2 py-1">
+          Featured
+        </span>
+      </div>
+    </section>
   );
 }
 
@@ -385,7 +582,6 @@ function PortfolioGallery({ onOpen }: { onOpen: (p: Project) => void }) {
     tall:   "clamp(340px, 52vh, 600px)",
     medium: "clamp(300px, 42vh, 520px)",
     short:  "clamp(260px, 36vh, 440px)",
-    banner: "clamp(260px, 40vh, 480px)",
   };
 
   let tileIdx = 0;
@@ -410,14 +606,6 @@ function PortfolioGallery({ onOpen }: { onOpen: (p: Project) => void }) {
 
       <div className="flex flex-col gap-[3px] max-w-7xl mx-auto px-6 lg:px-12">
         {galleryRows.map((row, rowIdx) => {
-          if (row.type === "full") {
-            const i = tileIdx++;
-            return (
-              <div key={rowIdx}>
-                <GalleryTile project={row.project} height={h.banner} tileIndex={i} onClick={onOpen} />
-              </div>
-            );
-          }
           if (row.type === "split21") {
             const iA = tileIdx++; const iB = tileIdx++;
             return (
@@ -749,7 +937,7 @@ function PortfolioCTA() {
             <button
               onClick={() => setCallOpen(!callOpen)}
               aria-expanded={callOpen}
-              className="group relative inline-flex items-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
+              className="pulse-glow group relative inline-flex items-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
             >
               <span
                 className="absolute inset-0 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
@@ -804,6 +992,11 @@ export default function PortfolioContent() {
     <>
       <PortfolioHero />
       <PortfolioStrip />
+      {/* Cinema strip — horizontal pin-scroll with parallax-blur (Task 1) */}
+      <PortfolioCinemaRow photos={cinemaPhotos} />
+      {/* Featured full-screen section (Task 3) */}
+      <PortfolioFeatured onOpen={setLightboxProject} />
+      {/* Main mixed-size gallery grid (Task 2 upgraded tiles) */}
       <PortfolioGallery onOpen={setLightboxProject} />
       <BuildPhilosophy />
       <PortfolioCTA />

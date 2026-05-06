@@ -274,8 +274,96 @@ const ADU_FAQ = [
   },
 ];
 
-function AduNeed() {
+// Shared FAQ with word-cascade animation on open
+function FaqAccordion({
+  items,
+  idPrefix,
+  onLight = true,
+}: {
+  items: { q: string; a: string }[];
+  idPrefix: string;
+  onLight?: boolean;
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const answerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const splitRefs = useRef<(SplitType | null)[]>([]);
+
+  const handleToggle = (i: number) => {
+    const isOpening = openIndex !== i;
+    setOpenIndex(isOpening ? i : null);
+
+    // Word cascade on open
+    if (isOpening && answerRefs.current[i]) {
+      const el = answerRefs.current[i]!;
+      requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        // Clean up previous split on this element
+        if (splitRefs.current[i]) { try { splitRefs.current[i]!.revert(); } catch {} splitRefs.current[i] = null; }
+        const split = new SplitType(el.querySelector("p") ?? el, { types: "words" });
+        splitRefs.current[i] = split;
+        const words = split.words ?? [];
+        if (words.length) {
+          gsap.fromTo(words,
+            { opacity: 0, y: 8 },
+            { opacity: 1, y: 0, stagger: 0.024, duration: 0.35, ease: "power2.out" }
+          );
+        }
+      });
+    }
+  };
+
+  return (
+    <div className={`border-t ${onLight ? "border-gray-200" : "border-white/10"}`}>
+      {items.map((item, i) => {
+        const isOpen = openIndex === i;
+        return (
+          <div key={i} className={`faq-item border-b ${onLight ? "border-gray-200" : "border-white/10"}`}>
+            <button
+              onClick={() => handleToggle(i)}
+              aria-expanded={isOpen}
+              aria-controls={`${idPrefix}-${i}`}
+              className="w-full flex items-center justify-between py-5 text-left group"
+            >
+              <span className={`font-labels text-[11px] tracking-[0.12em] uppercase transition-colors duration-200 pr-4 ${onLight ? "text-black group-hover:text-gray-600" : "text-white group-hover:text-gray-300"}`}>
+                {item.q}
+              </span>
+              <span
+                aria-hidden="true"
+                style={{
+                  display: "inline-block", flexShrink: 0,
+                  transition: "transform 0.22s ease",
+                  transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
+                  color: "var(--color-accent)", fontWeight: 300,
+                  fontSize: "1.5rem", lineHeight: 1, width: "1.5rem", textAlign: "center",
+                }}
+              >
+                +
+              </span>
+            </button>
+            <div
+              id={`${idPrefix}-${i}`}
+              style={{
+                overflow: "hidden",
+                maxHeight: isOpen ? "400px" : "0",
+                transition: "max-height 0.4s cubic-bezier(0.16,1,0.3,1)",
+              }}
+            >
+              <div ref={(el) => { answerRefs.current[i] = el; }}>
+                <GlassCard tone={onLight ? "light" : "dark"} className="p-4 mt-2 mb-4">
+                  <p className={`text-sm leading-relaxed pr-4 ${onLight ? "text-gray-600" : "text-gray-400"}`}>
+                    {item.a}
+                  </p>
+                </GlassCard>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AduNeed() {
   const sectionRef = useRef<HTMLElement>(null);
   const hairlineRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLParagraphElement>(null);
@@ -369,60 +457,9 @@ function AduNeed() {
             </p>
           </div>
 
-          {/* Right: FAQ accordion */}
+          {/* Right: FAQ accordion with word cascade */}
           <div className="lg:col-span-7">
-            <div className="border-t border-gray-200">
-              {ADU_FAQ.map((item, i) => {
-                const isOpen = openIndex === i;
-                return (
-                  <div key={i} className="faq-item border-b border-gray-200">
-                    <button
-                      onClick={() => setOpenIndex(isOpen ? null : i)}
-                      aria-expanded={isOpen}
-                      aria-controls={`adu-faq-${i}`}
-                      className="w-full flex items-center justify-between py-5 text-left group"
-                    >
-                      <span
-                        className="font-labels text-[11px] text-black tracking-[0.12em] uppercase group-hover:text-gray-600 transition-colors duration-200 pr-4"
-                      >
-                        {item.q}
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          display: "inline-block",
-                          flexShrink: 0,
-                          transition: "transform 0.3s ease",
-                          transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
-                          color: "var(--color-accent)",
-                          fontWeight: 300,
-                          fontSize: "1.5rem",
-                          lineHeight: 1,
-                          width: "1.5rem",
-                          textAlign: "center",
-                        }}
-                      >
-                        +
-                      </span>
-                    </button>
-                    <div
-                      id={`adu-faq-${i}`}
-                      style={{
-                        overflow: "hidden",
-                        maxHeight: isOpen ? "300px" : "0",
-                        transition: "max-height 0.4s cubic-bezier(0.16,1,0.3,1)",
-                      }}
-                    >
-                      <GlassCard tone="light" className="p-4 mt-2 mb-4">
-                        <p className="text-gray-600 text-sm leading-relaxed pr-4">
-                          {item.a}
-                        </p>
-                      </GlassCard>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <FaqAccordion items={ADU_FAQ} idPrefix="adu-faq" onLight={true} />
           </div>
         </div>
       </div>
@@ -703,191 +740,229 @@ const INVITATION_ITEMS = [
 ];
 
 function AduAcronym() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const watermarkRef = useRef<HTMLDivElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
+  const defItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const progressRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const section = sectionRef.current;
+    const wm = watermarkRef.current;
+    if (!wrapper || !section || !wm) return;
+
+    const items = defItemRefs.current.filter(Boolean) as HTMLDivElement[];
+
+    if (!AnimationController.shouldAnimate()) {
+      gsap.set(items, { opacity: 0, y: 20 });
+      items.forEach((item, i) => {
+        gsap.to(item, {
+          opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: i * 0.08,
+          scrollTrigger: { trigger: item, start: "top 80%", once: true },
+        });
+      });
+
+      // Still animate invitation items on mobile
+      const invItems = section.querySelectorAll<HTMLElement>(".inv-item");
+      if (invItems?.length) {
+        invItems.forEach((item) => {
+          gsap.fromTo(item, { opacity: 0, x: -16 }, {
+            opacity: 1, x: 0, duration: 0.4, ease: "power2.out",
+            scrollTrigger: { trigger: item, start: "top 85%", once: true },
+          });
+        });
+      }
+      return;
+    }
+
+    const vw = window.innerWidth;
     const ctx = gsap.context(() => {
-      if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
-          scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 55%", scrub: 1 },
-        });
-      }
+      // Set initial states via gsap.set (NOT JSX)
+      gsap.set(wm, { scale: 4, opacity: 0.05, x: 0 });
+      gsap.set(items, { x: vw, scale: 0.8, opacity: 0 });
 
-      // ADU page signature: watermark drifts subtly on scroll (unique to this page)
-      if (watermarkRef.current) {
-        gsap.to(watermarkRef.current, {
-          yPercent: -8, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top bottom", end: "bottom top", scrub: true },
-        });
-      }
+      const tl = gsap.timeline();
 
-      const defItems = sectionRef.current?.querySelectorAll<HTMLElement>(".def-item");
-      if (defItems?.length) {
-        if (!AnimationController.shouldAnimate()) {
-          gsap.fromTo(defItems, { opacity: 0, y: 20 }, {
-            opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power3.out",
-            scrollTrigger: { trigger: sectionRef.current, start: "top 78%", once: true },
-          });
-          return;
-        }
-        defItems.forEach((item) => {
-          gsap.fromTo(item, { opacity: 0, y: 32 }, {
-            opacity: 1, y: 0, ease: "power2.out",
-            scrollTrigger: { trigger: item, start: "top 88%", end: "top 55%", scrub: 1.2 },
-          });
-        });
-      }
+      // Phase 1 (0-15%): watermark zooms in
+      tl.to(wm, { scale: 1.5, opacity: 0.22, duration: 0.15, ease: "power2.inOut" }, 0);
 
+      // Phase 2 (15-35%): watermark drifts left
+      tl.to(wm, { x: -vw * 0.25, duration: 0.20, ease: "none" }, 0.15);
+
+      // Phase 3 (35-85%): cards slide in from right (~16% each for 3 cards)
+      items.forEach((item, i) => {
+        const start = 0.35 + i * 0.16;
+        tl.to(item, { x: 0, scale: 1, opacity: 1, duration: 0.14, ease: "power3.out" }, start);
+      });
+
+      // Phase 4 (85-100%): watermark drifts back + fades
+      tl.to(wm, { x: vw * 0.20, opacity: 0.05, duration: 0.15, ease: "none" }, 0.85);
+
+      ScrollTrigger.create({
+        trigger: wrapper,
+        pin: section,
+        start: "top top",
+        end: "+=180%",
+        scrub: 1.2,
+        anticipatePin: 1,
+        animation: tl,
+        onUpdate: (self) => {
+          if (progressRef.current) {
+            progressRef.current.style.transform = `scaleX(${self.progress})`;
+          }
+        },
+      });
+
+      // Invitation items — outside the pin, simple reveal
       const invItems = sectionRef.current?.querySelectorAll<HTMLElement>(".inv-item");
       if (invItems?.length) {
-        if (AnimationController.shouldAnimate()) {
-          invItems.forEach((item) => {
-            gsap.fromTo(item, { opacity: 0, x: -16 }, {
-              opacity: 1, x: 0, ease: "power2.out",
-              scrollTrigger: { trigger: item, start: "top 88%", end: "top 60%", scrub: 1.1 },
-            });
+        invItems.forEach((item) => {
+          gsap.fromTo(item, { opacity: 0, x: -16 }, {
+            opacity: 1, x: 0, ease: "power2.out",
+            scrollTrigger: { trigger: item, start: "top 88%", end: "top 60%", scrub: 1.1 },
           });
-        }
+        });
       }
-    }, sectionRef);
+    }, wrapper);
+
     ctxRef.current = ctx;
     return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      data-section="adu-acronym"
-      className="bg-black py-24 lg:py-40 relative overflow-hidden"
-    >
-      {/* ADU watermark backdrop — page signature */}
-      <div
-        ref={watermarkRef}
-        aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
-        style={{ zIndex: 0 }}
+    <div ref={wrapperRef}>
+      {/* Pinned acronym section */}
+      <section
+        ref={sectionRef}
+        data-section="adu-acronym"
+        className="bg-black relative"
+        style={{ minHeight: "100vh", overflowX: "clip", padding: "4rem 0 3rem" }}
       >
-        <span
-          className="font-display font-bold text-white leading-none"
-          style={{
-            fontSize: "clamp(14rem, 45vw, 36rem)",
-            opacity: 0.04,
-            letterSpacing: "-0.04em",
-            userSelect: "none",
-          }}
-        >
-          ADU
-        </span>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+        {/* ADU watermark — initial state set by GSAP, not JSX */}
         <div
-          ref={hairlineRef}
-          className="mb-10"
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.45, transformOrigin: "left", maxWidth: 60 }}
+          ref={watermarkRef}
           aria-hidden="true"
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 mb-20">
-          <div className="lg:col-span-4">
-            <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-4">
-              Why 828
-            </span>
-            <h2
-              className="font-display font-bold text-white tracking-tight leading-[0.88]"
-              style={{ fontSize: "clamp(2.4rem, 4.5vw, 4rem)" }}
-            >
-              The ADU<br />standard.
-            </h2>
-          </div>
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+          style={{ zIndex: 0 }}
+          data-gsap-reveal="true"
+        >
+          <span
+            className="font-display font-bold text-white leading-none"
+            style={{ fontSize: "clamp(14rem, 45vw, 36rem)", letterSpacing: "-0.04em", userSelect: "none" }}
+          >
+            ADU
+          </span>
         </div>
 
-        {/* A / D / U definitions */}
-        <div className="space-y-0 divide-y divide-white/[0.06] mb-20">
-          {ADU_DEFINITIONS.map((item) => (
-            <div
-              key={item.letter}
-              className="def-item grid grid-cols-[3.5rem_1fr] lg:grid-cols-[8rem_1fr] gap-6 lg:gap-10 py-10 lg:py-12"
-            >
-              <div className="flex flex-col items-start">
-                <span
-                  className="font-display font-bold leading-none"
-                  aria-hidden="true"
-                  style={{
-                    fontSize: "clamp(3rem, 6vw, 5rem)",
-                    color: "var(--color-accent)",
-                  }}
-                >
-                  {item.letter}
-                </span>
-              </div>
-              <div>
-                <span
-                  className="font-display font-bold text-white block mb-3 tracking-tight"
-                  style={{ fontSize: "clamp(1.1rem, 2vw, 1.5rem)" }}
-                >
-                  {item.word}
-                </span>
-                <GlassCard tone="dark" className="p-5 mt-3">
-                  <p className="text-gray-400 leading-relaxed italic" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
-                    {item.definition}
-                  </p>
-                </GlassCard>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* An invitation to work together */}
-        <div className="border-t border-white/[0.08] pt-16 lg:pt-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 mb-12">
             <div className="lg:col-span-4">
               <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-4">
-                An invitation to work together
+                Why 828
               </span>
-              <h3
-                className="font-display font-normal text-white tracking-tight leading-[0.95]"
-                style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)" }}
+              <h2
+                className="font-display font-bold text-white tracking-tight leading-[0.88]"
+                style={{ fontSize: "clamp(2.4rem, 4.5vw, 4rem)" }}
               >
-                Does this resonate?
-              </h3>
+                The ADU<br />standard.
+              </h2>
             </div>
+          </div>
 
-            <div className="lg:col-span-8">
-              <ul className="space-y-0 divide-y divide-white/[0.06]" aria-label="Invitation to work together">
-                {INVITATION_ITEMS.map((item, i) => (
-                  <li
-                    key={i}
-                    className="inv-item flex items-start gap-5 py-6"
+          {/* A / D / U definitions — slide in via GSAP pin-scrub */}
+          <div className="space-y-0 divide-y divide-white/[0.06]">
+            {ADU_DEFINITIONS.map((item, i) => (
+              <div
+                key={item.letter}
+                ref={(el) => { defItemRefs.current[i] = el; }}
+                className="grid grid-cols-[3rem_1fr] lg:grid-cols-[6rem_1fr] gap-4 lg:gap-8 py-5 lg:py-6"
+                data-gsap-reveal="true"
+              >
+                <div className="flex flex-col items-start">
+                  <span
+                    className="font-display font-bold leading-none"
+                    aria-hidden="true"
+                    style={{ fontSize: "clamp(3rem, 6vw, 5rem)", color: "var(--color-accent)" }}
                   >
-                    <span
-                      className="font-numbers font-bold leading-none flex-shrink-0 mt-0.5"
-                      aria-hidden="true"
-                      style={{ fontSize: "clamp(0.9rem, 1.5vw, 1rem)", color: "var(--color-accent)" }}
-                    >
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <p className="text-gray-300 leading-relaxed" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
-                      {item}
+                    {item.letter}
+                  </span>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span
+                    className="font-display font-bold text-white block mb-2 tracking-tight"
+                    style={{ fontSize: "clamp(1rem, 1.8vw, 1.4rem)" }}
+                  >
+                    {item.word}
+                  </span>
+                  <GlassCard tone="dark" className="p-4 lg:p-5">
+                    <p className="text-gray-400 leading-relaxed italic" style={{ fontSize: "clamp(0.82rem, 1.1vw, 0.9rem)" }}>
+                      {item.definition}
                     </p>
-                  </li>
-                ))}
-              </ul>
+                  </GlassCard>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-              <p className="mt-10 text-gray-500 italic leading-relaxed" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
-                &ldquo;If this resonates with your expectations, welcome the opportunity to explore your project.&rdquo;
-              </p>
+        {/* Maroon progress bar */}
+        <div className="absolute bottom-0 left-0 right-0 z-20"
+          style={{ height: 2, background: "rgba(255,255,255,0.05)" }} aria-hidden="true">
+          <div ref={progressRef}
+            style={{ height: "100%", background: "var(--color-accent)", transformOrigin: "left", transform: "scaleX(0)" }} />
+        </div>
+      </section>
+
+      {/* Invitation section — lives outside the pin */}
+      <section
+        data-section="adu-invitation"
+        className="bg-black py-16 lg:py-24"
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="border-t border-white/[0.08] pt-12 lg:pt-16">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+              <div className="lg:col-span-4">
+                <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-4">
+                  An invitation to work together
+                </span>
+                <h3
+                  className="font-display font-normal text-white tracking-tight leading-[0.95]"
+                  style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)" }}
+                >
+                  Does this resonate?
+                </h3>
+              </div>
+
+              <div className="lg:col-span-8">
+                <ul className="space-y-0 divide-y divide-white/[0.06]" aria-label="Invitation to work together">
+                  {INVITATION_ITEMS.map((item, i) => (
+                    <li key={i} className="inv-item flex items-start gap-5 py-6">
+                      <span
+                        className="font-numbers font-bold leading-none flex-shrink-0 mt-0.5"
+                        aria-hidden="true"
+                        style={{ fontSize: "clamp(0.9rem, 1.5vw, 1rem)", color: "var(--color-accent)" }}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <p className="text-gray-300 leading-relaxed" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
+                        {item}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-10 text-gray-500 italic leading-relaxed" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
+                  &ldquo;If this resonates with your expectations, welcome the opportunity to explore your project.&rdquo;
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
 
@@ -1003,7 +1078,9 @@ function AduStartHere() {
             </p>
 
             <div className="start-el flex items-center gap-4 flex-wrap">
-              <BookCallDropdown />
+              <div className="pulse-glow">
+                <BookCallDropdown />
+              </div>
               <Link
                 href="/contact"
                 className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"
@@ -1033,7 +1110,7 @@ function AduStartHere() {
                   <div key={i} className="start-el flex items-start gap-4 relative">
                     <span
                       className="font-numbers font-bold leading-none flex-shrink-0 w-8 relative z-10"
-                      style={{ color: "var(--color-accent)", fontSize: "clamp(1rem, 1.8vw, 1.2rem)", paddingRight: "0.2rem" }}
+                      style={{ color: "var(--color-accent)", fontSize: "clamp(1.2rem, 2vw, 1.5rem)", paddingRight: "0.2rem", display: "inline-block", transformOrigin: "center" }}
                       aria-hidden="true"
                     >
                       {String(i + 1).padStart(2, "0")}
