@@ -9,7 +9,13 @@ import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import GlassCard from "@/components/system/GlassCard";
-import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
+import {
+  ConstructionLineSilhouette,
+  CompassSilhouette,
+  ArchOutlineSilhouette,
+  HardhatSilhouette,
+  LevelSilhouette,
+} from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -302,9 +308,25 @@ function RemediationNeed() {
     <section
       ref={sectionRef}
       data-section="remediation-need"
-      className="bg-white py-24 lg:py-32"
+      className="relative py-24 lg:py-32"
+      style={{ background: "#f8f7f6" }}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      {/* Tiled pattern + maroon blob — gives backdrop-blur something to read */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ overflowX: "clip" }}>
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='40' fill='none' stroke='%237B2D26' stroke-width='1'/%3E%3Cline x1='60' y1='20' x2='60' y2='100' stroke='%237B2D26' stroke-width='0.5'/%3E%3Cline x1='20' y1='60' x2='100' y2='60' stroke='%237B2D26' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundSize: "120px 120px",
+          }}
+        />
+        <div style={{
+          position: "absolute", borderRadius: "50%",
+          width: "50%", height: "60%", top: "-10%", left: "-5%",
+          background: "radial-gradient(ellipse, rgba(123,45,38,0.07) 0%, transparent 70%)",
+        }} />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         <div
           ref={hairlineRef}
           className="mb-10"
@@ -388,105 +410,198 @@ function RemediationNeed() {
 }
 
 // ─── Section 3: The Process ───────────────────────────────────────────────────
+// Desktop: horizontal pin-scroll cinema. Mobile: vertical 3D fly-in.
 
 const REMEDIATION_PROCESS = [
   {
     num: "01",
     title: "Initial call",
     desc: "Understanding the situation — scope, urgency, and known conditions before site time is committed.",
+    Icon: CompassSilhouette,
   },
   {
     num: "02",
     title: "Visual inspection / testing",
     desc: "On-site diagnostic with 20+ years of pattern recognition. We look where others don't.",
+    Icon: ArchOutlineSilhouette,
   },
   {
     num: "03",
     title: "Remediation / scope of work",
     desc: "Written scope and transparent pricing before a single tool is picked up. No surprises.",
+    Icon: HardhatSilhouette,
   },
   {
     num: "04",
     title: "Build back / reconstruction",
     desc: "Full build-back to code with documentation. Useful for insurance claims and resale disclosure.",
+    Icon: LevelSilhouette,
   },
 ];
 
 function RemediationProcess() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const stepRefs = useRef<(HTMLElement | null)[]>([]);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!wrapper || !section || !track) return;
+
+    const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+
     const ctx = gsap.context(() => {
-      if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
-          scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 55%", scrub: 1 },
+      if (isMobile) {
+        const steps = stepRefs.current.filter(Boolean) as HTMLElement[];
+        gsap.set(steps, { translateZ: -300, rotateX: 45, opacity: 0 });
+        steps.forEach((step) => {
+          gsap.to(step, {
+            translateZ: 0, rotateX: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+            scrollTrigger: { trigger: step, start: "top 80%", once: true },
+          });
         });
+        return;
       }
 
-      const steps = sectionRef.current?.querySelectorAll<HTMLElement>(".process-step");
-      if (steps?.length) {
-        if (!AnimationController.shouldAnimate()) {
-          gsap.fromTo(steps, { opacity: 0, y: 20 }, {
-            opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out",
-            scrollTrigger: { trigger: sectionRef.current, start: "top 80%", once: true },
-          });
-          return;
-        }
-        steps.forEach((step) => {
-          gsap.fromTo(step, { opacity: 0, y: 28 }, {
-            opacity: 1, y: 0, ease: "power2.out",
-            scrollTrigger: { trigger: step, start: "top 85%", end: "top 52%", scrub: 1.2 },
-          });
-        });
-      }
-    }, sectionRef);
+      const totalWidth = track.scrollWidth;
+      const viewportWidth = window.innerWidth;
+      const scrollDistance = totalWidth - viewportWidth;
+
+      gsap.to(track, {
+        x: -scrollDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: wrapper,
+          pin: section,
+          start: "top top",
+          end: () => `+=${scrollDistance}`,
+          scrub: 1.5,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            if (progressRef.current) {
+              progressRef.current.style.transform = `scaleX(${self.progress})`;
+            }
+          },
+        },
+      });
+    }, wrapper);
+
     ctxRef.current = ctx;
     return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      data-section="remediation-process"
-      style={{ background: "#0a0a0a" }}
-      className="py-24 lg:py-36"
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+    <div ref={wrapperRef}>
+      <section
+        ref={sectionRef}
+        data-section="remediation-process"
+        className="relative h-screen"
+        style={{ background: "#0a0a0a", overflowX: "clip" }}
+      >
         <div
-          ref={hairlineRef}
-          className="mb-10"
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.45, transformOrigin: "left", maxWidth: 60 }}
-          aria-hidden="true"
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start mb-16">
-          <div className="lg:col-span-4">
-            <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-4">
-              The Approach
-            </span>
-            <h2
-              className="font-display font-bold text-white tracking-tight leading-[0.88]"
-              style={{ fontSize: "clamp(2.4rem, 4.5vw, 4rem)" }}
+          ref={trackRef}
+          className="absolute top-0 left-0 h-full flex"
+          style={{ willChange: "transform" }}
+        >
+          {REMEDIATION_PROCESS.map((step, i) => (
+            <article
+              key={step.num}
+              ref={(el) => { stepRefs.current[i] = el; }}
+              className="relative flex-shrink-0 flex items-center px-[10vw]"
+              style={{ width: "100vw", perspective: "1200px", transformStyle: "preserve-3d" }}
+              aria-label={`Step ${step.num}: ${step.title}`}
             >
-              Build<br />philosophy.
-            </h2>
-          </div>
-          <div className="lg:col-span-8 lg:pt-3">
-            <p className="text-gray-400 leading-relaxed" style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.05rem)" }}>
-              A disciplined four-step approach — from first call through complete reconstruction.
-            </p>
-          </div>
+              <div
+                aria-hidden="true"
+                className="absolute right-[5vw] top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ width: "28vw", maxWidth: "380px", color: "white", opacity: 0.07 }}
+              >
+                <step.Icon style={{ width: "100%", height: "auto" }} />
+              </div>
+
+              <div className="relative z-10 max-w-xl">
+                <div
+                  className="font-numbers font-bold leading-none mb-6"
+                  style={{ fontSize: "clamp(6rem, 12vw, 12rem)", color: "var(--color-accent)", lineHeight: 0.9 }}
+                  aria-hidden="true"
+                >
+                  {step.num}
+                </div>
+                <h2
+                  className="font-display font-bold text-white tracking-tight leading-[0.92] mb-6"
+                  style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}
+                >
+                  {step.title}
+                </h2>
+                <p className="font-body text-gray-400 leading-relaxed max-w-sm" style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}>
+                  {step.desc}
+                </p>
+                <div className="flex items-center gap-2 mt-10">
+                  {REMEDIATION_PROCESS.map((_, j) => (
+                    <div
+                      key={j}
+                      style={{
+                        width: j === i ? "24px" : "6px",
+                        height: "2px",
+                        background: j === i ? "var(--color-accent)" : "rgba(255,255,255,0.15)",
+                      }}
+                      aria-hidden="true"
+                    />
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
 
-        <div className="space-y-0 divide-y divide-white/[0.05]">
-          {REMEDIATION_PROCESS.map((step) => (
-            <div key={step.num} className="process-step grid grid-cols-[4rem_1fr] lg:grid-cols-[6rem_1fr] gap-6 lg:gap-10 py-8">
-              <div>
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20"
+          style={{ height: 2, background: "rgba(255,255,255,0.05)" }}
+          aria-hidden="true"
+        >
+          <div
+            ref={progressRef}
+            style={{
+              height: "100%",
+              background: "var(--color-accent)",
+              transformOrigin: "left",
+              transform: "scaleX(0)",
+            }}
+          />
+        </div>
+
+        <div className="absolute top-8 left-[10vw] z-20">
+          <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase">
+            The Approach — 4-Step Process
+          </span>
+        </div>
+      </section>
+
+      {/* Mobile vertical stack */}
+      <section
+        data-section="remediation-process-mobile"
+        className="lg:hidden"
+        style={{ background: "#0a0a0a" }}
+        aria-label="Remediation process steps"
+      >
+        <div className="max-w-7xl mx-auto px-6 py-20">
+          <span className="font-labels text-[10px] text-gray-500 tracking-[0.22em] uppercase block mb-12">
+            The Approach — 4-Step Process
+          </span>
+          <div className="space-y-0 divide-y divide-white/[0.05]" style={{ perspective: "1200px" }}>
+            {REMEDIATION_PROCESS.map((step, i) => (
+              <div
+                key={step.num}
+                ref={(el) => { if (!stepRefs.current[i]) stepRefs.current[i] = el; }}
+                className="grid grid-cols-[4rem_1fr] gap-6 py-8"
+              >
                 <span
                   className="font-numbers font-bold leading-none"
                   aria-hidden="true"
@@ -494,21 +609,18 @@ function RemediationProcess() {
                 >
                   {step.num}
                 </span>
+                <div>
+                  <h3 className="font-display font-bold text-white tracking-tight mb-2" style={{ fontSize: "clamp(1rem, 1.8vw, 1.2rem)" }}>
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+                </div>
               </div>
-              <div>
-                <h3
-                  className="font-display font-bold text-white tracking-tight mb-2"
-                  style={{ fontSize: "clamp(1rem, 1.8vw, 1.2rem)" }}
-                >
-                  {step.title}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
 
