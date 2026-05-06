@@ -200,7 +200,7 @@ async function testRoute(browser, routeObj, viewport) {
 
 
   try {
-    const response = await page.goto(url, { waitUntil: 'networkidle', timeout: 45_000 });
+    const response = await page.goto(url, { waitUntil: 'load', timeout: 45_000 });
     const status   = response?.status() ?? 0;
     if (status !== 200) result.errors.push(`HTTP ${status}`);
 
@@ -311,16 +311,16 @@ async function runNavTest(browser) {
   });
 
   try {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load', timeout: 30_000 });
     await sleep(1200);
-    await page.goto(`${BASE_URL}/about`, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(`${BASE_URL}/about`, { waitUntil: 'load', timeout: 30_000 });
     await sleep(500);
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load', timeout: 30_000 });
     await sleep(500);
     // Services → process (another SplitType-heavy pair)
-    await page.goto(`${BASE_URL}/services`, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(`${BASE_URL}/services`, { waitUntil: 'load', timeout: 30_000 });
     await sleep(500);
-    await page.goto(`${BASE_URL}/process`, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(`${BASE_URL}/process`, { waitUntil: 'load', timeout: 30_000 });
     await sleep(500);
   } finally {
     await ctx.close();
@@ -340,11 +340,11 @@ async function runHardRefreshTest(browser) {
 
   try {
     // Navigate, scroll partway, hard reload
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle', timeout: 30_000 });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load', timeout: 30_000 });
     await sleep(1000);
     await page.evaluate(() => window.scrollTo(0, 800));
     await sleep(300);
-    await page.reload({ waitUntil: 'networkidle', timeout: 30_000 });
+    await page.reload({ waitUntil: 'load', timeout: 30_000 });
     await sleep(2500);
 
     // After reload, above-fold images should be visible

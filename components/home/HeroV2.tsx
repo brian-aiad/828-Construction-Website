@@ -28,24 +28,27 @@ export default function HeroV2() {
   const splitRef = useRef<SplitType | null>(null);
   const splitFrameRef = useRef(-1);
   const magneticRef = useMagnetic(0.55) as React.RefObject<HTMLDivElement>;
+  const meshRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let mounted = true;
     const section = sectionRef.current;
     if (!section) return;
 
-    // Mesh gradient idle drift — runs always, regardless of shouldAnimate
-    const meshTl = gsap.timeline({ repeat: -1, yoyo: true });
-    meshTl.to(document.documentElement, {
-      duration: 14,
-      ease: "sine.inOut",
-      "--mesh-x-1": "60%",
-      "--mesh-y-1": "70%",
-      "--mesh-x-2": "30%",
-      "--mesh-y-2": "20%",
-      "--mesh-x-3": "80%",
-      "--mesh-y-3": "40%",
-    });
+    // Mesh gradient idle drift — direct CSS transform on the mesh div
+    // Avoids animating documentElement CSS vars (prevents networkidle timeout in Playwright)
+    let meshTl: gsap.core.Timeline | null = null;
+    const mesh = meshRef.current;
+    if (mesh) {
+      meshTl = gsap.timeline({ repeat: -1, yoyo: true });
+      meshTl.to(mesh, {
+        duration: 12,
+        ease: "sine.inOut",
+        x: "6%",
+        y: "4%",
+        scale: 1.08,
+      });
+    }
 
     const ctx = gsap.context(() => {
       // Set initial GSAP states here — never in JSX (Fix 14)
@@ -165,7 +168,7 @@ export default function HeroV2() {
 
     return () => {
       mounted = false;
-      meshTl.kill();
+      if (meshTl) meshTl.kill();
       cancelAnimationFrame(splitFrameRef.current);
       if (splitRef.current && headlineRef.current?.isConnected) {
         try { splitRef.current.revert(); } catch {}
@@ -182,17 +185,21 @@ export default function HeroV2() {
       aria-label="Hero"
     >
       {/* Animated mesh gradient — idle motion, maroon/copper blobs */}
+      {/* Transform drift via GSAP on the div itself (not CSS vars on documentElement) */}
       <div
+        ref={meshRef}
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
+          inset: "-15%",
           zIndex: 0,
           opacity: 0.45,
           mixBlendMode: "soft-light" as const,
+          willChange: "transform",
           background: `
-            radial-gradient(800px at var(--mesh-x-1, 20%) var(--mesh-y-1, 30%), rgba(123,45,38,0.65), transparent 60%),
-            radial-gradient(700px at var(--mesh-x-2, 70%) var(--mesh-y-2, 70%), rgba(184,115,51,0.4), transparent 55%),
-            radial-gradient(900px at var(--mesh-x-3, 50%) var(--mesh-y-3, 50%), rgba(255,255,255,0.07), transparent 65%)
+            radial-gradient(800px at 20% 30%, rgba(123,45,38,0.65), transparent 60%),
+            radial-gradient(700px at 70% 70%, rgba(184,115,51,0.4), transparent 55%),
+            radial-gradient(900px at 50% 50%, rgba(255,255,255,0.07), transparent 65%)
           `,
         }}
       />
