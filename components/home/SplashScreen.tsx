@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 // V2 cinematic intro — plays once per session (sessionStorage gate).
 // "828 Construction" ONE LINE, Space Grotesk Bold, vertical gradient background.
 // Each letter slides up from 28px below — NS Builders signature reveal.
-// Total ~2.9s. Skip button bottom-right. Prefers-reduced-motion respected.
+// V3: rotateX channel + gradient ignition overlay + curtain wipe exit.
 
 const CHARS_828: string[] = ["8", "2", "8"];
 const CHARS_CONSTRUCTION: string[] = [
@@ -20,6 +20,7 @@ export default function SplashScreen() {
   const underlineRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [ignitionProgress, setIgnitionProgress] = useState(0);
 
   const dismiss = () => setDismissed(true);
 
@@ -59,37 +60,46 @@ export default function SplashScreen() {
       return;
     }
 
-    gsap.set(splash, { opacity: 1 });
+    // Set initial clip-path for curtain exit
+    gsap.set(splash, { opacity: 1, clipPath: "inset(0 0 0% 0)" });
 
     const chars828 = chars828Refs.current.filter(Boolean) as HTMLSpanElement[];
     const charsConstr = charsConstrRefs.current.filter(Boolean) as HTMLSpanElement[];
     const allChars = [...chars828, ...charsConstr];
 
-    // Mask-cut reveal: chars slide up from below overflow-hidden parent
-    gsap.set(allChars, { yPercent: 110 });
+    // Mask-cut reveal: chars slide up from below overflow-hidden parent + rotateX
+    gsap.set(allChars, { yPercent: 110, rotateX: 88 });
     if (underlineRef.current) gsap.set(underlineRef.current, { scaleX: 0 });
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        sessionStorage.setItem("828-splash-seen", "1");
-        dismiss();
-      },
-    });
+    // No onComplete on the timeline — new one is on the last tween
+    const tl = gsap.timeline();
     tlRef.current = tl;
 
-    // IN: "828" chars — mask-cut clip reveal
+    // IN: "828" chars — rotateX + slide reveal
     tl.to(
       chars828,
-      { yPercent: 0, stagger: 0.04, duration: 0.55, ease: "power3.out" },
+      { yPercent: 0, rotateX: 0, opacity: 1, stagger: 0.04, duration: 0.9, ease: "power4.out" },
       0
     );
 
     // IN: "Construction" chars (slight delayed start — word gap)
     tl.to(
       charsConstr,
-      { yPercent: 0, stagger: 0.032, duration: 0.55, ease: "power3.out" },
+      { yPercent: 0, rotateX: 0, opacity: 1, stagger: 0.032, duration: 0.9, ease: "power4.out" },
       0.18
     );
+
+    // Gradient ignition — peaks at midpoint then decays
+    tl.to({ val: 0 }, {
+      val: 1,
+      duration: 1.6,
+      ease: "sine.inOut",
+      onUpdate: function() {
+        const v = (this.targets()[0] as { val: number }).val;
+        const intensity = v < 0.5 ? v * 2 : (1 - v) * 2;
+        setIgnitionProgress(intensity);
+      },
+    }, 0);
 
     // Maroon underline draws left → right
     if (underlineRef.current) {
@@ -111,10 +121,18 @@ export default function SplashScreen() {
       ease: "power2.in",
     });
 
-    // Dissolve overlay
+    // Curtain wipe exit — clips upward instead of fading
     tl.to(
       splash,
-      { opacity: 0, duration: 0.28, ease: "power2.in" },
+      {
+        clipPath: "inset(0 0 100% 0)",
+        duration: 0.45,
+        ease: "power3.inOut",
+        onComplete: () => {
+          sessionStorage.setItem("828-splash-seen", "1");
+          dismiss();
+        },
+      },
       "-=0.06"
     );
 
@@ -143,13 +161,26 @@ export default function SplashScreen() {
         pointerEvents: "auto",
       }}
     >
-      {/* "828 Construction" — ONE LINE, Space Grotesk Bold, V2 NS Builders style */}
+      {/* Gradient ignition overlay — radial bloom behind text */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(circle at 50% 50%, rgba(123,45,38,${(ignitionProgress * 0.22).toFixed(3)}), transparent 70%)`,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* "828 Construction" — ONE LINE, Space Grotesk Bold, V3 with perspective + rotateX */}
       <div
         style={{
           display: "flex",
           alignItems: "baseline",
           userSelect: "none",
           gap: 0,
+          perspective: "800px",
+          perspectiveOrigin: "50% 50%",
         }}
       >
         {/* "828" word — relative wrapper holds the maroon underline */}
@@ -173,7 +204,7 @@ export default function SplashScreen() {
               >
                 <span
                   ref={(el) => { chars828Refs.current[i] = el; }}
-                  style={{ display: "inline-block" }}
+                  style={{ display: "inline-block", transformStyle: "preserve-3d" }}
                 >
                   {char}
                 </span>
@@ -230,7 +261,7 @@ export default function SplashScreen() {
             >
               <span
                 ref={(el) => { charsConstrRefs.current[i] = el; }}
-                style={{ display: "inline-block" }}
+                style={{ display: "inline-block", transformStyle: "preserve-3d" }}
               >
                 {char}
               </span>
