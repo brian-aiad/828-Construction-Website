@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
-// Cinematic intro splash — plays once per session (sessionStorage gate).
-// "828" large monospace + copper underline; "CONSTRUCTION" display font.
+// V2 cinematic intro — plays once per session (sessionStorage gate).
+// "828 Construction" ONE LINE, Space Grotesk Bold, vertical gradient background.
+// Each letter slides up from 28px below — NS Builders signature reveal.
 // Total ~2.9s. Skip button bottom-right. Prefers-reduced-motion respected.
 
 const CHARS_828: string[] = ["8", "2", "8"];
 const CHARS_CONSTRUCTION: string[] = [
-  "C","O","N","S","T","R","U","C","T","I","O","N",
+  "C","o","n","s","t","r","u","c","t","i","o","n",
 ];
 
 export default function SplashScreen() {
@@ -41,7 +42,6 @@ export default function SplashScreen() {
       return;
     }
 
-    // Respect prefers-reduced-motion
     const prefersReduced =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -59,14 +59,14 @@ export default function SplashScreen() {
       return;
     }
 
-    // First visit — play full cinematic sequence
     gsap.set(splash, { opacity: 1 });
 
     const chars828 = chars828Refs.current.filter(Boolean) as HTMLSpanElement[];
     const charsConstr = charsConstrRefs.current.filter(Boolean) as HTMLSpanElement[];
     const allChars = [...chars828, ...charsConstr];
 
-    gsap.set(allChars, { y: 14, opacity: 0 });
+    // Vertical slide-up from 28px below — NS Builders signature
+    gsap.set(allChars, { y: 28, opacity: 0 });
     if (underlineRef.current) gsap.set(underlineRef.current, { scaleX: 0 });
 
     const tl = gsap.timeline({
@@ -77,21 +77,21 @@ export default function SplashScreen() {
     });
     tlRef.current = tl;
 
-    // IN: "828" chars (stagger 40ms per char)
+    // IN: "828" chars (40ms stagger per char)
     tl.to(
       chars828,
       { y: 0, opacity: 1, stagger: 0.04, duration: 0.55, ease: "power3.out" },
       0
     );
 
-    // IN: "CONSTRUCTION" chars (slight delayed start)
+    // IN: "Construction" chars (slight delayed start — word gap)
     tl.to(
       charsConstr,
       { y: 0, opacity: 1, stagger: 0.032, duration: 0.55, ease: "power3.out" },
       0.18
     );
 
-    // Copper underline draws left → right
+    // Maroon underline draws left → right
     if (underlineRef.current) {
       tl.to(
         underlineRef.current,
@@ -103,7 +103,7 @@ export default function SplashScreen() {
     // Hold (all fully visible)
     tl.to({}, { duration: 0.88 });
 
-    // OUT: all chars left → right (stagger 25ms per char)
+    // OUT: all chars left → right (25ms per char)
     tl.to(allChars, {
       y: 20,
       opacity: 0,
@@ -135,28 +135,36 @@ export default function SplashScreen() {
         position: "fixed",
         inset: 0,
         zIndex: 9980,
-        background: "#000",
+        background: "var(--gradient-splash-vertical)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        opacity: 0, // useEffect sets to 1 on first visit; invisible for returning visitors
+        opacity: 0,
         pointerEvents: "auto",
       }}
     >
-      <div style={{ textAlign: "center", userSelect: "none" }}>
-
-        {/* "828" — large IBM Plex Mono numerals with copper underline */}
-        <div style={{ position: "relative", display: "inline-block", marginBottom: "0.5rem" }}>
+      {/* "828 Construction" — ONE LINE, Space Grotesk Bold, V2 NS Builders style */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          userSelect: "none",
+          gap: 0,
+        }}
+      >
+        {/* "828" word — relative wrapper holds the maroon underline */}
+        <div style={{ position: "relative", display: "inline-block", whiteSpace: "nowrap" }}>
           <div
             style={{
-              fontFamily: "var(--font-ibm-plex-mono), monospace",
+              fontFamily: "var(--font-space-grotesk), sans-serif",
               fontWeight: 700,
-              fontSize: "clamp(5rem, 16vw, 13rem)",
+              fontSize: "clamp(2.4rem, 7vw, 6.5rem)",
               color: "#fff",
               lineHeight: 1,
               letterSpacing: "-0.02em",
               display: "flex",
+              alignItems: "baseline",
             }}
           >
             {CHARS_828.map((char, i) => (
@@ -170,34 +178,46 @@ export default function SplashScreen() {
             ))}
           </div>
 
-          {/* Copper underline — scaleX 0→1 from left */}
+          {/* Maroon underline — scaleX 0→1 from left */}
           <div
             ref={underlineRef}
             aria-hidden="true"
             style={{
               position: "absolute",
-              bottom: "-6px",
-              left: "3%",
-              right: "3%",
+              bottom: "-5px",
+              left: "2%",
+              right: "2%",
               height: "3px",
-              background: "#B87333",
+              background: "var(--color-accent)",
               transformOrigin: "left",
             }}
           />
         </div>
 
-        {/* "CONSTRUCTION" — Space Grotesk display, small, ultra-wide tracking */}
+        {/* Space between "828" and "Construction" */}
+        <span
+          style={{
+            fontFamily: "var(--font-space-grotesk), sans-serif",
+            fontWeight: 700,
+            fontSize: "clamp(2.4rem, 7vw, 6.5rem)",
+            display: "inline-block",
+            width: "0.3em",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* "Construction" word — inline block, nowrap prevents mid-word break */}
         <div
           style={{
             fontFamily: "var(--font-space-grotesk), sans-serif",
             fontWeight: 700,
-            fontSize: "clamp(0.7rem, 2vw, 1.5rem)",
+            fontSize: "clamp(2.4rem, 7vw, 6.5rem)",
             color: "#fff",
-            letterSpacing: "0.48em",
-            textTransform: "uppercase",
-            marginTop: "1.4rem",
+            lineHeight: 1,
+            letterSpacing: "-0.02em",
             display: "flex",
-            justifyContent: "center",
+            alignItems: "baseline",
+            whiteSpace: "nowrap",
           }}
         >
           {CHARS_CONSTRUCTION.map((char, i) => (
@@ -210,7 +230,6 @@ export default function SplashScreen() {
             </span>
           ))}
         </div>
-
       </div>
 
       {/* Skip button — bottom right, subtle */}
