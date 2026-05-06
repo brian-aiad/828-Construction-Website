@@ -98,9 +98,13 @@ function AduHero() {
       }
 
       if (silhouetteRef.current && AnimationController.shouldAnimate()) {
-        // Idle float + scroll parallax combined
+        // Idle float via GSAP (not CSS animation)
         gsap.to(silhouetteRef.current, {
-          yPercent: -75, ease: "none",
+          yPercent: 6, duration: 5, ease: "sine.inOut", repeat: -1, yoyo: true,
+        });
+        // Scroll parallax
+        gsap.to(silhouetteRef.current, {
+          yPercent: -30, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
         });
       }
@@ -148,7 +152,7 @@ function AduHero() {
           <div
             ref={imgWrapRef}
             className="absolute inset-x-0"
-            style={{ top: "-7.5%", height: "115%", zIndex: 2 }}
+            style={{ top: "-7.5%", height: "115%" }}
           >
             <Image
               src="/images/projects/adu-exterior-new.jpg"
@@ -165,30 +169,26 @@ function AduHero() {
           {/* Gradient where image meets copy side */}
           <div
             className="absolute inset-y-0 right-0 w-1/3 lg:w-2/5"
-            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.9))", zIndex: 3 }}
+            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.9))" }}
             aria-hidden="true"
           />
           <div
             className="absolute inset-x-0 bottom-0 h-1/3 lg:hidden"
-            style={{ background: "linear-gradient(to bottom, transparent, #000)", zIndex: 3 }}
+            style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
             aria-hidden="true"
           />
 
-          {/* ArchOutlineSilhouette — 65vw wide, opacity 0.55, clipped right edge, idle float */}
+          {/* ArchOutlineSilhouette — decorative depth layer */}
           <div
             ref={silhouetteRef}
             aria-hidden="true"
             className="absolute pointer-events-none hidden lg:block"
             style={{
-              width: "65vw",
-              right: "-8vw",
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 4,
+              width: "40vw",
+              right: 0,
+              bottom: 0,
               color: "white",
-              opacity: 0.55,
-              willChange: "transform",
-              animation: "silhouetteFloat 5s ease-in-out infinite",
+              opacity: 0.18,
             }}
           >
             <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
@@ -196,7 +196,7 @@ function AduHero() {
         </div>
 
         {/* ── Copy side (40%) ── */}
-        <div className="relative bg-black flex flex-col justify-center px-8 sm:px-12 lg:px-14 xl:px-20 py-20 lg:py-0 order-1 lg:order-2" style={{ zIndex: 5 }}>
+        <div className="relative bg-black flex flex-col justify-center px-8 sm:px-12 lg:px-14 xl:px-20 py-20 lg:py-0 order-1 lg:order-2">
           <Link
             href="/services"
             className="font-labels text-[10px] text-gray-500 tracking-[0.18em] uppercase hover:text-white transition-colors inline-flex items-center gap-1 mb-12 lg:mb-16"

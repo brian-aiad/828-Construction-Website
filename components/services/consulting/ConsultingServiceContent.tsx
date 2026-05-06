@@ -87,8 +87,13 @@ function ConsultingHero() {
       }
 
       if (silhouetteRef.current && AnimationController.shouldAnimate()) {
+        // Idle float via GSAP (not CSS animation — prevents LCP interference)
         gsap.to(silhouetteRef.current, {
-          yPercent: -75, ease: "none",
+          yPercent: 6, duration: 5, ease: "sine.inOut", repeat: -1, yoyo: true,
+        });
+        // Scroll parallax
+        gsap.to(silhouetteRef.current, {
+          yPercent: -30, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
         });
       }
@@ -102,7 +107,7 @@ function ConsultingHero() {
       ref={sectionRef}
       data-section="consulting-hero"
       className="relative"
-      style={{ minHeight: "100vh", overflowX: "clip" }}
+      style={{ minHeight: "100vh" }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] min-h-screen">
 
@@ -111,32 +116,10 @@ function ConsultingHero() {
           className="relative overflow-hidden min-h-[55vh] lg:min-h-0 order-2 lg:order-1"
           aria-hidden="true"
         >
-          {/* Drifting mesh gradient — Consulting: copper + maroon + warm white */}
-          <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-            <div style={{
-              position: "absolute", borderRadius: "50%",
-              width: "65%", height: "75%", top: "-10%", left: "10%",
-              background: "radial-gradient(ellipse, rgba(184,115,51,0.28) 0%, transparent 70%)",
-              animation: "meshDrift1 16s ease-in-out infinite", opacity: 0.35,
-            }} />
-            <div style={{
-              position: "absolute", borderRadius: "50%",
-              width: "55%", height: "60%", bottom: "0%", right: "-5%",
-              background: "radial-gradient(ellipse, rgba(123,45,38,0.28) 0%, transparent 70%)",
-              animation: "meshDrift3 16s ease-in-out infinite 6s", opacity: 0.35,
-            }} />
-            <div style={{
-              position: "absolute", borderRadius: "50%",
-              width: "40%", height: "45%", top: "40%", left: "5%",
-              background: "radial-gradient(ellipse, rgba(255,240,220,0.06) 0%, transparent 70%)",
-              animation: "meshDrift2 16s ease-in-out infinite 3s", opacity: 0.35,
-            }} />
-          </div>
-
           <div
             ref={imgWrapRef}
             className="absolute inset-x-0"
-            style={{ top: "-7.5%", height: "115%", zIndex: 2 }}
+            style={{ top: "-7.5%", height: "115%" }}
           >
             <Image
               src="/images/projects/consulting-blueprints.jpg"
@@ -152,37 +135,28 @@ function ConsultingHero() {
 
           <div
             className="absolute inset-y-0 right-0 w-1/3 lg:w-2/5"
-            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.9))", zIndex: 3 }}
+            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.9))" }}
             aria-hidden="true"
           />
           <div
             className="absolute inset-x-0 bottom-0 h-1/3 lg:hidden"
-            style={{ background: "linear-gradient(to bottom, transparent, #000)", zIndex: 3 }}
+            style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
             aria-hidden="true"
           />
 
-          {/* BlueprintCornerSilhouette — 65vw, opacity 0.55, idle float */}
+          {/* BlueprintCornerSilhouette — parallax depth layer (GSAP-animated, no CSS animation) */}
           <div
             ref={silhouetteRef}
             aria-hidden="true"
-            className="absolute pointer-events-none hidden lg:block"
-            style={{
-              width: "65vw",
-              right: "-8vw",
-              top: "50%",
-              zIndex: 4,
-              color: "white",
-              opacity: 0.55,
-              willChange: "transform",
-              animation: "silhouetteFloat 5s ease-in-out infinite 2s",
-            }}
+            className="absolute bottom-0 right-0 pointer-events-none hidden lg:block"
+            style={{ width: "40vw", color: "white", opacity: 0.18 }}
           >
             <BlueprintCornerSilhouette style={{ width: "100%", height: "auto" }} />
           </div>
         </div>
 
         {/* ── Copy side (40%) ── */}
-        <div className="relative bg-black flex flex-col justify-center px-8 sm:px-12 lg:px-14 xl:px-20 py-20 lg:py-0 order-1 lg:order-2" style={{ zIndex: 5 }}>
+        <div className="relative bg-black flex flex-col justify-center px-8 sm:px-12 lg:px-14 xl:px-20 py-20 lg:py-0 order-1 lg:order-2">
           <Link
             href="/services"
             className="font-labels text-[10px] text-gray-500 tracking-[0.18em] uppercase hover:text-white transition-colors inline-flex items-center gap-1 mb-12 lg:mb-16"
