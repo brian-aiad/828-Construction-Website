@@ -455,7 +455,7 @@ function ServicesAsymmetricTiles() {
       </div>
 
       {/* Asymmetric mosaic: ADU left (60%) + Remediation/Consulting stacked right (40%) */}
-      <div className="flex flex-col gap-[3px] lg:flex-row" style={{ perspective: "1200px" }}>
+      <div className="flex flex-col gap-[3px] lg:flex-row" style={{ perspective: "1200px", overflowX: "clip" }}>
         {/* Left: ADU — large tile */}
         <div
           ref={(el) => { tileRefs.current[0] = el; }}
