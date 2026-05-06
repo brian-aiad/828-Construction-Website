@@ -382,11 +382,13 @@ async function main() {
   // ── Step 1: Build ─────────────────────────────────────────────────────────
   if (!FAST) {
     console.log('\n[1/4] Building production bundle...');
-    // Kill any stale node processes and clear build output to prevent lock/cache conflicts
+    // Clear previous build output to prevent lock/cache conflicts
     try {
       const { rmSync } = await import('fs');
       rmSync('.next', { recursive: true, force: true });
     } catch { /* no .next dir, normal */ }
+    // Brief pause to let any orphaned build workers notice the missing .next and exit
+    await sleep(500);
     try {
       execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=3072' } });
       console.log('      ✅ Build succeeded');
