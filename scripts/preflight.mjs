@@ -394,7 +394,7 @@ async function main() {
   if (!FAST) {
     console.log('\n[1/4] Building production bundle...');
     try {
-      execSync('npx next build', { stdio: 'inherit' });
+      execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
       console.log('      ✅ Build succeeded');
     } catch {
       console.error('      ❌ Build FAILED — stopping preflight');
