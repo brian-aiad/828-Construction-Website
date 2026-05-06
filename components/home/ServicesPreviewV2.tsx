@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICES } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { useTilt } from "@/lib/hooks/useTilt";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V2 asymmetric 3-card services grid.
+// V3 asymmetric 3-card services grid with 3D tilt + z-lift + maroon shadow.
 // Layout: one tall featured card (ADU) left + two stacked smaller cards right.
-// Hover: image scale 1.05 + maroon bottom border reveal.
-// Pattern B (clip-path punch-in) on scroll enter. Fix 20 (hover cleanup).
+// Hover: image scale 1.08 + z:40 + maroon box-shadow + 3D tilt.
+// Pattern B (clip-path punch-in + rotateY) on scroll enter. Fix 20 (hover cleanup).
 
 const SERVICE_IMAGES: Record<string, string> = {
   adu: "/images/projects/adu-exterior-new.jpg",
@@ -32,6 +33,11 @@ export default function ServicesPreviewV2() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const hoverCleanups = useRef<Array<() => void>>([]);
 
+  // 3D tilt refs — one per card
+  const tiltRef0 = useTilt(10) as React.RefObject<HTMLDivElement>;
+  const tiltRef1 = useTilt(10) as React.RefObject<HTMLDivElement>;
+  const tiltRef2 = useTilt(10) as React.RefObject<HTMLDivElement>;
+
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -41,18 +47,19 @@ export default function ServicesPreviewV2() {
 
     const ctx = gsap.context(() => {
       // Set GSAP initial states (Fix 14 — never in JSX)
-      gsap.set(cards, { clipPath: "inset(8% 4% 8% 4%)", opacity: 0 });
+      gsap.set(cards, { clipPath: "inset(8% 4% 8% 4%)", opacity: 0, rotateY: 12 });
 
       if (!AnimationController.shouldAnimate()) {
         // Mobile: immediate reveal
-        gsap.set(cards, { clipPath: "inset(0%)", opacity: 1 });
+        gsap.set(cards, { clipPath: "inset(0%)", opacity: 1, rotateY: 0 });
         return;
       }
 
-      // Pattern B: clip-path punch-in on scroll enter
+      // Pattern B: clip-path punch-in + rotateY channel on scroll enter
       gsap.to(cards, {
         clipPath: "inset(0%)",
         opacity: 1,
+        rotateY: 0,
         stagger: { each: 0.12, from: "start" },
         duration: 1.05,
         ease: "power3.out",
@@ -63,19 +70,21 @@ export default function ServicesPreviewV2() {
         },
       });
 
-      // Hover: image scale + maroon border (Fix 20 — store removers)
+      // Hover: image scale + maroon border + z-lift + box-shadow (Fix 20 — store removers)
       if (window.matchMedia("(hover: hover)").matches) {
         cards.forEach((card) => {
           const imgEl = card.querySelector<HTMLElement>(".svc-card-img");
           const barEl = card.querySelector<HTMLElement>(".svc-card-bar");
 
           const onEnter = () => {
-            if (imgEl) gsap.to(imgEl, { scale: 1.05, duration: 0.7, ease: "power2.out" });
+            if (imgEl) gsap.to(imgEl, { scale: 1.08, duration: 0.7, ease: "power2.out" });
             if (barEl) gsap.to(barEl, { scaleX: 1, duration: 0.3, ease: "power2.out" });
+            gsap.to(card, { z: 40, boxShadow: "0 30px 60px -20px rgba(123,45,38,0.5)", duration: 0.5, ease: "power2.out" });
           };
           const onLeave = () => {
             if (imgEl) gsap.to(imgEl, { scale: 1, duration: 0.7, ease: "power2.out" });
             if (barEl) gsap.to(barEl, { scaleX: 0, duration: 0.3, ease: "power2.in" });
+            gsap.to(card, { z: 0, boxShadow: "none", duration: 0.5, ease: "power2.out" });
           };
 
           card.addEventListener("mouseenter", onEnter);
@@ -127,11 +136,14 @@ export default function ServicesPreviewV2() {
         {/* Asymmetric grid: ADU tall left | Remediation + Consulting stacked right */}
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
 
-          {/* ADU — tall featured card */}
+          {/* ADU — tall featured card with 3D tilt */}
           <div
-            ref={(el) => { cardRefs.current[0] = el; }}
+            ref={(el) => {
+              cardRefs.current[0] = el;
+              (tiltRef0 as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            }}
             className="relative group overflow-hidden cursor-pointer"
-            style={{ minHeight: "clamp(360px, 60vh, 600px)" }}
+            style={{ minHeight: "clamp(360px, 60vh, 600px)", transformStyle: "preserve-3d", willChange: "transform" }}
             data-gsap-reveal="true"
           >
             <Link href={`/services/${adu.slug}`} className="absolute inset-0 z-20" aria-label={adu.title} />
@@ -171,11 +183,14 @@ export default function ServicesPreviewV2() {
           {/* Right column: Remediation + Consulting stacked */}
           <div className="flex flex-col gap-3">
 
-            {/* Remediation */}
+            {/* Remediation — 3D tilt */}
             <div
-              ref={(el) => { cardRefs.current[1] = el; }}
+              ref={(el) => {
+                cardRefs.current[1] = el;
+                (tiltRef1 as React.MutableRefObject<HTMLDivElement | null>).current = el;
+              }}
               className="relative group overflow-hidden cursor-pointer flex-1"
-              style={{ minHeight: "clamp(180px, 28vh, 290px)" }}
+              style={{ minHeight: "clamp(180px, 28vh, 290px)", transformStyle: "preserve-3d", willChange: "transform" }}
               data-gsap-reveal="true"
             >
               <Link href={`/services/${remediation.slug}`} className="absolute inset-0 z-20" aria-label={remediation.title} />
@@ -209,11 +224,14 @@ export default function ServicesPreviewV2() {
               </div>
             </div>
 
-            {/* Consulting */}
+            {/* Consulting — 3D tilt */}
             <div
-              ref={(el) => { cardRefs.current[2] = el; }}
+              ref={(el) => {
+                cardRefs.current[2] = el;
+                (tiltRef2 as React.MutableRefObject<HTMLDivElement | null>).current = el;
+              }}
               className="relative group overflow-hidden cursor-pointer flex-1"
-              style={{ minHeight: "clamp(180px, 28vh, 290px)" }}
+              style={{ minHeight: "clamp(180px, 28vh, 290px)", transformStyle: "preserve-3d", willChange: "transform" }}
               data-gsap-reveal="true"
             >
               <Link href={`/services/${consulting.slug}`} className="absolute inset-0 z-20" aria-label={consulting.title} />
