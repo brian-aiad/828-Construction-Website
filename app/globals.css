@@ -483,6 +483,26 @@ html.lenis body {
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
+/* ── BOOK CALL header CTA — outer-ring pulse glow ───────────────────────── */
+@keyframes bookCallPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(123, 45, 38, 0.5); }
+  50%       { box-shadow: 0 0 0 14px rgba(123, 45, 38, 0); }
+}
+.book-call-cta {
+  animation: bookCallPulse 2.4s ease-in-out infinite;
+}
+
+/* ── Outline CTA pulse — maroon-outline buttons (about preview, etc.) ────── */
+.cta-pulse {
+  animation: bookCallPulse 2.4s ease-in-out 1s infinite;
+}
+
+/* ── Hide native cursor when custom cursor is active ─────────────────────── */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
 /* ── Drifting mesh gradient blobs — hero backgrounds ────────────────────── */
 @keyframes meshDrift1 {
   0%, 100% { transform: translate(0, 0) scale(1); }

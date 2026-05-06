@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SERVICES, SITE } from "@/lib/constants";
+import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -16,6 +17,7 @@ export default function Header() {
   const [torTime, setTorTime] = useState("");
   const lastScrollY = useRef(0);
   const pathname = usePathname();
+  const bookCallMagRef = useMagnetic(0.55) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -221,11 +223,11 @@ export default function Header() {
                 </span>
               )}
               {/* BOOK CALL — asterisk reveals phone number on click */}
-              <div className="relative">
+              <div ref={bookCallMagRef} style={{ display: "inline-block" }} className="relative">
                 <button
                   onClick={() => setBookCallOpen(!bookCallOpen)}
                   aria-expanded={bookCallOpen}
-                  className="btn-shine flex items-center gap-2 bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
+                  className="btn-shine book-call-cta flex items-center gap-2 bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
                 >
                   BOOK CALL
                   <span
@@ -296,6 +298,27 @@ export default function Header() {
                   }`}
                 />
               </button>
+            </div>
+          </div>
+
+          {/* Sub-header marquee strip — always on, below nav row */}
+          <div
+            className="overflow-hidden border-t hidden lg:block"
+            style={{ height: 22, borderColor: "rgba(123,45,38,0.15)", background: "rgba(123,45,38,0.08)" }}
+            aria-hidden="true"
+          >
+            <div
+              style={{ display: "flex", alignItems: "center", width: "max-content", height: "100%", animation: "marqueeScroll 35s linear infinite" }}
+            >
+              {[...Array(2)].map((_, i) => (
+                <span key={i} style={{ display: "flex", alignItems: "center", gap: "2.5rem", paddingRight: "2.5rem" }}>
+                  {["BUILT WITH INTENT", `CA LICENSE #${SITE.license}`, "EST. 2004", "828 CONSTRUCTION", "SOUTH BAY NATIVE", "QUALITY OVER QUANTITY"].map((text, j) => (
+                    <span key={j} style={{ fontFamily: "var(--font-space-mono)", fontSize: 9, letterSpacing: "0.18em", color: "var(--color-accent)", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                      {text}
+                    </span>
+                  ))}
+                </span>
+              ))}
             </div>
           </div>
         </div>
