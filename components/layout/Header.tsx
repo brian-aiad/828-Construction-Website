@@ -7,16 +7,11 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SERVICES, SITE } from "@/lib/constants";
 
-const SERVICE_THUMBS: Record<string, string> = {
-  adu: "/images/services/adu-permit.jpg",
-  remediation: "/images/services/remediation-before.jpg",
-  consulting: "/images/services/consulting-report.jpg",
-};
-
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [bookCallOpen, setBookCallOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [torTime, setTorTime] = useState("");
   const lastScrollY = useRef(0);
@@ -125,86 +120,69 @@ export default function Header() {
                         <span
                           className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                             isServicesActive
-                              ? "bg-[#B87333] scale-x-100"
+                              ? "bg-[#7B2D26] scale-x-100"
                               : "bg-white scale-x-0 group-hover:scale-x-100"
                           }`}
                         />
                       </Link>
 
-                      {/* Dropdown panel */}
+                      {/* Dropdown panel — vertical stack (Joseph's explicit choice) */}
                       <div
-                        className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[520px] bg-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto"
+                        className="absolute top-full left-0 mt-4 w-52 bg-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto"
                         style={{ zIndex: 60 }}
                       >
-                        {/* Copper top accent */}
-                        <div
-                          style={{
-                            height: 1,
-                            background: "#B87333",
-                            opacity: 0.5,
-                          }}
-                        />
-                        <div className="p-4 grid grid-cols-3 gap-0 divide-x divide-white/[0.06]">
-                          {SERVICES.map((service) => (
-                            <Link
-                              key={service.slug}
-                              href={`/services/${service.slug}`}
-                              className="group/item flex flex-col gap-0 px-4 py-2 hover:bg-white/[0.03] transition-colors duration-150"
-                            >
-                              {/* Mini thumbnail */}
-                              <div
-                                className="relative overflow-hidden mb-3"
-                                style={{ aspectRatio: "16/9" }}
+                        {/* Maroon top accent */}
+                        <div style={{ height: 1, background: "var(--color-accent)", opacity: 0.6 }} />
+
+                        {/* Vertical service list — each service on its own line */}
+                        <div className="py-1">
+                          {SERVICES.map((service, idx) => (
+                            <div key={service.slug}>
+                              <Link
+                                href={`/services/${service.slug}`}
+                                className="group/item flex items-center justify-between px-4 py-3 hover:bg-white/[0.04] transition-colors duration-150"
                               >
-                                <Image
-                                  src={
-                                    SERVICE_THUMBS[service.slug] ||
-                                    "/images/hero/hero-1.jpg"
-                                  }
-                                  alt={service.title}
-                                  fill
-                                  sizes="180px"
-                                  className="object-cover transition-transform duration-500 group-hover/item:scale-105"
-                                  style={{
-                                    filter:
-                                      "contrast(1.05) saturate(0.9) brightness(0.85)",
-                                  }}
-                                />
+                                <div>
+                                  <span
+                                    className={`font-display font-bold block leading-tight mb-0.5 transition-colors duration-150 ${
+                                      pathname === `/services/${service.slug}`
+                                        ? "text-white"
+                                        : "text-white/75 group-hover/item:text-white"
+                                    }`}
+                                    style={{ fontSize: "0.78rem" }}
+                                  >
+                                    {service.title}
+                                  </span>
+                                  <span className="font-labels text-[8px] text-gray-600 tracking-[0.14em] uppercase">
+                                    {service.short}
+                                  </span>
+                                </div>
                                 {pathname === `/services/${service.slug}` && (
-                                  <div
-                                    className="absolute bottom-0 left-0 right-0"
-                                    style={{
-                                      height: 2,
-                                      background: "#B87333",
-                                    }}
+                                  <span
+                                    className="w-1.5 h-1.5 flex-shrink-0 rounded-full"
+                                    style={{ background: "var(--color-accent)" }}
+                                    aria-hidden="true"
                                   />
                                 )}
-                              </div>
-                              <span
-                                className={`font-display font-bold tracking-tight block mb-1 transition-colors duration-150 leading-tight ${
-                                  pathname === `/services/${service.slug}`
-                                    ? "text-[#B87333]"
-                                    : "text-white group-hover/item:text-[#B87333]"
-                                }`}
-                                style={{ fontSize: "0.8rem" }}
-                              >
-                                {service.title}
-                              </span>
-                              <span className="font-labels text-[8px] text-gray-500 tracking-[0.15em] uppercase">
-                                {service.short}
-                              </span>
-                            </Link>
+                              </Link>
+                              {idx < SERVICES.length - 1 && (
+                                <div
+                                  className="mx-4"
+                                  style={{ height: 1, background: "var(--color-accent)", opacity: 0.12 }}
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </div>
                           ))}
                         </div>
-                        <div className="px-4 py-3 border-t border-white/[0.06] flex items-center justify-between">
-                          <span className="font-labels text-[8px] text-gray-500 tracking-[0.2em] uppercase">
-                            All Services
-                          </span>
+
+                        {/* Footer */}
+                        <div className="px-4 py-3 border-t border-white/[0.06]">
                           <Link
                             href="/services"
-                            className="font-labels text-[8px] text-gray-400 tracking-[0.15em] uppercase hover:text-[#B87333] transition-colors"
+                            className="font-labels text-[8px] text-gray-500 tracking-[0.15em] uppercase hover:text-white transition-colors"
                           >
-                            View Overview →
+                            All Services Overview →
                           </Link>
                         </div>
                       </div>
@@ -226,7 +204,7 @@ export default function Header() {
                     <span
                       className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                         pathname === link.href
-                          ? "bg-[#B87333] scale-x-100"
+                          ? "bg-[#7B2D26] scale-x-100"
                           : "bg-white scale-x-0 group-hover:scale-x-100"
                       }`}
                     />
@@ -235,26 +213,58 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Right side: live time + phone + CTA */}
+            {/* Right side: location + timestamp + BOOK CALL asterisk dropdown */}
             <div className="hidden lg:flex items-center gap-6">
-              {/* Live Torrance time — NS Builders style premium detail */}
               {torTime && (
-                <span className="hidden xl:block font-labels text-[9px] text-white/22 tracking-[0.14em] uppercase whitespace-nowrap">
+                <span className="hidden xl:block font-labels text-[9px] text-white/30 tracking-[0.14em] uppercase whitespace-nowrap">
                   Torrance · {torTime}
                 </span>
               )}
-              <a
-                href={SITE.phoneHref}
-                className="font-numbers text-sm text-white/55 hover:text-white transition-colors duration-200 tracking-wide"
-              >
-                {SITE.phone}
-              </a>
-              <Link
-                href="/contact"
-                className="btn-shine bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
-              >
-                Get Estimate
-              </Link>
+              {/* BOOK CALL — asterisk reveals phone number on click */}
+              <div className="relative">
+                <button
+                  onClick={() => setBookCallOpen(!bookCallOpen)}
+                  aria-expanded={bookCallOpen}
+                  className="btn-shine flex items-center gap-2 bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
+                >
+                  BOOK CALL
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      display: "inline-block",
+                      transition: "transform 0.3s ease",
+                      transform: bookCallOpen ? "rotate(45deg)" : "rotate(0deg)",
+                      fontWeight: 400,
+                      lineHeight: 1,
+                    }}
+                  >
+                    +
+                  </span>
+                </button>
+                {bookCallOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      background: "#000",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderTop: `1px solid var(--color-accent)`,
+                      padding: "12px 20px",
+                      animation: "dropReveal 0.35s cubic-bezier(0.16,1,0.3,1) both",
+                      zIndex: 60,
+                      minWidth: "180px",
+                    }}
+                  >
+                    <a
+                      href={SITE.phoneHref}
+                      className="font-numbers text-sm text-white hover:text-gray-300 transition-colors whitespace-nowrap tracking-wide"
+                    >
+                      {SITE.phone}
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Mobile: phone + hamburger */}
@@ -330,7 +340,7 @@ export default function Header() {
                         <span
                           className={`font-labels text-[9px] tracking-[0.2em] uppercase transition-colors duration-200 ${
                             mobileServicesOpen
-                              ? "text-[#B87333]"
+                              ? "text-[#7B2D26]"
                               : "text-gray-600"
                           }`}
                         >
@@ -367,7 +377,7 @@ export default function Header() {
                                   href={`/services/${service.slug}`}
                                   className={`flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0 transition-colors duration-150 ${
                                     pathname === `/services/${service.slug}`
-                                      ? "text-[#B87333]"
+                                      ? "text-[#7B2D26]"
                                       : "text-gray-400 hover:text-white"
                                   }`}
                                 >
@@ -419,12 +429,12 @@ export default function Header() {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="mt-8 space-y-4"
             >
-              <Link
-                href="/contact"
+              <a
+                href={SITE.phoneHref}
                 className="btn-shine block text-center bg-white text-black px-6 py-4 font-labels text-[11px] tracking-[0.18em] uppercase"
               >
-                Get Free Estimate
-              </Link>
+                Book Call
+              </a>
               <a
                 href={SITE.phoneHref}
                 className="block text-center border border-gray-700 text-white px-6 py-4 font-labels text-[11px] tracking-[0.18em] uppercase font-numbers"
