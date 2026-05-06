@@ -65,11 +65,11 @@ export default function CustomCursor() {
       ring.style.opacity = "1";
     };
 
-    // Hover over images: ring becomes copper and expands
+    // Hover over images: ring becomes maroon and expands
     const onImage = () => {
       ring.style.width = "52px";
       ring.style.height = "52px";
-      ring.style.borderColor = "#B87333";
+      ring.style.borderColor = "var(--color-accent)";
       ring.style.opacity = "0.85";
     };
 
@@ -136,7 +136,7 @@ export default function CustomCursor() {
           width: 5, height: 5,
           marginLeft: -2.5, marginTop: -2.5,
           borderRadius: "50%",
-          background: "#B87333",
+          background: "var(--color-accent)",
           opacity: 0.5,
         }}
       />
