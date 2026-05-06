@@ -1031,7 +1031,7 @@ function FeaturedWork({ slug }: { slug: string }) {
             </h2>
           </div>
           <Link
-            href="/projects"
+            href="/portfolio"
             className="hidden sm:inline-flex items-center gap-2 font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-transparent hover:border-[#B87333] hover:text-[#B87333] transition-colors duration-200 group"
           >
             All Projects
@@ -1111,7 +1111,7 @@ function FeaturedWork({ slug }: { slug: string }) {
 
         <div className="mt-10 sm:hidden">
           <Link
-            href="/projects"
+            href="/portfolio"
             className="inline-flex items-center gap-2 font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-transparent hover:border-[#B87333] hover:text-[#B87333] transition-colors duration-200 group"
           >
             All Projects
@@ -1197,7 +1197,7 @@ function ProcessSnapshot({ slug, title }: { slug: string; title: string }) {
             </h2>
           </div>
           <Link
-            href="/process"
+            href="/portfolio"
             className="hidden sm:inline-flex items-center gap-2 font-labels text-[10px] text-gray-500 tracking-[0.18em] uppercase border-b border-transparent hover:border-[#B87333] hover:text-[#B87333] transition-colors duration-200 group"
           >
             Full Process

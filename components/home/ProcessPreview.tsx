@@ -25,7 +25,7 @@ export default function ProcessPreview() {
               </h2>
             </div>
             <Link
-              href="/process"
+              href="/portfolio"
               className="font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-white transition-colors duration-200 group inline-flex items-center gap-2 self-start sm:self-auto"
             >
               Full Process

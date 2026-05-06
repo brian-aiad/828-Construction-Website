@@ -170,7 +170,7 @@ export default function ProjectsPreview() {
             </div>
           </div>
           <Link
-            href="/projects"
+            href="/portfolio"
             className="proj-counter group inline-flex items-center gap-2 font-labels text-[11px] text-gray-400 tracking-[0.18em] uppercase hover:text-[#B87333] transition-colors duration-200 border-b border-transparent hover:border-[#B87333] pb-0.5 pt-3 flex-shrink-0 self-start"
           >
             All Projects
@@ -194,7 +194,7 @@ export default function ProjectsPreview() {
           {featured && (
             <div className="proj-card relative overflow-hidden md:[grid-column:1/9] md:[grid-row:1/3]">
               <Link
-                href="/projects"
+                href="/portfolio"
                 className="group block relative overflow-hidden bg-[#111]"
                 style={{ height: "clamp(240px, 42vw, 570px)" }}
               >
@@ -232,7 +232,7 @@ export default function ProjectsPreview() {
           {secondary1 && (
             <div className="proj-card relative overflow-hidden md:[grid-column:9/13] md:[grid-row:1]">
               <Link
-                href="/projects"
+                href="/portfolio"
                 className="group block relative overflow-hidden bg-[#111]"
                 style={{ height: "clamp(200px, 20.5vw, 282px)" }}
               >
@@ -261,7 +261,7 @@ export default function ProjectsPreview() {
           {secondary2 && (
             <div className="proj-card relative overflow-hidden md:[grid-column:9/13] md:[grid-row:2]">
               <Link
-                href="/projects"
+                href="/portfolio"
                 className="group block relative overflow-hidden bg-[#111]"
                 style={{ height: "clamp(200px, 20.5vw, 282px)" }}
               >
@@ -294,7 +294,7 @@ export default function ProjectsPreview() {
           {wide && (
             <div className="proj-card col-span-full relative overflow-hidden">
               <Link
-                href="/projects"
+                href="/portfolio"
                 className="group block relative overflow-hidden bg-[#111]"
                 style={{ height: "clamp(180px, 22vw, 295px)" }}
               >

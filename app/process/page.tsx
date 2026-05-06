@@ -1,14 +1,7 @@
-import type { Metadata } from "next";
-import { SITE } from "@/lib/constants";
-import ProcessContent from "@/components/process/ProcessContent";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Our Process | How 828 Construction Works | Torrance, CA",
-  description:
-    "Our structured, transparent process from consultation through completion. Learn how 828 Construction approaches every project in Torrance and South Bay, CA.",
-  alternates: { canonical: `${SITE.url}/process` },
-};
-
+// /process has been merged into /portfolio — 301 redirect handled in next.config.ts
+// This component handles client-side navigation fallback.
 export default function ProcessPage() {
-  return <ProcessContent />;
+  redirect("/portfolio");
 }
