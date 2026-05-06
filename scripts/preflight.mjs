@@ -393,6 +393,11 @@ async function main() {
   // ── Step 1: Build ─────────────────────────────────────────────────────────
   if (!FAST) {
     console.log('\n[1/4] Building production bundle...');
+    // Remove stale Next.js build lock file that can be left behind after abnormal exits
+    try {
+      const { unlinkSync } = await import('fs');
+      unlinkSync('.next/lock');
+    } catch { /* no lock file, normal */ }
     try {
       execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
       console.log('      ✅ Build succeeded');
@@ -401,6 +406,7 @@ async function main() {
       process.exit(1);
     }
   }
+
 
   // ── Step 2: Start server ──────────────────────────────────────────────────
   if (!FAST) {
@@ -418,14 +424,23 @@ async function main() {
     // ── Step 3: Route tests ────────────────────────────────────────────────
     console.log('\n[3/4] Testing routes...\n');
 
+    let testCount = 0;
     for (const route of routes) {
       for (const vp of viewports) {
         // Verify server is still up; restart if it crashed (Windows OOM guard)
         if (!FAST) await ensureServer();
+        // Periodic server restart every 8 tests to release memory pressure
+        testCount++;
+        if (!FAST && testCount > 0 && testCount % 8 === 0) {
+          stopServer();
+          await sleep(800);
+          await startServer();
+        }
         process.stdout.write(`      ${route.name.padEnd(15)} @ ${vp.name.padEnd(8)}  `);
         const result = await testRoute(browser, route, vp);
         routeResults.push(result);
-        await sleep(500); // Brief gap between tests to avoid saturating the prod server
+        // Increased gap to avoid system resource exhaustion on Windows under load
+        await sleep(1200);
 
         if (result.PASS) {
           process.stdout.write('✅\n');
