@@ -8,6 +8,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import GlassCard from "@/components/system/GlassCard";
+import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -71,6 +73,7 @@ function BookCallDropdown() {
 function RemediationHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const imgWrapRef = useRef<HTMLDivElement>(null);
+  const silhouetteRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
@@ -81,6 +84,13 @@ function RemediationHero() {
         gsap.to(imgWrapRef.current, {
           yPercent: -12, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
+      }
+
+      if (silhouetteRef.current && AnimationController.shouldAnimate()) {
+        gsap.to(silhouetteRef.current, {
+          yPercent: -30, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
         });
       }
     }, sectionRef);
@@ -128,6 +138,15 @@ function RemediationHero() {
             style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
             aria-hidden="true"
           />
+          {/* Architectural silhouette — parallax depth layer */}
+          <div
+            ref={silhouetteRef}
+            aria-hidden="true"
+            className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
+            style={{ width: "25%", zIndex: 10, color: "white", opacity: 0.12, willChange: "transform" }}
+          >
+            <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
+          </div>
         </div>
 
         {/* ── Copy side (40%) ── */}
@@ -322,9 +341,11 @@ function RemediationNeed() {
                         transition: "max-height 0.4s cubic-bezier(0.16,1,0.3,1)",
                       }}
                     >
-                      <p className="text-gray-500 text-sm leading-relaxed pb-6 pr-8">
-                        {item.a}
-                      </p>
+                      <GlassCard tone="light" className="p-4 mt-2 mb-4">
+                        <p className="text-gray-600 text-sm leading-relaxed pr-4">
+                          {item.a}
+                        </p>
+                      </GlassCard>
                     </div>
                   </div>
                 );
