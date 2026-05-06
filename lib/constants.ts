@@ -31,9 +31,16 @@ export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
-  { href: "/projects", label: "Projects" },
-  { href: "/process", label: "Process" },
+  { href: "/portfolio", label: "Portfolio" },
   { href: "/contact", label: "Contact" },
+];
+
+export const PROCESS_STEPS_V2 = [
+  { number: "01", title: "Initial Contact", subtitle: "Pre-construction" },
+  { number: "02", title: "Site Visit", subtitle: "Design & Planning" },
+  { number: "03", title: "Permit & Approval", subtitle: "Code Compliance" },
+  { number: "04", title: "Construction", subtitle: "Full Build Execution" },
+  { number: "05", title: "Post-Construction", subtitle: "Project Completion" },
 ];
 
 export const SERVICES = [
@@ -82,6 +89,26 @@ export const SERVICES = [
       "Code compliance review",
     ],
   },
+];
+
+// ── V2 brand constants ────────────────────────────────────────────────────
+// FOUNDING_YEAR = 2004. Joe's typed notes say "2025" — this is a typo.
+// Verbal call + memory confirm 2004. Lock this value.
+export const FOUNDING_YEAR = 2004;
+
+export const SERVICE_AREAS = [
+  "Torrance",
+  "Redondo Beach",
+  "Manhattan Beach",
+  "Hermosa Beach",
+  "El Segundo",
+  "Carson",
+  "Lomita",
+  "Palos Verdes",
+  "Rolling Hills",
+  "San Pedro",
+  "Wilmington",
+  "Long Beach",
 ];
 
 // ── Accent tokens ─────────────────────────────────────────────────────────

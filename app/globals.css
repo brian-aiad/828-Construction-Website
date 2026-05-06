@@ -437,6 +437,12 @@ html.lenis body {
   opacity: 0.7;
 }
 
+/* ── Asterisk/plus dropdown reveal — BOOK CALL CTA + FAQ expanders ────────── */
+@keyframes dropReveal {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Left + right edges — done with inner child spans */
 .service-card-border-left,
 .service-card-border-right {
