@@ -30,8 +30,7 @@ const ALL_ROUTES = [
   { path: '/services/adu',        name: 'ADU' },
   { path: '/services/remediation',name: 'Remediation' },
   { path: '/services/consulting', name: 'Consulting' },
-  { path: '/process',             name: 'Process' },
-  { path: '/projects',            name: 'Projects' },
+  { path: '/portfolio',           name: 'Portfolio' },
   { path: '/contact',             name: 'Contact' },
 ];
 

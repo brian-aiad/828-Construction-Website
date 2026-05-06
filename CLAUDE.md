@@ -114,15 +114,17 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 
 | Page | Status | Date |
 |------|--------|------|
-| Home (`/`) | cinematic upgrade — Perf=99, A11y=96, SplashScreen (828+CONSTRUCTION GSAP stagger + copper underline + sessionStorage skip), second HomeMarquee reversed 60s, FooterRevealWrapper opacity scrub reveal, live Torrance time in header, copper cursor trail, CustomCursor copper ring on image hover | 2026-04-24 |
-| About (`/about`) | cinematic upgrade — Perf=99, A11y=96, founder profile block (portrait placeholder + signature + credentials row), pull quote section, horizontal editorial timeline, marquee strip, Ken Burns on ADU photo, sticky credentials on scroll, paragraph line reveals (SplitType lines) | 2026-04-24 |
-| Services (`/services`) | v3 polish — Perf=99, A11y=96, service row GSAP hover (image brightness + scale), Pattern C headline reveal | 2026-04-23 |
+| Splash | V2 rebuild — vertical gradient bg (--gradient-splash-vertical), "828 Construction" ONE LINE Space Grotesk Bold, y:28 slide-up reveal (NS Builders style), maroon underline under "828", sessionStorage gate | 2026-05-06 |
+| Home (`/`) | V2 rebuild — 4 sections only (Hero+Services+About Preview+Footer). Asymmetric HeroV2 60/40 split, ServicesPreviewV2 3-card asymmetric grid, AboutPreview compressed teaser. HERO_COPY_PENDING TODO in place. | 2026-05-06 |
+| About (`/about`) | V2 rebuild — 6 sections: Hero (photo bg) + Story (short copy, FOUNDING_YEAR=2004 from constants) + 3 Principles (maroon numerals) + CRAFT acronym (watermark xPercent drift scrub — page signature) + South Bay marquee (SERVICE_AREAS) + CTA. V1 timeline/how-we-think/proof-of-work deleted. | 2026-05-06 |
+| Services (`/services`) | V2 gateway rebuild — asymmetric 3-tile mosaic (60/40 ADU left + stacked right), three-vector clip entry signature, BOOK CALL dropdown CTA, header dropdown now vertical stack per Joseph's ask | 2026-05-06 |
 | Services/ADU (`/services/adu`) | v4 revamp — Perf=99, A11y=96, qualifier + featured work + process snapshot + embedded form (service_type hidden field) + related services footer | 2026-04-24 |
 | Services/Remediation (`/services/remediation`) | v4 revamp — Perf=98, A11y=96, same template as ADU — qualifier + featured work + process snapshot + embedded form + related services | 2026-04-24 |
 | Services/Consulting (`/services/consulting`) | v4 revamp — Perf=99, A11y=96, same template as ADU — 1 featured project (consulting only), embedded form + related services | 2026-04-24 |
-| Process (`/process`) | v3 polish — Perf=99, A11y=96, EditorialStandards row hover (number + body), scrub rule | 2026-04-23 |
+| Process (`/process`) | DELETED — 308 redirect to /portfolio | 2026-05-06 |
 | Contact (`/contact`) | v3 polish — Perf=99, A11y=96, vertical step connector line with copper gradient | 2026-04-23 |
-| Projects (`/projects`) | v3 polish — Perf=99, A11y=96, filter tab copper hover hint | 2026-04-23 |
+| Portfolio (`/portfolio`) | V2 — renamed from /projects, merged process content. Hero + 14-photo mixed-size gallery (6 rows, asymmetric grid) + 5-step build philosophy + BOOK CALL CTA | 2026-05-06 |
+| Footer (site-wide) | V2 rebuild — rolling marquee (38s, hover-pause) + BOOK CALL dropdown CTA + broken-color info blocks (email/phone/address) + maroon license badge + 828 wordmark anchor + Est. 2004 from constants | 2026-05-06 |
 
 ## Project context
 
