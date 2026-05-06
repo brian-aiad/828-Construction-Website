@@ -275,21 +275,10 @@ async function testRoute(browser, routeObj, viewport) {
         .map((el) => ({ text: (el.textContent ?? '').trim(), cls: el.className.slice(0, 50) }));
     });
 
-    // ── Screenshots (top / mid / bottom) ─────────────────────────────────
+    // ── Screenshot (top only — 3-shot capture disabled to reduce memory pressure) ──
     const slug = name.toLowerCase().replace(/\//g, '-');
     const vp   = viewport.name;
     await page.screenshot({ path: join(outDir, 'screenshots', `${slug}-${vp}-top.png`) });
-
-    const totalH = await page.evaluate(() => document.body.scrollHeight);
-    await page.evaluate((h) => window.scrollTo(0, h * 0.45), totalH);
-    await sleep(700);
-    await page.screenshot({ path: join(outDir, 'screenshots', `${slug}-${vp}-mid.png`) });
-
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await sleep(700);
-    await page.screenshot({ path: join(outDir, 'screenshots', `${slug}-${vp}-bot.png`) });
-
-    await page.evaluate(() => window.scrollTo(0, 0));
 
   } catch (err) {
     result.errors.push(`Navigation: ${err.message.slice(0, 120)}`);
@@ -418,7 +407,20 @@ async function main() {
   }
 
   const browser = await chromium.launch({
-    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-gpu'],
+    args: [
+      '--disable-dev-shm-usage',
+      '--no-sandbox',
+      '--disable-gpu',
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-sync',
+      '--disable-translate',
+      '--metrics-recording-only',
+      '--mute-audio',
+      '--safebrowsing-disable-auto-update',
+      '--no-first-run',
+    ],
   });
   const routeResults = [];
 
