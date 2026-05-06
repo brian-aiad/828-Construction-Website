@@ -382,11 +382,11 @@ async function main() {
   // ── Step 1: Build ─────────────────────────────────────────────────────────
   if (!FAST) {
     console.log('\n[1/4] Building production bundle...');
-    // Remove stale Next.js build lock file that can be left behind after abnormal exits
+    // Kill any stale node processes and clear build output to prevent lock/cache conflicts
     try {
-      const { unlinkSync } = await import('fs');
-      unlinkSync('.next/lock');
-    } catch { /* no lock file, normal */ }
+      const { rmSync } = await import('fs');
+      rmSync('.next', { recursive: true, force: true });
+    } catch { /* no .next dir, normal */ }
     try {
       execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
       console.log('      ✅ Build succeeded');
