@@ -65,8 +65,8 @@ export default function SplashScreen() {
     const charsConstr = charsConstrRefs.current.filter(Boolean) as HTMLSpanElement[];
     const allChars = [...chars828, ...charsConstr];
 
-    // Vertical slide-up from 28px below — NS Builders signature
-    gsap.set(allChars, { y: 28, opacity: 0 });
+    // Mask-cut reveal: chars slide up from below overflow-hidden parent
+    gsap.set(allChars, { yPercent: 110 });
     if (underlineRef.current) gsap.set(underlineRef.current, { scaleX: 0 });
 
     const tl = gsap.timeline({
@@ -77,17 +77,17 @@ export default function SplashScreen() {
     });
     tlRef.current = tl;
 
-    // IN: "828" chars (40ms stagger per char)
+    // IN: "828" chars — mask-cut clip reveal
     tl.to(
       chars828,
-      { y: 0, opacity: 1, stagger: 0.04, duration: 0.55, ease: "power3.out" },
+      { yPercent: 0, stagger: 0.04, duration: 0.55, ease: "power3.out" },
       0
     );
 
     // IN: "Construction" chars (slight delayed start — word gap)
     tl.to(
       charsConstr,
-      { y: 0, opacity: 1, stagger: 0.032, duration: 0.55, ease: "power3.out" },
+      { yPercent: 0, stagger: 0.032, duration: 0.55, ease: "power3.out" },
       0.18
     );
 
@@ -103,10 +103,9 @@ export default function SplashScreen() {
     // Hold (all fully visible)
     tl.to({}, { duration: 0.88 });
 
-    // OUT: all chars left → right (25ms per char)
+    // OUT: all chars left → right — clip up (25ms per char)
     tl.to(allChars, {
-      y: 20,
-      opacity: 0,
+      yPercent: -110,
       stagger: { each: 0.025, from: "start" },
       duration: 0.35,
       ease: "power2.in",
@@ -170,10 +169,14 @@ export default function SplashScreen() {
             {CHARS_828.map((char, i) => (
               <span
                 key={i}
-                ref={(el) => { chars828Refs.current[i] = el; }}
-                style={{ display: "inline-block" }}
+                style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
               >
-                {char}
+                <span
+                  ref={(el) => { chars828Refs.current[i] = el; }}
+                  style={{ display: "inline-block" }}
+                >
+                  {char}
+                </span>
               </span>
             ))}
           </div>
@@ -223,10 +226,14 @@ export default function SplashScreen() {
           {CHARS_CONSTRUCTION.map((char, i) => (
             <span
               key={i}
-              ref={(el) => { charsConstrRefs.current[i] = el; }}
-              style={{ display: "inline-block" }}
+              style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
             >
-              {char}
+              <span
+                ref={(el) => { charsConstrRefs.current[i] = el; }}
+                style={{ display: "inline-block" }}
+              >
+                {char}
+              </span>
             </span>
           ))}
         </div>
