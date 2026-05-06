@@ -10,6 +10,7 @@ import { SITE, PROJECTS, PROCESS_STEPS_V2, Project } from "@/lib/constants";
 import Lightbox from "@/components/gallery/Lightbox";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
 import { AnimationController } from "@/utils/animationControl";
+import { CompassSilhouette } from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -709,9 +710,19 @@ function PortfolioCTA() {
     <section
       ref={sectionRef}
       data-section="portfolio-cta"
-      className="bg-black py-28 lg:py-40"
+      className="relative bg-black py-28 lg:py-40"
       style={{ position: "relative", zIndex: 2 }}
     >
+      {/* Compass silhouette — right side, slow drift */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 hidden lg:block"
+        style={{ width: "160px", opacity: 0.10, color: "white" }}
+      >
+        <div style={{ animation: "compassSpinInner 90s linear infinite" }}>
+          <CompassSilhouette style={{ width: "100%", height: "auto" }} />
+        </div>
+      </div>
       <div
         ref={hairlineRef}
         className="max-w-7xl mx-auto px-6 lg:px-12 mb-14"
