@@ -3,9 +3,22 @@
 :root {
   --background: #ffffff;
   --foreground: #000000;
+
+  /* V2 primary accent — maroon (Joe's iteration, May 2026) */
+  --color-accent: #7B2D26;
+  --color-accent-light: #9A3F38;
+  --color-accent-dark: #5C1F1A;
+
+  /* Copper retained as fallback per client approval */
+  --color-accent-fallback: #B87333;
   --accent-copper: #B87333;
   --accent-copper-light: #D4A574;
   --accent-copper-dark: #8B5A2B;
+
+  /* Gradient tokens for splash + dark-section depth */
+  --gradient-splash-vertical: linear-gradient(180deg, #000000 0%, #0A0A0A 60%, #1A1A1A 100%);
+  --gradient-section-depth: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%);
+
   --home-hero-height: 200vh;
 }
 
@@ -149,7 +162,7 @@ body {
   font-family: var(--font-family-numbers), monospace;
   font-weight: 700;
   font-size: clamp(4rem, 6vw, 6rem);
-  color: #B87333;
+  color: var(--color-accent);
   opacity: 0.12;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -230,7 +243,7 @@ h1, h2, h3 {
   top: 0;
   left: 0;
   height: 2px;
-  background: var(--accent-copper);
+  background: var(--color-accent);
   z-index: 1000;
   transform-origin: left;
   transform: scaleX(0);
@@ -248,12 +261,23 @@ h1, h2, h3 {
   }
 }
 
-/* ── Copper accent utilities ─────────────────────────────────────────────── */
+/* ── Copper accent utilities (retained as fallback) ──────────────────────── */
 .text-copper {
   color: var(--accent-copper);
 }
 .border-copper {
   border-color: var(--accent-copper);
+}
+
+/* ── V2 primary accent utilities (maroon) ────────────────────────────────── */
+.text-accent {
+  color: var(--color-accent);
+}
+.border-accent {
+  border-color: var(--color-accent);
+}
+.bg-accent {
+  background-color: var(--color-accent);
 }
 
 /* ── Lenis smooth scroll ─────────────────────────────────────────────────── */
@@ -354,7 +378,7 @@ html.lenis body {
 
 /* ── Copper glow — hover shimmer for copper-accent elements ──────────────── */
 .copper-glow:hover {
-  box-shadow: 0 0 20px rgba(184, 115, 51, 0.2);
+  box-shadow: 0 0 20px rgba(123, 45, 38, 0.2);
 }
 
 /* ── Skip to main content — accessibility ────────────────────────────────── */
@@ -364,8 +388,8 @@ html.lenis body {
   left: 1rem;
   z-index: 9999;
   padding: 0.75rem 1.5rem;
-  background: #B87333;
-  color: #000;
+  background: var(--color-accent);
+  color: #fff;
   font-weight: 600;
   font-size: 0.875rem;
   transition: top 0.2s;
@@ -385,7 +409,7 @@ html.lenis body {
 .service-card-border-wrap::after {
   content: '';
   position: absolute;
-  background: var(--accent-copper);
+  background: var(--color-accent);
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -420,7 +444,7 @@ html.lenis body {
   top: 0;
   width: 1px;
   height: 100%;
-  background: var(--accent-copper);
+  background: var(--color-accent);
   opacity: 0;
   transform: scaleY(0);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;

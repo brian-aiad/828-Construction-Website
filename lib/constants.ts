@@ -84,6 +84,22 @@ export const SERVICES = [
   },
 ];
 
+// ── Accent tokens ─────────────────────────────────────────────────────────
+export const ACCENTS = {
+  maroon: {
+    DEFAULT: '#7B2D26',
+    light: '#9A3F38',
+    dark: '#5C1F1A',
+  },
+  copper: {
+    DEFAULT: '#B87333',
+    light: '#D4A574',
+    dark: '#8B5A2B',
+  },
+} as const;
+
+export const ACCENT_PRIMARY = ACCENTS.maroon.DEFAULT;
+
 // ── Project types ─────────────────────────────────────────────────────────
 export type ProjectCategory = "ADU Construction" | "Remediation" | "Consulting";
 
