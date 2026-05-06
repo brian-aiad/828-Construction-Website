@@ -428,18 +428,19 @@ async function main() {
     // ── Step 3: Route tests ────────────────────────────────────────────────
     console.log('\n[3/4] Testing routes...\n');
 
-    let testCount = 0;
+    let routeCount = 0;
     for (const route of routes) {
+      // Periodic server restart every 4 routes (8 tests) to release memory pressure
+      // Only restart between routes, not mid-viewport loop
+      routeCount++;
+      if (!FAST && routeCount > 1 && (routeCount - 1) % 4 === 0) {
+        stopServer();
+        await sleep(2000);
+        await startServer();
+      }
       for (const vp of viewports) {
         // Verify server is still up; restart if it crashed (Windows OOM guard)
         if (!FAST) await ensureServer();
-        // Periodic server restart every 8 tests to release memory pressure
-        testCount++;
-        if (!FAST && testCount > 0 && testCount % 8 === 0) {
-          stopServer();
-          await sleep(800);
-          await startServer();
-        }
         process.stdout.write(`      ${route.name.padEnd(15)} @ ${vp.name.padEnd(8)}  `);
         const result = await testRoute(browser, route, vp);
         routeResults.push(result);
