@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE, SERVICES } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -356,24 +357,43 @@ function ServicesAsymmetricTiles() {
         }
       });
 
-      // Hover: image scale + maroon bar (Fix 20: explicit removeEventListener)
+      // Hover: image scale + maroon bar + magnetic tile shift (Fix 20: explicit removeEventListener)
       if (window.matchMedia("(hover: hover)").matches) {
         tileRefs.current.forEach((tile, i) => {
           if (!tile) return;
           const imgInner = imgInnerRefs.current[i];
           const bar = barRefs.current[i];
+
+          // Magnetic quickTo for tile
+          const xTo = window.matchMedia("(pointer: coarse)").matches
+            ? null
+            : gsap.quickTo(tile, "x", { duration: 0.7, ease: "expo.out" });
+          const yTo = window.matchMedia("(pointer: coarse)").matches
+            ? null
+            : gsap.quickTo(tile, "y", { duration: 0.7, ease: "expo.out" });
+
           const onEnter = () => {
             if (imgInner) gsap.to(imgInner, { scale: 1.05, duration: 0.7, ease: "power2.out" });
             if (bar) gsap.to(bar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
           };
+          const onMove = (e: MouseEvent) => {
+            if (!xTo || !yTo) return;
+            const rect = tile.getBoundingClientRect();
+            xTo((e.clientX - (rect.left + rect.width / 2)) * 0.12);
+            yTo((e.clientY - (rect.top + rect.height / 2)) * 0.12);
+          };
           const onLeave = () => {
             if (imgInner) gsap.to(imgInner, { scale: 1.0, duration: 0.7, ease: "power2.out" });
             if (bar) gsap.to(bar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
+            if (xTo) xTo(0);
+            if (yTo) yTo(0);
           };
           tile.addEventListener("mouseenter", onEnter);
+          tile.addEventListener("mousemove", onMove);
           tile.addEventListener("mouseleave", onLeave);
           hoverCleanups.push(() => {
             tile.removeEventListener("mouseenter", onEnter);
+            tile.removeEventListener("mousemove", onMove);
             tile.removeEventListener("mouseleave", onLeave);
           });
         });
@@ -392,9 +412,19 @@ function ServicesAsymmetricTiles() {
     <section
       ref={sectionRef}
       data-section="services-tiles"
-      className="bg-black py-16 lg:py-20"
+      className="relative bg-black py-16 lg:py-20"
       style={{ position: "relative", zIndex: 2 }}
     >
+      {/* Construction-line silhouette — low-opacity drafting backdrop */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+      >
+        <ConstructionLineSilhouette
+          className="w-full max-w-6xl"
+          style={{ color: "white", opacity: 0.04 }}
+        />
+      </div>
       {/* Section header */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 mb-10">
         <div
