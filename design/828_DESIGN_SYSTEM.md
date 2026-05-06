@@ -1,6 +1,6 @@
 # 828 Construction — Design System
 > Reverse-engineered from the completed homepage. Canonical reference for all page work.
-> Last updated: 2026-04-19
+> Last updated: 2026-05-06 (V2 — maroon accent, motion vocabulary from Joseph's iteration call)
 
 ---
 
@@ -8,18 +8,32 @@
 
 Zero navy, blue, slate, or purple anywhere in the codebase.
 
-| Token | Hex | Usage |
-|---|---|---|
-| `black` | `#000000` | Section backgrounds (Services, mobile menu) |
-| `near-black` | `#0a0a0a` | Projects section bg, hero plate fallbacks |
-| `dark` | `#111111` | Card backgrounds, image placeholders |
-| `white` | `#ffffff` | Body bg, CTAs, headline text on dark |
-| `copper` | `#B87333` | Accent ONLY — hairlines, seams, active states, hover triggers |
-| `copper-light` | `#D4A574` | CSS var defined, not yet used |
-| `copper-dark` | `#8B5A2B` | CSS var defined, not yet used |
+### V2 Accent System (May 2026)
 
-### Copper budget: 5–10% of any composition
-Copper appears as: 1–2px hairlines, hover bars, ghost number tint (opacity 0.08–0.12), seam lines (opacity 0.4–0.5), scroll progress bar, active nav underline.
+**Primary accent: Maroon** — Joseph's explicit ask ("like a maroon, like a darker red... almost like that iPhone that's supposed to come out, just dark, dark red").
+**Secondary/fallback: Copper** — retained per client approval ("I'm not necessarily offended by [copper]. If it stays, it's not that big of a deal.").
+
+| Token | Hex | CSS var | Usage |
+|---|---|---|---|
+| `black` | `#000000` | — | Section backgrounds (Services, mobile menu) |
+| `near-black` | `#0a0a0a` | — | Projects section bg, hero plate fallbacks |
+| `dark` | `#111111` | — | Card backgrounds, image placeholders |
+| `white` | `#ffffff` | — | Body bg, CTAs, headline text on dark |
+| `maroon` | `#7B2D26` | `--color-accent` | **PRIMARY accent** — hairlines, hovers, scroll bar, form focus, active nav |
+| `maroon-light` | `#9A3F38` | `--color-accent-light` | Maroon highlight variant |
+| `maroon-dark` | `#5C1F1A` | `--color-accent-dark` | Maroon shadow variant |
+| `copper` | `#B87333` | `--color-accent-fallback` / `--accent-copper` | Secondary/fallback — warm photo overlays, moments where maroon would clash |
+| `copper-light` | `#D4A574` | `--accent-copper-light` | Copper highlight variant |
+| `copper-dark` | `#8B5A2B` | `--accent-copper-dark` | Copper shadow variant |
+
+**Rule:** Use `var(--color-accent)` for all new accent references. Use `var(--accent-copper)` only for explicit copper fallback moments.
+
+### Accent budget: 80/10/10 (Joe's explicit ratio)
+- 80% black/white composition
+- ~10% gray ramp
+- Under 10% maroon accent touches
+
+Maroon appears as: 1–2px hairlines, hover bars, ghost number tint (opacity 0.08–0.12), seam lines (opacity 0.4–0.5), scroll progress bar, active nav underline, form focus ring, button outlines.
 
 ### Gray ramp (Tailwind)
 Used for text on white backgrounds and subtle borders. Never drop below `text-gray-400` for body text (a11y).
@@ -56,8 +70,18 @@ Used for text on white backgrounds and subtle borders. Never drop below `text-gr
 | `font-labels` | `--font-space-mono` | Space Mono | All labels, nav, CTAs, tags, captions |
 | `font-body` | `--font-inter` | Inter | Body paragraphs, descriptions |
 
+### V2 Typography Hierarchy (May 2026)
+
+**Bold display font reservation rule:** `font-display font-bold` is reserved EXCLUSIVELY for:
+1. The "828 Construction" wordmark (header + splash)
+2. Main hero anchor headlines (the primary h1 on each page)
+
+Everything else uses lighter weights (`font-display font-normal`, `font-display font-light`, or body font).
+
+Joe's exact words: "I only want the business logo, I guess we can say, in that bold font. Everything else is gonna be kind of in a more slimmed down font."
+
 ### Headline type scale
-All display headlines use `font-display font-bold tracking-tight`.
+All display headlines use `font-display font-bold tracking-tight` for hero-level only. Sub-headings and section heads use `font-display font-normal` or `font-display` at reduced weight.
 
 | Context | clamp() value | Approx px at 1440w |
 |---|---|---|
@@ -408,6 +432,12 @@ RootLayout
 - Hidden on scroll down > 300px, revealed on scroll up
 - Mobile: hamburger → fullscreen `bg-black` overlay with `font-display font-bold text-3xl` nav links
 
+### V2 Header Rules (May 2026)
+- **Wordmark:** "828 Construction" on ONE LINE, left side. Bold. Never stacked to two lines.
+- **Location + timestamp:** RIGHT corner (was left — this is a change from V1).
+- **CTA:** Single "BOOK CALL" button. On click/hover: asterisk dropdown reveals `(213) 828-2388`.
+- Transparent → black on scroll: KEEP. Joe explicitly approved.
+
 ---
 
 ## 10. Accessibility Standards
@@ -441,7 +471,45 @@ All project images: `object-cover`, inside 115%-tall parallax wrapper.
 
 ---
 
-## 12. Anti-patterns (What NOT to Do)
+## 12. V2 Motion Vocabulary (May 2026)
+
+Derived from the four YouTube reference videos Joseph sent. These expand the existing animation catalog — they don't replace it.
+
+### From Nicolai Palmkvist — GSAP scroll-trigger (video on scroll)
+- Scroll-scrubbed image sequences / video elements for hero or featured project sections.
+- Reserve this technique for once real photos arrive. Placeholder: standard parallax scrub.
+
+### From Nicolai Palmkvist — Apple-style redesign
+- Sell the feeling, identity, and transformation BEFORE pushing to a product/service page.
+- Hero copy and About page story should land the brand before any CTA appears.
+- "Spacing and restraint" — negative space is intentional, not a gap to fill.
+
+### From Self-Made Web Designer — 6 Tips
+1. **Anchor headline font** — one statement font for the brand wordmark + hero; contrasting lighter font everywhere else (already locked per V2 typography rule).
+2. **"Star of the show" element** — tie a signature visual motif to the brand story (e.g., the "828" ghost watermark, the copper/maroon hairline).
+3. **Visual rhyming** — repeat shapes/motifs across pages to build coherence (e.g., the horizontal hairline rule, the ghost number treatment).
+4. **Subtle depth via texture/noise** — glass-morphism, noise overlay, layered shadows. Site must NOT feel flat. Use `.grain-overlay` (already global) + section-level glass treatment on dark panels.
+5. **Hierarchy through opacity** — not just size. Use `white/60`, `white/40`, `white/20` progression to guide eye without hierarchy requiring bold text.
+6. **Push past first idea** — always test a radical variation before shipping. The first layout is the expected layout.
+
+### From Create a Pro Website — premium
+- Gradient backgrounds with depth (not flat black/white cuts).
+- Generous whitespace / breathing room between sections.
+- Color cohesion — every element traces to the palette.
+- Motion on scroll that rewards curiosity: elements should reveal as the user explores.
+
+### Concrete V2 additions (site-wide)
+| Pattern | Description | Pages |
+|---|---|---|
+| **Rolling marquee** | Horizontal text strip, pause on hover, 60s duration, gap 4rem | Footer top, About area names, possibly portfolio tags |
+| **Asterisk/plus dropdown** | Expand/collapse reveal — FAQ answers, "Book Call" phone reveal | Header, ADU/Remediation/Consulting FAQ sections |
+| **Glass/blur depth** | `backdrop-blur-md` + `bg-white/5` on dark overlapping panels | Hero overlays, Contact split sections |
+| **Asymmetric hero split** | Photo ~55-60% one side, copy ~40-45% other side with negative space | Home hero, Contact hero, story sections |
+| **Mixed-size grid** | Non-uniform card sizing (1 large + 2-3 smaller) | Portfolio gallery, About area photos |
+
+---
+
+## 13. Anti-patterns (What NOT to Do)
 
 - No navy, blue, slate, or cool tones anywhere
 - No font-family mixing within a single element

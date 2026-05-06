@@ -706,6 +706,179 @@ This pattern is already used correctly in `ServicesPreview.tsx`. Apply it to any
 
 ---
 
+---
+
+### Pattern: Asterisk Dropdown Reveal (V2)
+
+**Usage:** "Book Call" CTA in header (reveals phone number) AND FAQ expanders on ADU / Remediation / Consulting service pages.
+
+**Interaction:**
+- Trigger: click or hover on the anchor element
+- Reveals: content below the trigger with a vertical slide-down
+- Icon: `+` or `*` rotates 45° to `×` when open
+
+**Implementation pattern:**
+```tsx
+const [open, setOpen] = useState(false);
+
+<button
+  onClick={() => setOpen(!open)}
+  aria-expanded={open}
+  className="flex items-center gap-2 font-labels text-[10px] tracking-[0.18em] uppercase"
+>
+  BOOK CALL
+  <span
+    style={{ display: 'inline-block', transition: 'transform 0.3s ease', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}
+    aria-hidden="true"
+  >+</span>
+</button>
+
+{open && (
+  <div
+    style={{ overflow: 'hidden', animation: 'dropReveal 0.35s cubic-bezier(0.16,1,0.3,1) both' }}
+  >
+    {/* revealed content */}
+  </div>
+)}
+
+// globals.css:
+// @keyframes dropReveal {
+//   from { opacity: 0; transform: translateY(-8px); }
+//   to   { opacity: 1; transform: translateY(0); }
+// }
+```
+
+**FAQ variant:** Same pattern, with `aria-controls` pointing to the answer panel. Answer panel is `max-height: 0 → auto` via CSS transition, or `height: 0 → auto` via GSAP `to({ height: 'auto' })`.
+
+---
+
+### Pattern: Rolling Marquee (V2)
+
+**Usage:** Footer top strip, About page area names ("South Bay Native" section), possibly portfolio category tags.
+
+**Implementation:**
+```tsx
+// Two identical strips side-by-side, animating translateX(-50%)
+<div className="overflow-hidden" aria-hidden="true">
+  <div
+    style={{
+      display: 'flex',
+      width: 'max-content',
+      animation: 'marqueeScroll 60s linear infinite',
+    }}
+    // Pause on hover:
+    onMouseEnter={e => (e.currentTarget.style.animationPlayState = 'paused')}
+    onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
+  >
+    {[0, 1].map(i => (
+      <div key={i} className="flex items-center gap-16 pr-16">
+        {items.map((item, j) => (
+          <span key={j} className="font-labels text-[11px] tracking-[0.22em] uppercase whitespace-nowrap">
+            {item}
+          </span>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+**Direction:** Default left-to-right (positive motion). For footer second strip: reverse (`animationDirection: 'reverse'` or negative translateX).
+**Speed:** 60s default. Slow = intentional — the content should be readable, not a blur.
+**Gap between items:** Use separator dots: `<span className="w-1 h-1 rounded-full bg-white/20 mx-4" aria-hidden="true" />` — NOT accent color as background (see Fix 8).
+**CSS:** Uses existing `@keyframes marqueeScroll` in globals.css.
+**Accessibility:** Wrap in `aria-hidden="true"` container. The actual content (city names, etc.) is also present in a visually-hidden semantic list if meaningful.
+
+---
+
+### Pattern: Glass / Depth Overlay (V2)
+
+**Usage:** Dark sections that risk feeling flat. Adds glass-morphism depth to overlapping cards, hero overlays, and panel transitions.
+
+**Principle:** The `.grain-overlay` fixed element (globals.css, opacity 0.028) is already site-wide. These patterns add LOCAL depth — per-section glass effects.
+
+**Glass panel:**
+```tsx
+<div
+  className="absolute inset-0 rounded-none"
+  style={{
+    backdropFilter: 'blur(12px)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+  }}
+  aria-hidden="true"
+/>
+```
+
+**Noise texture on a dark section background:**
+```tsx
+// Use .blueprint-grid or a noise SVG layer at low opacity (0.03–0.05)
+// DO NOT increase grain-overlay opacity globally — keep it at 0.028
+<div
+  className="absolute inset-0 pointer-events-none"
+  style={{
+    backgroundImage: 'url("data:image/svg+xml,...")', // same fractalNoise as grain-overlay
+    backgroundSize: '256px 256px',
+    opacity: 0.04,
+    mixBlendMode: 'overlay',
+  }}
+  aria-hidden="true"
+/>
+```
+
+**Gradient section dividers (replace hard cuts):**
+```css
+/* Dark section that should "breathe" into the next */
+.section-depth-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 120px;
+  background: var(--gradient-section-depth);
+  pointer-events: none;
+}
+```
+
+**Rule:** Glass effects are subtle — `opacity < 0.08` for blur panels, never a frosted-glass bank-of-fog effect. Think "dimension", not "translucency".
+
+---
+
+### Pattern: Asymmetric Hero Split (V2)
+
+**Usage:** Home hero, Contact hero (Section 1), Contact Section 3 (mission split), story sections.
+
+**Principle:** Photo occupies one side (~55-60% at desktop), text/copy occupies the other (~40-45%) with intentional negative space. Joe: "I like something that has a little bit more space right here, you know, for language."
+
+**Desktop layout:**
+```tsx
+<section className="relative min-h-screen grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
+  {/* Image side — 60% */}
+  <div className="relative overflow-hidden order-2 lg:order-1">
+    <Image fill className="object-cover" alt="..." />
+  </div>
+
+  {/* Copy side — 40%, with padding that creates negative space */}
+  <div className="relative flex flex-col justify-center px-12 lg:px-16 xl:px-24 order-1 lg:order-2">
+    {/* Top aligned: eyebrow label */}
+    {/* Center: headline + body */}
+    {/* Bottom: CTA */}
+  </div>
+</section>
+```
+
+**Breakpoint behavior:**
+- Mobile: stacks vertically. Image on top (full width, `aspect-[4/3]`), copy below.
+- Tablet (768–1024px): Consider 50/50 split or continue vertical stack.
+- Desktop (1024px+): 60/40 or 55/45 split. The "space" in the copy side is the design — resist the urge to fill it.
+
+**Line divider variant (Contact Section 3):**
+```tsx
+// Visible divider line down the center:
+<div className="absolute top-0 bottom-0 left-1/2 w-px bg-white/10" aria-hidden="true" />
+```
+
+---
+
 ## Animation Vocabulary
 
 Techniques referenced in component comments:
