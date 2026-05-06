@@ -430,10 +430,10 @@ async function main() {
 
     let routeCount = 0;
     for (const route of routes) {
-      // Periodic server restart every 4 routes (8 tests) to release memory pressure
-      // Only restart between routes, not mid-viewport loop
       routeCount++;
-      if (!FAST && routeCount > 1 && (routeCount - 1) % 4 === 0) {
+      // Restart server after every 4th route to prevent memory accumulation.
+      // routeCount 5, 9, 13... → restarts between route 4→5, 8→9, 12→13.
+      if (!FAST && routeCount > 1 && routeCount % 4 === 1) {
         stopServer();
         await sleep(2000);
         await startServer();
