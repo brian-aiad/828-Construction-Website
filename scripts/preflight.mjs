@@ -90,6 +90,18 @@ async function startServer() {
 
   // Extra buffer for GSAP/Lenis module loads
   await sleep(2500);
+
+  // Warm up server with a HEAD request so the first Playwright test doesn't hit cold-start timeout
+  await new Promise((resolve) => {
+    const req = http.get(`http://localhost:${PORT}/`, { timeout: 8000 }, (res) => {
+      res.resume(); // drain
+      resolve();
+    });
+    req.on('error', () => resolve());
+    req.on('timeout', () => { req.destroy(); resolve(); });
+  });
+  // Give server a moment to cache the initial page response
+  await sleep(1500);
 }
 
 function stopServer() {
@@ -436,6 +448,14 @@ async function main() {
 
     // ── Step 4: Cross-page navigation test ───────────────────────────────
     console.log('\n[4/4] Special tests...\n');
+
+    // Restart server before special tests to avoid accumulated memory/resource exhaustion
+    if (!FAST) {
+      stopServer();
+      await sleep(1000);
+      await startServer();
+      process.stdout.write('      (server restarted for special tests)\n');
+    }
 
     process.stdout.write('      Nav / SplitType cleanup        ');
     const navResult = await runNavTest(browser);
