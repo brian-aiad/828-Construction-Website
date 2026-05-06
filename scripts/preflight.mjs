@@ -388,7 +388,7 @@ async function main() {
       rmSync('.next', { recursive: true, force: true });
     } catch { /* no .next dir, normal */ }
     try {
-      execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' } });
+      execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=3072' } });
       console.log('      ✅ Build succeeded');
     } catch {
       console.error('      ❌ Build FAILED — stopping preflight');
