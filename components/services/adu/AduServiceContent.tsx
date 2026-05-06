@@ -8,6 +8,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import GlassCard from "@/components/system/GlassCard";
+import { ArchOutlineSilhouette } from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,6 +77,7 @@ function BookCallDropdown({ dark = true }: { dark?: boolean }) {
 function AduHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const imgWrapRef = useRef<HTMLDivElement>(null);
+  const silhouetteRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
@@ -86,6 +89,14 @@ function AduHero() {
         gsap.to(imgWrapRef.current, {
           yPercent: -12, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
+      }
+
+      // Silhouette parallax — desktop only
+      if (silhouetteRef.current && AnimationController.shouldAnimate()) {
+        gsap.to(silhouetteRef.current, {
+          yPercent: -30, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
         });
       }
     }, sectionRef);
@@ -135,6 +146,15 @@ function AduHero() {
             style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
             aria-hidden="true"
           />
+          {/* Architectural silhouette — parallax depth layer */}
+          <div
+            ref={silhouetteRef}
+            aria-hidden="true"
+            className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
+            style={{ width: "25%", zIndex: 10, color: "white", opacity: 0.13, willChange: "transform" }}
+          >
+            <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
+          </div>
         </div>
 
         {/* ── Copy side (40%) ── */}
@@ -338,9 +358,11 @@ function AduNeed() {
                         transition: "max-height 0.4s cubic-bezier(0.16,1,0.3,1)",
                       }}
                     >
-                      <p className="text-gray-500 text-sm leading-relaxed pb-6 pr-8">
-                        {item.a}
-                      </p>
+                      <GlassCard tone="light" className="p-4 mt-2 mb-4">
+                        <p className="text-gray-600 text-sm leading-relaxed pr-4">
+                          {item.a}
+                        </p>
+                      </GlassCard>
                     </div>
                   </div>
                 );
@@ -646,9 +668,11 @@ function AduAcronym() {
                 >
                   {item.word}
                 </span>
-                <p className="text-gray-400 leading-relaxed italic" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
-                  {item.definition}
-                </p>
+                <GlassCard tone="dark" className="p-5 mt-3">
+                  <p className="text-gray-400 leading-relaxed italic" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
+                    {item.definition}
+                  </p>
+                </GlassCard>
               </div>
             </div>
           ))}
