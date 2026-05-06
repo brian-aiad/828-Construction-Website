@@ -87,11 +87,6 @@ function ConsultingHero() {
       }
 
       if (silhouetteRef.current && AnimationController.shouldAnimate()) {
-        // Idle float via GSAP (not CSS animation — prevents LCP interference)
-        gsap.to(silhouetteRef.current, {
-          yPercent: 6, duration: 5, ease: "sine.inOut", repeat: -1, yoyo: true,
-        });
-        // Scroll parallax
         gsap.to(silhouetteRef.current, {
           yPercent: -30, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
@@ -144,12 +139,12 @@ function ConsultingHero() {
             aria-hidden="true"
           />
 
-          {/* BlueprintCornerSilhouette — parallax depth layer (GSAP-animated, no CSS animation) */}
+          {/* BlueprintCornerSilhouette — depth layer */}
           <div
             ref={silhouetteRef}
             aria-hidden="true"
-            className="absolute bottom-0 right-0 pointer-events-none hidden lg:block"
-            style={{ width: "40vw", color: "white", opacity: 0.18 }}
+            className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
+            style={{ width: "28%", color: "white", opacity: 0.14 }}
           >
             <BlueprintCornerSilhouette style={{ width: "100%", height: "auto" }} />
           </div>
@@ -179,17 +174,17 @@ function ConsultingHero() {
             style={{ fontSize: "clamp(2.8rem, 5vw, 6rem)" }}
           >
             <span className="block overflow-hidden">
-              <span className="hero-line-animate block" style={{ animationDelay: "0.4s" }}>
+              <span className="hero-line-animate block" style={{ animationDelay: "0.1s" }}>
                 Delivering
               </span>
             </span>
             <span className="block overflow-hidden">
-              <span className="hero-line-animate block" style={{ animationDelay: "0.52s" }}>
+              <span className="hero-line-animate block" style={{ animationDelay: "0.22s" }}>
                 considerate
               </span>
             </span>
             <span className="block overflow-hidden">
-              <span className="hero-line-animate block" style={{ animationDelay: "0.64s" }}>
+              <span className="hero-line-animate block" style={{ animationDelay: "0.34s" }}>
                 solutions.
               </span>
             </span>

@@ -180,11 +180,6 @@ function RemediationHero() {
       }
 
       if (silhouetteRef.current && AnimationController.shouldAnimate()) {
-        // Idle float via GSAP (not CSS animation)
-        gsap.to(silhouetteRef.current, {
-          yPercent: 6, duration: 5, ease: "sine.inOut", repeat: -1, yoyo: true,
-        });
-        // Scroll parallax
         gsap.to(silhouetteRef.current, {
           yPercent: -30, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
@@ -253,18 +248,12 @@ function RemediationHero() {
             aria-hidden="true"
           />
 
-          {/* ConstructionLineSilhouette — 65vw, opacity 0.55, idle float */}
+          {/* ConstructionLineSilhouette — depth layer */}
           <div
             ref={silhouetteRef}
             aria-hidden="true"
-            className="absolute pointer-events-none hidden lg:block"
-            style={{
-              width: "40vw",
-              right: 0,
-              bottom: 0,
-              color: "white",
-              opacity: 0.18,
-            }}
+            className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
+            style={{ width: "28%", color: "white", opacity: 0.16 }}
           >
             <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
           </div>
