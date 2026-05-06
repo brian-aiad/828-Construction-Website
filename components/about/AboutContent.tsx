@@ -8,6 +8,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE, FOUNDING_YEAR, SERVICE_AREAS } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import GlassCard from "@/components/system/GlassCard";
+import { ConstructionLineSilhouette, CompassSilhouette } from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -238,9 +240,19 @@ function AboutStory() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white py-24 lg:py-36"
+      className="relative bg-white py-24 lg:py-36"
       data-section="story"
     >
+      {/* Compass silhouette — desktop right margin, slow spin */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block"
+        style={{ width: "120px", opacity: 0.10, color: "black" }}
+      >
+        <div style={{ animation: "compassSpinInner 60s linear infinite" }}>
+          <CompassSilhouette style={{ width: "100%", height: "auto" }} />
+        </div>
+      </div>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
 
@@ -370,10 +382,20 @@ function AboutPrinciples() {
   return (
     <section
       ref={sectionRef}
-      className="bg-black py-24 lg:py-32"
+      className="relative bg-black py-24 lg:py-32"
       data-section="principles"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      {/* Construction line silhouette — full-width drafting backdrop */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+      >
+        <ConstructionLineSilhouette
+          className="w-full max-w-5xl"
+          style={{ color: "white", opacity: 0.04 }}
+        />
+      </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section header */}
         <div className="mb-12 lg:mb-16">
           <p className="font-labels text-[10px] text-white/40 tracking-[0.25em] uppercase mb-4">
@@ -557,10 +579,12 @@ function AboutCRAFT() {
                   </span>
                   <div style={{ height: 1, width: 24, background: "var(--color-accent)", opacity: 0.5 }} aria-hidden="true" />
                 </div>
-                <p className="font-body text-white/50 leading-relaxed max-w-prose"
-                  style={{ fontSize: "clamp(0.88rem, 1.25vw, 0.97rem)" }}>
-                  {item.body}
-                </p>
+                <GlassCard tone="dark" className="p-6 mt-3">
+                  <p className="font-body text-white/50 leading-relaxed max-w-prose"
+                    style={{ fontSize: "clamp(0.88rem, 1.25vw, 0.97rem)" }}>
+                    {item.body}
+                  </p>
+                </GlassCard>
               </div>
             </div>
           ))}
@@ -622,16 +646,49 @@ function AboutSouthBay() {
         </div>
       </div>
 
-      {/* Rolling marquee — per PATTERNS.md Rolling Marquee pattern */}
+      {/* Two-layer marquee — background slower + reversed, foreground full speed */}
       <div
-        className="overflow-hidden border-t border-b border-white/[0.06] py-5"
+        className="relative overflow-hidden border-t border-b border-white/[0.06] py-5"
         aria-hidden="true"
       >
+        {/* Background layer — slower, reversed, lower opacity */}
         <div
           style={{
             display: "flex",
             width: "max-content",
-            animation: "marqueeScroll 35s linear infinite",
+            animation: "marqueeScroll 80s linear infinite reverse",
+            opacity: 0.35,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100%",
+            alignItems: "center",
+          }}
+        >
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex items-center gap-0 pr-0">
+              {SERVICE_AREAS.map((area, j) => (
+                <span key={`${copy}-${j}`} className="flex items-center">
+                  <span className="font-labels text-[11px] text-white/60 tracking-[0.22em] uppercase whitespace-nowrap px-6">
+                    {area}
+                  </span>
+                  <span
+                    className="w-1 h-1 rounded-full"
+                    style={{ background: "var(--color-accent)", opacity: 0.4 }}
+                    aria-hidden="true"
+                  />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* Foreground layer — existing speed, full opacity */}
+        <div
+          style={{
+            display: "flex",
+            width: "max-content",
+            animation: "marqueeScroll 40s linear infinite",
+            position: "relative",
           }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused"; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.animationPlayState = "running"; }}
