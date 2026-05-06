@@ -5,6 +5,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FooterRevealWrapper from "@/components/layout/FooterRevealWrapper";
 import ScrollProgress from "@/components/layout/ScrollProgress";
+import GrainOverlay from "@/components/system/GrainOverlay";
+import RightScrollProgress from "@/components/system/RightScrollProgress";
 import LenisProvider from "@/components/providers/LenisProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
 import { Analytics } from "@vercel/analytics/react";
@@ -91,9 +93,9 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        {/* Grain texture — fixed overlay, pointer-events none */}
-        <div className="grain-overlay" aria-hidden="true" />
+        <GrainOverlay />
         <ScrollProgress />
+        <RightScrollProgress />
         {/* Custom cursor — hidden on touch devices via CSS */}
         <CustomCursor />
         <LenisProvider>
