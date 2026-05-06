@@ -157,7 +157,7 @@ export default function CustomCursor() {
         }}
       />
 
-      {/* Lagging ring — transitions to copper on image hover */}
+      {/* Lagging ring — transitions to copper on image hover (upgraded 32→36px base) */}
       <div
         ref={ringRef}
         aria-hidden="true"
@@ -167,11 +167,11 @@ export default function CustomCursor() {
           top: 0, left: 0,
           zIndex: 9998,
           pointerEvents: "none",
-          width: 32, height: 32,
-          marginLeft: -16, marginTop: -16,
+          width: 36, height: 36,
+          marginLeft: -18, marginTop: -18,
           borderRadius: "50%",
           border: "1.5px solid rgba(255,255,255,0.65)",
-          transition: "width 0.25s ease, height 0.25s ease, border-color 0.25s ease, opacity 0.25s ease",
+          transition: "width 0.25s ease, height 0.25s ease, margin 0.25s ease, border-color 0.25s ease, opacity 0.25s ease",
         }}
       />
     </>
