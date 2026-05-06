@@ -13,7 +13,16 @@ export default function CustomCursor() {
   const copperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    // Apply custom cursor class to body on pointer-fine devices (before animation gate)
+    if (window.matchMedia("(pointer: fine)").matches) {
+      document.body.classList.add("has-custom-cursor");
+    }
+
+    if (!AnimationController.shouldAnimate()) {
+      return () => {
+        document.body.classList.remove("has-custom-cursor");
+      };
+    }
 
     const dot = dotRef.current;
     const ring = ringRef.current;
@@ -49,26 +58,32 @@ export default function CustomCursor() {
       rafId = requestAnimationFrame(animate);
     };
 
-    // Default: white ring
+    // Default: white ring (upgraded 32→36px)
     const resetRing = () => {
-      ring.style.width = "32px";
-      ring.style.height = "32px";
+      ring.style.width = "36px";
+      ring.style.height = "36px";
+      ring.style.marginLeft = "-18px";
+      ring.style.marginTop = "-18px";
       ring.style.borderColor = "rgba(255,255,255,0.65)";
       ring.style.opacity = "1";
     };
 
-    // Hover over links/buttons: ring grows slightly
+    // Hover over links/buttons: ring grows (upgraded 44→64px)
     const onInteractive = () => {
-      ring.style.width = "44px";
-      ring.style.height = "44px";
+      ring.style.width = "64px";
+      ring.style.height = "64px";
+      ring.style.marginLeft = "-32px";
+      ring.style.marginTop = "-32px";
       ring.style.borderColor = "rgba(255,255,255,0.9)";
       ring.style.opacity = "1";
     };
 
-    // Hover over images: ring becomes maroon and expands
+    // Hover over images: ring becomes maroon and expands (upgraded 52→70px)
     const onImage = () => {
-      ring.style.width = "52px";
-      ring.style.height = "52px";
+      ring.style.width = "70px";
+      ring.style.height = "70px";
+      ring.style.marginLeft = "-35px";
+      ring.style.marginTop = "-35px";
       ring.style.borderColor = "var(--color-accent)";
       ring.style.opacity = "0.85";
     };
@@ -90,6 +105,7 @@ export default function CustomCursor() {
     });
 
     return () => {
+      document.body.classList.remove("has-custom-cursor");
       window.removeEventListener("mousemove", handleMove);
       cancelAnimationFrame(rafId);
       links.forEach((el) => {
