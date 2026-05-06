@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { gsap } from "gsap";
 import { SITE, SERVICES } from "@/lib/constants";
 
 // ─── Footer V2 ──────────────────────────────────────────────────────────────
@@ -28,20 +29,73 @@ const MARQUEE_TEXT = [
 export default function Footer() {
   const [callOpen, setCallOpen] = useState(false);
   const year = new Date().getFullYear();
+  const anchorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    if (!anchor || window.matchMedia("(pointer: coarse)").matches) return;
+
+    const xTo = gsap.quickTo(anchor, "x", { duration: 1.2, ease: "expo.out" });
+    const yTo = gsap.quickTo(anchor, "y", { duration: 1.2, ease: "expo.out" });
+
+    const footer = anchor.closest("footer");
+    if (!footer) return;
+
+    const onMove = (e: MouseEvent) => {
+      const rect = anchor.getBoundingClientRect();
+      xTo((e.clientX - (rect.left + rect.width / 2)) * 0.03);
+      yTo((e.clientY - (rect.top + rect.height / 2)) * 0.02);
+    };
+    const onLeave = () => { xTo(0); yTo(0); };
+
+    footer.addEventListener("mousemove", onMove);
+    footer.addEventListener("mouseleave", onLeave);
+
+    return () => {
+      footer.removeEventListener("mousemove", onMove);
+      footer.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
 
   return (
     <footer className="bg-black text-white" data-section="footer">
 
-      {/* ── 1. Rolling marquee — hover pause ────────────────────────────── */}
+      {/* ── 1. Rolling marquee — two layers ────────────────────────────── */}
       <div
-        className="overflow-hidden py-3 border-t border-white/[0.06]"
+        className="relative overflow-hidden py-3 border-t border-white/[0.06]"
         aria-hidden="true"
       >
+        {/* Background layer — slower, reversed, lower opacity */}
+        <div
+          className="flex items-center gap-10"
+          style={{
+            width: "max-content",
+            animation: "marqueeScroll 70s linear infinite reverse",
+            opacity: 0.3,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100%",
+            alignItems: "center",
+          }}
+        >
+          {[...MARQUEE_TEXT, ...MARQUEE_TEXT].map((item, i) => (
+            <span
+              key={i}
+              className="flex items-center gap-10 font-labels text-[9px] text-white/25 tracking-[0.28em] uppercase whitespace-nowrap"
+            >
+              {item}
+              <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "var(--color-accent)", opacity: 0.5 }} />
+            </span>
+          ))}
+        </div>
+        {/* Foreground layer — existing speed, full opacity */}
         <div
           className="flex items-center gap-10"
           style={{
             width: "max-content",
             animation: "marqueeScroll 38s linear infinite",
+            position: "relative",
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused";
@@ -193,9 +247,9 @@ export default function Footer() {
             {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
           </address>
 
-          {/* License badge with maroon border */}
+          {/* License badge with maroon border + glow on hover */}
           <div
-            className="inline-flex items-center gap-3 px-3 py-2"
+            className="license-badge inline-flex items-center gap-3 px-3 py-2"
             style={{ border: "1px solid var(--color-accent)", borderLeftWidth: 3 }}
           >
             <span className="font-labels text-[9px] text-gray-500 tracking-[0.2em] uppercase">
@@ -278,13 +332,14 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── 5. 828 wordmark anchor — decorative, large ───────────────────── */}
+      {/* ── 5. 828 wordmark anchor — decorative, large, magnetic ─────────── */}
       <div
         className="relative overflow-hidden"
         style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
         aria-hidden="true"
       >
         <div
+          ref={anchorRef}
           className="px-6 lg:px-8 py-0 leading-none select-none pointer-events-none font-display font-bold text-white"
           style={{
             fontSize: "clamp(6rem, 20vw, 18rem)",
@@ -292,6 +347,7 @@ export default function Footer() {
             letterSpacing: "-0.04em",
             lineHeight: 0.85,
             transform: "translateY(12%)",
+            willChange: "transform",
           }}
         >
           828
