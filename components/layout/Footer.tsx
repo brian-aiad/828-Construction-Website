@@ -60,43 +60,35 @@ export default function Footer() {
   return (
     <footer className="bg-black text-white" data-section="footer">
 
-      {/* ── 1. Rolling marquee — two layers ────────────────────────────── */}
+      {/* ── 1. Rolling marquee — two layers (v3: large bg + foreground size contrast) ── */}
       <div
-        className="relative overflow-hidden py-3 border-t border-white/[0.06]"
+        className="overflow-hidden py-3 border-t border-white/[0.06] relative"
         aria-hidden="true"
       >
-        {/* Background layer — slower, reversed, lower opacity */}
+        {/* Background layer — 2.2rem font, slow (70s), reversed, 0.18 opacity — visual depth */}
         <div
-          className="flex items-center gap-10"
-          style={{
-            width: "max-content",
-            animation: "marqueeScroll 70s linear infinite reverse",
-            opacity: 0.3,
-            position: "absolute",
-            top: 0,
-            left: 0,
-            height: "100%",
-            alignItems: "center",
-          }}
+          className="absolute inset-0 flex items-center"
+          style={{ overflow: "hidden" }}
         >
-          {[...MARQUEE_TEXT, ...MARQUEE_TEXT].map((item, i) => (
-            <span
-              key={i}
-              className="flex items-center gap-10 font-labels text-[9px] text-white/25 tracking-[0.28em] uppercase whitespace-nowrap"
-            >
-              {item}
-              <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "var(--color-accent)", opacity: 0.5 }} />
-            </span>
-          ))}
+          <div
+            style={{ display: "flex", width: "max-content", animation: "marqueeScroll 70s linear infinite reverse", opacity: 0.18 }}
+          >
+            {[...MARQUEE_TEXT, ...MARQUEE_TEXT].map((item, i) => (
+              <span
+                key={i}
+                className="font-labels text-white tracking-[0.22em] uppercase whitespace-nowrap px-10"
+                style={{ fontSize: "2.2rem" }}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
-        {/* Foreground layer — existing speed, full opacity */}
+
+        {/* Foreground layer — 9px (original), 38s, full opacity, pause-on-hover */}
         <div
-          className="flex items-center gap-10"
-          style={{
-            width: "max-content",
-            animation: "marqueeScroll 38s linear infinite",
-            position: "relative",
-          }}
+          className="relative flex items-center gap-10"
+          style={{ width: "max-content", animation: "marqueeScroll 38s linear infinite" }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLDivElement).style.animationPlayState = "paused";
           }}
