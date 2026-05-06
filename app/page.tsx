@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
-import HeroSections from "@/components/home/HeroSections";
-import BuildingScience from "@/components/home/BuildingScience";
-import ServicesPreview from "@/components/home/ServicesPreview";
-import HomeInterstitial from "@/components/home/HomeInterstitial";
-import ProjectsPreview from "@/components/home/ProjectsPreview";
-import HomeCTA from "@/components/home/HomeCTA";
-import HomeMarquee from "@/components/home/HomeMarquee";
+import HeroV2 from "@/components/home/HeroV2";
+import ServicesPreviewV2 from "@/components/home/ServicesPreviewV2";
+import AboutPreview from "@/components/home/AboutPreview";
 import SplashScreen from "@/components/home/SplashScreen";
-import SectionDivider from "@/components/layout/SectionDivider";
 import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
+
+// TODO: FOOTER_V2_PENDING — Footer rebuild (rolling marquee + broken-color
+// sections + schedule CTA) is Page 9 in the V2 build sequence.
+// The existing Footer component renders below via LenisProvider layout shell.
 
 export const metadata: Metadata = {
   title: "828 Construction | ADU, Remediation & Consulting - Torrance, CA",
   description:
-    "828 Construction brings 25+ years of building science expertise to Torrance and South Bay. Specializing in ADU construction, remediation, and consulting. CA License #1141119.",
+    "828 Construction brings 20+ years of building science expertise to Torrance and South Bay. Specializing in ADU construction, remediation, and consulting. CA License #1141119.",
   alternates: {
     canonical: SITE.url,
   },
@@ -53,30 +52,17 @@ export default function HomePage() {
 
       <JsonLd data={jsonLd} />
 
-      {/* Hero — 200vh with sticky parallax panel */}
-      <HeroSections />
+      {/* Section 1: Hero — asymmetric photo/copy split */}
+      <HeroV2 />
 
-      {/* Hero → Differentiator: black-to-white — WHY before WHAT */}
-      <SectionDivider opacity={0.6} />
-      <BuildingScience />
+      {/* Section 2: Services Preview — asymmetric 3-card grid */}
+      <ServicesPreviewV2 />
 
-      {/* Differentiator → Services: white-to-black, copper seam */}
-      <SectionDivider opacity={0.5} />
-      <ServicesPreview />
+      {/* Section 3: About Preview — compressed teaser block */}
+      <AboutPreview />
 
-      {/* Services → Interstitial → Projects */}
-      <HomeInterstitial />
-
-      {/* Services → Projects: black-to-dark, copper seam */}
-      <SectionDivider opacity={0.5} />
-      <ProjectsPreview />
-
-      {/* Projects → CTA: dark-to-black, copper seam */}
-      <SectionDivider opacity={0.6} />
-      <HomeCTA />
-
-      {/* Second marquee — reversed direction, slower, above footer */}
-      <HomeMarquee />
+      {/* Section 4: Footer — TODO: FOOTER_V2_PENDING (see above) */}
+      {/* Existing footer renders via layout shell */}
     </>
   );
 }
