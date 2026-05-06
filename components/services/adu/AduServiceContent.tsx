@@ -178,7 +178,7 @@ function AduHero() {
             ref={silhouetteRef}
             aria-hidden="true"
             className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
-            style={{ width: "28%", color: "white", opacity: 0.16 }}
+            style={{ width: "28%", zIndex: 10, color: "white", opacity: 0.16, willChange: "transform" }}
           >
             <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
           </div>
@@ -220,9 +220,7 @@ function AduHero() {
           </h1>
 
           <div className="flex items-center gap-4 flex-wrap">
-            <div className="pulse-glow">
-              <BookCallDropdown />
-            </div>
+            <BookCallDropdown />
             <Link
               href="/contact"
               className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"
@@ -1067,9 +1065,7 @@ function AduStartHere() {
             </p>
 
             <div className="start-el flex items-center gap-4 flex-wrap">
-              <div className="pulse-glow">
-                <BookCallDropdown />
-              </div>
+              <BookCallDropdown />
               <Link
                 href="/contact"
                 className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"

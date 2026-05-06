@@ -144,7 +144,7 @@ function ConsultingHero() {
             ref={silhouetteRef}
             aria-hidden="true"
             className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
-            style={{ width: "28%", color: "white", opacity: 0.14 }}
+            style={{ width: "25%", zIndex: 10, color: "white", opacity: 0.14, willChange: "transform" }}
           >
             <BlueprintCornerSilhouette style={{ width: "100%", height: "auto" }} />
           </div>
@@ -191,9 +191,7 @@ function ConsultingHero() {
           </h1>
 
           <div className="flex items-center gap-4 flex-wrap">
-            <div className="pulse-glow">
-              <BookCallDropdown />
-            </div>
+            <BookCallDropdown />
             <Link
               href="/contact"
               className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"
@@ -610,9 +608,7 @@ function ConsultingCTA() {
               Precision begins with understanding. Let&rsquo;s explore what your project requires.
             </p>
             <div className="cta-el flex items-center gap-4 flex-wrap">
-              <div className="pulse-glow">
-                <BookCallDropdown />
-              </div>
+              <BookCallDropdown />
               <Link
                 href="/contact"
                 className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"
