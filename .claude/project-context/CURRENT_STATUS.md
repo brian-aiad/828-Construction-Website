@@ -2,6 +2,63 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## V2.5 FIX — Homepage Cinematic Overhaul (2026-05-06)
+
+**Session:** Prompt 1 of the cinematic fix series. 10 feature commits + 12 preflight stability commits. All 16/16 routes passing. Branch: `main`.
+
+### What shipped this session
+
+**Phase 0 — Context rewire (same session, earlier):**
+- `docs/828_CLIENT_BRIEF_V2.md` — full V2 brief from Joseph iteration call
+- `lib/constants.ts` — `ACCENTS` + `ACCENT_PRIMARY` tokens added
+- `app/globals.css` — `--color-accent: #7B2D26` (maroon primary), `--color-accent-fallback: #B87333` (copper retained), gradient tokens, global accent refs normalized
+- `design/828_DESIGN_SYSTEM.md` — V2 palette dual-token, typography hierarchy rule, V2 header rules, motion vocabulary section
+- `design/PATTERNS.md` — 4 new patterns: asterisk dropdown, rolling marquee, glass/depth overlay, asymmetric hero split
+- `CLAUDE.md` — V2 section at top with locked decisions + rebuild order
+
+**V2 page rebuilds (separate terminals, same session):**
+All 9 pages rebuilt per V2 brief. See page status table below.
+
+**V2.5 elevation pass (same session):**
+- `components/system/GrainOverlay.tsx` — SVG fractalNoise component (replaces CSS div)
+- `components/system/RightScrollProgress.tsx` — right-edge vertical maroon progress bar
+- `components/system/GlassCard.tsx` — `backdrop-blur-xl` + maroon hairline top
+- `components/system/silhouettes/` — 6 architectural SVGs: Hardhat, Level, BlueprintCorner, ArchOutline, ConstructionLine, Compass
+- `lib/hooks/useMagnetic.ts` — GSAP `quickTo` magnetic hook, touch-guarded
+- `lib/hooks/useSectionScrub.ts` — pin+scrub abstraction hook
+- `lib/hooks/useTilt.ts` — GSAP rotateX/Y 3D tilt hook
+- `docs/828_V2_5_ELEVATION.md` — elevation plan reference
+- `app/template.tsx` — cinematic curtain page transition (black drop + maroon hairline swipe)
+- `components/portfolio/PortfolioCinemaRow.tsx` — horizontal pin-scroll cinema strip
+- `components/system/RevealImage.tsx` — image reveal on viewport entry
+- All 9 pages: silhouette parallax overlays, glass cards on definitions/FAQs, 2-layer marquees, magnetic CTAs, maroon cursor
+- Custom scrollbar maroon, `::selection` maroon, GrainOverlay 0.055, Lenis 1.4s duration
+
+**Homepage Cinematic Overhaul (this prompt):**
+
+| File | Change |
+|------|--------|
+| `SplashScreen.tsx` | `rotateX: 88→0` 3-channel reveal, maroon radial ignition pulse, curtain-wipe exit (not fade) |
+| `Header.tsx` | Sub-nav marquee strip (35s, always-on), BOOK CALL `pulse-glow` CSS animation, magnetic 0.55 |
+| `HeroV2.tsx` | Mesh gradient blobs (idle drift, `sine.inOut` yoyo), `ArchOutlineSilhouette` 65vw/0.55 opacity + idle float + -85% parallax, photo scale 1.10, copy block -20%, headline rotateX on load (delay 0.6s), headline scroll fade-out |
+| `ServicesPreviewV2.tsx` | `useTilt(10)` 3D tilt on cursor, z:40 lift + maroon ghost shadow on hover, rotateY entry animation |
+| `AboutPreview.tsx` | SplitType clipPath curtain-wipe on headline, `ConstructionLineSilhouette` 0.08 opacity -40% parallax, magnetic CTA |
+| `Footer.tsx` | Background marquee layer: 2.2rem font / 0.18 opacity / 70s reversed; foreground 9px / full opacity — visually distinct |
+| `CustomCursor.tsx` | `.has-custom-cursor` body class on `pointer:fine` — hides native cursor; ring 36px/64px hover |
+| `globals.css` | `@keyframes pulseGlow` (book-call-cta), `.has-custom-cursor * { cursor: none }`, `.book-call-cta` class |
+
+**Preflight stability hardening (Windows OOM prevention):**
+- Pre-build `.next` wipe, NODE_OPTIONS 4096MB, periodic server restart between routes, 1 screenshot/route, chromium `--disable-dev-shm-usage` flag, 1.2s test gaps
+
+### Above-the-fold idle motion (5-second test after Prompt 1)
+All 6/6 visible without scrolling:
+- Mesh gradient blobs drift
+- Silhouette Y-bob (sine.inOut yoyo)
+- Timestamp ticks every second
+- Sub-header marquee runs continuously
+- Headline chars reveal on load (delay 0.6s)
+- BOOK CALL pulse-glow ring
+
 ## V2.5 FIX — Prompt 3 Complete (2026-05-06)
 
 Portfolio + Services Landing + Global polish shipped and pushed to `origin/main`.

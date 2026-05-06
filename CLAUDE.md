@@ -114,17 +114,17 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 
 | Page | Status | Date |
 |------|--------|------|
-| Splash | V2 rebuild — vertical gradient bg (--gradient-splash-vertical), "828 Construction" ONE LINE Space Grotesk Bold, y:28 slide-up reveal (NS Builders style), maroon underline under "828", sessionStorage gate | 2026-05-06 |
-| Home (`/`) | V2 rebuild — 4 sections only (Hero+Services+About Preview+Footer). Asymmetric HeroV2 60/40 split, ServicesPreviewV2 3-card asymmetric grid, AboutPreview compressed teaser. HERO_COPY_PENDING TODO in place. | 2026-05-06 |
-| About (`/about`) | V2 rebuild — 6 sections: Hero (photo bg) + Story (short copy, FOUNDING_YEAR=2004 from constants) + 3 Principles (maroon numerals) + CRAFT acronym (watermark xPercent drift scrub — page signature) + South Bay marquee (SERVICE_AREAS) + CTA. V1 timeline/how-we-think/proof-of-work deleted. | 2026-05-06 |
-| Services (`/services`) | V2 gateway rebuild — asymmetric 3-tile mosaic (60/40 ADU left + stacked right), three-vector clip entry signature, BOOK CALL dropdown CTA, header dropdown now vertical stack per Joseph's ask | 2026-05-06 |
-| Services/ADU (`/services/adu`) | V2 rebuild — Perf=99, A11y=96. 5 sections: asymmetric hero (adu-exterior-new.jpg) + Need+FAQ accordion (4 questions, asterisk-dropdown) + 5-step process (maroon numerals) + ADU acronym (watermark backdrop — page signature) + Start Here (BOOK CALL dropdown + 4 what-happens-after steps). Static route overrides [slug]. | 2026-05-06 |
-| Services/Remediation (`/services/remediation`) | V2 rebuild — Perf=100, A11y=96. 5 sections: asymmetric hero + Need+FAQ accordion (3 mold questions) + 4-step process + Why 828 short copy + equipment showcase (Flair E8/F277 MR — photo placeholders TODO) + Start Here "Begin the path to renewal". | 2026-05-06 |
-| Services/Consulting (`/services/consulting`) | V2 rebuild — Perf=99, A11y=96. 4 sections: asymmetric hero + Need+5 benefits + Q&A 3 large-format visible prompts (NOT accordion — page signature) + CTA "Engineered solutions tailored to your project". | 2026-05-06 |
+| Splash | V2.5 Cinematic — rotateX 88→0 3-channel reveal, maroon radial ignition pulse on entry, curtain-wipe exit (clipPath inset). V2 base: vertical gradient, ONE LINE wordmark, maroon underline, sessionStorage gate. | 2026-05-06 |
+| Home (`/`) | V2.5 Cinematic Fix 1 — mesh gradient idle drift (HeroV2), silhouette 65vw/0.55/idle float/-85% parallax, photo 1.10 scale, copy -20% parallax, headline rotateX load-entry + scroll fade-out, 3D tilt service cards, SplitType curtain-wipe about preview, 2-layer footer marquee (size contrast). Sub-header marquee strip always-on. BOOK CALL pulse-glow + magnetic 0.55. Native cursor hidden via .has-custom-cursor. HERO_COPY_PENDING. | 2026-05-06 |
+| About (`/about`) | V2 + V2.5 elevation — 6 sections: hero + story + 3 principles (ConstructionLine backdrop) + CRAFT acronym (glass cards, watermark drift) + South Bay 2-layer parallax marquee + CTA. Compass silhouette in story margin. V1 timeline/how-we-think deleted. | 2026-05-06 |
+| Services (`/services`) | V2 + V2.5 elevation — asymmetric 3-tile gateway, 3D tilt (useTilt 10deg), maroon ghost shadow, ConstructionLine silhouette backdrop, magnetic CTAs. | 2026-05-06 |
+| Services/ADU (`/services/adu`) | V2 + V2.5 elevation — visual hero (ArchOutline silhouette 0.55), Need+FAQ glass cards, 5-step process, ADU acronym glass definitions, Start Here BOOK CALL. | 2026-05-06 |
+| Services/Remediation (`/services/remediation`) | V2 + V2.5 elevation — visual hero (ConstructionLine silhouette), Need+FAQ glass, 4-step process, Why 828, equipment placeholder TODO. | 2026-05-06 |
+| Services/Consulting (`/services/consulting`) | V2 + V2.5 elevation — visual hero (BlueprintCorner silhouette), 5 benefits, 3 Q&A, CTA. | 2026-05-06 |
 | Process (`/process`) | DELETED — 308 redirect to /portfolio | 2026-05-06 |
-| Contact (`/contact`) | v3 polish — Perf=99, A11y=96, vertical step connector line with copper gradient | 2026-04-23 |
-| Portfolio (`/portfolio`) | V2 — renamed from /projects, merged process content. Hero + 14-photo mixed-size gallery (6 rows, asymmetric grid) + 5-step build philosophy + BOOK CALL CTA | 2026-05-06 |
-| Footer (site-wide) | V2 rebuild — rolling marquee (38s, hover-pause) + BOOK CALL dropdown CTA + broken-color info blocks (email/phone/address) + maroon license badge + 828 wordmark anchor + Est. 2004 from constants | 2026-05-06 |
+| Contact (`/contact`) | ON HOLD — form infrastructure (email/DNS/Resend) pending Joe | — |
+| Portfolio (`/portfolio`) | V2 + V2.5 elevation — renamed from /projects, 14-photo gallery, cinema row, 5-step process, compass silhouette CTA. Real photos pending Joe mid-May. | 2026-05-06 |
+| Footer (site-wide) | V2 + V2.5 elevation — 2-layer marquee (2.2rem bg reversed + 9px fg, visually distinct), magnetic 828 anchor, license badge glow, BOOK CALL dropdown CTA, broken-color info blocks. | 2026-05-06 |
 
 ## Project context
 

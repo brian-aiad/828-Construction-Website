@@ -2,6 +2,50 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-05-06 — V2 full rebuild + V2.5 elevation + Homepage Cinematic Overhaul
+
+### Phase 0 — Context rewire
+- `docs/828_CLIENT_BRIEF_V2.md` created — full V2 brief from Joseph call
+- Maroon `#7B2D26` set as primary accent in tokens, CSS vars, and design docs
+- Copper `#B87333` retained as `--color-accent-fallback` per Joe's approval
+- `CLAUDE.md` rewritten with V2 section at top (locked decisions, page rebuild order)
+- `design/828_DESIGN_SYSTEM.md` updated: V2 palette, typography hierarchy, header rules, motion vocabulary from 4 reference videos
+- `design/PATTERNS.md` appended: asterisk dropdown, rolling marquee, glass/depth, asymmetric split
+
+### V2 page rebuilds (separate terminals)
+All 9 pages rebuilt per `docs/828_CLIENT_BRIEF_V2.md`. Key changes:
+- Splash: NS Builders vertical gradient, one-line wordmark, slide-up reveal
+- Home: stripped to Hero + Services Preview + About Preview + Footer; BOOK CALL asterisk dropdown replaces old CTAs; asymmetric split hero; timestamp+location moved to right
+- About: 6 sections — story (short version), 3 principles, CRAFT acronym watermark, South Bay marquee, CTA
+- ADU/Remediation/Consulting: visual hero + need + FAQ + process + acronym + start-here template
+- Services landing: asymmetric 3-tile gateway
+- Portfolio: `/portfolio` route (was `/projects`); Process page deleted, content merged in
+- Footer: rolling marquee + broken-color blocks + schedule CTA
+
+### V2.5 elevation pass
+New infrastructure:
+- `components/system/` — GrainOverlay, RightScrollProgress, GlassCard, 6 SVG silhouettes
+- `lib/hooks/` — useMagnetic, useSectionScrub, useTilt
+- `app/template.tsx` — cinematic curtain page transition
+- Custom scrollbar (maroon), `::selection` (maroon), GrainOverlay 0.055
+
+Per-page upgrades:
+- All 9 pages: silhouette parallax overlays, glass cards, 2-layer marquees, magnetic CTAs
+- CRAFT/ADU/Remediation acronym sections: GlassCard definitions
+- Service heroes: per-page silhouette (Arch/ConstructionLine/Blueprint)
+- Footer: magnetic 828 anchor, license badge glow
+
+### Homepage Cinematic Overhaul (Prompt 1)
+- `SplashScreen.tsx`: `rotateX: 88→0` 3-channel reveal + maroon radial ignition + curtain-wipe exit
+- `Header.tsx`: sub-nav marquee strip (35s always-on) + BOOK CALL `pulseGlow` animation + magnetic 0.55
+- `HeroV2.tsx`: mesh gradient idle drift + silhouette 65vw/0.55/float/-85% parallax + photo 1.10 + copy -20% + headline rotateX load entry + scroll fade-out
+- `ServicesPreviewV2.tsx`: useTilt(10) 3D cards + z:40 lift + maroon shadow + rotateY entry
+- `AboutPreview.tsx`: SplitType clipPath curtain-wipe + ConstructionLine silhouette 0.08 + magnetic CTA
+- `Footer.tsx`: 2-layer marquee size contrast (2.2rem bg vs 9px fg, 0.18 vs 1.0 opacity)
+- `CustomCursor.tsx`: `.has-custom-cursor` body class hides native cursor on `pointer:fine`
+- `globals.css`: `@keyframes pulseGlow`, `.book-call-cta`, `.has-custom-cursor * { cursor: none }`
+- Preflight hardened for Windows OOM: .next wipe pre-build, NODE_OPTIONS 4096MB, chromium flags
+
 ## 2026-04-29 — Four-workstream quality pass
 
 ### WS1: Visual QA + 25+ years fix (site-wide)
