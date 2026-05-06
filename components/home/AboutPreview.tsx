@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
 import { FOUNDING_YEAR } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
+import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V2 About Preview — compressed ~1 viewport height teaser.
+// V3 About Preview — SplitType char clip-reveal on headline + ConstructionLineSilhouette backdrop.
 // Glass/depth overlay per PATTERNS.md to prevent flat look.
 // Pulls from FOUNDING_YEAR constant (2004 — never hardcoded).
 
@@ -18,6 +21,10 @@ export default function AboutPreview() {
   const sectionRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
   const textRefs = useRef<(HTMLElement | null)[]>([]);
+  const silhouetteParallaxRef = useRef<HTMLDivElement>(null);
+  const splitRef = useRef<SplitType | null>(null);
+  const splitFrameRef = useRef(-1);
+  const ctaMagRef = useMagnetic(0.45) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -26,7 +33,9 @@ export default function AboutPreview() {
     const ctx = gsap.context(() => {
       // Set initial states (Fix 14)
       const textEls = textRefs.current.filter(Boolean) as HTMLElement[];
-      gsap.set(textEls, { y: 24, opacity: 0 });
+      // Exclude headline (index 1) from generic stagger — handled by SplitType below
+      const nonHeadlineEls = textEls.filter((_, i) => i !== 1);
+      gsap.set(nonHeadlineEls, { y: 24, opacity: 0 });
       if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(8% 0 8% 0)" });
 
       if (!AnimationController.shouldAnimate()) {
@@ -45,8 +54,8 @@ export default function AboutPreview() {
         });
       }
 
-      // Text reveals scrub-tied per element
-      textEls.forEach((el, i) => {
+      // Text reveals scrub-tied per element (non-headline)
+      nonHeadlineEls.forEach((el, i) => {
         gsap.to(el, {
           y: 0, opacity: 1,
           duration: 0.8,
@@ -60,9 +69,47 @@ export default function AboutPreview() {
           delay: i * 0.08,
         });
       });
+
+      // Headline SplitType char clip-reveal (curtain wipe, not fade)
+      const headlineEl = textRefs.current[1] as HTMLHeadingElement | null;
+      if (headlineEl) {
+        splitFrameRef.current = requestAnimationFrame(() => {
+          if (!headlineEl.isConnected) return;
+          splitRef.current = new SplitType(headlineEl, { types: "chars,words" });
+          const chars = splitRef.current.chars ?? [];
+          gsap.fromTo(chars,
+            { clipPath: "inset(0 100% 0 0)", x: 12 },
+            {
+              clipPath: "inset(0 0% 0 0)",
+              x: 0,
+              stagger: 0.022,
+              duration: 0.85,
+              ease: "power4.out",
+              scrollTrigger: { trigger: headlineEl, start: "top 80%", once: true },
+            }
+          );
+          gsap.set(headlineEl, { opacity: 1 });
+        });
+      }
+
+      // Silhouette parallax
+      if (silhouetteParallaxRef.current) {
+        gsap.to(silhouetteParallaxRef.current, {
+          yPercent: -40,
+          ease: "none",
+          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.5 },
+        });
+      }
     }, sectionRef);
 
-    return () => { try { ctx.revert(); } catch {} };
+    return () => {
+      cancelAnimationFrame(splitFrameRef.current);
+      if (splitRef.current && textRefs.current[1]?.isConnected) {
+        try { splitRef.current.revert(); } catch {}
+      }
+      splitRef.current = null;
+      try { ctx.revert(); } catch {}
+    };
   }, []);
 
   return (
@@ -83,6 +130,16 @@ export default function AboutPreview() {
           mixBlendMode: "overlay",
         }}
       />
+
+      {/* Architectural line silhouette — parallax depth */}
+      <div
+        ref={silhouetteParallaxRef}
+        aria-hidden="true"
+        className="absolute left-[-5%] top-1/2 -translate-y-1/2 pointer-events-none hidden lg:block"
+        style={{ width: "55%", opacity: 0.08, color: "white", zIndex: 1 }}
+      >
+        <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
+      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 h-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[min(90vh,700px)]">
@@ -149,15 +206,18 @@ export default function AboutPreview() {
               aria-hidden="true"
             />
 
-            <Link
-              ref={(el) => { textRefs.current[4] = el as HTMLAnchorElement; }}
-              href="/about"
-              className="inline-flex items-center gap-2 font-labels text-[11px] text-white/50 tracking-[0.18em] uppercase hover:text-white transition-colors group border-b border-white/15 hover:border-white/40 pb-1 self-start"
-              style={{ opacity: 0 }}
-            >
-              Learn more
-              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-            </Link>
+            {/* Magnetic CTA wrapper */}
+            <div ref={ctaMagRef} style={{ display: "inline-block", alignSelf: "flex-start" }}>
+              <Link
+                ref={(el) => { textRefs.current[4] = el as HTMLAnchorElement; }}
+                href="/about"
+                className="cta-pulse inline-flex items-center gap-2 font-labels text-[11px] text-white/50 tracking-[0.18em] uppercase hover:text-white transition-colors group border-b border-white/15 hover:border-white/40 pb-1"
+                style={{ opacity: 0 }}
+              >
+                Learn more
+                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </Link>
+            </div>
           </div>
 
         </div>
