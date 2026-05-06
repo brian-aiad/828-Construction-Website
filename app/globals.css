@@ -526,6 +526,12 @@ html.lenis body {
   transform-style: preserve-3d;
 }
 
+/* ── Silhouette idle float — service hero pages ─────────────────────────── */
+@keyframes silhouetteFloat {
+  0%, 100% { transform: translateY(-50%); }
+  50%       { transform: translateY(calc(-50% + 24px)); }
+}
+
 /* ── Maroon text selection ───────────────────────────────────────────────── */
 ::selection {
   background: var(--color-accent);

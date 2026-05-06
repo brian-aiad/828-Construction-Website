@@ -89,7 +89,7 @@ function RemediationHero() {
 
       if (silhouetteRef.current && AnimationController.shouldAnimate()) {
         gsap.to(silhouetteRef.current, {
-          yPercent: -30, ease: "none",
+          yPercent: -75, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
         });
       }
@@ -103,7 +103,7 @@ function RemediationHero() {
       ref={sectionRef}
       data-section="remediation-hero"
       className="relative"
-      style={{ minHeight: "100vh" }}
+      style={{ minHeight: "100vh", overflowX: "clip" }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] min-h-screen">
 
@@ -112,10 +112,26 @@ function RemediationHero() {
           className="relative overflow-hidden min-h-[55vh] lg:min-h-0 order-2 lg:order-1"
           aria-hidden="true"
         >
+          {/* Drifting mesh gradient — Remediation: maroon + slate gray + black */}
+          <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+            <div style={{
+              position: "absolute", borderRadius: "50%",
+              width: "70%", height: "80%", top: "-10%", right: "-5%",
+              background: "radial-gradient(ellipse, rgba(123,45,38,0.32) 0%, transparent 70%)",
+              animation: "meshDrift2 16s ease-in-out infinite", opacity: 0.35,
+            }} />
+            <div style={{
+              position: "absolute", borderRadius: "50%",
+              width: "55%", height: "60%", bottom: "0%", left: "-5%",
+              background: "radial-gradient(ellipse, rgba(60,65,70,0.28) 0%, transparent 70%)",
+              animation: "meshDrift3 16s ease-in-out infinite 5s", opacity: 0.35,
+            }} />
+          </div>
+
           <div
             ref={imgWrapRef}
             className="absolute inset-x-0"
-            style={{ top: "-7.5%", height: "115%" }}
+            style={{ top: "-7.5%", height: "115%", zIndex: 2 }}
           >
             <Image
               src="/images/projects/remediation-after.jpg"
@@ -128,29 +144,40 @@ function RemediationHero() {
               style={{ filter: "contrast(1.05) saturate(1.08)" }}
             />
           </div>
+
           <div
             className="absolute inset-y-0 right-0 w-1/3 lg:w-2/5"
-            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.9))" }}
+            style={{ background: "linear-gradient(to right, transparent, rgba(0,0,0,0.9))", zIndex: 3 }}
             aria-hidden="true"
           />
           <div
             className="absolute inset-x-0 bottom-0 h-1/3 lg:hidden"
-            style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
+            style={{ background: "linear-gradient(to bottom, transparent, #000)", zIndex: 3 }}
             aria-hidden="true"
           />
-          {/* Architectural silhouette — parallax depth layer */}
+
+          {/* ConstructionLineSilhouette — 65vw, opacity 0.55, idle float */}
           <div
             ref={silhouetteRef}
             aria-hidden="true"
-            className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
-            style={{ width: "25%", zIndex: 10, color: "white", opacity: 0.12, willChange: "transform" }}
+            className="absolute pointer-events-none hidden lg:block"
+            style={{
+              width: "65vw",
+              right: "-8vw",
+              top: "50%",
+              zIndex: 4,
+              color: "white",
+              opacity: 0.55,
+              willChange: "transform",
+              animation: "silhouetteFloat 5s ease-in-out infinite 1s",
+            }}
           >
             <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
           </div>
         </div>
 
         {/* ── Copy side (40%) ── */}
-        <div className="relative bg-black flex flex-col justify-center px-8 sm:px-12 lg:px-14 xl:px-20 py-20 lg:py-0 order-1 lg:order-2">
+        <div className="relative bg-black flex flex-col justify-center px-8 sm:px-12 lg:px-14 xl:px-20 py-20 lg:py-0 order-1 lg:order-2" style={{ zIndex: 5 }}>
           <Link
             href="/services"
             className="font-labels text-[10px] text-gray-500 tracking-[0.18em] uppercase hover:text-white transition-colors inline-flex items-center gap-1 mb-12 lg:mb-16"
@@ -173,19 +200,21 @@ function RemediationHero() {
             style={{ fontSize: "clamp(2.8rem, 5vw, 6rem)" }}
           >
             <span className="block overflow-hidden">
-              <span className="hero-line-animate block" style={{ animationDelay: "0.1s" }}>
+              <span className="hero-line-animate block" style={{ animationDelay: "0.4s" }}>
                 Complex conditions,
               </span>
             </span>
             <span className="block overflow-hidden">
-              <span className="hero-line-animate block" style={{ animationDelay: "0.22s" }}>
+              <span className="hero-line-animate block" style={{ animationDelay: "0.52s" }}>
                 refined expertise.
               </span>
             </span>
           </h1>
 
           <div className="flex items-center gap-4 flex-wrap">
-            <BookCallDropdown />
+            <div className="pulse-glow">
+              <BookCallDropdown />
+            </div>
             <Link
               href="/contact"
               className="font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-white/15 hover:border-[var(--color-accent)] hover:text-white transition-colors duration-200 pb-0.5"
