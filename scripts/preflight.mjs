@@ -417,7 +417,9 @@ async function main() {
     console.log(`\n[2/4] Fast mode — using server on :${PORT}`);
   }
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-gpu'],
+  });
   const routeResults = [];
 
   try {
