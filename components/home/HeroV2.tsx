@@ -13,9 +13,8 @@ import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V2 asymmetric hero: photo ~60% left, copy ~40% right with negative space.
-// TODO: HERO_COPY_PENDING — final copy from Joe.
-// TODO: swap patio-pool.jpg for ADU at-night photo when Joe sends it.
+// V3 hero: mesh gradient idle drift + silhouette 65vw/0.55 + aggressive parallax.
+// Headline fires on page load (delay 0.6s) with rotateX channel + scroll fade-out.
 
 export default function HeroV2() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -28,12 +27,25 @@ export default function HeroV2() {
   const copyBlockRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const splitFrameRef = useRef(-1);
-  const magneticRef = useMagnetic(0.3) as React.RefObject<HTMLDivElement>;
+  const magneticRef = useMagnetic(0.55) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     let mounted = true;
     const section = sectionRef.current;
     if (!section) return;
+
+    // Mesh gradient idle drift — runs always, regardless of shouldAnimate
+    const meshTl = gsap.timeline({ repeat: -1, yoyo: true });
+    meshTl.to(document.documentElement, {
+      duration: 14,
+      ease: "sine.inOut",
+      "--mesh-x-1": "60%",
+      "--mesh-y-1": "70%",
+      "--mesh-x-2": "30%",
+      "--mesh-y-2": "20%",
+      "--mesh-x-3": "80%",
+      "--mesh-y-3": "40%",
+    });
 
     const ctx = gsap.context(() => {
       // Set initial GSAP states here — never in JSX (Fix 14)
@@ -49,10 +61,10 @@ export default function HeroV2() {
         return;
       }
 
-      // Desktop: image scale-through-scroll
+      // Desktop: image scale-through-scroll (1.0 → 1.10)
       if (imgInnerRef.current) {
         gsap.to(imgInnerRef.current, {
-          scale: 1.08,
+          scale: 1.10,
           ease: "none",
           scrollTrigger: {
             trigger: section,
@@ -63,10 +75,10 @@ export default function HeroV2() {
         });
       }
 
-      // Floating silhouette parallax
+      // Floating silhouette parallax — 85% aggressive travel
       if (silhouetteRef.current) {
         gsap.to(silhouetteRef.current, {
-          yPercent: -22,
+          yPercent: -85,
           ease: "none",
           scrollTrigger: {
             trigger: section,
@@ -75,12 +87,20 @@ export default function HeroV2() {
             scrub: 1.2,
           },
         });
+        // Idle float animation
+        gsap.to(silhouetteRef.current, {
+          yPercent: 8,
+          duration: 4.5,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
       }
 
-      // Copy block subtle parallax
+      // Copy block aggressive parallax -20%
       if (copyBlockRef.current) {
         gsap.to(copyBlockRef.current, {
-          yPercent: -8,
+          yPercent: -20,
           ease: "none",
           scrollTrigger: {
             trigger: section,
@@ -104,30 +124,48 @@ export default function HeroV2() {
         }
       );
 
-      // Headline: SplitType chars slide up (Pattern C variant)
+      // Headline: fires on page load (delay 0.6s to clear splash exit) with rotateX channel
       if (headlineRef.current) {
         splitFrameRef.current = requestAnimationFrame(() => {
           if (!mounted || !headlineRef.current?.isConnected) return;
           splitRef.current = new SplitType(headlineRef.current!, { types: "words,chars" });
           const chars = splitRef.current.chars ?? [];
           if (chars.length) {
+            // Entry on load
             gsap.fromTo(chars,
-              { yPercent: 110, opacity: 0 },
+              { yPercent: 110, opacity: 0, rotateX: 50 },
               {
-                yPercent: 0, opacity: 1,
-                stagger: 0.025,
-                duration: 0.7,
+                yPercent: 0, opacity: 1, rotateX: 0,
+                stagger: 0.024,
+                duration: 1.1,
                 ease: "power3.out",
-                scrollTrigger: { trigger: headlineRef.current, start: "top 88%", once: true },
+                delay: 0.6,
+                onStart: () => {
+                  if (headlineRef.current) headlineRef.current.style.opacity = "1";
+                },
               }
             );
           }
+        });
+
+        // Scroll fade-out — headline lifts as user scrolls past
+        gsap.to(headlineRef.current, {
+          opacity: 0,
+          yPercent: -30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: "60% top",
+            scrub: 1,
+          },
         });
       }
     }, sectionRef);
 
     return () => {
       mounted = false;
+      meshTl.kill();
       cancelAnimationFrame(splitFrameRef.current);
       if (splitRef.current && headlineRef.current?.isConnected) {
         try { splitRef.current.revert(); } catch {}
@@ -143,6 +181,22 @@ export default function HeroV2() {
       className="relative min-h-screen grid grid-cols-1 lg:grid-cols-[3fr_2fr] overflow-hidden bg-black"
       aria-label="Hero"
     >
+      {/* Animated mesh gradient — idle motion, maroon/copper blobs */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 0,
+          opacity: 0.45,
+          mixBlendMode: "soft-light" as const,
+          background: `
+            radial-gradient(800px at var(--mesh-x-1, 20%) var(--mesh-y-1, 30%), rgba(123,45,38,0.65), transparent 60%),
+            radial-gradient(700px at var(--mesh-x-2, 70%) var(--mesh-y-2, 70%), rgba(184,115,51,0.4), transparent 55%),
+            radial-gradient(900px at var(--mesh-x-3, 50%) var(--mesh-y-3, 50%), rgba(255,255,255,0.07), transparent 65%)
+          `,
+        }}
+      />
+
       {/* Photo side — 60% width, full height */}
       <div className="relative overflow-hidden order-2 lg:order-1 min-h-[50vh] lg:min-h-screen">
         {/* Image wrapper — tall for parallax travel budget */}
@@ -174,12 +228,20 @@ export default function HeroV2() {
           aria-hidden="true"
         />
 
-        {/* Floating architectural silhouette — parallax depth layer */}
+        {/* Floating architectural silhouette — parallax depth layer, 65vw */}
         <div
           ref={silhouetteRef}
           aria-hidden="true"
-          className="absolute bottom-0 right-0 pointer-events-none hidden lg:block"
-          style={{ width: "28%", zIndex: 10, color: "white", opacity: 0.15, willChange: "transform" }}
+          className="absolute pointer-events-none hidden lg:block"
+          style={{
+            width: "65vw",
+            bottom: "-5%",
+            right: "-8%",
+            zIndex: 10,
+            color: "white",
+            opacity: 0.55,
+            willChange: "transform",
+          }}
         >
           <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
         </div>
@@ -211,12 +273,12 @@ export default function HeroV2() {
           </span>
         </div>
 
-        {/* Headline — bold display font (wordmark exception) */}
+        {/* Headline — bold display font with perspective for rotateX visibility */}
         {/* TODO: HERO_COPY_PENDING — final copy from Joe. Current: "Improving the unimproved." */}
         <h1
           ref={headlineRef}
           className="font-display font-bold leading-[0.92] tracking-tight text-white mb-8"
-          style={{ fontSize: "clamp(2.8rem, 5vw, 4.8rem)" }}
+          style={{ fontSize: "clamp(2.8rem, 5vw, 4.8rem)", perspective: "1000px" }}
         >
           Improving the unimproved.
         </h1>
