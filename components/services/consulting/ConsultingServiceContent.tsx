@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { BlueprintCornerSilhouette } from "@/components/system/silhouettes";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -71,6 +72,7 @@ function BookCallDropdown() {
 function ConsultingHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const imgWrapRef = useRef<HTMLDivElement>(null);
+  const silhouetteRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
@@ -81,6 +83,13 @@ function ConsultingHero() {
         gsap.to(imgWrapRef.current, {
           yPercent: -12, ease: "none",
           scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
+      }
+
+      if (silhouetteRef.current && AnimationController.shouldAnimate()) {
+        gsap.to(silhouetteRef.current, {
+          yPercent: -30, ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1.2 },
         });
       }
     }, sectionRef);
@@ -129,6 +138,15 @@ function ConsultingHero() {
             style={{ background: "linear-gradient(to bottom, transparent, #000)" }}
             aria-hidden="true"
           />
+          {/* Architectural silhouette — parallax depth layer */}
+          <div
+            ref={silhouetteRef}
+            aria-hidden="true"
+            className="absolute bottom-0 right-8 pointer-events-none hidden lg:block"
+            style={{ width: "25%", zIndex: 10, color: "white", opacity: 0.14, willChange: "transform" }}
+          >
+            <BlueprintCornerSilhouette style={{ width: "100%", height: "auto" }} />
+          </div>
         </div>
 
         {/* ── Copy side (40%) ── */}
