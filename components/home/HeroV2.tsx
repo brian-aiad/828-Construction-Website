@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -8,6 +8,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { ArchOutlineSilhouette } from "@/components/system/silhouettes";
+import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,8 +24,11 @@ export default function HeroV2() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const silhouetteRef = useRef<HTMLDivElement>(null);
+  const copyBlockRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const splitFrameRef = useRef(-1);
+  const magneticRef = useMagnetic(0.3) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     let mounted = true;
@@ -54,6 +59,34 @@ export default function HeroV2() {
             start: "top top",
             end: "bottom top",
             scrub: 1.5,
+          },
+        });
+      }
+
+      // Floating silhouette parallax
+      if (silhouetteRef.current) {
+        gsap.to(silhouetteRef.current, {
+          yPercent: -22,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1.2,
+          },
+        });
+      }
+
+      // Copy block subtle parallax
+      if (copyBlockRef.current) {
+        gsap.to(copyBlockRef.current, {
+          yPercent: -8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: "bottom top",
+            scrub: 1.0,
           },
         });
       }
@@ -140,10 +173,21 @@ export default function HeroV2() {
           className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent lg:hidden"
           aria-hidden="true"
         />
+
+        {/* Floating architectural silhouette — parallax depth layer */}
+        <div
+          ref={silhouetteRef}
+          aria-hidden="true"
+          className="absolute bottom-0 right-0 pointer-events-none hidden lg:block"
+          style={{ width: "28%", zIndex: 10, color: "white", opacity: 0.15, willChange: "transform" }}
+        >
+          <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
+        </div>
       </div>
 
       {/* Copy side — 40% width, centered with intentional negative space */}
       <div className="relative flex flex-col justify-center px-8 lg:px-12 xl:px-16 py-20 lg:py-0 order-1 lg:order-2 z-10">
+        <div ref={copyBlockRef} className="flex flex-col" style={{ willChange: "transform" }}>
 
         {/* Subtle maroon top hairline on copy side */}
         <div
@@ -187,18 +231,20 @@ export default function HeroV2() {
           ADU. Remediation. Consulting.
         </p>
 
-        {/* CTA row */}
+        {/* CTA row — magnetic wrapper on primary button */}
         <div
           ref={ctaRef}
           className="flex flex-col sm:flex-row items-start gap-4"
           style={{ opacity: 0 }}
         >
-          <Link
-            href="/services"
-            className="btn-shine btn-lift inline-block bg-white text-black px-7 py-3 font-labels text-[10px] tracking-[0.18em] uppercase"
-          >
-            Explore Services
-          </Link>
+          <div ref={magneticRef} style={{ display: "inline-block" }}>
+            <Link
+              href="/services"
+              className="btn-shine btn-lift inline-block bg-white text-black px-7 py-3 font-labels text-[10px] tracking-[0.18em] uppercase"
+            >
+              Explore Services
+            </Link>
+          </div>
           <Link
             href="/about"
             className="inline-block border border-white/25 text-white px-7 py-3 font-labels text-[10px] tracking-[0.18em] uppercase btn-outline-hover"
@@ -206,6 +252,8 @@ export default function HeroV2() {
             About 828
           </Link>
         </div>
+
+        </div>{/* end copyBlockRef */}
 
         {/* Scroll indicator — bottom of copy side */}
         <div
