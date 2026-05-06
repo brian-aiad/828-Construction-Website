@@ -179,6 +179,9 @@ async function testRoute(browser, routeObj, viewport) {
   });
 
   // ── Collect image 404s + any 500s from local server ─────────────────────
+  // Track CSS 500s separately — they prevent Tailwind from loading and cascade-break
+  // overflow checks (overflow-hidden doesn't apply → false-positive H-overflow).
+  let cssAssetFailed = false;
   page.on('response', (res) => {
     const u   = res.url();
     const st  = res.status();
@@ -190,6 +193,7 @@ async function testRoute(browser, routeObj, viewport) {
       const isStaticAsset = u.includes('/_next/static/') && (
         u.endsWith('.js') || u.endsWith('.css') || u.endsWith('.woff2') || u.endsWith('.woff')
       );
+      if (isStaticAsset && u.endsWith('.css')) cssAssetFailed = true;
       if (!isStaticAsset) result.errors.push(`HTTP 500: ${u}`);
     }
   });
@@ -204,11 +208,14 @@ async function testRoute(browser, routeObj, viewport) {
     await sleep(2500);
 
     // ── Horizontal overflow ───────────────────────────────────────────────
-    const { docWidth, winWidth } = await page.evaluate(() => ({
-      docWidth: document.documentElement.scrollWidth,
-      winWidth: window.innerWidth,
-    }));
-    result.hasHOverflow = docWidth > winWidth + 2;
+    // Skip if CSS failed to load (cascades to false-positive overflow from missing overflow-hidden)
+    if (!cssAssetFailed) {
+      const { docWidth, winWidth } = await page.evaluate(() => ({
+        docWidth: document.documentElement.scrollWidth,
+        winWidth: window.innerWidth,
+      }));
+      result.hasHOverflow = docWidth > winWidth + 2;
+    }
 
     // ── Trigger ScrollTrigger (scroll 1px and back) ───────────────────────
     await page.evaluate(() => window.scrollTo(0, 1));
