@@ -4,10 +4,56 @@ This file is read by Claude Code automatically at the start of every session in
 this project. It contains non-negotiable rules. If anything here conflicts with
 skill instructions, this file wins.
 
+---
+
+## V2 DESIGN LANGUAGE — CURRENT (May 2026)
+
+The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-level work.
+
+### Locked decisions
+- **Accent color:** Maroon `#7B2D26` is primary. Use `var(--color-accent)`. Copper `#B87333` retained as fallback only (`var(--color-accent-fallback)` / `var(--accent-copper)`).
+- **Founding year:** 2004 (typed-notes typo of 2025 ignored — verbal call confirms 2004).
+- **Bold display font:** Reserved for "828" wordmark and main hero anchor headlines ONLY. Everything else uses lighter weights.
+- **Header:** One-line "828 Construction" wordmark LEFT, location+timestamp RIGHT, "BOOK CALL" CTA with asterisk-dropdown phone reveal.
+- **Splash:** Black vertical gradient (`var(--gradient-splash-vertical)`), one-line wordmark, letter-by-letter reveal, slightly larger than V1.
+- **Process page:** DELETED. Content merges into renamed `/portfolio` (was `/projects`).
+- **Contact form:** ON HOLD. Do not build. Email/DNS/Resend pending Joe.
+- **Portfolio photos:** Real only. AI-generated work photos forbidden. "Coming Soon" placeholders OK per Joe.
+
+### Motion vocabulary
+1. Scroll-scrub reveals (GSAP ScrollTrigger — already in stack).
+2. Asterisk/plus dropdown reveals (Book Call header CTA, FAQ expanders on service pages).
+3. Rolling marquees (footer top, About area names — `@keyframes marqueeScroll` already in globals.css).
+4. Subtle glass/depth overlays — site must NOT feel flat.
+5. Asymmetric splits (home hero, contact sections).
+6. Image-sequence on scroll (reserved for once real photos arrive).
+
+### Standing rules
+- All factual data traces to `lib/constants.ts`.
+- Production build only for verification (port 4000).
+- Chrome DevTools MCP for animation/scroll verification — Playwright is functional only.
+- 18-route preflight gates `git push`.
+- Atomic conventional commits per change area.
+- `impeccable` pre-commit hook runs on every commit.
+
+### Page rebuild order (separate terminals)
+1. Splash — NS Builders vertical gradient treatment
+2. Home — simplified to Hero + Services Preview + About Preview + Footer
+3. About — story + 3 principles + CRAFT acronym + South Bay marquee
+4. Services landing — creative discretion within design language
+5. ADU page — visual hero + need + FAQ + 5-step process + ADU acronym + start-here
+6. Remediation page — visual hero + need + 3 FAQs + 4-step process + why 828 + start-here
+7. Consulting page — visual hero + need + 5 benefits + 3 Q&A + CTA
+8. Portfolio (rename from Projects) — real photos + merged process content
+9. Footer rebuild — rolling marquee + broken-color sections + schedule CTA
+10. Contact page — ON HOLD until form infrastructure unblocks
+
+---
+
 ## Read these before any code change
 
 1. `design/828_DESIGN_SYSTEM.md` — palette, type, animation catalog, component primitives
-2. `design/PATTERNS.md` — Known Fixes section (16 solved bugs; use these, do not re-solve)
+2. `design/PATTERNS.md` — Known Fixes section (21 solved bugs + 4 V2 patterns; use these, do not re-solve)
 3. `~/.claude/skills/828-construction-methodology/SKILL.md` — the v3 autonomous build protocol
 4. `~/.claude/skills/ux-architecture-methodology/SKILL.md` — UX architecture protocol (runs before motion skill on new pages; audit layer on existing pages)
 5. `~/.claude/skills/828-preflight/SKILL.md` — pre-push test gate (run before declaring any page done)
@@ -20,7 +66,7 @@ Any page being redesigned must reach parity with the About page
 
 ## Forbidden patterns
 
-- Navy, blue, or slate-reading-as-blue tones. Palette is black / white / gray ramp / `#B87333` copper only.
+- Navy, blue, or slate-reading-as-blue tones. V2 palette: black / white / gray ramp / maroon `#7B2D26` (primary accent) / copper `#B87333` (fallback only).
 - `filter: grayscale(...)` on any image, ever.
 - `filter: brightness(...)` below 0.9 on hero images — makes photos unreadable.
 - `pinSpacing: true` (the GSAP default) without an explicit `minHeight` on the pin wrapper — causes visible white gaps after pinned sections.
