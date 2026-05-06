@@ -7,6 +7,7 @@ import FooterRevealWrapper from "@/components/layout/FooterRevealWrapper";
 import ScrollProgress from "@/components/layout/ScrollProgress";
 import GrainOverlay from "@/components/system/GrainOverlay";
 import RightScrollProgress from "@/components/system/RightScrollProgress";
+import PageTransition from "@/components/system/PageTransition";
 import LenisProvider from "@/components/providers/LenisProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
 import { Analytics } from "@vercel/analytics/react";
@@ -100,7 +101,9 @@ export default function RootLayout({
         <CustomCursor />
         <LenisProvider>
           <Header />
-          <main id="main-content" className="flex-1">{children}</main>
+          <main id="main-content" className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <FooterRevealWrapper>
             <Footer />
           </FooterRevealWrapper>
