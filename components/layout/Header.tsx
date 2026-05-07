@@ -108,9 +108,9 @@ export default function Header() {
               <Image
                 src="/images/logo/828logo_v2.png"
                 alt="828 Construction"
-                width={280}
-                height={96}
-                className="h-12 w-auto lg:h-16"
+                width={480}
+                height={120}
+                className="h-16 w-auto lg:h-20"
                 style={{ filter: "invert(1) hue-rotate(180deg)" }}
                 priority
               />
