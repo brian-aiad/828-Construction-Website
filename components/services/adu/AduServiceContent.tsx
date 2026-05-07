@@ -23,8 +23,19 @@ gsap.registerPlugin(ScrollTrigger);
 
 function BookCallDropdown({ dark = true }: { dark?: boolean }) {
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapRef}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
@@ -150,7 +161,7 @@ function AduHero() {
             style={{ top: "-7.5%", height: "115%" }}
           >
             <Image
-              src="/images/projects/adu-exterior-new.jpg"
+              src="/images/chatpics/08_adu_hero_finished_unit.png"
               alt="828 Construction — detached ADU exterior, Torrance CA"
               fill
               className="object-cover"
@@ -181,6 +192,20 @@ function AduHero() {
             style={{ width: "28%", zIndex: 10, color: "white", opacity: 0.16, willChange: "transform" }}
           >
             <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
+          </div>
+          <div className="absolute bottom-8 left-8 z-20 hidden w-56 overflow-hidden border border-white/15 bg-black/45 p-2 backdrop-blur-xl lg:block">
+            <div className="relative aspect-[16/10]">
+              <Image
+                src="/images/chatpics/09_adu_permit_process_png.png"
+                alt=""
+                fill
+                sizes="14rem"
+                className="object-cover"
+              />
+            </div>
+            <p className="mt-3 px-2 pb-2 font-labels text-[8px] uppercase tracking-[0.2em] text-white/45">
+              Detached ADU / permit-ready planning
+            </p>
           </div>
         </div>
 

@@ -13,6 +13,7 @@ export default function Header() {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [bookCallOpen, setBookCallOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [torTime, setTorTime] = useState("");
   const lastScrollY = useRef(0);
@@ -45,6 +46,17 @@ export default function Header() {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
+
+  // Close BOOK CALL dropdown when clicking outside it
+  useEffect(() => {
+    if (!bookCallOpen) return;
+    const handler = (e: MouseEvent) => {
+      const el = bookCallMagRef.current;
+      if (el && !el.contains(e.target as Node)) setBookCallOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [bookCallOpen, bookCallMagRef]);
 
   // Live Torrance time — updates every second
   useEffect(() => {
@@ -108,7 +120,12 @@ export default function Header() {
               {NAV_LINKS.map((link) => {
                 if (link.href === "/services") {
                   return (
-                    <div key={link.href} className="relative group">
+                    <div
+                      key={link.href}
+                      className="relative"
+                      onMouseEnter={() => setServicesOpen(true)}
+                      onMouseLeave={() => setServicesOpen(false)}
+                    >
                       {/* Trigger */}
                       <Link
                         href="/services"
@@ -123,16 +140,19 @@ export default function Header() {
                           className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                             isServicesActive
                               ? "bg-[#7B2D26] scale-x-100"
-                              : "bg-white scale-x-0 group-hover:scale-x-100"
+                              : `bg-white origin-left transition-transform duration-300 ${servicesOpen ? "scale-x-100" : "scale-x-0"}`
                           }`}
                         />
                       </Link>
 
-                      {/* Dropdown panel — vertical stack (Joseph's explicit choice) */}
+                      {/* Dropdown panel — pt-2 gives visual gap without breaking hover area */}
                       <div
-                        className="absolute top-full left-0 mt-4 w-52 bg-black border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto"
+                        className={`absolute top-full left-0 pt-2 w-52 transition-all duration-200 ${
+                          servicesOpen ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
+                        }`}
                         style={{ zIndex: 60 }}
                       >
+                      <div className="bg-black border border-white/10">
                         {/* Maroon top accent */}
                         <div style={{ height: 1, background: "var(--color-accent)", opacity: 0.6 }} />
 
@@ -187,7 +207,8 @@ export default function Header() {
                             All Services Overview →
                           </Link>
                         </div>
-                      </div>
+                      </div>{/* end bg-black inner card */}
+                      </div>{/* end positioning wrapper */}
                     </div>
                   );
                 }

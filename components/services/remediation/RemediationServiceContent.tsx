@@ -109,8 +109,19 @@ gsap.registerPlugin(ScrollTrigger);
 
 function BookCallDropdown() {
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapRef}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
@@ -226,7 +237,7 @@ function RemediationHero() {
             style={{ top: "-7.5%", height: "115%" }}
           >
             <Image
-              src="/images/projects/remediation-after.jpg"
+              src="/images/chatpics/10_remediation_diagnostic_hero.png"
               alt="828 Construction — remediation work, Torrance CA"
               fill
               className="object-cover"
@@ -256,6 +267,15 @@ function RemediationHero() {
             style={{ width: "28%", zIndex: 10, color: "white", opacity: 0.16, willChange: "transform" }}
           >
             <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
+          </div>
+          <div className="absolute bottom-8 left-8 z-20 hidden h-40 w-40 pointer-events-none lg:block">
+            <Image
+              src="/images/chatpics/11_remediation_moisture_meter_png.png"
+              alt=""
+              fill
+              sizes="10rem"
+              className="object-contain"
+            />
           </div>
         </div>
 

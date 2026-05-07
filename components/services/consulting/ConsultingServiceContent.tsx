@@ -16,8 +16,19 @@ gsap.registerPlugin(ScrollTrigger);
 
 function BookCallDropdown() {
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapRef}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
@@ -117,7 +128,7 @@ function ConsultingHero() {
             style={{ top: "-7.5%", height: "115%" }}
           >
             <Image
-              src="/images/projects/consulting-blueprints.jpg"
+              src="/images/chatpics/03_home_active_listening_table.png"
               alt="828 Construction — consulting and inspection services, Torrance CA"
               fill
               className="object-cover"
