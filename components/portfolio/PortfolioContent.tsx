@@ -479,7 +479,7 @@ function PortfolioHero() {
         aria-hidden="true"
       >
         <Image
-          src="/images/projects/service-adu.jpg"
+          src="/images/chatpics/01_home_hero_backyard_editorial.png"
           alt=""
           fill
           priority

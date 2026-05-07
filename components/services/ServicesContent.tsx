@@ -6,7 +6,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
-import { SITE, SERVICES } from "@/lib/constants";
+import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
 
@@ -20,7 +20,7 @@ const tiles = [
     slug: "adu",
     title: "ADU Construction",
     tagline: "Built for permanence.",
-    image: "/images/services/adu-detail.jpg",
+    image: "/images/chatpics/08_adu_hero_finished_unit.png",
     imageAlt: "ADU construction — 828 Construction Torrance CA",
     clipFrom: "inset(0% 100% 0% 0%)", // left → right wipe
   },
@@ -29,7 +29,7 @@ const tiles = [
     slug: "remediation",
     title: "Remediation",
     tagline: "Fix it right. Fix it once.",
-    image: "/images/services/remediation-detail.jpg",
+    image: "/images/chatpics/10_remediation_diagnostic_hero.png",
     imageAlt: "Remediation work — 828 Construction Torrance CA",
     clipFrom: "inset(100% 0% 0% 0%)", // top → bottom wipe
   },
@@ -38,7 +38,7 @@ const tiles = [
     slug: "consulting",
     title: "Consulting",
     tagline: "Clarity before commitment.",
-    image: "/images/services/consulting-detail.jpg",
+    image: "/images/chatpics/03_home_active_listening_table.png",
     imageAlt: "Construction consulting — 828 Construction Torrance CA",
     clipFrom: "inset(0% 0% 100% 0%)", // bottom → top wipe
   },
@@ -159,7 +159,7 @@ function ServicesHero() {
         aria-hidden="true"
       >
         <Image
-          src="/images/services/services-hero.jpg"
+          src="/images/chatpics/07_services_hero_three_disciplines.png"
           alt=""
           fill
           priority
@@ -306,7 +306,7 @@ function ServicesAsymmetricTiles() {
       }
 
       // Three-vector clip reveals on scroll (signature moment)
-      imgWrapRefs.current.forEach((wrap, i) => {
+      imgWrapRefs.current.forEach((wrap) => {
         if (!wrap) return;
         gsap.to(wrap, {
           clipPath: "inset(0% 0% 0% 0%)",

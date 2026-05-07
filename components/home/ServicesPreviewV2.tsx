@@ -17,9 +17,9 @@ gsap.registerPlugin(ScrollTrigger);
 // Pattern B (clip-path punch-in + rotateY) on scroll enter. Fix 20 (hover cleanup).
 
 const SERVICE_IMAGES: Record<string, string> = {
-  adu: "/images/projects/adu-exterior-new.jpg",
-  remediation: "/images/projects/remediation-after.jpg",
-  consulting: "/images/projects/consulting-blueprints.jpg",
+  adu: "/images/chatpics/08_adu_hero_finished_unit.png",
+  remediation: "/images/chatpics/10_remediation_diagnostic_hero.png",
+  consulting: "/images/chatpics/03_home_active_listening_table.png",
 };
 
 const SERVICE_TAGLINES: Record<string, string> = {
@@ -34,9 +34,9 @@ export default function ServicesPreviewV2() {
   const hoverCleanups = useRef<Array<() => void>>([]);
 
   // 3D tilt refs — one per card
-  const tiltRef0 = useTilt(10) as React.RefObject<HTMLDivElement>;
-  const tiltRef1 = useTilt(10) as React.RefObject<HTMLDivElement>;
-  const tiltRef2 = useTilt(10) as React.RefObject<HTMLDivElement>;
+  const tilt0Ref = useTilt(10) as React.MutableRefObject<HTMLDivElement | null>;
+  const tilt1Ref = useTilt(10) as React.MutableRefObject<HTMLDivElement | null>;
+  const tilt2Ref = useTilt(10) as React.MutableRefObject<HTMLDivElement | null>;
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -140,7 +140,7 @@ export default function ServicesPreviewV2() {
           <div
             ref={(el) => {
               cardRefs.current[0] = el;
-              (tiltRef0 as React.MutableRefObject<HTMLDivElement | null>).current = el;
+              tilt0Ref.current = el;
             }}
             className="relative group overflow-hidden cursor-pointer"
             style={{ minHeight: "clamp(360px, 60vh, 600px)", transformStyle: "preserve-3d", willChange: "transform" }}
@@ -187,7 +187,7 @@ export default function ServicesPreviewV2() {
             <div
               ref={(el) => {
                 cardRefs.current[1] = el;
-                (tiltRef1 as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                tilt1Ref.current = el;
               }}
               className="relative group overflow-hidden cursor-pointer flex-1"
               style={{ minHeight: "clamp(180px, 28vh, 290px)", transformStyle: "preserve-3d", willChange: "transform" }}
@@ -228,7 +228,7 @@ export default function ServicesPreviewV2() {
             <div
               ref={(el) => {
                 cardRefs.current[2] = el;
-                (tiltRef2 as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                tilt2Ref.current = el;
               }}
               className="relative group overflow-hidden cursor-pointer flex-1"
               style={{ minHeight: "clamp(180px, 28vh, 290px)", transformStyle: "preserve-3d", willChange: "transform" }}

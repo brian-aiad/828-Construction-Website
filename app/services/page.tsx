@@ -13,8 +13,7 @@ export default function ServicesPage() {
   return (
     <>
       {/* Preload hero image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <link rel="preload" as="image" href="/images/services/services-hero.jpg" />
+      <link rel="preload" as="image" href="/images/chatpics/07_services_hero_three_disciplines.png" />
       <ServicesContent />
     </>
   );

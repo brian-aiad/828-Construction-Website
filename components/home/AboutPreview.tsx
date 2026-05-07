@@ -152,7 +152,7 @@ export default function AboutPreview() {
             data-gsap-reveal="true"
           >
             <Image
-              src="/images/about/craftsmanship.jpg"
+              src="/images/chatpics/05_about_founder_workbench.png"
               alt="828 Construction — craftsmanship"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -167,6 +167,15 @@ export default function AboutPreview() {
               <span className="font-labels text-[8px] text-white/50 tracking-[0.22em] uppercase">
                 Est. {FOUNDING_YEAR}
               </span>
+            </div>
+            <div className="absolute -bottom-10 -left-8 hidden h-44 w-44 pointer-events-none lg:block">
+              <Image
+                src="/images/chatpics/06_about_craft_material_stack_png.png"
+                alt=""
+                fill
+                sizes="11rem"
+                className="object-contain"
+              />
             </div>
           </div>
 

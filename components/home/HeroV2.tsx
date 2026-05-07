@@ -8,13 +8,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
-import { ArchOutlineSilhouette } from "@/components/system/silhouettes";
 import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V3 hero: mesh gradient idle drift + silhouette 65vw/0.55 + aggressive parallax.
-// Headline fires on page load (delay 0.6s) with rotateX channel + scroll fade-out.
+// V3 hero: mesh gradient idle drift + technical overlay + aggressive parallax.
+// Headline fires on page load with rotateX channel + scroll fade-out.
 
 export default function HeroV2() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -33,6 +32,7 @@ export default function HeroV2() {
   useEffect(() => {
     let mounted = true;
     const section = sectionRef.current;
+    const headlineEl = headlineRef.current;
     if (!section) return;
 
     // Mesh gradient idle drift — direct CSS transform on the mesh div
@@ -127,7 +127,7 @@ export default function HeroV2() {
         }
       );
 
-      // Headline: fires on page load (delay 0.6s to clear splash exit) with rotateX channel
+      // Headline: fires on page load with rotateX channel
       if (headlineRef.current) {
         splitFrameRef.current = requestAnimationFrame(() => {
           if (!mounted || !headlineRef.current?.isConnected) return;
@@ -142,7 +142,7 @@ export default function HeroV2() {
                 stagger: 0.024,
                 duration: 1.1,
                 ease: "power3.out",
-                delay: 0.6,
+                delay: 0.05,
                 onStart: () => {
                   if (headlineRef.current) headlineRef.current.style.opacity = "1";
                 },
@@ -170,7 +170,7 @@ export default function HeroV2() {
       mounted = false;
       if (meshTl) meshTl.kill();
       cancelAnimationFrame(splitFrameRef.current);
-      if (splitRef.current && headlineRef.current?.isConnected) {
+      if (splitRef.current && headlineEl?.isConnected) {
         try { splitRef.current.revert(); } catch {}
       }
       splitRef.current = null;
@@ -214,7 +214,7 @@ export default function HeroV2() {
           aria-hidden="true"
         >
           <Image
-            src="/images/hero/patio-pool.jpg"
+            src="/images/chatpics/01_home_hero_backyard_editorial.png"
             alt="828 Construction — premium residential construction"
             fill
             priority
@@ -235,22 +235,43 @@ export default function HeroV2() {
           aria-hidden="true"
         />
 
-        {/* Floating architectural silhouette — parallax depth layer, 65vw */}
+        {/* Technical drafting overlay — replaces the old floating house outline. */}
         <div
           ref={silhouetteRef}
           aria-hidden="true"
           className="absolute pointer-events-none hidden lg:block"
           style={{
-            width: "65vw",
-            bottom: "-5%",
-            right: "-8%",
+            width: "42vw",
+            height: "42vw",
+            bottom: "4%",
+            right: "3%",
             zIndex: 10,
-            color: "white",
-            opacity: 0.55,
+            opacity: 0.36,
             willChange: "transform",
           }}
         >
-          <ArchOutlineSilhouette style={{ width: "100%", height: "auto" }} />
+          <Image
+            src="/images/chatpics/02_home_replace_grey_house_png.png"
+            alt=""
+            fill
+            sizes="42vw"
+            className="object-contain"
+          />
+        </div>
+
+        <div className="absolute bottom-6 left-6 z-20 hidden max-w-[18rem] border border-white/15 bg-black/55 p-5 backdrop-blur-xl lg:block">
+          <p className="mb-3 font-labels text-[9px] uppercase tracking-[0.24em] text-white/45">
+            01 / Active listening
+          </p>
+          <p className="font-body text-sm leading-relaxed text-white/70">
+            One conversation becomes the foundation for shaping your vision.
+          </p>
+        </div>
+
+        <div className="absolute right-6 top-24 z-20 hidden border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-xl lg:block">
+          <p className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/55">
+            CA #{SITE.license}
+          </p>
         </div>
       </div>
 
@@ -281,13 +302,12 @@ export default function HeroV2() {
         </div>
 
         {/* Headline — bold display font with perspective for rotateX visibility */}
-        {/* TODO: HERO_COPY_PENDING — final copy from Joe. Current: "Improving the unimproved." */}
         <h1
           ref={headlineRef}
-          className="font-display font-bold leading-[0.92] tracking-tight text-white mb-8"
-          style={{ fontSize: "clamp(2.8rem, 5vw, 4.8rem)", perspective: "1000px" }}
+          className="font-display font-bold leading-[0.9] tracking-tight text-white mb-8"
+          style={{ fontSize: "clamp(2.55rem, 4.25vw, 4.25rem)", perspective: "1000px" }}
         >
-          Improving the unimproved.
+          Built with intent. Not by accident.
         </h1>
 
         {/* Sub-line */}
@@ -296,8 +316,9 @@ export default function HeroV2() {
           className="font-body text-white/55 leading-relaxed mb-10 max-w-xs"
           style={{ fontSize: "clamp(0.9rem, 1.4vw, 1.05rem)", opacity: 0 }}
         >
-          Residential construction for homeowners who refuse to compromise.
-          ADU. Remediation. Consulting.
+          Refined residential construction shaped through listening,
+          thoughtful analysis, and enduring craft. ADU. Remediation.
+          Consulting.
         </p>
 
         {/* CTA row — magnetic wrapper on primary button */}

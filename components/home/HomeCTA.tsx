@@ -6,7 +6,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
-import { SITE } from "@/lib/constants";
+import { FOUNDING_YEAR, SITE } from "@/lib/constants";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { AnimationController } from "@/utils/animationControl";
 
@@ -219,7 +219,7 @@ export default function HomeCTA() {
           ref={hairlineRef}
           style={{
             height: 1,
-            background: "#B87333",
+            background: "var(--color-accent)",
             opacity: 0.45,
             transformOrigin: "left",
             marginBottom: "3rem",
@@ -231,7 +231,7 @@ export default function HomeCTA() {
           {/* Left: copy + CTAs */}
           <div className="lg:col-span-6">
             <span className="cta-label font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-6">
-              Torrance, CA · Est. 2025
+              Prepared to proceed / Est. {FOUNDING_YEAR}
             </span>
 
             <h2
@@ -239,26 +239,27 @@ export default function HomeCTA() {
               className="font-display font-bold text-white tracking-tight leading-[0.88] mb-8"
               style={{ fontSize: "clamp(3rem, 6vw, 5.5rem)" }}
             >
-              Let&apos;s talk about your project.
+              Prepared to proceed with your vision?
             </h2>
 
             <p ref={bodyRef} className="text-gray-400 text-[15px] leading-relaxed mb-10 max-w-sm">
-              The first conversation is free. We&apos;ll tell you whether the
-              project makes sense, what the realistic next step looks like,
-              and whether we&apos;re the right fit.
+              Whether your vision is fully defined or still evolving, start
+              with one conversation. 828 Construction will personally review
+              the project and explore the next right step.
             </p>
 
             <div ref={ctasRef} className="flex flex-col sm:flex-row items-start gap-4">
-              <MagneticButton strength={0.3}>
+              <MagneticButton strength={0.55}>
                 <Link
                   href="/contact"
                   className="group relative inline-flex items-center justify-center gap-3 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
                 >
                   <span
-                    className="absolute inset-0 bg-[#B87333] translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+                    className="absolute inset-0 translate-x-[-101%] transition-transform duration-300 ease-in-out group-hover:translate-x-0"
+                    style={{ background: "var(--color-accent)" }}
                     aria-hidden="true"
                   />
-                  <span className="relative">Request an Estimate</span>
+                  <span className="relative">Start Here</span>
                   <span className="relative transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </Link>
               </MagneticButton>
@@ -277,15 +278,15 @@ export default function HomeCTA() {
                 {[
                   `CA #${SITE.license}`,
                   "Torrance · South Bay",
-                  "Free Consultation",
+                  "First Step: Listening",
                 ].map((item, i) => (
                   <div key={item} className="flex items-center gap-2 sm:gap-3">
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="flex-shrink-0 sm:hidden">
-                      <circle cx="7" cy="7" r="6.5" stroke="#B87333" strokeOpacity="0.4" />
+                      <circle cx="7" cy="7" r="6.5" stroke="var(--color-accent)" strokeOpacity="0.4" />
                     </svg>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="hidden sm:block flex-shrink-0">
-                      <circle cx="7" cy="7" r="6.5" stroke="#B87333" strokeOpacity="0.4" />
-                      <path d="M4.5 7L6.2 8.7L9.5 5.3" stroke="#B87333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="7" cy="7" r="6.5" stroke="var(--color-accent)" strokeOpacity="0.4" />
+                      <path d="M4.5 7L6.2 8.7L9.5 5.3" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <span className="font-labels text-[9px] sm:text-[10px] text-gray-400 tracking-[0.15em] uppercase whitespace-nowrap">{item}</span>
                     {i < 2 && (
@@ -326,11 +327,11 @@ export default function HomeCTA() {
               <div
                 ref={copperTagRef}
                 className="absolute -bottom-6 -right-6 bg-black text-white p-6 w-44 border-l-2"
-                style={{ opacity: 1, borderColor: "#B87333" }}
+                style={{ opacity: 1, borderColor: "var(--color-accent)" }}
               >
-                <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "#B87333" }}>25+</div>
+                <div className="font-numbers font-bold text-3xl leading-none mb-1" style={{ color: "var(--color-accent)" }}>20+</div>
                 <div className="font-labels text-[8px] text-gray-400 tracking-[0.18em] uppercase leading-relaxed">
-                  Years Building South Bay
+                  Years Hands-On Expertise
                 </div>
               </div>
             </div>
