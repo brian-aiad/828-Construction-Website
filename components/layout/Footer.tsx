@@ -326,23 +326,25 @@ export default function Footer() {
 
       {/* ── 5. 828 wordmark anchor — decorative, large, magnetic ─────────── */}
       <div
-        className="relative overflow-hidden"
+        className="relative overflow-hidden px-6 py-10 lg:px-12 lg:py-14"
         style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
         aria-hidden="true"
       >
         <div
           ref={anchorRef}
-          className="px-6 lg:px-8 py-0 leading-none select-none pointer-events-none font-display font-bold text-white"
+          className="relative mx-auto h-20 max-w-7xl select-none pointer-events-none sm:h-28 lg:h-36"
           style={{
-            fontSize: "clamp(6rem, 20vw, 18rem)",
-            opacity: 0.04,
-            letterSpacing: "-0.04em",
-            lineHeight: 0.85,
-            transform: "translateY(12%)",
+            opacity: 0.075,
             willChange: "transform",
           }}
         >
-          828
+          <Image
+            src="/images/logo/828logo_new_full.png"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-contain object-left"
+          />
         </div>
       </div>
 

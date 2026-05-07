@@ -36,8 +36,11 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
-    setMobileServicesOpen(false);
+    const frame = requestAnimationFrame(() => {
+      setMobileOpen(false);
+      setMobileServicesOpen(false);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [pathname]);
 
   useEffect(() => {
@@ -100,18 +103,17 @@ export default function Header() {
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center"
+              className="flex shrink-0 items-center"
               onClick={() => {
                 if (pathname === "/") window.scrollTo(0, 0);
               }}
             >
               <Image
-                src="/images/logo/828logo_v2.png"
+                src="/images/logo/828logo_new_header.png"
                 alt="828 Construction"
-                width={480}
-                height={120}
-                className="h-16 w-auto lg:h-20"
-                style={{ filter: "invert(1) hue-rotate(180deg)" }}
+                width={360}
+                height={48}
+                className="h-6 w-auto sm:h-7 lg:h-9 xl:h-10"
                 priority
               />
             </Link>
