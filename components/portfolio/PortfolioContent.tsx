@@ -12,6 +12,7 @@ import ImageWithFallback from "@/components/ui/ImageWithFallback";
 import { AnimationController } from "@/utils/animationControl";
 import { CompassSilhouette } from "@/components/system/silhouettes";
 import PortfolioCinemaRow from "@/components/portfolio/PortfolioCinemaRow";
+import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -740,6 +741,7 @@ function BuildPhilosophy() {
       className="bg-[#0a0a0a] py-24 lg:py-36"
       style={{ position: "relative", zIndex: 2, overflowX: "clip" }}
     >
+      <PrecisionOverlay tone="dark" opacity={0.10} />
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div
           ref={hairlineRef}

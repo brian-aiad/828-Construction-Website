@@ -11,6 +11,7 @@ import { AnimationController } from "@/utils/animationControl";
 import { useMobile } from "@/hooks/useMobile";
 import MagneticButton from "@/components/ui/MagneticButton";
 import ServicePageContactForm from "@/components/contact/ServicePageContactForm";
+import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -287,6 +288,7 @@ function DetailHero({
           background: "linear-gradient(to bottom, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.52) 55%, rgba(0,0,0,0.88) 100%)",
         }}
       />
+      <PrecisionOverlay tone="dark" opacity={0.10} />
       <div ref={headlineRef} className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-40 pb-24">
         <div className="mb-6">
           <Link
@@ -579,7 +581,7 @@ function DetailContent({
     if (!AnimationController.shouldAnimate()) return;
     let mounted = true;
     let h2SplitFrame = -1;
-    let h2El: HTMLHeadingElement | null = h2Ref.current;
+    const h2El: HTMLHeadingElement | null = h2Ref.current;
     let h2LocalSplit: SplitType | null = null;
     const ctx = gsap.context(() => {
       if (hairlineRef.current) {
@@ -1175,8 +1177,9 @@ function ProcessSnapshot({ slug, title }: { slug: string; title: string }) {
     <section
       ref={sectionRef}
       data-section="service-process-snapshot"
-      className="bg-white py-24 lg:py-32"
+      className="relative overflow-hidden bg-white py-24 lg:py-32"
     >
+      <PrecisionOverlay tone="light" opacity={0.08} />
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div
           ref={hairlineRef}

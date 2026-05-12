@@ -3,7 +3,6 @@ import HeroV2 from "@/components/home/HeroV2";
 import ServicesPreviewV2 from "@/components/home/ServicesPreviewV2";
 import HomeVisionSequence from "@/components/home/HomeVisionSequence";
 import AboutPreview from "@/components/home/AboutPreview";
-import HomeCTA from "@/components/home/HomeCTA";
 import SplashScreen from "@/components/home/SplashScreen";
 import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
@@ -51,7 +50,6 @@ export default function HomePage() {
       <ServicesPreviewV2 />
       <HomeVisionSequence />
       <AboutPreview />
-      <HomeCTA />
     </>
   );
 }

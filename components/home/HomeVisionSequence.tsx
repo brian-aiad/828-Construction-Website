@@ -165,7 +165,7 @@ export default function HomeVisionSequence() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[#050505] text-white">
+    <section ref={sectionRef} data-section="vision" className="relative overflow-hidden bg-[#050505] text-white">
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-[0.14]"

@@ -28,7 +28,7 @@ function CheckmarkSVG() {
         cx="26"
         cy="26"
         r="23"
-        stroke="#B87333"
+        stroke="var(--color-accent)"
         strokeWidth="2"
         strokeDasharray="145"
         strokeDashoffset="145"
@@ -36,7 +36,7 @@ function CheckmarkSVG() {
       />
       <polyline
         points="14,26 23,35 38,18"
-        stroke="#B87333"
+        stroke="var(--color-accent)"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -142,7 +142,7 @@ export default function ContactForm() {
           work, call{" "}
           <a
             href={SITE.phoneHref}
-            className="text-[#B87333] hover:text-white transition-colors"
+            className="text-[var(--color-accent)] hover:text-white transition-colors"
           >
             {SITE.phone}
           </a>{" "}
@@ -183,7 +183,7 @@ export default function ContactForm() {
             htmlFor="cf-name"
             className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
           >
-            Full Name <span className="text-[#B87333]">*</span>
+            Full Name <span className="text-[var(--color-accent)]">*</span>
           </label>
           <input
             id="cf-name"
@@ -211,7 +211,7 @@ export default function ContactForm() {
             htmlFor="cf-phone"
             className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
           >
-            Phone <span className="text-[#B87333]">*</span>
+            Phone <span className="text-[var(--color-accent)]">*</span>
           </label>
           <input
             id="cf-phone"
@@ -272,7 +272,7 @@ export default function ContactForm() {
           htmlFor="cf-service"
           className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
         >
-          Service Needed <span className="text-[#B87333]">*</span>
+          Project Type <span className="text-[var(--color-accent)]">*</span>
         </label>
         <select
           id="cf-service"
@@ -283,7 +283,7 @@ export default function ContactForm() {
           className={`${inputClass("service")} bg-[#0a0a0a] cursor-pointer`}
         >
           <option value="" className="bg-[#0a0a0a]">
-            Select a service…
+            Choose project type *
           </option>
           {SERVICES.map((s) => (
             <option key={s.slug} value={s.title} className="bg-[#0a0a0a]">
@@ -310,7 +310,7 @@ export default function ContactForm() {
           htmlFor="cf-message"
           className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
         >
-          Project Description <span className="text-[#B87333]">*</span>
+          Project Description <span className="text-[var(--color-accent)]">*</span>
         </label>
         <textarea
           id="cf-message"
@@ -345,7 +345,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={state === "loading"}
-        className="w-full bg-white text-black py-4 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-[#B87333] hover:text-white transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed group flex items-center justify-center"
+        className="w-full bg-white text-black py-4 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-[var(--color-accent)] hover:text-white transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed group flex items-center justify-center"
       >
         {state === "loading" ? (
           <>
@@ -366,7 +366,7 @@ export default function ContactForm() {
         Typically respond within 24 hours · For urgent work, call{" "}
         <a
           href={SITE.phoneHref}
-          className="text-gray-500 hover:text-[#B87333] transition-colors"
+          className="text-gray-500 hover:text-[var(--color-accent)] transition-colors"
         >
           {SITE.phone}
         </a>

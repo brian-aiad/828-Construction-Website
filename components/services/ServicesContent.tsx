@@ -9,6 +9,7 @@ import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
+import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -433,6 +434,7 @@ function ServicesAsymmetricTiles() {
       style={{ position: "relative", zIndex: 2 }}
     >
       {/* Construction-line silhouette — visible drafting backdrop with slow rotate */}
+      <PrecisionOverlay tone="dark" opacity={0.09} />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"

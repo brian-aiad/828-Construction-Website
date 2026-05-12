@@ -10,6 +10,7 @@ import { SITE, FOUNDING_YEAR, SERVICE_AREAS } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import GlassCard from "@/components/system/GlassCard";
 import { ConstructionLineSilhouette, CompassSilhouette } from "@/components/system/silhouettes";
+import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -368,6 +369,7 @@ function AboutStory() {
       style={{ overflowX: "clip" }}
     >
       {/* Compass silhouette — 400px, opacity 0.22, slow idle spin + scroll parallax */}
+      <PrecisionOverlay tone="light" opacity={0.08} />
       <div
         ref={compassRef}
         aria-hidden="true"
