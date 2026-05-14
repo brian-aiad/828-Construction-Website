@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { SITE, SERVICES } from "@/lib/constants";
+import BrandMarqueeBottom from "@/components/footer/BrandMarqueeBottom";
 import SocialIcons from "@/components/footer/SocialIcons";
 import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
@@ -202,6 +203,29 @@ export default function Footer() {
       </section>
 
       <MaroonDivider />
+
+      <section
+        className="relative z-10 overflow-hidden bg-black px-6 py-8 lg:px-12"
+        data-footer-section="brand-marquee"
+      >
+        <div className="mx-auto max-w-7xl border border-white/10 bg-white/[0.025]">
+          <div className="grid lg:grid-cols-[0.34fr_0.66fr]">
+            <div className="flex min-h-20 items-center border-b border-white/10 px-5 py-5 lg:border-b-0 lg:border-r lg:px-7">
+              <div>
+                <p className="font-labels text-[9px] uppercase tracking-[0.24em] text-white/35">
+                  Closing mark
+                </p>
+                <p className="mt-2 font-labels text-[10px] uppercase tracking-[0.18em] text-white/55">
+                  828 / South Bay
+                </p>
+              </div>
+            </div>
+            <div className="min-w-0 px-4">
+              <BrandMarqueeBottom />
+            </div>
+          </div>
+        </div>
+      </section>
     </footer>
   );
 }
