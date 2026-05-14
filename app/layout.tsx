@@ -7,6 +7,7 @@ import FooterRevealWrapper from "@/components/layout/FooterRevealWrapper";
 import ScrollProgress from "@/components/layout/ScrollProgress";
 import GrainOverlay from "@/components/system/GrainOverlay";
 import RightScrollProgress from "@/components/system/RightScrollProgress";
+import VerticalBrandMark from "@/components/system/VerticalBrandMark";
 import LenisProvider from "@/components/providers/LenisProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
 import { Analytics } from "@vercel/analytics/react";
@@ -100,6 +101,7 @@ export default function RootLayout({
         <GrainOverlay />
         <ScrollProgress />
         <RightScrollProgress />
+        <VerticalBrandMark />
         {/* Custom cursor — hidden on touch devices via CSS */}
         <CustomCursor />
         <LenisProvider>
