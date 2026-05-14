@@ -3,24 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
-// V2 cinematic intro — plays once per session (sessionStorage gate).
-// "828 Construction" ONE LINE, Space Grotesk Bold, vertical gradient background.
-// Each letter slides up from 28px below — NS Builders signature reveal.
-// V3: rotateX channel + gradient ignition overlay + curtain wipe exit.
+// Homepage intro. Replays on refresh, keeps the smaller mark size, and uses
+// the NS-style letter reveal the client liked.
 
-const CHARS_828: string[] = ["8", "2", "8"];
-const CHARS_CONSTRUCTION: string[] = [
-  "C","o","n","s","t","r","u","c","t","i","o","n",
-];
+const PREFIX = "828";
+const SUFFIX = "CONSTRUCTION";
+const PREFIX_CHARS = PREFIX.split("");
+const SUFFIX_CHARS = SUFFIX.split("");
 
 export default function SplashScreen() {
   const splashRef = useRef<HTMLDivElement>(null);
-  const chars828Refs = useRef<(HTMLSpanElement | null)[]>([]);
-  const charsConstrRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const underlineRef = useRef<HTMLDivElement>(null);
+  const prefixCharRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const suffixCharRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const underlineRef = useRef<HTMLSpanElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const sweepRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  const [ignitionProgress, setIgnitionProgress] = useState(0);
 
   const dismiss = () => setDismissed(true);
 
@@ -33,15 +32,14 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
-    const seen = sessionStorage.getItem("828-splash-seen");
     const splash = splashRef.current;
-    if (!splash) return;
-
-    if (seen) {
-      splash.style.pointerEvents = "none";
-      dismiss();
-      return;
-    }
+    const underline = underlineRef.current;
+    const glow = glowRef.current;
+    const sweep = sweepRef.current;
+    const prefixChars = prefixCharRefs.current.filter(Boolean) as HTMLSpanElement[];
+    const suffixChars = suffixCharRefs.current.filter(Boolean) as HTMLSpanElement[];
+    const chars = [...prefixChars, ...suffixChars];
+    if (!splash || !underline || !glow || !sweep || chars.length === 0) return;
 
     const prefersReduced =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -50,90 +48,159 @@ export default function SplashScreen() {
       gsap.set(splash, { opacity: 1 });
       gsap.to(splash, {
         opacity: 0,
-        duration: 0.4,
-        delay: 0.6,
-        onComplete: () => {
-          sessionStorage.setItem("828-splash-seen", "1");
-          dismiss();
-        },
+        duration: 0.45,
+        delay: 1,
+        onComplete: dismiss,
       });
       return;
     }
 
-    // Set initial clip-path for curtain exit
-    gsap.set(splash, { opacity: 1, clipPath: "inset(0 0 0% 0)" });
+    gsap.set(splash, {
+      opacity: 1,
+      clipPath: "inset(0 0 0% 0)",
+    });
+    gsap.set(chars, {
+      yPercent: 118,
+      rotateX: 88,
+      opacity: 0,
+      scale: 0.85,
+      filter: "blur(8px)",
+      textShadow: "0 0 0px rgba(123,45,38,0)",
+      transformOrigin: "50% 85%",
+    });
+    gsap.set(underline, { scaleX: 0, opacity: 0 });
+    gsap.set(glow, { opacity: 0, scale: 0.76 });
+    gsap.set(sweep, { xPercent: -130, opacity: 0 });
 
-    const chars828 = chars828Refs.current.filter(Boolean) as HTMLSpanElement[];
-    const charsConstr = charsConstrRefs.current.filter(Boolean) as HTMLSpanElement[];
-    const allChars = [...chars828, ...charsConstr];
-
-    // Mask-cut reveal: chars slide up from below overflow-hidden parent + rotateX
-    gsap.set(allChars, { yPercent: 110, rotateX: 88 });
-    if (underlineRef.current) gsap.set(underlineRef.current, { scaleX: 0 });
-
-    // No onComplete on the timeline — new one is on the last tween
     const tl = gsap.timeline();
     tlRef.current = tl;
 
-    // IN: "828" chars — rotateX + slide reveal
-    tl.to(
-      chars828,
-      { yPercent: 0, rotateX: 0, opacity: 1, stagger: 0.04, duration: 0.9, ease: "power4.out" },
-      0
-    );
-
-    // IN: "Construction" chars (slight delayed start — word gap)
-    tl.to(
-      charsConstr,
-      { yPercent: 0, rotateX: 0, opacity: 1, stagger: 0.032, duration: 0.9, ease: "power4.out" },
-      0.18
-    );
-
-    // Gradient ignition — peaks at midpoint then decays
-    tl.to({ val: 0 }, {
-      val: 1,
-      duration: 1.6,
-      ease: "sine.inOut",
-      onUpdate: function() {
-        const v = (this.targets()[0] as { val: number }).val;
-        const intensity = v < 0.5 ? v * 2 : (1 - v) * 2;
-        setIgnitionProgress(intensity);
-      },
-    }, 0);
-
-    // Maroon underline draws left → right
-    if (underlineRef.current) {
-      tl.to(
-        underlineRef.current,
-        { scaleX: 1, duration: 0.6, ease: "power2.inOut" },
-        0.28
-      );
-    }
-
-    // Hold (all fully visible)
-    tl.to({}, { duration: 0.88 });
-
-    // OUT: all chars left → right — clip up (25ms per char)
-    tl.to(allChars, {
-      yPercent: -110,
-      stagger: { each: 0.025, from: "start" },
-      duration: 0.35,
-      ease: "power2.in",
+    tl.to(glow, {
+      opacity: 1,
+      scale: 1,
+      duration: 1.2,
+      ease: "sine.out",
     });
 
-    // Curtain wipe exit — clips upward instead of fading
+    tl.to(
+      prefixChars,
+      {
+        yPercent: 0,
+        rotateX: 0,
+        opacity: 1,
+        scale: 1,
+        filter: "blur(0px)",
+        stagger: { each: 0.045, from: "start" },
+        duration: 1.2,
+        ease: "power4.out",
+      },
+      0.2
+    );
+
+    tl.to(
+      suffixChars,
+      {
+        yPercent: 0,
+        rotateX: 0,
+        opacity: 1,
+        scale: 1,
+        filter: "blur(0px)",
+        stagger: { each: 0.065, from: "start" },
+        duration: 0.75,
+        ease: "power3.out",
+      },
+      0.5
+    );
+
+    tl.to(
+      underline,
+      {
+        scaleX: 1,
+        opacity: 1,
+        duration: 0.6,
+        ease: "expo.out",
+      },
+      1.7
+    );
+
+    chars.forEach((char, index) => {
+      const isPrefix = index < prefixChars.length;
+      const localIndex = isPrefix ? index : index - prefixChars.length;
+      const landingTime = isPrefix
+        ? 0.2 + localIndex * 0.045 + 0.72
+        : 0.5 + localIndex * 0.065 + 0.42;
+
+      tl.to(
+        char,
+        {
+          textShadow: "0 0 24px rgba(123,45,38,0.5)",
+          duration: 0.15,
+          yoyo: true,
+          repeat: 1,
+          ease: "sine.inOut",
+        },
+        landingTime
+      );
+    });
+
+    tl.to(
+      sweep,
+      {
+        xPercent: 130,
+        opacity: 0.55,
+        duration: 1.15,
+        ease: "power2.inOut",
+      },
+      0.72
+    );
+
+    tl.to(sweep, { opacity: 0, duration: 0.22 }, 1.65);
+
+    // Hold after the underline so the full mark can be read.
+    tl.to({}, { duration: 1.0 }, 2.3);
+
+    tl.to(chars, {
+      yPercent: -116,
+      rotateX: -46,
+      opacity: 0,
+      scale: 0.96,
+      filter: "blur(4px)",
+      stagger: { each: 0.022, from: "start" },
+      duration: 0.42,
+      ease: "power3.in",
+    }, 3.3);
+
+    tl.to(
+      underline,
+      {
+        scaleX: 0,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+      },
+      "-=0.38"
+    );
+
+    tl.to(
+      glow,
+      {
+        opacity: 0,
+        scale: 1.12,
+        duration: 0.5,
+        ease: "sine.in",
+      },
+      "-=0.32"
+    );
+
     tl.to(
       splash,
       {
         clipPath: "inset(0 0 100% 0)",
-        duration: 0.45,
+        duration: 0.7,
         ease: "power3.inOut",
-        onComplete: () => {
-          sessionStorage.setItem("828-splash-seen", "1");
-          dismiss();
-        },
+        onComplete: dismiss,
       },
-      "-=0.06"
+      3.3
     );
 
     return () => {
@@ -154,123 +221,150 @@ export default function SplashScreen() {
         zIndex: 9980,
         background: "var(--gradient-splash-vertical)",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         opacity: 0,
         pointerEvents: "auto",
       }}
     >
-      {/* Gradient ignition overlay — radial bloom behind text */}
       <div
-        aria-hidden
+        aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
-          background: `radial-gradient(circle at 50% 50%, rgba(123,45,38,${(ignitionProgress * 0.22).toFixed(3)}), transparent 70%)`,
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 34%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        ref={glowRef}
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          width: "min(48vw, 440px)",
+          aspectRatio: "1 / 0.55",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(123,45,38,0.28), rgba(123,45,38,0.08) 42%, transparent 72%)",
+          filter: "blur(18px)",
           pointerEvents: "none",
         }}
       />
 
-      {/* "828 Construction" — ONE LINE, Space Grotesk Bold, V3 with perspective + rotateX */}
       <div
         style={{
-          display: "flex",
-          alignItems: "baseline",
-          userSelect: "none",
-          gap: 0,
-          perspective: "800px",
+          position: "relative",
+          width: "min(90vw, 720px)",
+          minWidth: 260,
+          overflow: "hidden",
+          padding: "0.5rem 0 0.72rem",
+          perspective: "900px",
           perspectiveOrigin: "50% 50%",
+          userSelect: "none",
         }}
       >
-        {/* "828" word — relative wrapper holds the maroon underline */}
-        <div style={{ position: "relative", display: "inline-block", whiteSpace: "nowrap" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-space-grotesk), sans-serif",
-              fontWeight: 700,
-              fontSize: "clamp(2.4rem, 7vw, 6.5rem)",
-              color: "#fff",
-              lineHeight: 1,
-              letterSpacing: "-0.02em",
-              display: "flex",
-              alignItems: "baseline",
-            }}
-          >
-            {CHARS_828.map((char, i) => (
-              <span
-                key={i}
-                style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
-              >
-                <span
-                  ref={(el) => { chars828Refs.current[i] = el; }}
-                  style={{ display: "inline-block", transformStyle: "preserve-3d" }}
-                >
-                  {char}
-                </span>
-              </span>
-            ))}
-          </div>
-
-          {/* Maroon underline — scaleX 0→1 from left */}
-          <div
-            ref={underlineRef}
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              bottom: "-5px",
-              left: "2%",
-              right: "2%",
-              height: "3px",
-              background: "var(--color-accent)",
-              transformOrigin: "left",
-            }}
-          />
-        </div>
-
-        {/* Space between "828" and "Construction" */}
-        <span
-          style={{
-            fontFamily: "var(--font-space-grotesk), sans-serif",
-            fontWeight: 700,
-            fontSize: "clamp(2.4rem, 7vw, 6.5rem)",
-            display: "inline-block",
-            width: "0.3em",
-          }}
-          aria-hidden="true"
-        />
-
-        {/* "Construction" word — inline block, nowrap prevents mid-word break */}
         <div
           style={{
-            fontFamily: "var(--font-space-grotesk), sans-serif",
-            fontWeight: 700,
-            fontSize: "clamp(2.4rem, 7vw, 6.5rem)",
-            color: "#fff",
-            lineHeight: 1,
-            letterSpacing: "-0.02em",
+            position: "relative",
             display: "flex",
             alignItems: "baseline",
+            justifyContent: "center",
+            width: "100%",
             whiteSpace: "nowrap",
+            color: "#fff",
+            fontFamily: "var(--font-space-grotesk), sans-serif",
+            fontWeight: 700,
+            lineHeight: 0.92,
+            letterSpacing: "0",
+            fontSize: "clamp(1.14rem, 4.25vw, 3rem)",
+            textTransform: "uppercase",
           }}
         >
-          {CHARS_CONSTRUCTION.map((char, i) => (
-            <span
-              key={i}
-              style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
-            >
+          <span
+            style={{
+              position: "relative",
+              display: "inline-block",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {PREFIX_CHARS.map((char, i) => (
               <span
-                ref={(el) => { charsConstrRefs.current[i] = el; }}
-                style={{ display: "inline-block", transformStyle: "preserve-3d" }}
+                key={`prefix-${char}-${i}`}
+                ref={(el) => {
+                  prefixCharRefs.current[i] = el;
+                }}
+                style={{
+                  display: "inline-block",
+                  transformStyle: "preserve-3d",
+                  willChange: "transform, opacity, filter",
+                }}
               >
                 {char}
               </span>
-            </span>
-          ))}
+            ))}
+            <span
+              ref={underlineRef}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: "-0.18em",
+                height: "0.09em",
+                background: "#fff",
+                transformOrigin: "left center",
+                pointerEvents: "none",
+              }}
+            />
+          </span>
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-block",
+              width: "0.28em",
+              flex: "0 0 auto",
+            }}
+          />
+          <span
+            style={{
+              display: "inline-block",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {SUFFIX_CHARS.map((char, i) => (
+              <span
+                key={`suffix-${char}-${i}`}
+                ref={(el) => {
+                  suffixCharRefs.current[i] = el;
+                }}
+                style={{
+                  display: "inline-block",
+                  transformStyle: "preserve-3d",
+                  willChange: "transform, opacity, filter",
+                }}
+              >
+                {char}
+              </span>
+            ))}
+          </span>
+          <div
+            ref={sweepRef}
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: "-35% auto -35% 0",
+              width: "32%",
+              transform: "skewX(-18deg)",
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.42), transparent)",
+              mixBlendMode: "screen",
+              pointerEvents: "none",
+            }}
+          />
         </div>
       </div>
 
-      {/* Skip button — bottom right, subtle */}
       <button
         onClick={skip}
         aria-label="Skip intro"
@@ -281,7 +375,7 @@ export default function SplashScreen() {
           fontFamily: "var(--font-space-mono), monospace",
           fontSize: "9px",
           fontWeight: 400,
-          color: "rgba(255,255,255,0.22)",
+          color: "rgba(255,255,255,0.24)",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           background: "none",
@@ -291,13 +385,13 @@ export default function SplashScreen() {
           transition: "color 0.2s",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)";
+          e.currentTarget.style.color = "rgba(255,255,255,0.58)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.22)";
+          e.currentTarget.style.color = "rgba(255,255,255,0.24)";
         }}
       >
-        Skip ↓
+        Skip
       </button>
     </div>
   );
