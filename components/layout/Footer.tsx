@@ -24,6 +24,15 @@ const linkClass =
 const underlineClass =
   "absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-accent)] transition-transform duration-300 group-hover/link:scale-x-100";
 
+function MaroonDivider() {
+  return (
+    <div
+      aria-hidden="true"
+      className="relative z-10 h-px w-full bg-[var(--color-accent)] opacity-25"
+    />
+  );
+}
+
 function formatPhone(phone: string) {
   const digits = phone.replace(/\D/g, "");
   if (digits.length !== 10) return phone;
@@ -38,12 +47,12 @@ export default function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden bg-[#050505] text-white"
+      className="relative overflow-hidden bg-black text-white"
       data-section="footer"
     >
       <PrecisionOverlay tone="dark" opacity={0.08} className="hidden lg:block" />
 
-      <div className="relative z-10 border-y border-white/10">
+      <section className="relative z-10 bg-black" data-footer-section="cta">
         <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
           <div className="px-6 py-16 lg:px-12 lg:py-24">
             <p className="mb-5 font-labels text-[10px] uppercase tracking-[0.24em] text-white/36">
@@ -106,87 +115,93 @@ export default function Footer() {
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-y-10 px-6 py-16 md:grid-cols-2 md:gap-x-14 lg:grid-cols-[1.35fr_0.8fr_1.05fr_0.65fr] lg:gap-x-20 lg:px-12 lg:pb-24 lg:pt-[120px]">
-        <div className="border-b border-white/10 pb-10 md:border-b-0 md:pb-0">
-          <p className={eyebrowClass}>Contact</p>
-          <div className="mt-7 space-y-4">
-            <a href={`mailto:${SITE.email}`} className={`${linkClass} break-all`}>
-              {SITE.email}
-              <span className={underlineClass} />
-            </a>
-            <a href={SITE.phoneHref} className={`${linkClass} block font-numbers`}>
-              {formattedPhone}
-              <span className={underlineClass} />
-            </a>
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(SITE.address.full)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${bodyClass} block max-w-[18rem] transition-colors duration-300 hover:text-white`}
-            >
-              {streetLine}
-              <br />
-              {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
-            </a>
-            <p className="inline-flex border border-[var(--color-accent)]/55 px-3 py-2 font-labels text-[10px] uppercase tracking-[0.18em] text-white/72">
-              CA License #{SITE.license}
+      <MaroonDivider />
+
+      <section className="relative z-10 bg-[#0A0A0A]" data-footer-section="info">
+        <div className="mx-auto grid max-w-7xl gap-y-10 px-6 py-16 md:grid-cols-2 md:gap-x-14 lg:grid-cols-[1.35fr_0.8fr_1.05fr_0.65fr] lg:gap-x-20 lg:px-12 lg:pb-24 lg:pt-[120px]">
+          <div className="border-b border-white/10 pb-10 md:border-b-0 md:pb-0">
+            <p className={eyebrowClass}>Contact</p>
+            <div className="mt-7 space-y-4">
+              <a href={`mailto:${SITE.email}`} className={`${linkClass} break-all`}>
+                {SITE.email}
+                <span className={underlineClass} />
+              </a>
+              <a href={SITE.phoneHref} className={`${linkClass} block font-numbers`}>
+                {formattedPhone}
+                <span className={underlineClass} />
+              </a>
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(SITE.address.full)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${bodyClass} block max-w-[18rem] transition-colors duration-300 hover:text-white`}
+              >
+                {streetLine}
+                <br />
+                {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
+              </a>
+              <p className="inline-flex border border-[var(--color-accent)]/55 px-3 py-2 font-labels text-[10px] uppercase tracking-[0.18em] text-white/72">
+                CA License #{SITE.license}
+              </p>
+            </div>
+          </div>
+
+          <div className="border-b border-white/10 pb-10 md:border-b-0 md:pb-0">
+            <p className={eyebrowClass}>Navigate</p>
+            <nav className="mt-7 flex flex-col gap-3" aria-label="Footer navigation">
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className={linkClass}>
+                  {link.label}
+                  <span className={underlineClass} />
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="border-b border-white/10 pb-10 md:border-b-0 md:pb-0">
+            <p className={eyebrowClass}>Services</p>
+            <div className="mt-7 flex flex-col gap-3">
+              {SERVICES.map((service) => (
+                <Link
+                  key={service.slug}
+                  href={`/services/${service.slug}`}
+                  className={linkClass}
+                >
+                  {service.title}
+                  <span className={underlineClass} />
+                </Link>
+              ))}
+            </div>
+
+            <p className="mt-10 font-labels text-[10px] uppercase tracking-[0.2em] text-white/42">
+              Service area
+            </p>
+            <p className={`${bodyClass} mt-5 max-w-sm`}>{FOOTER_AREAS.join(" / ")}</p>
+          </div>
+
+          <div>
+            <p className={eyebrowClass}>Connect</p>
+            <div className="mt-7">
+              <SocialIcons />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10 px-6 py-6 lg:px-12">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <p className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/35">
+              &copy; {year} 828 Construction. All rights reserved.
+            </p>
+            <p className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/35">
+              Torrance &middot; South Bay &middot; LA County
             </p>
           </div>
         </div>
+      </section>
 
-        <div className="border-b border-white/10 pb-10 md:border-b-0 md:pb-0">
-          <p className={eyebrowClass}>Navigate</p>
-          <nav className="mt-7 flex flex-col gap-3" aria-label="Footer navigation">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className={linkClass}>
-                {link.label}
-                <span className={underlineClass} />
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        <div className="border-b border-white/10 pb-10 md:border-b-0 md:pb-0">
-          <p className={eyebrowClass}>Services</p>
-          <div className="mt-7 flex flex-col gap-3">
-            {SERVICES.map((service) => (
-              <Link
-                key={service.slug}
-                href={`/services/${service.slug}`}
-                className={linkClass}
-              >
-                {service.title}
-                <span className={underlineClass} />
-              </Link>
-            ))}
-          </div>
-
-          <p className="mt-10 font-labels text-[10px] uppercase tracking-[0.2em] text-white/42">
-            Service area
-          </p>
-          <p className={`${bodyClass} mt-5 max-w-sm`}>{FOOTER_AREAS.join(" / ")}</p>
-        </div>
-
-        <div>
-          <p className={eyebrowClass}>Connect</p>
-          <div className="mt-7">
-            <SocialIcons />
-          </div>
-        </div>
-      </div>
-
-      <div className="relative z-10 border-t border-[var(--color-accent)]/30 bg-black px-6 py-6 lg:px-12">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <p className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/35">
-            &copy; {year} 828 Construction. All rights reserved.
-          </p>
-          <p className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/35">
-            Torrance &middot; South Bay &middot; LA County
-          </p>
-        </div>
-      </div>
+      <MaroonDivider />
     </footer>
   );
 }
