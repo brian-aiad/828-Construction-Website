@@ -5,15 +5,6 @@ import Link from "next/link";
 import { SITE, SERVICES } from "@/lib/constants";
 import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
-const MARQUEE_TEXT = [
-  "828 CONSTRUCTION",
-  "BUILT WITH INTENT",
-  "SOUTH BAY NATIVE",
-  `CA LICENSE #${SITE.license}`,
-  "REFINED BUILDING",
-  "ART OF CONSTRUCTION",
-];
-
 export default function Footer() {
   const [callOpen, setCallOpen] = useState(false);
   const year = new Date().getFullYear();
@@ -116,17 +107,6 @@ export default function Footer() {
             </p>
           </div>
         </a>
-      </div>
-
-      <div className="relative z-10 overflow-hidden border-b border-white/10 py-5" aria-hidden="true">
-        <div
-          className="flex w-max gap-10 whitespace-nowrap font-display text-[clamp(3rem,10vw,10rem)] font-bold uppercase leading-none text-white/[0.055]"
-          style={{ animation: "marqueeScroll 48s linear infinite" }}
-        >
-          {Array.from({ length: 6 }).flatMap((_, copy) =>
-            MARQUEE_TEXT.map((item) => <span key={`${copy}-${item}`}>{item}</span>)
-          )}
-        </div>
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-12 lg:grid-cols-[1fr_1fr_2fr] lg:px-12">
