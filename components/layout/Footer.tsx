@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { SITE, SERVICES } from "@/lib/constants";
 import SocialIcons from "@/components/footer/SocialIcons";
@@ -32,57 +32,16 @@ function formatPhone(phone: string) {
 
 export default function Footer() {
   const [callOpen, setCallOpen] = useState(false);
-  const footerRef = useRef<HTMLElement>(null);
-  const watermarkRef = useRef<HTMLDivElement>(null);
   const year = new Date().getFullYear();
   const formattedPhone = formatPhone(SITE.phone);
   const streetLine = SITE.address.street.replace(" STE", ", STE");
 
-  useEffect(() => {
-    const footer = footerRef.current;
-    const watermark = watermarkRef.current;
-    if (!footer || !watermark) return;
-
-    const handleMove = (event: MouseEvent) => {
-      const rect = footer.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width - 0.5) * 3;
-      const y = ((event.clientY - rect.top) / rect.height - 0.5) * 3;
-      watermark.style.setProperty("--footer-wm-x", `${x.toFixed(2)}%`);
-      watermark.style.setProperty("--footer-wm-y", `${y.toFixed(2)}%`);
-    };
-
-    const handleLeave = () => {
-      watermark.style.setProperty("--footer-wm-x", "0%");
-      watermark.style.setProperty("--footer-wm-y", "0%");
-    };
-
-    footer.addEventListener("mousemove", handleMove);
-    footer.addEventListener("mouseleave", handleLeave);
-
-    return () => {
-      footer.removeEventListener("mousemove", handleMove);
-      footer.removeEventListener("mouseleave", handleLeave);
-    };
-  }, []);
-
   return (
     <footer
-      ref={footerRef}
       className="relative overflow-hidden bg-[#050505] text-white"
       data-section="footer"
     >
       <PrecisionOverlay tone="dark" opacity={0.08} className="hidden lg:block" />
-      <div
-        ref={watermarkRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-[-0.22em] left-1/2 z-0 whitespace-nowrap font-display text-[clamp(5rem,16vw,14rem)] font-bold uppercase leading-none text-white/[0.025] transition-transform duration-500 ease-out"
-        style={{
-          transform:
-            "translate(calc(-50% + var(--footer-wm-x, 0%)), var(--footer-wm-y, 0%))",
-        }}
-      >
-        828 Construction
-      </div>
 
       <div className="relative z-10 border-y border-white/10">
         <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
