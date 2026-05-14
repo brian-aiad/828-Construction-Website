@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { SERVICE_AREAS, SITE, SERVICES } from "@/lib/constants";
+import { SITE, SERVICES } from "@/lib/constants";
 import SocialIcons from "@/components/footer/SocialIcons";
 import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
 
@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
-const FOOTER_AREAS = SITE.serviceArea.filter((area) => SERVICE_AREAS.includes(area));
+const FOOTER_AREAS = SITE.serviceArea;
 
 const eyebrowClass =
   "font-labels text-[11px] uppercase tracking-[0.2em] text-white/50";
