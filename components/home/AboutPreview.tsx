@@ -6,16 +6,17 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
-import { FOUNDING_YEAR } from "@/lib/constants";
+import { EXPERIENCE_SINCE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
 import { useMagnetic } from "@/lib/hooks/useMagnetic";
+import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // V3 About Preview — SplitType char clip-reveal on headline + ConstructionLineSilhouette backdrop.
 // Glass/depth overlay per PATTERNS.md to prevent flat look.
-// Pulls from FOUNDING_YEAR constant (2004 — never hardcoded).
+// Pulls from EXPERIENCE_SINCE constant (2004 — Joe's field experience, not company founding).
 
 export default function AboutPreview() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -29,6 +30,7 @@ export default function AboutPreview() {
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
+    const headlineEl = textRefs.current[1] as HTMLHeadingElement | null;
 
     const ctx = gsap.context(() => {
       // Set initial states (Fix 14)
@@ -71,7 +73,6 @@ export default function AboutPreview() {
       });
 
       // Headline SplitType char clip-reveal (curtain wipe, not fade)
-      const headlineEl = textRefs.current[1] as HTMLHeadingElement | null;
       if (headlineEl) {
         splitFrameRef.current = requestAnimationFrame(() => {
           if (!headlineEl.isConnected) return;
@@ -104,7 +105,7 @@ export default function AboutPreview() {
 
     return () => {
       cancelAnimationFrame(splitFrameRef.current);
-      if (splitRef.current && textRefs.current[1]?.isConnected) {
+      if (splitRef.current && headlineEl?.isConnected) {
         try { splitRef.current.revert(); } catch {}
       }
       splitRef.current = null;
@@ -119,6 +120,7 @@ export default function AboutPreview() {
       style={{ minHeight: "min(90vh, 700px)" }}
       data-section="about-preview"
     >
+      <DraftingMotionLayer intensity="quiet" className="opacity-35" />
       {/* Glass/depth noise overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -152,12 +154,15 @@ export default function AboutPreview() {
             data-gsap-reveal="true"
           >
             <Image
-              src="/images/chatpics/05_about_founder_workbench.png"
+              src="/images/generated/home-about-workbench.png"
               alt="828 Construction — craftsmanship"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
-              style={{ filter: "contrast(1.05) saturate(1.08)" }}
+              style={{
+                filter: "contrast(1.05) saturate(1.08)",
+                objectPosition: "18% center",
+              }}
             />
             {/* Est. badge */}
             <div
@@ -165,17 +170,8 @@ export default function AboutPreview() {
               style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.6)" }}
             >
               <span className="font-labels text-[8px] text-white/50 tracking-[0.22em] uppercase">
-                Est. {FOUNDING_YEAR}
+                Since {EXPERIENCE_SINCE}
               </span>
-            </div>
-            <div className="absolute -bottom-10 -left-8 hidden h-44 w-44 pointer-events-none lg:block">
-              <Image
-                src="/images/chatpics/06_about_craft_material_stack_png.png"
-                alt=""
-                fill
-                sizes="11rem"
-                className="object-contain"
-              />
             </div>
           </div>
 
@@ -191,8 +187,8 @@ export default function AboutPreview() {
 
             <h2
               ref={(el) => { textRefs.current[1] = el as HTMLElement; }}
-              className="font-display font-normal text-white leading-tight mb-6"
-              style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", opacity: 0 }}
+              className="font-editorial font-semibold text-white leading-[0.94] mb-6"
+              style={{ fontSize: "clamp(3rem, 5.2vw, 5.4rem)", opacity: 0 }}
             >
               Two decades building what others overlook.
             </h2>
@@ -202,10 +198,10 @@ export default function AboutPreview() {
               className="font-body text-white/55 leading-relaxed mb-8"
               style={{ fontSize: "clamp(0.9rem, 1.3vw, 1rem)", opacity: 0, maxWidth: "42ch" }}
             >
-              Founded in {FOUNDING_YEAR}, 828 Construction is guided by a founder with over
-              two decades of hands-on residential construction experience — built working
-              directly alongside skilled tradesmen. That knowledge shapes every decision,
-              from structural integrity to refined finishing details.
+              Joe has been in the field since {EXPERIENCE_SINCE} — over two decades of
+              hands-on residential construction experience built working directly alongside
+              skilled tradesmen. That knowledge shapes every 828 decision, from structural
+              integrity to refined finishing details.
             </p>
 
             {/* Maroon hairline */}

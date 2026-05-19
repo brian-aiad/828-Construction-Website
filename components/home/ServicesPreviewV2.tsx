@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICES } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { useTilt } from "@/lib/hooks/useTilt";
+import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,7 +18,7 @@ gsap.registerPlugin(ScrollTrigger);
 // Pattern B (clip-path punch-in + rotateY) on scroll enter. Fix 20 (hover cleanup).
 
 const SERVICE_IMAGES: Record<string, string> = {
-  adu: "/images/chatpics/08_adu_hero_finished_unit.png",
+  adu: "/images/projects/service-adu.jpg",
   remediation: "/images/chatpics/10_remediation_diagnostic_hero.png",
   consulting: "/images/chatpics/03_home_active_listening_table.png",
 };
@@ -30,6 +31,7 @@ const SERVICE_TAGLINES: Record<string, string> = {
 
 export default function ServicesPreviewV2() {
   const sectionRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const hoverCleanups = useRef<Array<() => void>>([]);
 
@@ -46,29 +48,66 @@ export default function ServicesPreviewV2() {
     if (!cards.length) return;
 
     const ctx = gsap.context(() => {
-      // Set GSAP initial states (Fix 14 — never in JSX)
-      gsap.set(cards, { clipPath: "inset(8% 4% 8% 4%)", opacity: 0, rotateY: 12 });
-
       if (!AnimationController.shouldAnimate()) {
         // Mobile: immediate reveal
-        gsap.set(cards, { clipPath: "inset(0%)", opacity: 1, rotateY: 0 });
+        gsap.set(cards, { clipPath: "inset(0%)", opacity: 1, rotationY: 0, y: 0 });
         return;
       }
 
-      // Pattern B: clip-path punch-in + rotateY channel on scroll enter
-      gsap.to(cards, {
-        clipPath: "inset(0%)",
-        opacity: 1,
-        rotateY: 0,
-        stagger: { each: 0.12, from: "start" },
-        duration: 1.05,
-        ease: "power3.out",
+      const imageEls = cards
+        .map((card) => card.querySelector<HTMLElement>(".svc-card-img"))
+        .filter(Boolean) as HTMLElement[];
+      const textEls = cards
+        .flatMap((card) => Array.from(card.querySelectorAll<HTMLElement>(".svc-card-copy > *")));
+
+      gsap.set(cards, {
+        clipPath: "inset(16% 5% 16% 5%)",
+        opacity: 0,
+        y: 58,
+        rotationY: 10,
+      });
+      gsap.set(imageEls, { scale: 1.14, yPercent: 4 });
+      gsap.set(textEls, { y: 14, opacity: 0 });
+
+      const revealTl = gsap.timeline({
+        defaults: { ease: "power3.out" },
         scrollTrigger: {
-          trigger: section,
-          start: "top 82%",
-          once: true,
+          trigger: gridRef.current ?? section,
+          start: "top 92%",
+          end: "top 32%",
+          scrub: 0.85,
         },
       });
+
+      revealTl
+        .to(cards, {
+          clipPath: "inset(0%)",
+          opacity: 1,
+          y: 0,
+          rotationY: 0,
+          stagger: { each: 0.22, from: "start" },
+          duration: 1.35,
+        })
+        .to(
+          imageEls,
+          {
+            scale: 1,
+            yPercent: 0,
+            stagger: { each: 0.22, from: "start" },
+            duration: 1.45,
+          },
+          "<0.05"
+        )
+        .to(
+          textEls,
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.045,
+            duration: 0.75,
+          },
+          "<0.42"
+        );
 
       // Hover: image scale + maroon border + z-lift + box-shadow (Fix 20 — store removers)
       if (window.matchMedia("(hover: hover)").matches) {
@@ -109,32 +148,40 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="bg-black py-20 lg:py-28"
+      className="relative overflow-hidden bg-black py-20 lg:py-28"
       data-section="services-v2"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <DraftingMotionLayer intensity="standard" className="opacity-35" />
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section header */}
-        <div className="flex items-end justify-between mb-10 lg:mb-14">
+        <div className="mb-10 grid gap-8 lg:mb-14 lg:grid-cols-[0.92fr_1fr] lg:items-end">
           <div>
             <p className="font-labels text-[10px] text-white/40 tracking-[0.25em] uppercase mb-3">
               What we build
             </p>
-            <h2 className="font-display font-normal text-white leading-tight"
-              style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)" }}>
+            <h2 className="font-editorial font-semibold text-white leading-[0.92]"
+              style={{ fontSize: "clamp(3rem, 6vw, 6rem)" }}>
               Three disciplines.<br className="hidden lg:block" /> One standard.
             </h2>
           </div>
-          <Link
-            href="/services"
-            className="hidden lg:flex items-center gap-2 font-labels text-[11px] text-white/40 tracking-[0.18em] uppercase hover:text-white transition-colors group"
-          >
-            All Services
-            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-          </Link>
+          <div className="max-w-xl border-l border-white/10 pl-6 lg:justify-self-end lg:pl-8">
+            <p className="font-body text-base leading-relaxed text-white/58 lg:text-lg">
+              A premium build starts before the first cut. 828 combines field
+              knowledge, planning discipline, and clean execution across the
+              work that matters most to South Bay homeowners.
+            </p>
+            <Link
+              href="/services"
+              className="mt-7 hidden w-fit items-center gap-2 border-b border-white/15 pb-1 font-labels text-[11px] uppercase tracking-[0.18em] text-white/45 transition-colors hover:text-white lg:flex group"
+            >
+              All Services
+              <span className="transition-transform duration-200 group-hover:translate-x-1">-&gt;</span>
+            </Link>
+          </div>
         </div>
 
         {/* Asymmetric grid: ADU tall left | Remediation + Consulting stacked right */}
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
+        <div ref={gridRef} className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
 
           {/* ADU — tall featured card with 3D tilt */}
           <div
@@ -166,11 +213,11 @@ export default function ServicesPreviewV2() {
               aria-hidden="true"
             />
 
-            <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8 z-10">
+            <div className="svc-card-copy absolute bottom-0 left-0 right-0 p-6 lg:p-8 z-10">
               <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-2">
                 {adu.short}
               </p>
-              <h3 className="font-display font-bold text-white tracking-tight mb-2"
+              <h3 className="font-editorial font-semibold text-white tracking-normal mb-2"
                 style={{ fontSize: "clamp(1.4rem, 2.8vw, 2.2rem)" }}>
                 {adu.title}
               </h3>
@@ -210,11 +257,11 @@ export default function ServicesPreviewV2() {
                 style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
                 aria-hidden="true"
               />
-              <div className="absolute bottom-0 left-0 right-0 p-5 lg:p-6 z-10">
+              <div className="svc-card-copy absolute bottom-0 left-0 right-0 p-5 lg:p-6 z-10">
                 <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
                   {remediation.short}
                 </p>
-                <h3 className="font-display font-bold text-white tracking-tight"
+                <h3 className="font-editorial font-semibold text-white tracking-normal"
                   style={{ fontSize: "clamp(1.2rem, 2.2vw, 1.8rem)" }}>
                   {remediation.title}
                 </h3>
@@ -251,11 +298,11 @@ export default function ServicesPreviewV2() {
                 style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
                 aria-hidden="true"
               />
-              <div className="absolute bottom-0 left-0 right-0 p-5 lg:p-6 z-10">
+              <div className="svc-card-copy absolute bottom-0 left-0 right-0 p-5 lg:p-6 z-10">
                 <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
                   {consulting.short}
                 </p>
-                <h3 className="font-display font-bold text-white tracking-tight"
+                <h3 className="font-editorial font-semibold text-white tracking-normal"
                   style={{ fontSize: "clamp(1.2rem, 2.2vw, 1.8rem)" }}>
                   {consulting.title}
                 </h3>

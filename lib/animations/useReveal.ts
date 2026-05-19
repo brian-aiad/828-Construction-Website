@@ -99,12 +99,9 @@ export function useReveal({
  */
 export function splitTextToLines(el: HTMLElement): HTMLSpanElement[] {
   const originalHTML = el.innerHTML;
-  const text = el.textContent ?? "";
 
   // Simple approach: split on <br> tags or newlines
-  // For real line-wrapping, we measure and group words
-  const words = text.split(" ").filter(Boolean);
-  const lineInners: HTMLSpanElement[] = [];
+  // For real line-wrapping, we measure the rendered height.
 
   // Measure line breaks by temporarily rendering
   el.innerHTML = originalHTML; // restore for measurement

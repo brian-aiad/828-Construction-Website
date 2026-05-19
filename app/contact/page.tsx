@@ -36,9 +36,6 @@ export default function ContactPage() {
   return (
     <>
       <JsonLd data={contactJsonLd} />
-      {/* Preload hero image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <link rel="preload" as="image" href="/images/contact/contact-hero.jpg" />
       <ContactContent />
       {/* Easter egg: clicking the phone number copies it to clipboard */}
       <PhoneCopyToast />

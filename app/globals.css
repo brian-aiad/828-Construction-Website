@@ -38,6 +38,7 @@
 
   /* Font families wired to CSS vars set by next/font */
   --font-family-display: var(--font-space-grotesk);
+  --font-family-editorial: var(--font-editorial);
   --font-family-numbers: var(--font-ibm-plex-mono);
   --font-family-labels: var(--font-space-mono);
   --font-family-body: var(--font-inter);
@@ -277,6 +278,22 @@ h1, h2, h3 {
   .animate-brand-marquee {
     animation: none !important;
   }
+}
+
+.font-editorial {
+  font-family: var(--font-family-editorial), Georgia, serif;
+  font-feature-settings: "liga" 1, "kern" 1;
+  letter-spacing: 0;
+}
+
+.premium-object {
+  filter: drop-shadow(0 28px 36px rgba(0, 0, 0, 0.34));
+  pointer-events: none;
+  user-select: none;
+}
+
+.premium-object-subtle {
+  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.22));
 }
 
 /* ── Copper accent utilities (retained as fallback) ──────────────────────── */

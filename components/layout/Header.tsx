@@ -113,7 +113,7 @@ export default function Header() {
                 alt="828 Construction"
                 width={360}
                 height={48}
-                className="h-6 w-auto sm:h-7 lg:h-9 xl:h-10"
+                className="h-5 w-auto sm:h-6 lg:h-8 xl:h-9"
                 priority
               />
             </Link>
@@ -336,7 +336,7 @@ export default function Header() {
             >
               {[...Array(2)].map((_, i) => (
                 <span key={i} style={{ display: "flex", alignItems: "center", gap: "2.5rem", paddingRight: "2.5rem" }}>
-                  {["BUILT WITH INTENT", `CA LICENSE #${SITE.license}`, "EST. 2004", "828 CONSTRUCTION", "SOUTH BAY NATIVE", "QUALITY OVER QUANTITY"].map((text, j) => (
+                  {["BUILT WITH INTENT", `CA LICENSE #${SITE.license}`, "20+ YRS EXPERIENCE", "828 CONSTRUCTION", "SOUTH BAY NATIVE", "QUALITY OVER QUANTITY"].map((text, j) => (
                     <span key={j} style={{ fontFamily: "var(--font-space-mono)", fontSize: 9, letterSpacing: "0.18em", color: "var(--color-accent)", textTransform: "uppercase", whiteSpace: "nowrap" }}>
                       {text}
                     </span>

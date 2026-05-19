@@ -85,8 +85,13 @@ export default function ContactForm() {
     const errors = validate(data);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      const firstField = form.querySelector<HTMLElement>("[aria-invalid='true']");
-      firstField?.focus();
+      const firstInvalidName = ["name", "phone", "email", "service", "message"].find(
+        (field) => errors[field as keyof FieldErrors]
+      );
+      if (firstInvalidName) {
+        const firstField = form.elements.namedItem(firstInvalidName) as HTMLElement | null;
+        firstField?.focus();
+      }
       return;
     }
     setFieldErrors({});
@@ -159,7 +164,7 @@ export default function ContactForm() {
       className="space-y-6"
       aria-label="Contact form"
     >
-      {/* Honeypot — traps bots, invisible to real users */}
+      {/* Honeypot: traps bots, invisible to real users. */}
       <div
         aria-hidden="true"
         style={{
@@ -243,7 +248,7 @@ export default function ContactForm() {
         >
           Email{" "}
           <span className="text-gray-600 normal-case tracking-normal font-body text-xs">
-            — optional
+            - optional
           </span>
         </label>
         <input
@@ -320,7 +325,7 @@ export default function ContactForm() {
           aria-invalid={!!fieldErrors.message || undefined}
           aria-describedby={fieldErrors.message ? "cf-message-err" : undefined}
           className={`${inputClass("message")} resize-none`}
-          placeholder="Location, scope, timeline, and any specific concerns…"
+          placeholder="Location, scope, timeline, and any specific concerns..."
         />
         {fieldErrors.message && (
           <p
@@ -350,7 +355,7 @@ export default function ContactForm() {
         {state === "loading" ? (
           <>
             <Spinner />
-            Sending…
+            Sending...
           </>
         ) : (
           <>
@@ -363,7 +368,7 @@ export default function ContactForm() {
       </button>
 
       <p className="text-[10px] text-gray-600 text-center font-labels tracking-wide">
-        Typically respond within 24 hours · For urgent work, call{" "}
+        Typically respond within 24 hours / For urgent work, call{" "}
         <a
           href={SITE.phoneHref}
           className="text-gray-500 hover:text-[var(--color-accent)] transition-colors"

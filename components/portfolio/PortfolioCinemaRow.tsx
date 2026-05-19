@@ -80,8 +80,6 @@ export default function PortfolioCinemaRow({ photos }: PortfolioCinemaRowProps) 
     return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
   }, [photos.length]);
 
-  const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
-
   return (
     <section
       ref={sectionRef}

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { ease } from "@/lib/animations";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
@@ -16,30 +16,25 @@ interface FadeInProps {
 }
 
 const directionOffset: Record<Direction, object> = {
-  up:    { y: 48 },
-  down:  { y: -48 },
-  left:  { x: 48 },
-  right: { x: -48 },
+  up:    { y: 32 },
+  down:  { y: -32 },
+  left:  { x: 32 },
+  right: { x: -32 },
   none:  {},
 };
 
 export default function FadeIn({
   children,
   delay = 0,
-  duration = 0.8,
+  duration = 0.72,
   className = "",
   direction = "up",
   once = true,
 }: FadeInProps) {
-  // Assume animations are enabled until the effect says otherwise.
-  // This means desktop always starts with animation; mobile removes it after hydration.
-  const [animate, setAnimate] = useState(true);
-
-  useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (isMobile || reducedMotion) setAnimate(false);
-  }, []);
+  const [animate] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.innerWidth >= 768 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  });
 
   if (!animate) {
     return <div className={className}>{children}</div>;

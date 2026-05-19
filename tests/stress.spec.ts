@@ -289,7 +289,7 @@ test.describe("Keyboard navigation", () => {
 
       // Nav should show links after open (look for visible link in menu overlay)
       const visibleLink = page.locator("a[href='/about'], a[href='/services'], a[href='/contact']").first();
-      const isVisible = await visibleLink.isVisible().catch(() => false);
+      await visibleLink.isVisible().catch(() => false);
       // Don't fail if menu implementation differs — just verify page didn't crash
       expect(await page.locator("body").isVisible()).toBe(true);
 

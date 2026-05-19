@@ -6,7 +6,7 @@ import RemediationServiceContent from "@/components/services/remediation/Remedia
 export const metadata: Metadata = {
   title: "Construction Remediation Torrance | Mold & Structural Repair | 828 Construction",
   description:
-    "Expert remediation services in Torrance: mold remediation, foundation repair, structural damage, and building defect correction. Est. 2004. CA License #1141119.",
+    "Expert remediation services in Torrance: mold remediation, foundation repair, structural damage, and building defect correction. 20+ years experience. CA License #1141119.",
   keywords: [
     "remediation contractor Torrance",
     "mold remediation Torrance",

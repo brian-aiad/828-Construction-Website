@@ -17,7 +17,7 @@ export default function RightScrollProgress() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed right-0 top-0 z-[9999] h-screen w-[2px]"
+      className="pointer-events-none fixed right-0 top-0 z-[9999] hidden h-screen w-[2px] lg:block"
     >
       <div
         className="origin-top"

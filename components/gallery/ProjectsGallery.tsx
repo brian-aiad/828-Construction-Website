@@ -96,7 +96,7 @@ function ProjectCard({ project, index, onClick }: { project: Project; index: num
       wrap.removeEventListener("mouseleave", onLeave);
       try { ctx.revert(); } catch {}
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [index]);
 
   return (
     <motion.div
@@ -219,7 +219,7 @@ function FeaturedCard({ project, index, onClick }: { project: Project; index: nu
       wrap.removeEventListener("mouseleave", onLeave);
       try { ctx.revert(); } catch {}
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <motion.div

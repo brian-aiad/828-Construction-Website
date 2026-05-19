@@ -1,1008 +1,561 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
-import { SITE, PROJECTS, PROCESS_STEPS_V2, Project } from "@/lib/constants";
+import { PROJECTS, Project, ProjectCategory, SITE } from "@/lib/constants";
 import Lightbox from "@/components/gallery/Lightbox";
-import ImageWithFallback from "@/components/ui/ImageWithFallback";
-import { AnimationController } from "@/utils/animationControl";
-import { CompassSilhouette } from "@/components/system/silhouettes";
-import PortfolioCinemaRow from "@/components/portfolio/PortfolioCinemaRow";
-import PrecisionOverlay from "@/components/shared/PrecisionOverlay";
+import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── Gallery layout data ──────────────────────────────────────────────────────
-// Mixed-size grid: NOT uniform 3-up. Rows alternate between 2:1, full-width, 3-equal.
-// Signature: sequential row-by-row reveal — portfolio "reads" like a visual timeline.
+type Filter = "All" | ProjectCategory;
 
-type RowLayout =
-  | { type: "split21"; wide: Project; narrow: Project }
-  | { type: "triple"; a: Project; b: Project; c: Project }
-  | { type: "split12"; narrow: Project; wide: Project };
+const CATEGORIES: Filter[] = ["All", "ADU Construction", "Remediation", "Consulting"];
+const INDEX_IDS = [3, 12, 10, 13, 1];
+const ARCHIVE_IDS = [3, 12, 8, 13, 1, 10, 15, 14, 4];
+const WALL_IDS = [3, 12, 8, 13, 15, 10, 4, 14, 1, 2, 5, 7, 6, 9];
 
-const P = PROJECTS;
-
-// "full" row (P[2]) removed — now lives in PortfolioCinemaRow + PortfolioFeatured
-const galleryRows: RowLayout[] = [
-  { type: "split21", wide: P[10], narrow: P[0] },
-  { type: "triple",  a: P[11], b: P[9],  c: P[8] },
-  { type: "split12", narrow: P[7], wide: P[12] },
-  { type: "triple",  a: P[3],  b: P[1],  c: P[4] },
-  { type: "split21", wide: P[13], narrow: P[6] },
+const contactSheetLayout = [
+  "col-span-2 row-span-2 md:col-span-4 md:row-span-2",
+  "col-span-1 row-span-1 md:col-span-2 md:row-span-1",
+  "col-span-1 row-span-1 md:col-span-2 md:row-span-1",
+  "col-span-2 row-span-2 md:col-span-3 md:row-span-2",
+  "col-span-2 row-span-1 md:col-span-3 md:row-span-1",
+  "col-span-1 row-span-1 md:col-span-2 md:row-span-1",
+  "col-span-1 row-span-1 md:col-span-2 md:row-span-1",
+  "col-span-1 row-span-1 md:col-span-2 md:row-span-1",
+  "col-span-1 row-span-1 md:col-span-2 md:row-span-1",
 ];
 
-// Photos for the horizontal cinema strip (Task 1)
-const cinemaPhotos = [
-  { image: P[2].image,  title: P[2].title,  location: P[2].location,  category: P[2].category  },
-  { image: P[8].image,  title: P[8].title,  location: P[8].location,  category: P[8].category  },
-  { image: P[9].image,  title: P[9].title,  location: P[9].location,  category: P[9].category  },
-];
-
-// ─── Gallery image tile (Task 2 upgrades) ────────────────────────────────────
-
-function GalleryTile({
-  project,
-  height,
-  tileIndex,
-  onClick,
-}: {
-  project: Project;
-  height: string;
-  tileIndex: number;
-  onClick: (p: Project) => void;
-}) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const imgInnerRef = useRef<HTMLDivElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
-  const captionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    const inner = imgInnerRef.current;
-    const bar = barRef.current;
-    const caption = captionRef.current;
-    if (!wrap || !inner || !bar) return;
-
-    // Fix 14: set initial states before gate
-    gsap.set(wrap, { clipPath: "inset(100% 0% 0% 0%)", opacity: 0, y: 0,
-      boxShadow: "0 0px 0px 0px rgba(123, 45, 38, 0)" });
-    gsap.set(bar, { scaleX: 0, transformOrigin: "left" });
-    if (caption) gsap.set(caption, { y: 0, opacity: 0.85 });
-
-    if (!AnimationController.shouldAnimate()) {
-      // Fix 15: mobile — clear immediately
-      gsap.set(wrap, { clipPath: "inset(0%)", opacity: 1 });
-      if (caption) gsap.set(caption, { opacity: 1 });
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      // Task 2: curtain reveal scrub-tied (Fix 15 pattern)
-      gsap.to(wrap, {
-        clipPath: "inset(0% 0% 0% 0%)", opacity: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: wrap,
-          start: "top 95%",
-          end: "top 52%",
-          scrub: 1.2,
-        },
-      });
-
-      // Pattern F: parallax image inner
-      gsap.to(inner, {
-        yPercent: -10, ease: "none",
-        scrollTrigger: { trigger: wrap, start: "top bottom", end: "bottom top", scrub: true },
-      });
-    }, wrapRef);
-
-    // Task 2: hover lift + ghost shadow + caption slide
-    const onEnter = () => {
-      gsap.to(inner, { scale: 1.06, duration: 0.7, ease: "power2.out" });
-      gsap.to(bar, { scaleX: 1, duration: 0.3, ease: "power2.out" });
-      gsap.to(wrap, {
-        y: -6, duration: 0.5, ease: "power2.out",
-        boxShadow: "0 30px 60px -20px rgba(123, 45, 38, 0.5)",
-      });
-      if (caption) gsap.to(caption, { y: -8, opacity: 1, duration: 0.5, ease: "power2.out" });
-    };
-    const onLeave = () => {
-      gsap.to(inner, { scale: 1.0, duration: 0.7, ease: "power2.out" });
-      gsap.to(bar, { scaleX: 0, duration: 0.3, ease: "power2.in" });
-      gsap.to(wrap, {
-        y: 0, duration: 0.5, ease: "power2.out",
-        boxShadow: "0 0px 0px 0px rgba(123, 45, 38, 0)",
-      });
-      if (caption) gsap.to(caption, { y: 0, opacity: 0.85, duration: 0.5, ease: "power2.out" });
-    };
-
-    if (window.matchMedia("(hover: hover)").matches) {
-      wrap.addEventListener("mouseenter", onEnter);
-      wrap.addEventListener("mouseleave", onLeave);
-    }
-
-    return () => {
-      wrap.removeEventListener("mouseenter", onEnter);
-      wrap.removeEventListener("mouseleave", onLeave);
-      try { ctx.revert(); } catch {}
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <div
-      ref={wrapRef}
-      className="relative overflow-hidden group cursor-pointer bg-[#111] h-full"
-      style={{ minHeight: height }}
-      onClick={() => onClick(project)}
-      data-gsap-reveal="true"
-    >
-      <div
-        ref={imgInnerRef}
-        className="absolute inset-x-0"
-        style={{ top: "-7.5%", height: "115%" }}
-      >
-        <ImageWithFallback
-          src={project.image}
-          alt={project.title}
-          fill
-          className="object-cover"
-          style={{ filter: "contrast(1.06) saturate(1.1)" }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          fallback={<div className="w-full h-full plate-concrete" aria-hidden="true" />}
-        />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
-
-      {/* Category badge */}
-      <div className="absolute top-4 left-4">
-        <span className="font-labels text-[8px] text-white/55 tracking-[0.2em] uppercase bg-black/60 px-2 py-1 backdrop-blur-sm">
-          {project.category}
-        </span>
-      </div>
-
-      {/* View overlay */}
-      <div
-        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100"
-        style={{ transition: "opacity 0.3s ease" }}
-      >
-        <span className="font-labels text-[10px] text-white tracking-[0.22em] uppercase bg-black/60 px-4 py-2 backdrop-blur-sm">
-          View Project
-        </span>
-      </div>
-
-      {/* Project info — caption slides on hover */}
-      <div ref={captionRef} className="absolute bottom-0 left-0 right-0 p-5">
-        <div className="font-labels text-[8px] text-white/40 tracking-[0.2em] uppercase mb-1">
-          {project.location}
-        </div>
-        <h3
-          className="font-display font-bold text-white leading-[1.04] tracking-tight"
-          style={{ fontSize: "clamp(0.9rem, 1.5vw, 1.2rem)" }}
-        >
-          {project.title}
-        </h3>
-        <p className="font-labels text-[8px] text-white/30 tracking-wide mt-1 line-clamp-1">
-          {project.spec}
-        </p>
-      </div>
-
-      {/* Maroon hover bar */}
-      <div
-        ref={barRef}
-        className="absolute bottom-0 left-0 right-0"
-        style={{ height: 2, background: "var(--color-accent)" }}
-        aria-hidden="true"
-      />
-    </div>
-  );
+function cleanText(value: string) {
+  return value
+    .replace(/\u00c2\u00b7/g, "/")
+    .replace(/\u00e2\u20ac\u201d/g, "-")
+    .replace(/\u00e2\u20ac\u201c/g, "-")
+    .replace(/\u00e2\u20ac\u2122/g, "'")
+    .replace(/\u00e2\u20ac\u0153|\u00e2\u20ac\u009d/g, '"');
 }
 
-// ─── Section: Featured full-screen project (Task 3) ───────────────────────────
+function categoryCount(category: Filter) {
+  if (category === "All") return PROJECTS.length;
+  return PROJECTS.filter((project) => project.category === category).length;
+}
 
-function PortfolioFeatured({ onOpen }: { onOpen: (p: Project) => void }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const splitRef = useRef<SplitType | null>(null);
+function projectImage(project: Project) {
+  return project.image;
+}
+
+function usePortfolioMotion() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => () => {
-    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
-    try { ctxRef.current?.revert(); } catch {}
+    try {
+      ctxRef.current?.revert();
+    } catch {}
   }, []);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    const bg = bgRef.current;
-    const hairline = hairlineRef.current;
-    const headlineEl = headlineRef.current;
-    if (!section) return;
-
-    if (!AnimationController.shouldAnimate()) {
-      if (headlineEl) gsap.set(headlineEl, { opacity: 1, y: 0 });
-      return;
-    }
-
-    let mounted = true;
-    let splitFrame = -1;
-    let featSplit: SplitType | null = null;
+    const root = rootRef.current;
+    if (
+      !root ||
+      window.innerWidth < 1024 ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) return;
 
     const ctx = gsap.context(() => {
-      // Scale 1.05 → 1.0 "settling" on entry
-      if (bg) {
-        gsap.fromTo(bg,
-          { scale: 1.05 },
+      const reveals = gsap.utils.toArray<HTMLElement>(".portfolio-reveal");
+      const tiles = gsap.utils.toArray<HTMLElement>(".portfolio-tile");
+      const lines = gsap.utils.toArray<HTMLElement>(".draw-line");
+      const contactFrames = gsap.utils.toArray<HTMLElement>(".archive-frame");
+      const indexRows = gsap.utils.toArray<HTMLElement>(".index-row");
+
+      reveals.forEach((el) => {
+        gsap.fromTo(
+          el,
+          { autoAlpha: 0, y: 26 },
           {
-            scale: 1.0, ease: "power2.out",
-            scrollTrigger: { trigger: section, start: "top 75%", end: "top 10%", scrub: 1.5 },
+            autoAlpha: 1,
+            y: 0,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 88%",
+              end: "top 58%",
+              scrub: 1.35,
+            },
           }
         );
-      }
+      });
 
-      // Maroon hairline grow
-      if (hairline) {
-        gsap.fromTo(hairline, { scaleX: 0 }, {
-          scaleX: 1, ease: "none", transformOrigin: "left",
-          scrollTrigger: { trigger: section, start: "top 85%", end: "top 55%", scrub: 1.2 },
-        });
-      }
-
-      // Char-by-char curtain reveal on headline
-      if (headlineEl) {
-        gsap.set(headlineEl, { opacity: 0 });
-        splitFrame = requestAnimationFrame(() => {
-          if (!mounted || !headlineEl.isConnected) return;
-          gsap.set(headlineEl, { opacity: 1 });
-          const split = new SplitType(headlineEl, { types: "words,chars" });
-          featSplit = split;
-          splitRef.current = split;
-          if (split.chars?.length) {
-            gsap.fromTo(split.chars,
-              { yPercent: 110, opacity: 0 },
-              {
-                yPercent: 0, opacity: 1,
-                stagger: { each: 0.022, from: "start" }, ease: "none",
-                scrollTrigger: { trigger: section, start: "top 80%", end: "top 30%", scrub: 1.1 },
-              }
-            );
+      contactFrames.forEach((el, index) => {
+        gsap.fromTo(
+          el,
+          {
+            autoAlpha: 0,
+            y: 42 + index * 3,
+            rotate: index % 2 === 0 ? -1.6 : 1.2,
+            clipPath: "inset(12% 0% 12% 0%)",
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            rotate: 0,
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 1,
+            delay: index * 0.035,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              toggleActions: "play none none reverse",
+            },
           }
-        });
-      }
+        );
 
-      // Supporting text
-      const textEls = section.querySelectorAll<HTMLElement>(".featured-fade");
-      if (textEls.length) {
-        gsap.fromTo(Array.from(textEls), { y: 16, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: "power3.out",
-          scrollTrigger: { trigger: section, start: "top 78%", once: true },
-        });
-      }
-    }, sectionRef);
-
-    ctxRef.current = ctx;
-    return () => {
-      mounted = false;
-      cancelAnimationFrame(splitFrame);
-      if (featSplit && headlineEl?.isConnected) { try { featSplit.revert(); } catch {} }
-      splitRef.current = null;
-      ctxRef.current = null;
-      try { ctx.revert(); } catch {}
-    };
-  }, []);
-
-  const project = P[2]; // South Bay Outdoor Living
-
-  return (
-    <section
-      ref={sectionRef}
-      data-section="portfolio-featured"
-      className="relative bg-black cursor-pointer overflow-hidden"
-      style={{ minHeight: "100svh", position: "relative", zIndex: 2 }}
-      onClick={() => onOpen(project)}
-      aria-label={`Featured project: ${project.title}`}
-    >
-      {/* Full-screen image with settling scale */}
-      <div
-        ref={bgRef}
-        className="absolute inset-0 will-change-transform"
-        style={{ transformOrigin: "center" }}
-      >
-        <Image
-          src={project.image}
-          alt={project.title}
-          fill
-          priority={false}
-          className="object-cover"
-          style={{ filter: "contrast(1.06) saturate(1.1) brightness(0.88)" }}
-          sizes="100vw"
-        />
-      </div>
-      {/* Dark overlay — lower 50% */}
-      <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.30) 45%, rgba(0,0,0,0.88) 100%)" }}
-        aria-hidden="true"
-      />
-
-      {/* Text overlay — lower-left third */}
-      <div className="absolute bottom-0 left-0 right-0 max-w-7xl mx-auto px-6 lg:px-12 pb-14 lg:pb-20">
-        {/* Maroon hairline grow */}
-        <div
-          ref={hairlineRef}
-          className="mb-8"
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.6, transformOrigin: "left", maxWidth: 120 }}
-          aria-hidden="true"
-        />
-
-        <p className="featured-fade font-labels text-[10px] text-white/55 tracking-[0.22em] uppercase mb-4">
-          {project.location} · {project.category}
-        </p>
-        <h2
-          ref={headlineRef}
-          className="font-display font-bold text-white tracking-tight leading-[0.88] mb-6"
-          style={{ fontSize: "clamp(2.8rem, 6vw, 6rem)", maxWidth: "20ch" }}
-        >
-          {project.title}
-        </h2>
-        <p className="featured-fade text-white/50 max-w-md leading-relaxed" style={{ fontSize: "clamp(0.9rem, 1.3vw, 1rem)" }}>
-          {project.spec}
-        </p>
-
-        {/* Tap to view hint */}
-        <div className="featured-fade mt-8 inline-flex items-center gap-3 font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase">
-          <span>View Project</span>
-          <span className="w-10 h-px bg-white/20" aria-hidden="true" />
-        </div>
-      </div>
-
-      {/* "Featured" label — top right */}
-      <div className="absolute top-8 right-6 lg:right-12">
-        <span className="font-labels text-[8px] text-white/35 tracking-[0.28em] uppercase border border-white/15 px-2 py-1">
-          Featured
-        </span>
-      </div>
-    </section>
-  );
-}
-
-// ─── Section: Hero ────────────────────────────────────────────────────────────
-
-function PortfolioHero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
-  const splitRef = useRef<SplitType | null>(null);
-  const ctxRef = useRef<gsap.Context | null>(null);
-
-  useLayoutEffect(() => () => {
-    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
-    try { ctxRef.current?.revert(); } catch {}
-  }, []);
-
-  useEffect(() => {
-    const shouldAnimate = AnimationController.shouldAnimate();
-
-    if (!shouldAnimate) {
-      const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
-      if (fadeEls?.length) gsap.set(Array.from(fadeEls), { opacity: 1, y: 0 });
-      return;
-    }
-
-    let mounted = true;
-    let splitFrame = -1;
-    let heroSplit: SplitType | null = null;
-    let heroLineEl: HTMLElement | null = null;
-
-    const ctx = gsap.context(() => {
-      if (bgRef.current) {
-        gsap.to(bgRef.current, {
-          yPercent: -15, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
-        });
-      }
-      if (headlineRef.current) {
-        gsap.to(headlineRef.current, {
-          yPercent: 5, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: 1 },
-        });
-      }
-      if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
-          scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
-        });
-      }
-
-      // 4-guard SplitType (Fix 1)
-      splitFrame = requestAnimationFrame(() => {
-        if (!mounted) return;
-        const heroLine = sectionRef.current?.querySelector<HTMLElement>(".portfolio-hero-line");
-        if (heroLine && heroLine.isConnected) {
-          heroLineEl = heroLine;
-          const split = new SplitType(heroLine, { types: "words,chars" });
-          heroSplit = split;
-          splitRef.current = split;
-          const chars = split.chars ?? [];
-          gsap.to(chars, {
-            yPercent: -80, opacity: 0,
-            stagger: { each: 0.014, from: "random" }, ease: "none",
-            scrollTrigger: { trigger: sectionRef.current, start: "30% top", end: "bottom top", scrub: 1.2 },
+        const image = el.querySelector("img");
+        if (image) {
+          gsap.to(image, {
+            yPercent: index % 2 === 0 ? -8 : 6,
+            ease: "none",
+            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: 1.8 },
           });
-          const lcpLine = headlineRef.current?.querySelector(".portfolio-lcp-line");
-          if (lcpLine) {
-            gsap.to(lcpLine, {
-              opacity: 0, ease: "none",
-              scrollTrigger: { trigger: sectionRef.current, start: "25% top", end: "65% top", scrub: 1.2 },
-            });
-          }
         }
       });
 
-      const fadeEls = sectionRef.current?.querySelectorAll<HTMLElement>(".hero-fade");
-      if (fadeEls?.length) {
-        gsap.fromTo(Array.from(fadeEls),
-          { y: 18, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, delay: 0.3, ease: "power3.out" }
+      indexRows.forEach((el, index) => {
+        gsap.fromTo(
+          el,
+          { autoAlpha: 0, x: -22 },
+          {
+            autoAlpha: 1,
+            x: 0,
+            duration: 0.75,
+            delay: index * 0.07,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 88%",
+              toggleActions: "play none none reverse",
+            },
+          }
         );
-      }
-    }, sectionRef);
-    ctxRef.current = ctx;
+      });
 
+      tiles.forEach((el, index) => {
+        gsap.fromTo(
+          el,
+          {
+            y: 34,
+            clipPath: index % 3 === 0 ? "inset(0% 0% 18% 0%)" : "inset(14% 0% 0% 0%)",
+          },
+          {
+            y: 0,
+            clipPath: "inset(0% 0% 0% 0%)",
+            ease: "none",
+            scrollTrigger: { trigger: el, start: "top 92%", end: "top 58%", scrub: 1.35 },
+          }
+        );
+      });
+
+      lines.forEach((el) => {
+        gsap.fromTo(
+          el,
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              end: "top 62%",
+              scrub: 1,
+            },
+          }
+        );
+      });
+    }, rootRef);
+
+    ctxRef.current = ctx;
     return () => {
-      mounted = false;
-      cancelAnimationFrame(splitFrame);
-      if (heroSplit && heroLineEl?.isConnected) { try { heroSplit.revert(); } catch {} }
-      splitRef.current = null;
       ctxRef.current = null;
-      try { ctx.revert(); } catch {}
+      try {
+        ctx.revert();
+      } catch {}
     };
   }, []);
 
+  return rootRef;
+}
+
+function ArchiveFrame({
+  project,
+  index,
+  onOpen,
+}: {
+  project: Project;
+  index: number;
+  onOpen: (project: Project) => void;
+}) {
   return (
-    <section
-      ref={sectionRef}
-      data-section="portfolio-hero"
-      className="relative bg-black"
-      style={{ minHeight: "55vh", overflowX: "clip", position: "relative", zIndex: 1 }}
+    <button
+      type="button"
+      onClick={() => onOpen(project)}
+      className={`archive-frame group relative min-h-[10rem] overflow-hidden bg-black text-left ${contactSheetLayout[index % contactSheetLayout.length]}`}
     >
-      <div
-        ref={bgRef}
-        className="absolute left-0 right-0"
-        style={{ top: "-15%", height: "130%" }}
-        role="presentation"
-        aria-hidden="true"
-      >
-        <Image
-          src="/images/chatpics/01_home_hero_backyard_editorial.png"
-          alt=""
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          className="object-cover object-[center_30%]"
-          style={{ filter: "contrast(1.05) saturate(1.1) brightness(0.88)" }}
-        />
-      </div>
-      <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.92) 100%)" }}
-        aria-hidden="true"
+      <Image
+        src={projectImage(project)}
+        alt={project.title}
+        fill
+        preload={index < 3}
+        loading={index < 3 ? "eager" : "lazy"}
+        fetchPriority={index < 3 ? "high" : "auto"}
+        sizes="(max-width: 1024px) 50vw, 28vw"
+        className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+        style={{ filter: "contrast(1.06) saturate(1.04)" }}
       />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/8 to-transparent opacity-85" />
+      <span className="absolute left-3 top-3 bg-black/72 px-2.5 py-1 font-labels text-[8px] uppercase tracking-[0.18em] text-white/58 backdrop-blur">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <span className="absolute bottom-3 left-3 right-3 truncate font-labels text-[8px] uppercase tracking-[0.16em] text-white/62">
+        {cleanText(project.location)} / {project.category}
+      </span>
+    </button>
+  );
+}
 
-      <div className="relative z-10 pt-36 pb-16 max-w-7xl mx-auto px-6 lg:px-12">
-        <div
-          ref={hairlineRef}
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.5, transformOrigin: "left", marginBottom: "1.5rem" }}
-          aria-hidden="true"
-        />
-
-        <span className="hero-fade font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-4">
-          Our Work — Torrance &amp; South Bay
+function ProjectIndexRow({
+  project,
+  active,
+  number,
+  onFocus,
+  onOpen,
+}: {
+  project: Project;
+  active: boolean;
+  number: number;
+  onFocus: () => void;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onMouseEnter={onFocus}
+      onFocus={onFocus}
+      onClick={onOpen}
+      className={`index-row group grid w-full grid-cols-[3.5rem_1fr] gap-4 border-t py-5 text-left transition-colors sm:grid-cols-[4.5rem_1fr_8rem] sm:items-center ${
+        active ? "border-white/28 text-white" : "border-white/10 text-white/58 hover:text-white"
+      }`}
+    >
+      <span className={`font-numbers text-2xl font-bold leading-none ${active ? "text-[var(--color-accent)]" : "text-white/22"}`}>
+        {String(number).padStart(2, "0")}
+      </span>
+      <span>
+        <span className="block font-editorial text-[clamp(1.7rem,3vw,3.2rem)] leading-[0.92]">
+          {cleanText(project.title)}
         </span>
-
-        <h1
-          ref={headlineRef}
-          className="font-display font-bold text-white tracking-tight leading-[0.9] mb-6"
-          style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}
-        >
-          <span className="portfolio-lcp-line block">Art of</span>
-          <span className="block overflow-hidden" style={{ color: "rgba(255,255,255,0.42)" }}>
-            <span className="portfolio-hero-line hero-line-animate block" style={{ animationDelay: "0.1s" }}>
-              Construction.
-            </span>
-          </span>
-        </h1>
-
-        <p className="hero-fade text-gray-300 max-w-xl leading-relaxed">
-          Fourteen projects. Real work. Every job below represents a problem solved with building science — not guesswork.
-        </p>
-      </div>
-    </section>
+        <span className="mt-3 block font-labels text-[9px] uppercase tracking-[0.16em] text-white/36">
+          {project.category} / {cleanText(project.location)} / {cleanText(project.spec)}
+        </span>
+      </span>
+      <span className="hidden justify-self-end border border-white/12 px-4 py-3 font-labels text-[9px] uppercase tracking-[0.16em] text-white/44 transition-colors group-hover:border-white/30 group-hover:text-white sm:block">
+        Open
+      </span>
+    </button>
   );
 }
 
-// ─── Keyword strip ────────────────────────────────────────────────────────────
-
-function PortfolioStrip() {
-  const labels = ["ADU Construction", "Water Remediation", "Structural Repair", "Consulting", "South Bay CA", "Torrance", "Est. 2004"];
-  return (
-    <div
-      className="bg-[#0a0a0a] border-b border-white/5 overflow-hidden py-3"
-      style={{ position: "relative", zIndex: 2 }}
-      aria-hidden="true"
-    >
-      <div
-        className="flex gap-12 items-center"
-        style={{ animation: "marqueeScroll 30s linear infinite", width: "max-content" }}
-      >
-        {[...labels, ...labels].map((label, i) => (
-          <span
-            key={i}
-            className="font-labels text-[9px] text-gray-600 tracking-[0.28em] uppercase whitespace-nowrap flex items-center gap-12"
-          >
-            {label}
-            <span className="w-px h-3 inline-block" style={{ background: "var(--color-accent)", opacity: 0.3 }} />
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── Section: Mixed-size Gallery ─────────────────────────────────────────────
-
-function PortfolioGallery({ onOpen }: { onOpen: (p: Project) => void }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
-  const ctxRef = useRef<gsap.Context | null>(null);
-
-  useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
-
-  useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
-    const ctx = gsap.context(() => {
-      if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
-          scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 88%", end: "top 58%", scrub: 1.2 },
-        });
-      }
-    }, sectionRef);
-    ctxRef.current = ctx;
-    return () => { ctxRef.current = null; try { ctx.revert(); } catch {} };
-  }, []);
-
-  const h = {
-    tall:   "clamp(340px, 52vh, 600px)",
-    medium: "clamp(300px, 42vh, 520px)",
-    short:  "clamp(260px, 36vh, 440px)",
-  };
-
-  let tileIdx = 0;
+function ProjectWallTile({
+  project,
+  index,
+  onOpen,
+}: {
+  project: Project;
+  index: number;
+  onOpen: (project: Project) => void;
+}) {
+  const spanClass = index % 9 === 0 || index % 9 === 5
+    ? "md:col-span-2 md:row-span-2"
+    : index % 9 === 2
+      ? "md:row-span-2"
+      : "";
 
   return (
-    <section
-      ref={sectionRef}
-      data-section="portfolio-gallery"
-      className="bg-black py-10 lg:py-14"
-      style={{ position: "relative", zIndex: 2 }}
+    <button
+      type="button"
+      onClick={() => onOpen(project)}
+      className={`portfolio-tile group relative min-h-[18rem] overflow-hidden bg-black text-left ${spanClass}`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 mb-10">
-        <div
-          ref={hairlineRef}
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.5, transformOrigin: "left", maxWidth: 80, marginBottom: "1.25rem" }}
-          aria-hidden="true"
-        />
-        <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block">
-          Selected Work
+      <Image
+        src={projectImage(project)}
+        alt={project.title}
+        fill
+        sizes={spanClass.includes("col-span-2") ? "(max-width: 1024px) 100vw, 58vw" : "(max-width: 1024px) 100vw, 31vw"}
+        className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
+        style={{ filter: "contrast(1.05) saturate(1.04)" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/14 to-transparent" />
+      <div className="absolute left-4 top-4 flex items-center gap-3">
+        <span className="h-px w-8 bg-[var(--color-accent)]" />
+        <span className="font-labels text-[8px] uppercase tracking-[0.18em] text-white/52">
+          {project.category}
         </span>
       </div>
-
-      <div className="flex flex-col gap-[3px] max-w-7xl mx-auto px-6 lg:px-12">
-        {galleryRows.map((row, rowIdx) => {
-          if (row.type === "split21") {
-            const iA = tileIdx++; const iB = tileIdx++;
-            return (
-              <div key={rowIdx} className="grid grid-cols-1 md:grid-cols-3 gap-[3px]">
-                <div className="md:col-span-2">
-                  <GalleryTile project={row.wide} height={h.tall} tileIndex={iA} onClick={onOpen} />
-                </div>
-                <GalleryTile project={row.narrow} height={h.tall} tileIndex={iB} onClick={onOpen} />
-              </div>
-            );
-          }
-          if (row.type === "split12") {
-            const iA = tileIdx++; const iB = tileIdx++;
-            return (
-              <div key={rowIdx} className="grid grid-cols-1 md:grid-cols-3 gap-[3px]">
-                <GalleryTile project={row.narrow} height={h.medium} tileIndex={iA} onClick={onOpen} />
-                <div className="md:col-span-2">
-                  <GalleryTile project={row.wide} height={h.medium} tileIndex={iB} onClick={onOpen} />
-                </div>
-              </div>
-            );
-          }
-          // triple
-          const iA = tileIdx++; const iB = tileIdx++; const iC = tileIdx++;
-          const r = row as Extract<RowLayout, { type: "triple" }>;
-          return (
-            <div key={rowIdx} className="grid grid-cols-1 md:grid-cols-3 gap-[3px]">
-              <GalleryTile project={r.a} height={h.short} tileIndex={iA} onClick={onOpen} />
-              <GalleryTile project={r.b} height={h.short} tileIndex={iB} onClick={onOpen} />
-              <GalleryTile project={r.c} height={h.short} tileIndex={iC} onClick={onOpen} />
-            </div>
-          );
-        })}
+      <div className="absolute bottom-0 left-0 right-0 p-5">
+        <div className="font-labels text-[8px] uppercase tracking-[0.18em] text-white/38">
+          {cleanText(project.location)}
+        </div>
+        <h3 className="mt-2 max-w-lg font-editorial text-[clamp(1.55rem,2.6vw,3rem)] leading-[0.94] text-white">
+          {cleanText(project.title)}
+        </h3>
       </div>
-    </section>
+    </button>
   );
 }
 
-// ─── Section: Build Philosophy (merged from /process) ─────────────────────────
+export default function PortfolioContent() {
+  const [activeFilter, setActiveFilter] = useState<Filter>("All");
+  const [lightboxProject, setLightboxProject] = useState<Project | null>(null);
+  const rootRef = usePortfolioMotion();
 
-function BuildPhilosophy() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const vertRuleRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const splitRef = useRef<SplitType | null>(null);
-  const ctxRef = useRef<gsap.Context | null>(null);
+  const indexProjects = useMemo(
+    () => INDEX_IDS.map((id) => PROJECTS.find((project) => project.id === id)).filter(Boolean) as Project[],
+    []
+  );
+  const archiveProjects = useMemo(
+    () => ARCHIVE_IDS.map((id) => PROJECTS.find((project) => project.id === id)).filter(Boolean) as Project[],
+    []
+  );
+  const wallProjects = useMemo(
+    () => WALL_IDS.map((id) => PROJECTS.find((project) => project.id === id)).filter(Boolean) as Project[],
+    []
+  );
+  const [activeIndexId, setActiveIndexId] = useState(indexProjects[0]?.id ?? PROJECTS[0].id);
 
-  useLayoutEffect(() => () => {
-    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
-    try { ctxRef.current?.revert(); } catch {}
-  }, []);
+  const activeIndexProject = useMemo(
+    () => indexProjects.find((project) => project.id === activeIndexId) ?? indexProjects[0] ?? PROJECTS[0],
+    [activeIndexId, indexProjects]
+  );
 
-  useEffect(() => {
-    const shouldAnimate = AnimationController.shouldAnimate();
-
-    if (!shouldAnimate) {
-      rowRefs.current.forEach((row) => {
-        if (!row) return;
-        gsap.fromTo(row, { opacity: 0, y: 24 }, {
-          opacity: 1, y: 0, duration: 0.6, ease: "power3.out",
-          scrollTrigger: { trigger: row, start: "top 85%", once: true },
-        });
-      });
-      return;
-    }
-
-    let mounted = true;
-    let splitFrame = -1;
-    let headlineSplit: SplitType | null = null;
-
-    const ctx = gsap.context(() => {
-      if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
-          scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
-        });
-      }
-
-      if (vertRuleRef.current) {
-        gsap.fromTo(vertRuleRef.current, { scaleY: 0 }, {
-          scaleY: 1, ease: "none", transformOrigin: "top",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 55%", end: "bottom 55%", scrub: 1.2 },
-        });
-      }
-
-      const headEl = headlineRef.current;
-      if (headEl) {
-        splitFrame = requestAnimationFrame(() => {
-          if (!mounted || !headEl.isConnected) return;
-          const split = new SplitType(headEl, { types: "words,chars" });
-          headlineSplit = split;
-          splitRef.current = split;
-          if (split.chars?.length) {
-            gsap.fromTo(split.chars,
-              { yPercent: 110, opacity: 0 },
-              {
-                yPercent: 0, opacity: 1,
-                stagger: { each: 0.018, from: "start" }, ease: "none",
-                scrollTrigger: { trigger: sectionRef.current, start: "top 82%", end: "top 45%", scrub: 1.1 },
-              }
-            );
-          }
-        });
-      }
-
-      rowRefs.current.forEach((row) => {
-        if (!row) return;
-        gsap.fromTo(row, { opacity: 0, y: 24 }, {
-          opacity: 1, y: 0, ease: "power2.out",
-          scrollTrigger: { trigger: row, start: "top 88%", end: "top 52%", scrub: 1.2 },
-        });
-      });
-    }, sectionRef);
-
-    ctxRef.current = ctx;
-    return () => {
-      mounted = false;
-      cancelAnimationFrame(splitFrame);
-      if (headlineSplit && headlineRef.current?.isConnected) { try { headlineSplit.revert(); } catch {} }
-      splitRef.current = null;
-      ctxRef.current = null;
-      try { ctx.revert(); } catch {}
-    };
-  }, []);
+  const filteredProjects = useMemo(() => {
+    return activeFilter === "All"
+      ? wallProjects
+      : wallProjects.filter((project) => project.category === activeFilter);
+  }, [activeFilter, wallProjects]);
 
   return (
-    <section
-      ref={sectionRef}
-      data-section="portfolio-approach"
-      className="bg-[#0a0a0a] py-24 lg:py-36"
-      style={{ position: "relative", zIndex: 2, overflowX: "clip" }}
-    >
-      <PrecisionOverlay tone="dark" opacity={0.10} />
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div
-          ref={hairlineRef}
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.5, transformOrigin: "left", marginBottom: "3.5rem" }}
-          aria-hidden="true"
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mb-16 lg:mb-20">
-          <div className="lg:col-span-5">
-            <span className="font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-5">
-              The Approach
+    <div ref={rootRef} className="bg-[#f5f0e9] text-black">
+      <section className="relative overflow-hidden border-b border-black/10 px-6 pb-14 pt-32 lg:px-12 lg:pb-20">
+        <DraftingMotionLayer intensity="quiet" variant="intro" />
+        <div className="absolute left-0 top-[18%] hidden h-px w-1/3 origin-left bg-[var(--color-accent)]/40 lg:block" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div className="portfolio-reveal">
+            <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/42">
+              Portfolio archive / Torrance and South Bay
             </span>
-            <h2
-              ref={headlineRef}
-              className="font-display font-bold text-white tracking-tight leading-[0.9]"
-              style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}
-            >
-              Build{" "}
-              <span style={{ color: "rgba(255,255,255,0.40)" }}>philosophy.</span>
-            </h2>
-          </div>
-          <div className="lg:col-span-7 flex items-end">
-            <p className="text-gray-400 leading-relaxed max-w-md" style={{ fontSize: "clamp(0.9rem, 1.4vw, 1rem)" }}>
-              Every project follows the same structured approach — not because we&apos;re rigid, but because structure is what prevents problems before they happen.
+            <h1 className="mt-7 max-w-2xl font-editorial text-[clamp(4rem,8.3vw,8.8rem)] leading-[0.86] tracking-normal">
+              <span className="block">Work you </span>
+              <span className="block">can inspect.</span>
+            </h1>
+            <p className="mt-8 max-w-lg text-base leading-8 text-black/58">
+              A compact record of ADUs, remediation, consulting, and detailed finish work. Less sales copy, more proof.
             </p>
+            <div className="mt-9 grid max-w-lg grid-cols-3 border-y border-black/12">
+              {[
+                [`${PROJECTS.length}`, "Projects"],
+                ["03", "Scopes"],
+                [SITE.license, "License"],
+              ].map(([value, label]) => (
+                <div key={label} className="border-r border-black/10 py-4 pr-4 last:border-r-0">
+                  <span className="block font-numbers text-2xl font-bold">{value}</span>
+                  <span className="mt-1 block font-labels text-[8px] uppercase tracking-[0.16em] text-black/42">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div aria-hidden="true" className="absolute -right-6 -top-8 hidden h-28 w-28 border border-black/14 lg:block">
+              <span className="absolute left-1/2 top-0 h-full w-px bg-black/12" />
+              <span className="absolute left-0 top-1/2 h-px w-full bg-black/12" />
+            </div>
+            <div className="grid auto-rows-[9.5rem] grid-cols-2 gap-2 sm:auto-rows-[10.5rem] md:grid-cols-6 lg:auto-rows-[8.8rem]">
+              {archiveProjects.map((project, index) => (
+                <ArchiveFrame
+                  key={project.id}
+                  project={project}
+                  index={index}
+                  onOpen={setLightboxProject}
+                />
+              ))}
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="relative">
-          <div
-            ref={vertRuleRef}
-            className="hidden lg:block absolute left-0 top-0 h-full"
-            style={{ width: 1, background: "var(--color-accent)", opacity: 0.35, transformOrigin: "top", transform: "scaleY(0)" }}
-            aria-hidden="true"
-          />
-          <div className="lg:pl-8">
-            {PROCESS_STEPS_V2.map((step, i) => (
-              <div
-                key={step.number}
-                ref={(el) => { rowRefs.current[i] = el; }}
-                className="py-7 lg:py-9 border-t border-white/5"
-              >
-                <div className="grid grid-cols-[3.5rem_1fr] gap-5">
-                  <span
-                    className="font-numbers font-bold leading-none flex-shrink-0"
-                    aria-hidden="true"
-                    style={{ fontSize: "clamp(1.5rem, 2.2vw, 2rem)", color: "var(--color-accent)", opacity: 0.75, letterSpacing: "-0.03em", paddingTop: "0.1em" }}
-                  >
-                    {step.number}
+      <section className="relative overflow-hidden bg-black px-6 pb-18 pt-28 text-white lg:px-12 lg:pb-24 lg:pt-32">
+        <div className="absolute inset-y-0 left-0 hidden w-px bg-white/12 lg:block" />
+        <div className="absolute bottom-10 right-10 hidden h-36 w-36 rounded-full border border-white/10 lg:block" />
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+          <div>
+            <div className="portfolio-reveal mb-9 max-w-2xl">
+              <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/38">
+                Case index
+              </span>
+              <h2 className="mt-5 font-editorial text-[clamp(2.8rem,6.8vw,6.7rem)] leading-[0.86]">
+                Pick the proof by project type.
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLightboxProject(activeIndexProject)}
+              className="portfolio-reveal mb-8 block w-full text-left lg:hidden"
+            >
+              <div className="relative min-h-[18rem] overflow-hidden bg-[#111]">
+                <Image
+                  key={`mobile-${activeIndexProject.id}`}
+                  src={projectImage(activeIndexProject)}
+                  alt={activeIndexProject.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  style={{ filter: "contrast(1.06) saturate(1.04)" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
+                    Preview / {activeIndexProject.category}
                   </span>
-                  <div className="lg:grid lg:grid-cols-[1fr_1.8fr] lg:gap-10 items-start">
-                    <div>
-                      <h3 className="font-display font-bold text-white leading-tight mb-0.5" style={{ fontSize: "clamp(1rem, 1.5vw, 1.2rem)" }}>
-                        {step.title}
-                      </h3>
-                      <span className="font-labels text-[9px] text-gray-600 tracking-[0.18em] uppercase">
-                        {step.subtitle}
-                      </span>
-                    </div>
-                  </div>
+                  <h3 className="mt-3 font-editorial text-[clamp(1.9rem,10vw,3rem)] leading-[0.9] text-white">
+                    {cleanText(activeIndexProject.title)}
+                  </h3>
                 </div>
               </div>
+            </button>
+            <div className="draw-line mb-1 h-px origin-left bg-[var(--color-accent)]/58" />
+            {indexProjects.map((project, index) => (
+              <ProjectIndexRow
+                key={project.id}
+                project={project}
+                active={project.id === activeIndexProject.id}
+                number={index + 1}
+                onFocus={() => setActiveIndexId(project.id)}
+                onOpen={() => setLightboxProject(project)}
+              />
+            ))}
+          </div>
+
+          <div className="portfolio-reveal hidden lg:sticky lg:top-24 lg:block">
+            <button
+              type="button"
+              onClick={() => setLightboxProject(activeIndexProject)}
+              className="group block w-full text-left"
+            >
+              <div className="relative min-h-[28rem] overflow-hidden bg-[#111]">
+                <Image
+                  key={activeIndexProject.id}
+                  src={projectImage(activeIndexProject)}
+                  alt={activeIndexProject.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 42vw"
+                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                  style={{ filter: "contrast(1.06) saturate(1.04)" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
+                    Live preview / {activeIndexProject.category}
+                  </span>
+                  <h3 className="mt-3 font-editorial text-[clamp(2rem,4vw,4rem)] leading-[0.9] text-white">
+                    {cleanText(activeIndexProject.title)}
+                  </h3>
+                </div>
+              </div>
+              <p className="mt-5 max-w-lg text-sm leading-7 text-white/50">
+                {cleanText(activeIndexProject.description)}
+              </p>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-18 pt-28 lg:px-12 lg:pb-24 lg:pt-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="portfolio-reveal mb-10 grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+            <div>
+              <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
+                Work wall
+              </span>
+              <h2 className="mt-5 font-editorial text-[clamp(2.8rem,6vw,6rem)] leading-[0.88]">
+                Browse the archive without the pitch.
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-2 lg:justify-end">
+              {CATEGORIES.map((category) => {
+                const active = activeFilter === category;
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setActiveFilter(category)}
+                    className={`border px-4 py-3 font-labels text-[9px] uppercase tracking-[0.16em] transition-colors ${
+                      active
+                        ? "border-black bg-black text-white"
+                        : "border-black/12 bg-white/62 text-black/54 hover:border-black/35 hover:text-black"
+                    }`}
+                  >
+                    {category} / {categoryCount(category)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid auto-rows-[18rem] grid-cols-1 gap-3 md:grid-cols-3">
+            {filteredProjects.map((project, index) => (
+              <ProjectWallTile
+                key={`${activeFilter}-${project.id}`}
+                project={project}
+                index={index}
+                onOpen={setLightboxProject}
+              />
             ))}
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-// ─── Section: Working With Us CTA ─────────────────────────────────────────────
-
-function PortfolioCTA() {
-  const [callOpen, setCallOpen] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-  const hairlineRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const splitRef = useRef<SplitType | null>(null);
-  const ctxRef = useRef<gsap.Context | null>(null);
-
-  useLayoutEffect(() => () => {
-    if (splitRef.current) { try { splitRef.current.revert(); } catch {} }
-    try { ctxRef.current?.revert(); } catch {}
-  }, []);
-
-  useEffect(() => {
-    const shouldAnimate = AnimationController.shouldAnimate();
-
-    if (!shouldAnimate) {
-      const revealEls = sectionRef.current?.querySelectorAll<HTMLElement>(".cta-reveal");
-      if (revealEls?.length) {
-        gsap.fromTo(Array.from(revealEls),
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out",
-            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", once: true } }
-        );
-      }
-      return;
-    }
-
-    let mounted = true;
-    let splitFrame = -1;
-    let ctaSplit: SplitType | null = null;
-    const ctaEl = headlineRef.current;
-
-    const ctx = gsap.context(() => {
-      if (hairlineRef.current) {
-        gsap.fromTo(hairlineRef.current, { scaleX: 0 }, {
-          scaleX: 1, ease: "none",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", end: "top 55%", scrub: 1.2 },
-        });
-      }
-
-      if (ctaEl) {
-        const _el = ctaEl;
-        const _trigger = sectionRef.current;
-        splitFrame = requestAnimationFrame(() => {
-          if (!mounted || !_el.isConnected) return;
-          const split = new SplitType(_el, { types: "words,chars" });
-          ctaSplit = split;
-          splitRef.current = split;
-          if (split.chars?.length) {
-            gsap.fromTo(split.chars,
-              { yPercent: 110, opacity: 0 },
-              {
-                yPercent: 0, opacity: 1,
-                stagger: { each: 0.018, from: "start" }, ease: "none",
-                scrollTrigger: { trigger: _trigger, start: "top 75%", end: "top 35%", scrub: 1.2 },
-              }
-            );
-          }
-        });
-      }
-
-      const els = sectionRef.current?.querySelectorAll<HTMLElement>(".cta-reveal");
-      if (els?.length) {
-        gsap.fromTo(Array.from(els), { y: 28, opacity: 0 }, {
-          y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: "power3.out",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 78%", once: true },
-        });
-      }
-    }, sectionRef);
-    ctxRef.current = ctx;
-
-    return () => {
-      mounted = false;
-      cancelAnimationFrame(splitFrame);
-      if (ctaSplit && ctaEl?.isConnected) { try { ctaSplit.revert(); } catch {} }
-      splitRef.current = null;
-      ctxRef.current = null;
-      try { ctx.revert(); } catch {}
-    };
-  }, []);
-
-  return (
-    <section
-      ref={sectionRef}
-      data-section="portfolio-cta"
-      className="relative bg-black py-28 lg:py-40"
-      style={{ position: "relative", zIndex: 2 }}
-    >
-      {/* Compass silhouette — right side, slow drift */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 hidden lg:block"
-        style={{ width: "160px", opacity: 0.10, color: "white" }}
-      >
-        <div style={{ animation: "compassSpinInner 90s linear infinite" }}>
-          <CompassSilhouette style={{ width: "100%", height: "auto" }} />
-        </div>
-      </div>
-      <div
-        ref={hairlineRef}
-        className="max-w-7xl mx-auto px-6 lg:px-12 mb-14"
-        style={{ height: 1, background: "var(--color-accent)", opacity: 0.5, transformOrigin: "left" }}
-        aria-hidden="true"
-      />
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <span className="cta-reveal font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-5">
-          Working With Us
-        </span>
-        <h2
-          ref={headlineRef}
-          className="font-display font-bold text-white tracking-tight leading-[0.88] mb-8"
-          style={{ fontSize: "clamp(2.8rem, 5.5vw, 5.5rem)", maxWidth: "20ch" }}
-        >
-          Communication is essential in building your vision.
-        </h2>
-        <p className="cta-reveal text-gray-500 max-w-md leading-relaxed mb-12" style={{ fontSize: "clamp(0.9rem, 1.3vw, 1rem)" }}>
-          Every project begins with a direct conversation — scope, budget, timeline, and your goals. We stay accountable for the duration.
-        </p>
-
-        <div className="cta-reveal flex flex-col sm:flex-row items-start gap-4">
-          <div className="relative">
-            <button
-              onClick={() => setCallOpen(!callOpen)}
-              aria-expanded={callOpen}
-              className="pulse-glow group relative inline-flex items-center gap-2 bg-white text-black px-8 py-4 font-labels text-[11px] tracking-[0.18em] uppercase overflow-hidden transition-colors duration-300 hover:text-white"
-            >
-              <span
-                className="absolute inset-0 translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
-                style={{ background: "var(--color-accent)" }}
-                aria-hidden="true"
-              />
-              <span className="relative">Book Call</span>
-              <span
-                className="relative"
-                style={{ display: "inline-block", transition: "transform 0.3s ease", transform: callOpen ? "rotate(45deg)" : "rotate(0deg)" }}
-                aria-hidden="true"
-              >
-                *
-              </span>
-            </button>
-
-            {callOpen && (
-              <div
-                className="absolute top-full left-0 mt-2 bg-black border border-white/10 px-5 py-4 whitespace-nowrap"
-                style={{ overflow: "hidden", animation: "dropReveal 0.35s cubic-bezier(0.16,1,0.3,1) both", zIndex: 20 }}
-              >
-                <div style={{ height: 1, background: "var(--color-accent)", opacity: 0.5, marginBottom: "0.75rem" }} aria-hidden="true" />
-                <a href={SITE.phoneHref} className="font-numbers text-white text-lg tracking-wide hover:text-gray-300 transition-colors block">
-                  {SITE.phone}
-                </a>
-                <span className="font-labels text-[9px] text-gray-500 tracking-[0.18em] uppercase mt-1 block">
-                  Mon – Fri · 7am – 6pm PT
-                </span>
-              </div>
-            )}
+      <section className="border-t border-black/10 px-6 py-12 lg:px-12">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="portfolio-reveal">
+            <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
+              Ready to compare notes
+            </span>
+            <h2 className="mt-3 max-w-3xl font-editorial text-[clamp(2.6rem,5vw,5.6rem)] leading-[0.88]">
+              Bring a real project. Get a real answer.
+            </h2>
           </div>
-
-          <Link
-            href="/contact"
-            className="group inline-flex items-center gap-2 font-labels text-[10px] text-gray-400 tracking-[0.18em] uppercase border-b border-gray-700 hover:text-white hover:border-white pb-0.5 transition-colors duration-200 py-4"
-          >
-            Get in touch
-            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-          </Link>
+          <div className="portfolio-reveal flex flex-wrap gap-3 lg:justify-end">
+            <a
+              href={SITE.phoneHref}
+              className="bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
+            >
+              Call {SITE.phone}
+            </a>
+            <Link
+              href="/contact"
+              className="border border-black/15 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/62 transition-colors hover:border-black hover:text-black"
+            >
+              Start a project
+            </Link>
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-// ─── Main export ──────────────────────────────────────────────────────────────
-
-export default function PortfolioContent() {
-  const [lightboxProject, setLightboxProject] = useState<Project | null>(null);
-
-  return (
-    <>
-      <PortfolioHero />
-      <PortfolioStrip />
-      {/* Cinema strip — horizontal pin-scroll with parallax-blur (Task 1) */}
-      <PortfolioCinemaRow photos={cinemaPhotos} />
-      {/* Featured full-screen section (Task 3) */}
-      <PortfolioFeatured onOpen={setLightboxProject} />
-      {/* Main mixed-size gallery grid (Task 2 upgraded tiles) */}
-      <PortfolioGallery onOpen={setLightboxProject} />
-      <BuildPhilosophy />
-      <PortfolioCTA />
       <Lightbox project={lightboxProject} onClose={() => setLightboxProject(null)} />
-    </>
+    </div>
   );
 }

@@ -11,8 +11,8 @@ export function useTilt(maxDeg = 10) {
     if (!el || typeof window === 'undefined') return;
     if (window.matchMedia('(pointer: coarse)').matches) return;
 
-    const xTo = gsap.quickTo(el, 'rotateY', { duration: 0.55, ease: 'expo.out' });
-    const yTo = gsap.quickTo(el, 'rotateX', { duration: 0.55, ease: 'expo.out' });
+    const xTo = gsap.quickTo(el, 'rotationY', { duration: 0.55, ease: 'expo.out' });
+    const yTo = gsap.quickTo(el, 'rotationX', { duration: 0.55, ease: 'expo.out' });
 
     const onMove = (e: MouseEvent) => {
       const rect = el.getBoundingClientRect();

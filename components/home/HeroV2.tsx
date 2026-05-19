@@ -9,364 +9,240 @@ import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { useMagnetic } from "@/lib/hooks/useMagnetic";
+import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V3 hero: mesh gradient idle drift + technical overlay + aggressive parallax.
-// Headline fires on page load with rotateX channel + scroll fade-out.
-
 export default function HeroV2() {
   const sectionRef = useRef<HTMLElement>(null);
-  const imgInnerRef = useRef<HTMLDivElement>(null);
-  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
+  const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const silhouetteRef = useRef<HTMLDivElement>(null);
-  const copyBlockRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const licenseRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef<SplitType | null>(null);
   const splitFrameRef = useRef(-1);
-  const magneticRef = useMagnetic(0.55) as React.RefObject<HTMLDivElement>;
-  const meshRef = useRef<HTMLDivElement>(null);
+  const magneticRef = useMagnetic(0.45) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
-    let mounted = true;
     const section = sectionRef.current;
     const headlineEl = headlineRef.current;
     if (!section) return;
 
-    // Mesh gradient idle drift — direct CSS transform on the mesh div
-    // Avoids animating documentElement CSS vars (prevents networkidle timeout in Playwright)
-    let meshTl: gsap.core.Timeline | null = null;
-    const mesh = meshRef.current;
-    if (mesh) {
-      meshTl = gsap.timeline({ repeat: -1, yoyo: true });
-      meshTl.to(mesh, {
-        duration: 12,
-        ease: "sine.inOut",
-        x: "6%",
-        y: "4%",
-        scale: 1.08,
-      });
-    }
-
     const ctx = gsap.context(() => {
-      // Set initial GSAP states here — never in JSX (Fix 14)
-      if (imgInnerRef.current) {
-        gsap.set(imgInnerRef.current, { scale: 1 });
-      }
+      const revealEls = [
+        eyebrowRef.current,
+        subRef.current,
+        ctaRef.current,
+        lineRef.current,
+        licenseRef.current,
+      ].filter(Boolean) as HTMLElement[];
+
+      gsap.set(revealEls, { y: 22, opacity: 0 });
+      if (headlineRef.current) gsap.set(headlineRef.current, { opacity: 1 });
 
       if (!AnimationController.shouldAnimate()) {
-        // Mobile: immediate reveals, no scroll hooks
-        if (eyebrowRef.current) gsap.set(eyebrowRef.current, { opacity: 1, y: 0 });
-        if (subRef.current) gsap.set(subRef.current, { opacity: 1, y: 0 });
-        if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 });
+        gsap.set(revealEls, { y: 0, opacity: 1 });
         return;
       }
 
-      // Desktop: image scale-through-scroll (1.0 → 1.10)
-      if (imgInnerRef.current) {
-        gsap.to(imgInnerRef.current, {
-          scale: 1.10,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.5,
-          },
+      splitFrameRef.current = requestAnimationFrame(() => {
+        if (!headlineRef.current?.isConnected) return;
+        splitRef.current = new SplitType(headlineRef.current, {
+          types: "words,chars",
         });
-      }
 
-      // Floating silhouette parallax — 85% aggressive travel
-      if (silhouetteRef.current) {
-        gsap.to(silhouetteRef.current, {
-          yPercent: -85,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.2,
-          },
-        });
-        // Idle float animation
-        gsap.to(silhouetteRef.current, {
-          yPercent: 8,
-          duration: 4.5,
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-        });
-      }
-
-      // Copy block aggressive parallax -20%
-      if (copyBlockRef.current) {
-        gsap.to(copyBlockRef.current, {
-          yPercent: -20,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.0,
-          },
-        });
-      }
-
-      // Eyebrow + sub + CTA: stagger reveal on scroll enter
-      const revealEls = [eyebrowRef.current, subRef.current, ctaRef.current].filter(Boolean) as HTMLElement[];
-      gsap.fromTo(revealEls,
-        { y: 24, opacity: 0 },
-        {
-          y: 0, opacity: 1,
-          stagger: 0.12,
-          duration: 0.85,
-          ease: "power3.out",
-          scrollTrigger: { trigger: section, start: "top 80%", once: true },
-        }
-      );
-
-      // Headline: fires on page load with rotateX channel
-      if (headlineRef.current) {
-        splitFrameRef.current = requestAnimationFrame(() => {
-          if (!mounted || !headlineRef.current?.isConnected) return;
-          splitRef.current = new SplitType(headlineRef.current!, { types: "words,chars" });
-          const chars = splitRef.current.chars ?? [];
-          if (chars.length) {
-            // Entry on load
-            gsap.fromTo(chars,
-              { yPercent: 110, opacity: 0, rotateX: 50 },
-              {
-                yPercent: 0, opacity: 1, rotateX: 0,
-                stagger: 0.024,
-                duration: 1.1,
-                ease: "power3.out",
-                delay: 0.05,
-                onStart: () => {
-                  if (headlineRef.current) headlineRef.current.style.opacity = "1";
-                },
-              }
-            );
+        gsap.fromTo(
+          splitRef.current.chars ?? [],
+          { yPercent: 112, opacity: 0, rotationX: 54 },
+          {
+            yPercent: 0,
+            opacity: 1,
+            rotationX: 0,
+            stagger: 0.017,
+            duration: 1.05,
+            ease: "power4.out",
+            delay: 0.1,
           }
-        });
+        );
+      });
 
-        // Scroll fade-out — headline lifts as user scrolls past
-        gsap.to(headlineRef.current, {
+      gsap.to(revealEls, {
+        y: 0,
+        opacity: 1,
+        stagger: 0.09,
+        duration: 0.85,
+        ease: "power3.out",
+        delay: 0.32,
+      });
+
+      if (imageRef.current) {
+        gsap.fromTo(
+          imageRef.current,
+          { scale: 1.04, yPercent: 0 },
+          {
+            scale: 1.22,
+            yPercent: -4,
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: "bottom top",
+              scrub: 1.2,
+            },
+          }
+        );
+      }
+
+      if (copyRef.current) {
+        gsap.to(copyRef.current, {
+          yPercent: -28,
           opacity: 0,
-          yPercent: -30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "10% top",
+            end: "42% top",
+            scrub: 1,
+          },
+        });
+      }
+
+      if (veilRef.current) {
+        gsap.to(veilRef.current, {
+          opacity: 0.34,
           ease: "none",
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: "60% top",
+            end: "bottom top",
             scrub: 1,
+          },
+        });
+      }
+
+      if (licenseRef.current) {
+        gsap.to(licenseRef.current, {
+          yPercent: -130,
+          opacity: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "30% top",
+            end: "82% top",
+            scrub: 1.1,
           },
         });
       }
     }, sectionRef);
 
     return () => {
-      mounted = false;
-      if (meshTl) meshTl.kill();
       cancelAnimationFrame(splitFrameRef.current);
       if (splitRef.current && headlineEl?.isConnected) {
-        try { splitRef.current.revert(); } catch {}
+        try {
+          splitRef.current.revert();
+        } catch {}
       }
       splitRef.current = null;
-      try { ctx.revert(); } catch {}
+      try {
+        ctx.revert();
+      } catch {}
     };
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen grid grid-cols-1 lg:grid-cols-[3fr_2fr] overflow-hidden bg-black"
-      aria-label="Hero"
+      className="relative h-[165svh] bg-black text-white"
+      aria-label="828 Construction homepage hero"
     >
-      {/* Animated mesh gradient — idle motion, maroon/copper blobs */}
-      {/* Transform drift via GSAP on the div itself (not CSS vars on documentElement) */}
-      <div
-        ref={meshRef}
-        aria-hidden="true"
-        className="absolute pointer-events-none"
-        style={{
-          inset: "-15%",
-          zIndex: 0,
-          opacity: 0.45,
-          mixBlendMode: "soft-light" as const,
-          willChange: "transform",
-          background: `
-            radial-gradient(800px at 20% 30%, rgba(123,45,38,0.65), transparent 60%),
-            radial-gradient(700px at 70% 70%, rgba(184,115,51,0.4), transparent 55%),
-            radial-gradient(900px at 50% 50%, rgba(255,255,255,0.07), transparent 65%)
-          `,
-        }}
-      />
-
-      {/* Photo side — 60% width, full height */}
-      <div className="relative overflow-hidden order-2 lg:order-1 min-h-[50vh] lg:min-h-screen">
-        {/* Image wrapper — tall for parallax travel budget */}
-        <div
-          ref={imgInnerRef}
-          className="absolute inset-0"
-          style={{ willChange: "transform" }}
-          aria-hidden="true"
-        >
+      <div ref={stickyRef} className="sticky top-0 h-[100svh] overflow-hidden">
+        <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/chatpics/01_home_hero_backyard_editorial.png"
-            alt="828 Construction — premium residential construction"
+            src="/images/generated/home-hero-simple-adu-bluehour.png"
+            alt="Modern ADU and outdoor living build at blue hour"
             fill
             priority
             fetchPriority="high"
-            sizes="(max-width: 1024px) 100vw, 60vw"
+            sizes="100vw"
             className="object-cover"
-            style={{ filter: "contrast(1.05) saturate(1.1)" }}
           />
         </div>
 
-        {/* Gradient overlay on photo — lighter than V1, preserves photo quality */}
         <div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/60 lg:block hidden"
+          ref={veilRef}
           aria-hidden="true"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent lg:hidden"
-          aria-hidden="true"
-        />
-
-        {/* Technical drafting overlay — replaces the old floating house outline. */}
-        <div
-          ref={silhouetteRef}
-          aria-hidden="true"
-          className="absolute pointer-events-none hidden lg:block"
+          className="absolute inset-0"
           style={{
-            width: "42vw",
-            height: "42vw",
-            bottom: "4%",
-            right: "3%",
-            zIndex: 10,
-            opacity: 0.36,
-            willChange: "transform",
+            opacity: 0.74,
+            background:
+              "linear-gradient(90deg, rgba(0,0,0,0.86) 0%, rgba(0,0,0,0.62) 38%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.42) 100%), linear-gradient(180deg, rgba(0,0,0,0.34) 0%, rgba(0,0,0,0.04) 48%, rgba(0,0,0,0.82) 100%)",
           }}
-        >
-          <Image
-            src="/images/chatpics/02_home_replace_grey_house_png.png"
-            alt=""
-            fill
-            sizes="42vw"
-            className="object-contain"
-          />
-        </div>
-
-        <div className="absolute bottom-6 left-6 z-20 hidden max-w-[18rem] border border-white/15 bg-black/55 p-5 backdrop-blur-xl lg:block">
-          <p className="mb-3 font-labels text-[9px] uppercase tracking-[0.24em] text-white/45">
-            01 / Active listening
-          </p>
-          <p className="font-body text-sm leading-relaxed text-white/70">
-            One conversation becomes the foundation for shaping your vision.
-          </p>
-        </div>
-
-        <div className="absolute right-6 top-24 z-20 hidden border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-xl lg:block">
-          <p className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/55">
-            CA #{SITE.license}
-          </p>
-        </div>
-      </div>
-
-      {/* Copy side — 40% width, centered with intentional negative space */}
-      <div className="relative flex flex-col justify-center px-8 lg:px-12 xl:px-16 py-20 lg:py-0 order-1 lg:order-2 z-10">
-        <div ref={copyBlockRef} className="flex flex-col" style={{ willChange: "transform" }}>
-
-        {/* Subtle maroon top hairline on copy side */}
-        <div
-          className="absolute top-0 left-0 right-0 lg:hidden"
-          aria-hidden="true"
-          style={{ height: 1, background: "var(--color-accent)", opacity: 0.4 }}
         />
 
-        {/* Eyebrow */}
-        <div
-          ref={eyebrowRef}
-          className="flex items-center gap-3 mb-8"
-          style={{ opacity: 0 }}
-        >
+        <DraftingMotionLayer intensity="quiet" className="opacity-25" />
+
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-14 pt-32 lg:px-12 lg:pb-16">
           <div
-            aria-hidden="true"
-            style={{ width: 24, height: 1, background: "var(--color-accent)" }}
-          />
-          <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
-            Torrance, CA — Est. 2004
-          </span>
-        </div>
-
-        {/* Headline — bold display font with perspective for rotateX visibility */}
-        <h1
-          ref={headlineRef}
-          className="font-display font-bold leading-[0.9] tracking-tight text-white mb-8"
-          style={{ fontSize: "clamp(2.55rem, 4.25vw, 4.25rem)", perspective: "1000px" }}
-        >
-          Built with intent. Not by accident.
-        </h1>
-
-        {/* Sub-line */}
-        <p
-          ref={subRef}
-          className="font-body text-white/55 leading-relaxed mb-10 max-w-xs"
-          style={{ fontSize: "clamp(0.9rem, 1.4vw, 1.05rem)", opacity: 0 }}
-        >
-          Refined residential construction shaped through listening,
-          thoughtful analysis, and enduring craft. ADU. Remediation.
-          Consulting.
-        </p>
-
-        {/* CTA row — magnetic wrapper on primary button */}
-        <div
-          ref={ctaRef}
-          className="flex flex-col sm:flex-row items-start gap-4"
-          style={{ opacity: 0 }}
-        >
-          <div ref={magneticRef} style={{ display: "inline-block" }}>
-            <Link
-              href="/services"
-              className="btn-shine btn-lift inline-block bg-white text-black px-7 py-3 font-labels text-[10px] tracking-[0.18em] uppercase"
-            >
-              Explore Services
-            </Link>
-          </div>
-          <Link
-            href="/about"
-            className="inline-block border border-white/25 text-white px-7 py-3 font-labels text-[10px] tracking-[0.18em] uppercase btn-outline-hover"
+            ref={copyRef}
+            className="grid max-w-6xl gap-8 lg:grid-cols-[1.12fr_0.72fr] lg:items-end lg:gap-16"
+            style={{ willChange: "transform, opacity" }}
           >
-            About 828
-          </Link>
-        </div>
+            <div>
+              <p
+                ref={eyebrowRef}
+                className="mb-7 font-labels text-[10px] uppercase tracking-[0.28em] text-white/58"
+              >
+                Torrance / South Bay
+              </p>
 
-        </div>{/* end copyBlockRef */}
+              <h1
+                ref={headlineRef}
+                className="font-editorial text-[clamp(4.2rem,10vw,10.8rem)] font-semibold leading-[0.78]"
+                style={{ perspective: "1000px" }}
+              >
+                Build your vision.
+              </h1>
 
-        {/* Scroll indicator — bottom of copy side */}
-        <div
-          className="absolute bottom-8 left-8 lg:left-12 xl:left-16 flex items-center gap-3"
-          aria-hidden="true"
-        >
-          <div style={{ width: 1, height: 32, background: "rgba(255,255,255,0.2)" }} />
-          <span className="font-labels text-[8px] text-white/30 tracking-[0.22em] uppercase">
-            Scroll
-          </span>
+              <div ref={lineRef} className="mt-8 h-px w-24 bg-white/38" aria-hidden="true" />
+            </div>
+
+            <div className="flex max-w-md flex-col gap-7 border-l border-white/12 pl-6 lg:mb-2 lg:pl-8">
+              <p
+                ref={subRef}
+                className="font-body text-[clamp(1rem,1.35vw,1.18rem)] leading-relaxed text-white/72"
+              >
+                ADU construction, remediation, and consulting shaped with
+                discipline from first conversation to final detail.
+              </p>
+
+              <div ref={ctaRef} className="shrink-0">
+                <div ref={magneticRef} className="inline-block">
+                  <Link
+                    href="/contact"
+                    className="btn-shine btn-lift inline-flex items-center justify-center bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black"
+                  >
+                    Start a Project
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={licenseRef}
+            className="absolute bottom-8 right-6 hidden font-labels text-[9px] uppercase tracking-[0.22em] text-white/38 lg:block lg:right-12"
+            style={{ willChange: "transform, opacity" }}
+          >
+            CA License #{SITE.license}
+          </div>
         </div>
       </div>
-
-      {/* Maroon top accent line (desktop full-width) */}
-      <div
-        className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          height: "2px",
-          background: `linear-gradient(to right, transparent 5%, var(--color-accent) 35%, var(--color-accent) 65%, transparent 95%)`,
-          opacity: 0.5,
-        }}
-      />
     </section>
   );
 }

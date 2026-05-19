@@ -28,6 +28,11 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 5. Asymmetric splits (home hero, contact sections).
 6. Image-sequence on scroll (reserved for once real photos arrive).
 
+### Route-specific motion rule
+- Each route must have its own motion grammar. Do not copy the homepage scroll pattern onto About or other pages.
+- About should feel like a documentary/editorial profile: different section pacing, different reveal logic, and more proof-led composition.
+- If an image reads as generic or AI-like, replace it with a better-fitting asset or crop rather than repeating the same visual trick.
+
 ### Standing rules
 - All factual data traces to `lib/constants.ts`.
 - Production build only for verification (port 4000).
@@ -116,7 +121,7 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 |------|--------|------|
 | Splash | V2.5 Cinematic — rotateX 88→0 3-channel reveal, maroon radial ignition pulse on entry, curtain-wipe exit (clipPath inset). V2 base: vertical gradient, ONE LINE wordmark, maroon underline, sessionStorage gate. | 2026-05-06 |
 | Home (`/`) | V2.5 homepage remodel handoff in `docs/828_HOME_REMODEL_HANDOFF.md`. Route now renders HeroV2 + ServicesPreviewV2 + new HomeVisionSequence + AboutPreview + HomeCTA. Hero copy changed to `Built with intent. Not by accident.` with active-listening glass card and CA license badge. New HomeVisionSequence adds Joseph-note language: first step is listening, one conversation begins the build, build your vision, dedicated to your dream, build philosophy/process cards, rolling marquee, blueprint/level silhouettes, pinned horizontal process track. HomeCTA restored and cleaned to 2004/maroon/conversation-first copy. Verify locally on `http://localhost:3028`; port 3000 may be another app. | 2026-05-07 |
-| About (`/about`) | V2 + V2.5 elevation — 6 sections: hero + story + 3 principles (ConstructionLine backdrop) + CRAFT acronym (glass cards, watermark drift) + South Bay 2-layer parallax marquee + CTA. Compass silhouette in story margin. V1 timeline/how-we-think deleted. | 2026-05-06 |
+| About (`/about`) | V2 + V2.5 elevation — documentary/editorial profile layout with its own motion grammar: split hero dossier, origin story, field notes, South Bay coverage band, and CTA. Do not mirror the homepage scroll stack. | 2026-05-18 |
 | Services (`/services`) | V2 + V2.5 elevation — asymmetric 3-tile gateway, 3D tilt (useTilt 10deg), maroon ghost shadow, ConstructionLine silhouette backdrop, magnetic CTAs. | 2026-05-06 |
 | Services/ADU (`/services/adu`) | V2 + V2.5 elevation — visual hero (ArchOutline silhouette 0.55), Need+FAQ glass cards, 5-step process, ADU acronym glass definitions, Start Here BOOK CALL. | 2026-05-06 |
 | Services/Remediation (`/services/remediation`) | V2 + V2.5 elevation — visual hero (ConstructionLine silhouette), Need+FAQ glass, 4-step process, Why 828, equipment placeholder TODO. | 2026-05-06 |

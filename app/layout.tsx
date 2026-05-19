@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, Space_Mono, IBM_Plex_Mono } from "next/font/google";
+import { Cormorant_Garamond, Inter, Space_Grotesk, Space_Mono, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -13,10 +13,18 @@ import CustomCursor from "@/components/ui/CustomCursor";
 import { Analytics } from "@vercel/analytics/react";
 import GoogleAnalytics from "@/components/shared/GoogleAnalytics";
 import { SITE } from "@/lib/constants";
+import ScrollRestorationReset from "@/components/system/ScrollRestorationReset";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-editorial",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -87,13 +95,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${cormorant.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-black font-body">
-        {/* Disable browser scroll restoration before any JS runs.
-            Prevents the race where the browser restores a mid-page Y position
-            before GSAP initialises, which leaves photos stuck at opacity:0. */}
-        <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual';window.scrollTo(0,0);" }} />
+        <ScrollRestorationReset />
         {/* Skip to main content — keyboard accessibility */}
         <a href="#main-content" className="skip-link">
           Skip to main content

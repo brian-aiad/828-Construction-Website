@@ -5,7 +5,7 @@ export const SITE = {
     "25+ years of building science expertise. Specializing in ADU construction, remediation, and consulting in Torrance and South Bay, CA.",
   phone: "213-828-2388",
   phoneHref: "tel:+12138282388",
-  email: "joe@828constructions.com",
+  email: "828constructionca@gmail.com",
   address: {
     street: "21223 Hawthorne Boulevard STE B 1087",
     city: "Torrance",
@@ -92,9 +92,9 @@ export const SERVICES = [
 ];
 
 // ── V2 brand constants ────────────────────────────────────────────────────
-// FOUNDING_YEAR = 2004. Joe's typed notes say "2025" — this is a typo.
-// Verbal call + memory confirm 2004. Lock this value.
-export const FOUNDING_YEAR = 2004;
+// Joe has been doing construction since 2004 — this is experience, not founding year.
+// 828 Construction (the company) is newer. Never frame 2004 as "Est." or "Founded."
+export const EXPERIENCE_SINCE = 2004;
 
 export const SERVICE_AREAS = [
   "Torrance",
@@ -146,6 +146,45 @@ export interface Project {
   tempPhoto?: boolean;
 }
 
+const GENERATED_PROJECT_GALLERIES = {
+  adu: [
+    "/images/projects/generated/adu-pack-01.jpg",
+    "/images/projects/generated/adu-pack-02.jpg",
+    "/images/projects/generated/adu-pack-03.jpg",
+    "/images/projects/generated/adu-pack-04.jpg",
+  ],
+  bath: [
+    "/images/projects/generated/bath-pack-01.jpg",
+    "/images/projects/generated/bath-pack-02.jpg",
+    "/images/projects/generated/bath-pack-03.jpg",
+    "/images/projects/generated/bath-pack-04.jpg",
+  ],
+  outdoor: [
+    "/images/projects/generated/outdoor-pack-01.jpg",
+    "/images/projects/generated/outdoor-pack-02.jpg",
+    "/images/projects/generated/outdoor-pack-03.jpg",
+    "/images/projects/generated/outdoor-pack-04.jpg",
+  ],
+  remediation: [
+    "/images/projects/generated/remediation-pack-01.jpg",
+    "/images/projects/generated/remediation-pack-02.jpg",
+    "/images/projects/generated/remediation-pack-03.jpg",
+    "/images/projects/generated/remediation-pack-04.jpg",
+  ],
+  consulting: [
+    "/images/projects/generated/consulting-pack-01.jpg",
+    "/images/projects/generated/consulting-pack-02.jpg",
+    "/images/projects/generated/consulting-pack-03.jpg",
+    "/images/projects/generated/consulting-pack-04.jpg",
+  ],
+  foundation: [
+    "/images/projects/generated/foundation-pack-01.jpg",
+    "/images/projects/generated/foundation-pack-02.jpg",
+    "/images/projects/generated/foundation-pack-03.jpg",
+    "/images/projects/generated/foundation-pack-04.jpg",
+  ],
+} as const;
+
 export const PROJECTS: Project[] = [
   {
     id: 1,
@@ -155,11 +194,8 @@ export const PROJECTS: Project[] = [
     spec: "Custom herringbone tile · Wall-mount toilet · Stone accent wall",
     description:
       "Full bathroom renovation featuring a floor-to-ceiling herringbone tile shower wall, wall-mounted toilet with in-wall tank, natural stone accent, and recessed niche. A complete gut-and-rebuild executed to the millimeter.",
-    image: "/images/projects/bathroom-herringbone.jpg",
-    images: [
-      "/images/projects/bathroom-herringbone.jpg",
-      "/images/projects/bathroom-shower.jpg",
-    ],
+    image: "/images/projects/generated/bath-pack-01.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-herringbone.jpg"],
     featured: true,
   },
   {
@@ -170,7 +206,8 @@ export const PROJECTS: Project[] = [
     spec: "Geometric tile · Matte black fixtures · Glass partition",
     description:
       "Bold starburst geometric tile dominates this ADU bathroom — black matte fixtures, frameless glass shower partition, and warm wood vanity. Proof that a small space can have maximum personality.",
-    image: "/images/projects/bathroom-geometric.jpg",
+    image: "/images/projects/generated/bath-pack-02.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-geometric.jpg"],
   },
   {
     id: 3,
@@ -180,12 +217,8 @@ export const PROJECTS: Project[] = [
     spec: "Pergola · Pool deck · Custom wood decking",
     description:
       "Luxury outdoor living space built around an existing pool — custom wood deck, pergola with pendant lighting, and seamless indoor-outdoor flow. Designed for California life, built to last decades.",
-    image: "/images/projects/outdoor-living-editorial.jpg",
-    images: [
-      "/images/projects/outdoor-living-editorial.jpg",
-      "/images/hero/patio-pool.jpg",
-      "/images/projects/outdoor-patio-pergola.jpg",
-    ],
+    image: "/images/projects/generated/outdoor-pack-01.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.outdoor, "/images/projects/outdoor-living-editorial.jpg"],
     featured: true,
   },
   {
@@ -196,12 +229,8 @@ export const PROJECTS: Project[] = [
     spec: "Waterproofing · Dual shower heads · Herringbone niche",
     description:
       "Shower torn out to the studs — improper waterproofing removed, rebuilt to code, large-format white tile installed with a custom herringbone-tile niche and dual shower system. The kind of work that fixes it right.",
-    image: "/images/projects/bathroom-shower.jpg",
-    images: [
-      "/images/projects/bathroom-shower.jpg",
-      "/images/projects/shower-black-fixtures.jpg",
-      "/images/projects/niche-detail.jpg",
-    ],
+    image: "/images/projects/generated/bath-pack-03.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-shower.jpg"],
   },
   {
     id: 5,
@@ -211,7 +240,8 @@ export const PROJECTS: Project[] = [
     spec: "Tile ceiling · LED downlights · Copper sconce",
     description:
       "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a warm copper wall sconce. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
-    image: "/images/projects/bathroom-led.jpg",
+    image: "/images/projects/generated/bath-pack-04.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-led.jpg"],
   },
   {
     id: 6,
@@ -221,7 +251,8 @@ export const PROJECTS: Project[] = [
     spec: "Microcement finish · Recessed niche · Dark tile ceiling",
     description:
       "Mid-project documentation of a precision shower niche in microcement finish — dark tile ceiling contrasts the light walls. This is what the work looks like before the glamour shot. Detail-first, always.",
-    image: "/images/projects/niche-detail.jpg",
+    image: "/images/projects/generated/remediation-pack-02.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/niche-detail.jpg"],
   },
   {
     id: 7,
@@ -231,7 +262,8 @@ export const PROJECTS: Project[] = [
     spec: "LED strip lighting · Warm ambiance · Wood plank floor",
     description:
       "Bathroom renovation focused on atmosphere — LED strip lighting under the vanity shelf creates warm, indirect glow. Wood plank flooring and clean white walls complete a space designed for long-term comfort.",
-    image: "/images/projects/bathroom-warm.jpg",
+    image: "/images/projects/generated/bath-pack-02.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-warm.jpg"],
   },
   {
     id: 8,
@@ -241,11 +273,8 @@ export const PROJECTS: Project[] = [
     spec: "Teak decking · Pergola · Woven pendant lighting · Pool surround",
     description:
       "Full outdoor living transformation — custom teak deck, pergola with statement woven pendants, and a complete pool surround redesign. The kind of project where every material decision matters for long-term performance outdoors.",
-    image: "/images/projects/outdoor-patio-pergola.jpg",
-    images: [
-      "/images/projects/outdoor-patio-pergola.jpg",
-      "/images/hero/patio-pool.jpg",
-    ],
+    image: "/images/projects/generated/outdoor-pack-03.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.outdoor, "/images/projects/outdoor-patio-pergola.jpg"],
     featured: true,
   },
   {
@@ -256,16 +285,8 @@ export const PROJECTS: Project[] = [
     spec: "Detached unit · 420 sq ft · Permit expedited",
     description:
       "Full-build detached ADU from foundation to finish — permitted, framed, wrapped, and finished to match the main structure. Built for long-term rental income with durable materials throughout.",
-    image: "/images/projects/adu-exterior-new.jpg",
-    images: [
-      "/images/projects/adu-exterior-new.jpg",
-      "/images/projects/exterior-stucco.jpg",
-      "/images/projects/adu-interior-living.jpg",
-      "/images/projects/waterproofing-membrane.jpg",
-      "/images/projects/adu-framing.jpg",
-      "/images/projects/adu-exterior.jpg",
-      "/images/projects/adu-interior.jpg",
-    ],
+    image: "/images/projects/generated/adu-pack-01.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.adu, ...GENERATED_PROJECT_GALLERIES.foundation, "/images/projects/adu-exterior-new.jpg"],
     featured: true,
   },
   {
@@ -276,7 +297,8 @@ export const PROJECTS: Project[] = [
     spec: "Garage conversion · Steel glass doors · Polished concrete",
     description:
       "Former two-car garage converted to a full ADU — steel-framed glass bifold doors replace the garage opening, polished concrete floors, open kitchen, and seamless indoor-outdoor flow. Permitted and built to code.",
-    image: "/images/projects/garage-conversion.jpg",
+    image: "/images/projects/generated/adu-pack-04.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.adu, "/images/projects/garage-conversion.jpg"],
     featured: true,
   },
   {
@@ -287,7 +309,13 @@ export const PROJECTS: Project[] = [
     spec: "Matte black cabinetry · Waterfall island · Pendant lighting",
     description:
       "Full kitchen renovation with custom matte black lower cabinets, white uppers, waterfall-edge island with flush sink, and minimal pendant lighting. Part of a whole-home ADU conversion project.",
-    image: "/images/projects/kitchen-dark.jpg",
+    image: "/images/projects/generated/adu-pack-04.jpg",
+    images: [
+      "/images/projects/kitchen-dark.jpg",
+      GENERATED_PROJECT_GALLERIES.adu[3],
+      GENERATED_PROJECT_GALLERIES.bath[1],
+      GENERATED_PROJECT_GALLERIES.bath[3],
+    ],
     featured: false,
   },
   {
@@ -298,7 +326,8 @@ export const PROJECTS: Project[] = [
     spec: "Continuous footings · Rebar grid · Engineered pour",
     description:
       "Foundation work for a new detached ADU — continuous concrete footings with engineered rebar placement. This is the part no one photographs but everyone relies on. Built to outlast the structure above it.",
-    image: "/images/projects/foundation-concrete.jpg",
+    image: "/images/projects/generated/foundation-pack-01.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.foundation],
     featured: false,
   },
   {
@@ -309,13 +338,8 @@ export const PROJECTS: Project[] = [
     spec: "Feasibility study · Defect report · Contractor review",
     description:
       "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and delivered a written feasibility analysis. Client negotiated $80K off the purchase price.",
-    image: "/images/projects/consulting-blueprints.jpg",
-    images: [
-      "/images/projects/consulting-blueprints.jpg",
-      "/images/projects/consulting-inspection.jpg",
-      "/images/projects/consulting-plans.jpg",
-      "/images/projects/consulting-crawlspace.jpg",
-    ],
+    image: "/images/projects/generated/consulting-pack-01.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.consulting, "/images/projects/consulting-inspection.jpg"],
   },
   {
     id: 10,
@@ -325,15 +349,8 @@ export const PROJECTS: Project[] = [
     spec: "Envelope failure · Moisture remediation · Rebuilt to code",
     description:
       "Chronic water intrusion traced to failed flashing and improper window installation — not a roofing issue as originally diagnosed. Scope rebuilt correctly, structure dried, and building envelope sealed. No recurrence.",
-    image: "/images/projects/remediation-after.jpg",
-    images: [
-      "/images/projects/remediation-after.jpg",
-      "/images/projects/remediation-restored.jpg",
-      "/images/projects/remediation-active.jpg",
-      "/images/projects/remediation-mold.jpg",
-      "/images/projects/remediation-work.jpg",
-      "/images/projects/remediation-damage.jpg",
-    ],
+    image: "/images/projects/generated/remediation-pack-04.jpg",
+    images: [...GENERATED_PROJECT_GALLERIES.remediation, "/images/projects/remediation-after.jpg"],
   },
 ];
 

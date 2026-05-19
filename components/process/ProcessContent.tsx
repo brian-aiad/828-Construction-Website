@@ -53,7 +53,7 @@ const steps = [
       "A thorough walkthrough, full documentation, and continued availability after handoff. The job isn't done when the tools leave the site.",
     promise:
       "We stay available. If a question comes up six months later, we're still here.",
-    image: "/images/process/completion.jpg",
+    image: "/images/process/completion-post-construction.png",
     tag: "Done Right, Not Just Done",
   },
 ];
@@ -353,7 +353,7 @@ function PinnedTimeline() {
             <span style={{ color: "rgba(255,255,255,0.40)" }}>No shortcuts.</span>
           </h2>
         </div>
-        {steps.map((step, i) => (
+        {steps.map((step) => (
           <div key={step.number} className="border-t border-white/5">
             <div className="relative overflow-hidden" style={{ height: "clamp(240px, 55vw, 320px)" }}>
               <Image
@@ -361,10 +361,10 @@ function PinnedTimeline() {
                 alt={`828 Construction — ${step.title}`}
                 fill
                 className="object-cover"
-                style={{ filter: "contrast(1.06) saturate(0.9)" }}
+                style={{ filter: "contrast(1.04) saturate(1.04) brightness(1.06)" }}
                 sizes="100vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
                 <span className="font-numbers font-bold text-[#B87333] leading-none block" style={{ fontSize: "2.5rem" }}>
                   {step.number}
@@ -519,12 +519,12 @@ function PinnedTimeline() {
                           alt={`828 Construction — ${step.title} phase`}
                           fill
                           className="object-cover"
-                          style={{ filter: "contrast(1.06) saturate(0.9)" }}
+                          style={{ filter: "contrast(1.04) saturate(1.04) brightness(1.06)" }}
                           sizes="(max-width: 1280px) 55vw, 700px"
                           priority={i === 0}
                         />
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/32 via-transparent to-transparent" />
                       {/* Phase tag bottom-right */}
                       <div className="absolute bottom-5 right-5">
                         <span className="font-labels text-[9px] text-white/50 tracking-[0.18em] uppercase">
@@ -568,6 +568,7 @@ function EditorialStandards() {
     let mounted = true;
     let splitFrame = -1;
     let headlineSplit: SplitType | null = null;
+    const headEl = headlineRef.current;
 
     const ctx = gsap.context(() => {
       // Copper hairline reveal (Pattern D)
@@ -588,7 +589,6 @@ function EditorialStandards() {
       }
 
       // Headline char scrub reveal (Fix 1 — 4-guard SplitType cleanup)
-      const headEl = headlineRef.current;
       if (headEl) {
         splitFrame = requestAnimationFrame(() => {
           if (!mounted || !headEl.isConnected) return;
@@ -638,7 +638,7 @@ function EditorialStandards() {
     return () => {
       mounted = false;
       cancelAnimationFrame(splitFrame);
-      if (headlineSplit && headlineRef.current?.isConnected) {
+      if (headlineSplit && headEl?.isConnected) {
         try { headlineSplit.revert(); } catch {}
       }
       splitRef.current = null;

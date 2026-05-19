@@ -28,26 +28,30 @@ export default function NumberCounter({
     const isMobile = window.innerWidth < 768;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (isMobile || reducedMotion) {
-      setCount(target);
       return;
     }
 
-    // Count up from 0
-    setCount(0);
+    let timer: ReturnType<typeof setInterval> | undefined;
     let current = 0;
     const step = target / (duration / 16);
 
-    const timer = setInterval(() => {
+    const frame = requestAnimationFrame(() => {
+      setCount(0);
+      timer = setInterval(() => {
       current += step;
       if (current >= target) {
         setCount(target);
-        clearInterval(timer);
+        if (timer) clearInterval(timer);
       } else {
         setCount(Math.floor(current));
       }
-    }, 16);
+      }, 16);
+    });
 
-    return () => clearInterval(timer);
+    return () => {
+      cancelAnimationFrame(frame);
+      if (timer) clearInterval(timer);
+    };
   }, [isInView, target, duration]);
 
   return (

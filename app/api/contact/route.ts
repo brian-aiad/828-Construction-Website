@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, service, message, website } = body;
+    const { name, phone, email, address, service, message, website } = body;
 
     // Honeypot check — bots fill this field, humans don't see it
     if (website && String(website).trim().length > 0) {
@@ -61,22 +61,24 @@ export async function POST(request: NextRequest) {
     const safeName = sanitize(name);
     const safePhone = sanitize(phone);
     const safeEmail = sanitize(email || "");
+    const safeAddress = sanitize(address || "");
     const safeService = sanitize(service);
     const safeMessage = sanitize(message);
 
     const apiKey = process.env.RESEND_API_KEY;
-    const toEmail = process.env.CONTACT_EMAIL || "joe@828constructions.com";
+    const toEmail = process.env.CONTACT_EMAIL;
+    const fromEmail = process.env.CONTACT_FROM_EMAIL;
 
-    if (!apiKey) {
-      console.log("📬 Contact form submission (dev — no Resend key):", {
-        name: safeName,
-        phone: safePhone,
-        email: safeEmail,
-        service: safeService,
-        message: safeMessage,
-        ip,
+    if (!apiKey || !toEmail || !fromEmail) {
+      console.error("Contact email environment is not fully configured.", {
+        hasApiKey: Boolean(apiKey),
+        hasContactEmail: Boolean(toEmail),
+        hasFromEmail: Boolean(fromEmail),
       });
-      return NextResponse.json({ ok: true });
+      return NextResponse.json(
+        { error: "Contact form is not configured. Please call us directly." },
+        { status: 500 }
+      );
     }
 
     const emailHtml = `
@@ -100,6 +102,10 @@ export async function POST(request: NextRequest) {
               <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Email</td>
               <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 16px;"><a href="mailto:${safeEmail}" style="color: #000;">${safeEmail}</a></td>
             </tr>` : ""}
+            ${safeAddress ? `<tr>
+              <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Address</td>
+              <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 16px;">${safeAddress}</td>
+            </tr>` : ""}
             <tr>
               <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px;">Service</td>
               <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-size: 16px;">${safeService}</td>
@@ -120,7 +126,7 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "828 Construction Website <noreply@828constructions.com>",
+        from: fromEmail,
         to: [toEmail],
         reply_to: safeEmail || undefined,
         subject: `New ${safeService} Inquiry from ${safeName}`,

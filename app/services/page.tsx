@@ -12,8 +12,6 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <>
-      {/* Preload hero image */}
-      <link rel="preload" as="image" href="/images/chatpics/07_services_hero_three_disciplines.png" />
       <ServicesContent />
     </>
   );

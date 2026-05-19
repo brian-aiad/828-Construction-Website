@@ -49,26 +49,26 @@ export default function RevealImage({ revealStyle = 'mask', ...props }: RevealIm
       if (revealStyle === 'mask') {
         gsap.to(img, {
           clipPath: 'inset(0% 0 0 0)',
-          duration: 1.2,
-          ease: 'power3.inOut',
-          scrollTrigger: { trigger: wrapper, start: 'top 80%', once: true },
+          duration: 1.05,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: wrapper, start: 'top 84%', once: true },
         });
       } else if (revealStyle === 'blur') {
         gsap.to(img, {
           filter: 'blur(0px)',
           scale: 1,
           opacity: 1,
-          duration: 1.4,
+          duration: 1.1,
           ease: 'power3.out',
-          scrollTrigger: { trigger: wrapper, start: 'top 80%', once: true },
+          scrollTrigger: { trigger: wrapper, start: 'top 84%', once: true },
         });
       } else if (revealStyle === 'scale') {
         gsap.to(img, {
           scale: 1,
           opacity: 1,
-          duration: 1.0,
+          duration: 0.9,
           ease: 'power3.out',
-          scrollTrigger: { trigger: wrapper, start: 'top 80%', once: true },
+          scrollTrigger: { trigger: wrapper, start: 'top 84%', once: true },
         });
       }
     }, wrapper);
@@ -80,6 +80,7 @@ export default function RevealImage({ revealStyle = 'mask', ...props }: RevealIm
     <div ref={wrapperRef} className="relative overflow-hidden w-full h-full" data-gsap-reveal="true">
       <Image
         {...props}
+        alt={props.alt ?? ''}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ref={imgRef as any}
         onLoad={() => setLoaded(true)}

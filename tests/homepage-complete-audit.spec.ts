@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -26,8 +26,6 @@ test.describe('HOMEPAGE COMPLETE AUDIT - Every Section', () => {
 
     const logo = page.locator('header img[alt*="828"]');
     const navLinks = page.locator('header nav a');
-    const timestamp = page.locator('header').filter({ hasText: /\d{2}:\d{2}:\d{2}/ });
-
     const logoVisible = await logo.isVisible();
     const navCount = await navLinks.count();
     const hasTimestamp = await page.locator('header span').filter({ hasText: /\d{2}:\d{2}/ }).count();

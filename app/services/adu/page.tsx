@@ -6,7 +6,7 @@ import AduServiceContent from "@/components/services/adu/AduServiceContent";
 export const metadata: Metadata = {
   title: "ADU Builder Torrance | Accessory Dwelling Units | 828 Construction",
   description:
-    "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. Est. 2004. CA License #1141119. Free consultation.",
+    "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. 20+ years experience. CA License #1141119. Free consultation.",
   keywords: [
     "ADU builder Torrance",
     "accessory dwelling unit Torrance",

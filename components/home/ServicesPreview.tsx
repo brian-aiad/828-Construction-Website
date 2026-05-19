@@ -56,10 +56,8 @@ const services = [
 
 function ServiceRow({
   service,
-  index,
 }: {
   service: (typeof services)[0];
-  index: number;
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const imagePaneRef = useRef<HTMLDivElement>(null);
@@ -70,7 +68,8 @@ function ServiceRow({
   useLayoutEffect(() => () => { try { ctxRef.current?.revert(); } catch {} }, []);
 
   useEffect(() => {
-    if (!rowRef.current || !imagePaneRef.current || !textRef.current) return;
+    const row = rowRef.current;
+    if (!row || !imagePaneRef.current || !textRef.current) return;
 
     // Hover handlers defined outside ctx so they can be removed in cleanup
     const imgEl = imgRef.current?.querySelector<HTMLImageElement>("img");
@@ -81,9 +80,9 @@ function ServiceRow({
       if (imgEl) gsap.to(imgEl, { filter: "contrast(1.06) saturate(1.1)", scale: 1, duration: 0.5, ease: "power2.out" });
     };
     const supportsHover = typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
-    if (supportsHover && rowRef.current) {
-      rowRef.current.addEventListener("mouseenter", onEnter);
-      rowRef.current.addEventListener("mouseleave", onLeave);
+    if (supportsHover) {
+      row.addEventListener("mouseenter", onEnter);
+      row.addEventListener("mouseleave", onLeave);
     }
 
     const ctx = gsap.context(() => {
@@ -166,14 +165,14 @@ function ServiceRow({
           }
         );
       }
-    }, rowRef);
+    }, row);
 
     ctxRef.current = ctx;
 
     return () => {
-      if (supportsHover && rowRef.current) {
-        rowRef.current.removeEventListener("mouseenter", onEnter);
-        rowRef.current.removeEventListener("mouseleave", onLeave);
+      if (supportsHover) {
+        row.removeEventListener("mouseenter", onEnter);
+        row.removeEventListener("mouseleave", onLeave);
       }
       ctxRef.current = null;
       try { ctx.revert(); } catch {}
@@ -416,7 +415,7 @@ export default function ServicesPreview() {
       <div>
         {services.map((service, i) => (
           <div key={service.slug}>
-            <ServiceRow service={service} index={i} />
+            <ServiceRow service={service} />
             {/* Inter-row copper hairline (not after last row) */}
             {i < services.length - 1 && (
               <div style={{ height: 1, background: "rgba(184,115,51,0.2)" }} />

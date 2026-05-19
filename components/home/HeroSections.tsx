@@ -284,7 +284,7 @@ export default function HeroSections() {
             </span>
             <span className="w-px h-3 bg-white/20" aria-hidden="true" />
             <span className="font-labels text-[10px] text-white/50 tracking-[0.25em] uppercase">
-              Est. 2004
+              20+ Yrs Experience
             </span>
           </div>
         </div>

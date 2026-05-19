@@ -4,7 +4,19 @@ import { useRef } from "react";
 
 const REPETITIONS = 6;
 
-export default function BrandMarqueeBottom() {
+type BrandMarqueeBottomProps = {
+  className?: string;
+  itemClassName?: string;
+  separatorClassName?: string;
+  compact?: boolean;
+};
+
+export default function BrandMarqueeBottom({
+  className = "",
+  itemClassName = "",
+  separatorClassName = "",
+  compact = false,
+}: BrandMarqueeBottomProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const setPaused = (paused: boolean) => {
@@ -15,7 +27,7 @@ export default function BrandMarqueeBottom() {
   return (
     <div
       aria-hidden="true"
-      className="brand-marquee-bottom relative h-20 w-full overflow-hidden"
+      className={`brand-marquee-bottom relative w-full overflow-hidden ${compact ? "h-12" : "h-20"} ${className}`}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
     >
@@ -26,20 +38,20 @@ export default function BrandMarqueeBottom() {
         {Array.from({ length: REPETITIONS }).map((_, i) => (
           <span
             key={i}
-            className="inline-flex items-center pr-16 font-display font-bold uppercase"
+            className={`inline-flex items-center font-display font-bold uppercase ${compact ? "pr-10" : "pr-16"} ${itemClassName}`}
             style={{
-              fontSize: "clamp(1.9rem, 3.6vw, 3.75rem)",
+              fontSize: compact ? "clamp(1.25rem, 2.2vw, 2.35rem)" : "clamp(1.9rem, 3.6vw, 3.75rem)",
               color: "rgba(255, 255, 255, 0.28)",
-              letterSpacing: "-0.01em",
+              letterSpacing: 0,
               lineHeight: 1,
             }}
           >
             828 Construction
             <span
-              className="mx-12 inline-block rounded-full bg-[var(--color-accent)] opacity-60"
+              className={`inline-block rounded-full bg-[var(--color-accent)] opacity-60 ${compact ? "mx-7" : "mx-12"} ${separatorClassName}`}
               style={{
-                width: "0.35rem",
-                height: "0.35rem",
+                width: compact ? "0.24rem" : "0.35rem",
+                height: compact ? "0.24rem" : "0.35rem",
                 transform: "translateY(-0.4em)",
               }}
             />

@@ -6,7 +6,7 @@ import ConsultingServiceContent from "@/components/services/consulting/Consultin
 export const metadata: Metadata = {
   title: "Construction Consulting Torrance | Building Science Expert | 828 Construction",
   description:
-    "Professional construction consulting in Torrance. Pre-construction advisory, project feasibility, and building science expertise. Est. 2004. CA License #1141119.",
+    "Professional construction consulting in Torrance. Pre-construction advisory, project feasibility, and building science expertise. 20+ years experience. CA License #1141119.",
   keywords: [
     "construction consulting Torrance",
     "building science consultant",

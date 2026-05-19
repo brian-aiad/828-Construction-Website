@@ -477,7 +477,6 @@ function PinnedWhy() {
     }, wrapperRef);
     pinCtxRef.current = ctx;
     return () => { pinCtxRef.current = null; try { ctx.revert(); } catch {} };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

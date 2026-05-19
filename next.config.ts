@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   // TypeScript check is already verified via npx tsc --noEmit in CI.
   // Skipping the redundant build-time check avoids OOM crashes on Windows
   // when the build runs inside the git pre-push hook environment.
