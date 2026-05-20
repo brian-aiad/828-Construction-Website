@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE } from "@/lib/constants";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { useServicePageMotion } from "@/components/services/useServicePageMotion";
 
 const MATRIX = [
@@ -20,7 +21,8 @@ export default function ConsultingServiceContent() {
     <div ref={rootRef} className="bg-[#f7f4f0] text-black">
       <section className="relative min-h-screen overflow-hidden">
         <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[0.46fr_0.54fr]">
-          <div className="relative flex flex-col justify-center px-6 py-28 sm:px-10 lg:px-16">
+          <div className="relative flex flex-col justify-center overflow-hidden px-6 py-28 sm:px-10 lg:px-16">
+            <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.12]" />
             <div className="relative z-10">
               <Link href="/services" className="font-labels text-[10px] uppercase tracking-[0.18em] text-black/45 hover:text-black">
                 Back to services
@@ -47,7 +49,7 @@ export default function ConsultingServiceContent() {
           </div>
           <div className="detail-image relative min-h-[52vh] overflow-hidden lg:min-h-screen">
             <Image
-              src="/images/services/generated/consulting-service-hero-clean.png"
+              src="/images/projects/consulting-plans.jpg"
               alt="Construction consulting table with plans and measuring tools"
               fill
               priority
@@ -87,11 +89,12 @@ export default function ConsultingServiceContent() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
+      <section className="relative overflow-hidden py-20 lg:py-28">
+        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.1]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
           <div className="detail-image relative min-h-[30rem] overflow-hidden">
             <Image
-              src="/images/projects/generated/consulting-pack-02.jpg"
+              src="/images/projects/consulting-inspection.jpg"
               alt="Construction inspection and consulting access point"
               fill
               sizes="(max-width: 1024px) 100vw, 52vw"

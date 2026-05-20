@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE } from "@/lib/constants";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
-import CraftInstrumentLayer from "@/components/system/CraftInstrumentLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { useServicePageMotion } from "@/components/services/useServicePageMotion";
 
 const PATH = [
@@ -22,7 +22,7 @@ export default function AduServiceContent() {
         <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[0.56fr_0.44fr]">
           <div className="detail-image relative order-2 min-h-[52vh] overflow-hidden lg:order-1 lg:min-h-screen">
             <Image
-              src="/images/services/generated/adu-service-hero-clean.png"
+              src="/images/projects/adu-exterior-new.jpg"
               alt="Modern detached ADU exterior for 828 Construction"
               fill
               priority
@@ -67,8 +67,7 @@ export default function AduServiceContent() {
       </section>
 
       <section className="relative overflow-hidden bg-[#f7f4f0] py-20 text-black lg:py-28">
-        <CraftInstrumentLayer tone="dark" density="quiet" />
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:px-12">
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:px-12">
           <div className="detail-reveal">
             <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/45">
               From lot to livable unit
@@ -92,11 +91,12 @@ export default function AduServiceContent() {
         </div>
       </section>
 
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
+      <section className="relative overflow-hidden py-20 lg:py-28">
+        <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
           <div className="detail-image relative min-h-[30rem] overflow-hidden">
             <Image
-              src="/images/projects/generated/foundation-pack-03.jpg"
+              src="/images/projects/foundation-concrete.jpg"
               alt="ADU framing work"
               fill
               sizes="(max-width: 1024px) 100vw, 52vw"

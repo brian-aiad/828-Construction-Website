@@ -146,42 +146,104 @@ export interface Project {
   tempPhoto?: boolean;
 }
 
-const GENERATED_PROJECT_GALLERIES = {
-  adu: [
-    "/images/projects/generated/adu-pack-01.jpg",
-    "/images/projects/generated/adu-pack-02.jpg",
-    "/images/projects/generated/adu-pack-03.jpg",
-    "/images/projects/generated/adu-pack-04.jpg",
+const PROJECT_GALLERIES = {
+  modernHerringboneBath: [
+    "/images/projects/generated-angles/modern-herringbone-bath/01.jpg",
+    "/images/projects/generated-angles/modern-herringbone-bath/02.jpg",
+    "/images/projects/generated-angles/modern-herringbone-bath/03.jpg",
+    "/images/projects/generated-angles/modern-herringbone-bath/04.jpg",
+    "/images/projects/generated-angles/modern-herringbone-bath/05.jpg",
   ],
-  bath: [
-    "/images/projects/generated/bath-pack-01.jpg",
-    "/images/projects/generated/bath-pack-02.jpg",
-    "/images/projects/generated/bath-pack-03.jpg",
-    "/images/projects/generated/bath-pack-04.jpg",
+  geometricFeatureBath: [
+    "/images/projects/generated-angles/geometric-feature-bath/01.jpg",
+    "/images/projects/generated-angles/geometric-feature-bath/02.jpg",
+    "/images/projects/generated-angles/geometric-feature-bath/03.jpg",
+    "/images/projects/generated-angles/geometric-feature-bath/04.jpg",
+    "/images/projects/generated-angles/geometric-feature-bath/05.jpg",
   ],
-  outdoor: [
-    "/images/projects/generated/outdoor-pack-01.jpg",
-    "/images/projects/generated/outdoor-pack-02.jpg",
-    "/images/projects/generated/outdoor-pack-03.jpg",
-    "/images/projects/generated/outdoor-pack-04.jpg",
+  southBayOutdoorLiving: [
+    "/images/projects/generated-angles/south-bay-outdoor-living/01.jpg",
+    "/images/projects/generated-angles/south-bay-outdoor-living/02.jpg",
+    "/images/projects/generated-angles/south-bay-outdoor-living/03.jpg",
+    "/images/projects/generated-angles/south-bay-outdoor-living/04.jpg",
+    "/images/projects/generated-angles/south-bay-outdoor-living/05.jpg",
   ],
-  remediation: [
-    "/images/projects/generated/remediation-pack-01.jpg",
-    "/images/projects/generated/remediation-pack-02.jpg",
-    "/images/projects/generated/remediation-pack-03.jpg",
-    "/images/projects/generated/remediation-pack-04.jpg",
+  showerRemediationNicheRebuild: [
+    "/images/projects/generated-angles/shower-remediation-niche-rebuild/01.jpg",
+    "/images/projects/generated-angles/shower-remediation-niche-rebuild/02.jpg",
+    "/images/projects/generated-angles/shower-remediation-niche-rebuild/03.jpg",
+    "/images/projects/generated-angles/shower-remediation-niche-rebuild/04.jpg",
+    "/images/projects/generated-angles/shower-remediation-niche-rebuild/05.jpg",
   ],
-  consulting: [
-    "/images/projects/generated/consulting-pack-01.jpg",
-    "/images/projects/generated/consulting-pack-02.jpg",
-    "/images/projects/generated/consulting-pack-03.jpg",
-    "/images/projects/generated/consulting-pack-04.jpg",
+  recessedCeilingLedBath: [
+    "/images/projects/generated-angles/recessed-ceiling-led-bath/01.jpg",
+    "/images/projects/generated-angles/recessed-ceiling-led-bath/02.jpg",
+    "/images/projects/generated-angles/recessed-ceiling-led-bath/03.jpg",
+    "/images/projects/generated-angles/recessed-ceiling-led-bath/04.jpg",
+    "/images/projects/generated-angles/recessed-ceiling-led-bath/05.jpg",
   ],
-  foundation: [
-    "/images/projects/generated/foundation-pack-01.jpg",
-    "/images/projects/generated/foundation-pack-02.jpg",
-    "/images/projects/generated/foundation-pack-03.jpg",
-    "/images/projects/generated/foundation-pack-04.jpg",
+  customShowerNicheProgress: [
+    "/images/projects/generated-angles/custom-shower-niche-progress/01.jpg",
+    "/images/projects/generated-angles/custom-shower-niche-progress/02.jpg",
+    "/images/projects/generated-angles/custom-shower-niche-progress/03.jpg",
+    "/images/projects/generated-angles/custom-shower-niche-progress/04.jpg",
+    "/images/projects/generated-angles/custom-shower-niche-progress/05.jpg",
+  ],
+  vanityLedStripRenovation: [
+    "/images/projects/generated-angles/vanity-led-strip-renovation/01.jpg",
+    "/images/projects/generated-angles/vanity-led-strip-renovation/02.jpg",
+    "/images/projects/generated-angles/vanity-led-strip-renovation/03.jpg",
+    "/images/projects/generated-angles/vanity-led-strip-renovation/04.jpg",
+    "/images/projects/generated-angles/vanity-led-strip-renovation/05.jpg",
+  ],
+  outdoorLivingPoolSurround: [
+    "/images/projects/generated-angles/outdoor-living-pool-surround/01.jpg",
+    "/images/projects/generated-angles/outdoor-living-pool-surround/02.jpg",
+    "/images/projects/generated-angles/outdoor-living-pool-surround/03.jpg",
+    "/images/projects/generated-angles/outdoor-living-pool-surround/04.jpg",
+    "/images/projects/generated-angles/outdoor-living-pool-surround/05.jpg",
+  ],
+  detachedAduNewConstruction: [
+    "/images/projects/generated-angles/detached-adu-new-construction/01.jpg",
+    "/images/projects/generated-angles/detached-adu-new-construction/02.jpg",
+    "/images/projects/generated-angles/detached-adu-new-construction/03.jpg",
+    "/images/projects/generated-angles/detached-adu-new-construction/04.jpg",
+    "/images/projects/generated-angles/detached-adu-new-construction/05.jpg",
+  ],
+  garageConversionGlassEntryAdu: [
+    "/images/projects/generated-angles/garage-conversion-glass-entry-adu/01.jpg",
+    "/images/projects/generated-angles/garage-conversion-glass-entry-adu/02.jpg",
+    "/images/projects/generated-angles/garage-conversion-glass-entry-adu/03.jpg",
+    "/images/projects/generated-angles/garage-conversion-glass-entry-adu/04.jpg",
+    "/images/projects/generated-angles/garage-conversion-glass-entry-adu/05.jpg",
+  ],
+  kitchenRenovationDarkCabinetBuild: [
+    "/images/projects/generated-angles/kitchen-renovation-dark-cabinet-build/01.jpg",
+    "/images/projects/generated-angles/kitchen-renovation-dark-cabinet-build/02.jpg",
+    "/images/projects/generated-angles/kitchen-renovation-dark-cabinet-build/03.jpg",
+    "/images/projects/generated-angles/kitchen-renovation-dark-cabinet-build/04.jpg",
+    "/images/projects/generated-angles/kitchen-renovation-dark-cabinet-build/05.jpg",
+  ],
+  foundationNewAduConstruction: [
+    "/images/projects/generated-angles/foundation-new-adu-construction/01.jpg",
+    "/images/projects/generated-angles/foundation-new-adu-construction/02.jpg",
+    "/images/projects/generated-angles/foundation-new-adu-construction/03.jpg",
+    "/images/projects/generated-angles/foundation-new-adu-construction/04.jpg",
+    "/images/projects/generated-angles/foundation-new-adu-construction/05.jpg",
+  ],
+  prePurchaseStructuralEvaluation: [
+    "/images/projects/generated-angles/pre-purchase-structural-evaluation/01.jpg",
+    "/images/projects/generated-angles/pre-purchase-structural-evaluation/02.jpg",
+    "/images/projects/generated-angles/pre-purchase-structural-evaluation/03.jpg",
+    "/images/projects/generated-angles/pre-purchase-structural-evaluation/04.jpg",
+    "/images/projects/generated-angles/pre-purchase-structural-evaluation/05.jpg",
+  ],
+  waterIntrusionRemediation: [
+    "/images/projects/generated-angles/water-intrusion-remediation/01.jpg",
+    "/images/projects/generated-angles/water-intrusion-remediation/02.jpg",
+    "/images/projects/generated-angles/water-intrusion-remediation/03.jpg",
+    "/images/projects/generated-angles/water-intrusion-remediation/04.jpg",
+    "/images/projects/generated-angles/water-intrusion-remediation/05.jpg",
   ],
 } as const;
 
@@ -194,8 +256,8 @@ export const PROJECTS: Project[] = [
     spec: "Custom herringbone tile · Wall-mount toilet · Stone accent wall",
     description:
       "Full bathroom renovation featuring a floor-to-ceiling herringbone tile shower wall, wall-mounted toilet with in-wall tank, natural stone accent, and recessed niche. A complete gut-and-rebuild executed to the millimeter.",
-    image: "/images/projects/generated/bath-pack-01.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-herringbone.jpg"],
+    image: PROJECT_GALLERIES.modernHerringboneBath[0],
+    images: [...PROJECT_GALLERIES.modernHerringboneBath],
     featured: true,
   },
   {
@@ -206,8 +268,8 @@ export const PROJECTS: Project[] = [
     spec: "Geometric tile · Matte black fixtures · Glass partition",
     description:
       "Bold starburst geometric tile dominates this ADU bathroom — black matte fixtures, frameless glass shower partition, and warm wood vanity. Proof that a small space can have maximum personality.",
-    image: "/images/projects/generated/bath-pack-02.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-geometric.jpg"],
+    image: PROJECT_GALLERIES.geometricFeatureBath[0],
+    images: [...PROJECT_GALLERIES.geometricFeatureBath],
   },
   {
     id: 3,
@@ -217,8 +279,8 @@ export const PROJECTS: Project[] = [
     spec: "Pergola · Pool deck · Custom wood decking",
     description:
       "Luxury outdoor living space built around an existing pool — custom wood deck, pergola with pendant lighting, and seamless indoor-outdoor flow. Designed for California life, built to last decades.",
-    image: "/images/projects/generated/outdoor-pack-01.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.outdoor, "/images/projects/outdoor-living-editorial.jpg"],
+    image: PROJECT_GALLERIES.southBayOutdoorLiving[0],
+    images: [...PROJECT_GALLERIES.southBayOutdoorLiving],
     featured: true,
   },
   {
@@ -229,8 +291,8 @@ export const PROJECTS: Project[] = [
     spec: "Waterproofing · Dual shower heads · Herringbone niche",
     description:
       "Shower torn out to the studs — improper waterproofing removed, rebuilt to code, large-format white tile installed with a custom herringbone-tile niche and dual shower system. The kind of work that fixes it right.",
-    image: "/images/projects/generated/bath-pack-03.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-shower.jpg"],
+    image: PROJECT_GALLERIES.showerRemediationNicheRebuild[0],
+    images: [...PROJECT_GALLERIES.showerRemediationNicheRebuild],
   },
   {
     id: 5,
@@ -240,8 +302,8 @@ export const PROJECTS: Project[] = [
     spec: "Tile ceiling · LED downlights · Copper sconce",
     description:
       "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a warm copper wall sconce. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
-    image: "/images/projects/generated/bath-pack-04.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-led.jpg"],
+    image: PROJECT_GALLERIES.recessedCeilingLedBath[0],
+    images: [...PROJECT_GALLERIES.recessedCeilingLedBath],
   },
   {
     id: 6,
@@ -251,8 +313,8 @@ export const PROJECTS: Project[] = [
     spec: "Microcement finish · Recessed niche · Dark tile ceiling",
     description:
       "Mid-project documentation of a precision shower niche in microcement finish — dark tile ceiling contrasts the light walls. This is what the work looks like before the glamour shot. Detail-first, always.",
-    image: "/images/projects/generated/remediation-pack-02.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/niche-detail.jpg"],
+    image: PROJECT_GALLERIES.customShowerNicheProgress[0],
+    images: [...PROJECT_GALLERIES.customShowerNicheProgress],
   },
   {
     id: 7,
@@ -262,8 +324,8 @@ export const PROJECTS: Project[] = [
     spec: "LED strip lighting · Warm ambiance · Wood plank floor",
     description:
       "Bathroom renovation focused on atmosphere — LED strip lighting under the vanity shelf creates warm, indirect glow. Wood plank flooring and clean white walls complete a space designed for long-term comfort.",
-    image: "/images/projects/generated/bath-pack-02.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.bath, "/images/projects/bathroom-warm.jpg"],
+    image: PROJECT_GALLERIES.vanityLedStripRenovation[0],
+    images: [...PROJECT_GALLERIES.vanityLedStripRenovation],
   },
   {
     id: 8,
@@ -273,8 +335,8 @@ export const PROJECTS: Project[] = [
     spec: "Teak decking · Pergola · Woven pendant lighting · Pool surround",
     description:
       "Full outdoor living transformation — custom teak deck, pergola with statement woven pendants, and a complete pool surround redesign. The kind of project where every material decision matters for long-term performance outdoors.",
-    image: "/images/projects/generated/outdoor-pack-03.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.outdoor, "/images/projects/outdoor-patio-pergola.jpg"],
+    image: PROJECT_GALLERIES.outdoorLivingPoolSurround[0],
+    images: [...PROJECT_GALLERIES.outdoorLivingPoolSurround],
     featured: true,
   },
   {
@@ -285,8 +347,8 @@ export const PROJECTS: Project[] = [
     spec: "Detached unit · 420 sq ft · Permit expedited",
     description:
       "Full-build detached ADU from foundation to finish — permitted, framed, wrapped, and finished to match the main structure. Built for long-term rental income with durable materials throughout.",
-    image: "/images/projects/generated/adu-pack-01.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.adu, ...GENERATED_PROJECT_GALLERIES.foundation, "/images/projects/adu-exterior-new.jpg"],
+    image: PROJECT_GALLERIES.detachedAduNewConstruction[0],
+    images: [...PROJECT_GALLERIES.detachedAduNewConstruction],
     featured: true,
   },
   {
@@ -297,8 +359,8 @@ export const PROJECTS: Project[] = [
     spec: "Garage conversion · Steel glass doors · Polished concrete",
     description:
       "Former two-car garage converted to a full ADU — steel-framed glass bifold doors replace the garage opening, polished concrete floors, open kitchen, and seamless indoor-outdoor flow. Permitted and built to code.",
-    image: "/images/projects/generated/adu-pack-04.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.adu, "/images/projects/garage-conversion.jpg"],
+    image: PROJECT_GALLERIES.garageConversionGlassEntryAdu[0],
+    images: [...PROJECT_GALLERIES.garageConversionGlassEntryAdu],
     featured: true,
   },
   {
@@ -309,13 +371,8 @@ export const PROJECTS: Project[] = [
     spec: "Matte black cabinetry · Waterfall island · Pendant lighting",
     description:
       "Full kitchen renovation with custom matte black lower cabinets, white uppers, waterfall-edge island with flush sink, and minimal pendant lighting. Part of a whole-home ADU conversion project.",
-    image: "/images/projects/generated/adu-pack-04.jpg",
-    images: [
-      "/images/projects/kitchen-dark.jpg",
-      GENERATED_PROJECT_GALLERIES.adu[3],
-      GENERATED_PROJECT_GALLERIES.bath[1],
-      GENERATED_PROJECT_GALLERIES.bath[3],
-    ],
+    image: PROJECT_GALLERIES.kitchenRenovationDarkCabinetBuild[0],
+    images: [...PROJECT_GALLERIES.kitchenRenovationDarkCabinetBuild],
     featured: false,
   },
   {
@@ -326,8 +383,8 @@ export const PROJECTS: Project[] = [
     spec: "Continuous footings · Rebar grid · Engineered pour",
     description:
       "Foundation work for a new detached ADU — continuous concrete footings with engineered rebar placement. This is the part no one photographs but everyone relies on. Built to outlast the structure above it.",
-    image: "/images/projects/generated/foundation-pack-01.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.foundation],
+    image: PROJECT_GALLERIES.foundationNewAduConstruction[0],
+    images: [...PROJECT_GALLERIES.foundationNewAduConstruction],
     featured: false,
   },
   {
@@ -338,8 +395,8 @@ export const PROJECTS: Project[] = [
     spec: "Feasibility study · Defect report · Contractor review",
     description:
       "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and delivered a written feasibility analysis. Client negotiated $80K off the purchase price.",
-    image: "/images/projects/generated/consulting-pack-01.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.consulting, "/images/projects/consulting-inspection.jpg"],
+    image: PROJECT_GALLERIES.prePurchaseStructuralEvaluation[0],
+    images: [...PROJECT_GALLERIES.prePurchaseStructuralEvaluation],
   },
   {
     id: 10,
@@ -349,8 +406,8 @@ export const PROJECTS: Project[] = [
     spec: "Envelope failure · Moisture remediation · Rebuilt to code",
     description:
       "Chronic water intrusion traced to failed flashing and improper window installation — not a roofing issue as originally diagnosed. Scope rebuilt correctly, structure dried, and building envelope sealed. No recurrence.",
-    image: "/images/projects/generated/remediation-pack-04.jpg",
-    images: [...GENERATED_PROJECT_GALLERIES.remediation, "/images/projects/remediation-after.jpg"],
+    image: PROJECT_GALLERIES.waterIntrusionRemediation[0],
+    images: [...PROJECT_GALLERIES.waterIntrusionRemediation],
   },
 ];
 

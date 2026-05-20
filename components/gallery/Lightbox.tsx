@@ -96,7 +96,7 @@ export default function Lightbox({ project, onClose }: LightboxProps) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative mx-auto w-full max-w-6xl"
+              className="relative mx-auto w-full max-w-6xl bg-black"
               style={{ aspectRatio: "16/9" }}
             >
               <AnimatePresence initial={false} custom={direction} mode="wait">
@@ -113,7 +113,7 @@ export default function Lightbox({ project, onClose }: LightboxProps) {
                     src={images[safeActiveIndex] ?? project.image}
                     alt={`${project.title} image ${safeActiveIndex + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 768px) 100vw, 82vw"
                   />
                 </motion.div>

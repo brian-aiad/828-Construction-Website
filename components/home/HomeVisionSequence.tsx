@@ -25,7 +25,7 @@ const processImages = [
   "/images/process/planning.jpg",
   "/images/process/scope-document.jpg",
   "/images/process/execution.jpg",
-  "/images/process/completion-post-construction.png",
+  "/images/process/completion-post-construction.jpg",
 ];
 
 const listeningSteps = [

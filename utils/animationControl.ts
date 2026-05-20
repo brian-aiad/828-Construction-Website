@@ -14,19 +14,32 @@ export class AnimationController {
 
   private _isMobile: boolean = false;
   private _prefersReducedMotion: boolean = false;
+  private _desktopQuery: MediaQueryList | null = null;
+  private _reducedMotionQuery: MediaQueryList | null = null;
 
   private constructor() {
     if (typeof window === "undefined") return;
-    this._isMobile = window.innerWidth < 1024;
-    this._prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
 
+    this._desktopQuery = window.matchMedia("(min-width: 1024px)");
+    this._reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this._syncFromMedia();
+
+    this._desktopQuery.addEventListener("change", this._onMediaChange);
+    this._reducedMotionQuery.addEventListener("change", this._onMediaChange);
     window.addEventListener("resize", this._onResize.bind(this), { passive: true });
   }
 
+  private _onMediaChange = () => {
+    this._syncFromMedia();
+  };
+
+  private _syncFromMedia() {
+    this._isMobile = !(this._desktopQuery?.matches ?? window.innerWidth >= 1024);
+    this._prefersReducedMotion = this._reducedMotionQuery?.matches ?? false;
+  }
+
   private _onResize() {
-    this._isMobile = window.innerWidth < 1024;
+    this._syncFromMedia();
   }
 
   private static getInstance(): AnimationController {

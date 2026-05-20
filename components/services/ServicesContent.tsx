@@ -9,22 +9,23 @@ import { SERVICES, SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 import CraftInstrumentLayer from "@/components/system/CraftInstrumentLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const SERVICE_VISUALS: Record<string, { image: string; label: string; line: string }> = {
   adu: {
-    image: "/images/services/generated/adu-service-hero-clean.png",
+    image: "/images/projects/adu-exterior-new.jpg",
     label: "01 / ADU",
     line: "New living space, permitted and built to hold value.",
   },
   remediation: {
-    image: "/images/services/generated/remediation-service-hero-clean.png",
+    image: "/images/projects/remediation-active.jpg",
     label: "02 / Remediation",
     line: "Find the cause, open only what matters, rebuild correctly.",
   },
   consulting: {
-    image: "/images/services/generated/consulting-service-hero-clean.png",
+    image: "/images/projects/consulting-plans.jpg",
     label: "03 / Consulting",
     line: "Decide before you spend. Scope, risk, cost, and next moves.",
   },
@@ -225,11 +226,12 @@ export default function ServicesContent() {
         </div>
       </section>
 
-      <section className="bg-[#f6f3ef] py-20 text-black lg:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:px-12">
+      <section className="relative overflow-hidden bg-[#f6f3ef] py-20 text-black lg:py-28">
+        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.12]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:px-12">
           <div className="services-image relative min-h-[28rem] overflow-hidden">
             <Image
-              src="/images/services/generated/consulting-service-hero-clean.png"
+              src="/images/projects/consulting-plans.jpg"
               alt="Construction plans, measure, and material samples"
               fill
               sizes="(max-width: 1024px) 100vw, 48vw"

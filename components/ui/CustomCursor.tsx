@@ -32,15 +32,29 @@ export default function CustomCursor() {
     dot.style.display = "block";
     ring.style.display = "block";
     copper.style.display = "block";
+    dot.style.opacity = "0";
+    ring.style.opacity = "0";
+    copper.style.opacity = "0";
 
     let rafId: number;
     let ringX = 0, ringY = 0;
     let copperX = 0, copperY = 0;
     let curX = 0, curY = 0;
+    let hasPointer = false;
 
     const handleMove = (e: MouseEvent) => {
       curX = e.clientX;
       curY = e.clientY;
+      if (!hasPointer) {
+        hasPointer = true;
+        ringX = curX;
+        ringY = curY;
+        copperX = curX;
+        copperY = curY;
+        dot.style.opacity = "1";
+        ring.style.opacity = "1";
+        copper.style.opacity = "0.5";
+      }
       dot.style.transform = `translate(${curX}px, ${curY}px)`;
     };
 
@@ -65,7 +79,7 @@ export default function CustomCursor() {
       ring.style.marginLeft = "-18px";
       ring.style.marginTop = "-18px";
       ring.style.borderColor = "rgba(255,255,255,0.65)";
-      ring.style.opacity = "1";
+      ring.style.opacity = hasPointer ? "1" : "0";
     };
 
     // Hover over links/buttons: ring grows (upgraded 44→64px)
@@ -75,7 +89,7 @@ export default function CustomCursor() {
       ring.style.marginLeft = "-32px";
       ring.style.marginTop = "-32px";
       ring.style.borderColor = "rgba(255,255,255,0.9)";
-      ring.style.opacity = "1";
+      ring.style.opacity = hasPointer ? "1" : "0";
     };
 
     // Hover over images: ring becomes maroon and expands (upgraded 52→70px)
@@ -85,37 +99,51 @@ export default function CustomCursor() {
       ring.style.marginLeft = "-35px";
       ring.style.marginTop = "-35px";
       ring.style.borderColor = "var(--color-accent)";
-      ring.style.opacity = "0.85";
+      ring.style.opacity = hasPointer ? "0.85" : "0";
     };
 
     window.addEventListener("mousemove", handleMove, { passive: true });
     rafId = requestAnimationFrame(animate);
 
-    const links = document.querySelectorAll("a, button, [data-cursor-grow]");
-    links.forEach((el) => {
-      el.addEventListener("mouseenter", onInteractive);
-      el.addEventListener("mouseleave", resetRing);
-    });
+    const isInteractiveTarget = (target: EventTarget | null) =>
+      target instanceof Element && Boolean(target.closest("a, button, [role='button'], input, select, textarea, [data-cursor-grow]"));
 
-    // Images get copper ring on hover
-    const images = document.querySelectorAll("img, [data-cursor-image]");
-    images.forEach((el) => {
-      el.addEventListener("mouseenter", onImage);
-      el.addEventListener("mouseleave", resetRing);
-    });
+    const isImageTarget = (target: EventTarget | null) =>
+      target instanceof Element && Boolean(target.closest("img, picture, [data-cursor-image]"));
+
+    const handlePointerOver = (e: PointerEvent) => {
+      if (isImageTarget(e.target)) {
+        onImage();
+        return;
+      }
+      if (isInteractiveTarget(e.target)) onInteractive();
+    };
+
+    const handlePointerOut = (e: PointerEvent) => {
+      if (!(e.relatedTarget instanceof Element)) {
+        resetRing();
+        return;
+      }
+
+      const leavingImage = isImageTarget(e.target);
+      const enteringImage = isImageTarget(e.relatedTarget);
+      const leavingInteractive = isInteractiveTarget(e.target);
+      const enteringInteractive = isInteractiveTarget(e.relatedTarget);
+
+      if ((leavingImage && !enteringImage) || (leavingInteractive && !enteringInteractive)) {
+        resetRing();
+      }
+    };
+
+    document.addEventListener("pointerover", handlePointerOver, { passive: true });
+    document.addEventListener("pointerout", handlePointerOut, { passive: true });
 
     return () => {
       document.body.classList.remove("has-custom-cursor");
       window.removeEventListener("mousemove", handleMove);
       cancelAnimationFrame(rafId);
-      links.forEach((el) => {
-        el.removeEventListener("mouseenter", onInteractive);
-        el.removeEventListener("mouseleave", resetRing);
-      });
-      images.forEach((el) => {
-        el.removeEventListener("mouseenter", onImage);
-        el.removeEventListener("mouseleave", resetRing);
-      });
+      document.removeEventListener("pointerover", handlePointerOver);
+      document.removeEventListener("pointerout", handlePointerOut);
     };
   }, []);
 

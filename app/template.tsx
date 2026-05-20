@@ -9,8 +9,12 @@ export default function Template({ children }: { children: ReactNode }) {
   // On first mount in a session: no curtain (LCP-safe).
   // On subsequent mounts (route transitions): show curtain.
   useEffect(() => {
-    setIsNavigation(sessionStorage.getItem('_tpl') !== null);
+    const frame = requestAnimationFrame(() => {
+      setIsNavigation(sessionStorage.getItem('_tpl') !== null);
+    });
     sessionStorage.setItem('_tpl', '1');
+
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   return (

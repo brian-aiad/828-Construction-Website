@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS, Project, ProjectCategory, SITE } from "@/lib/constants";
 import Lightbox from "@/components/gallery/Lightbox";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -398,9 +399,10 @@ export default function PortfolioContent() {
       </section>
 
       <section className="relative overflow-hidden bg-black px-6 pb-18 pt-28 text-white lg:px-12 lg:pb-24 lg:pt-32">
+        <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
         <div className="absolute inset-y-0 left-0 hidden w-px bg-white/12 lg:block" />
         <div className="absolute bottom-10 right-10 hidden h-36 w-36 rounded-full border border-white/10 lg:block" />
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
           <div>
             <div className="portfolio-reveal mb-9 max-w-2xl">
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/38">
@@ -483,8 +485,9 @@ export default function PortfolioContent() {
         </div>
       </section>
 
-      <section className="px-6 pb-18 pt-28 lg:px-12 lg:pb-24 lg:pt-32">
-        <div className="mx-auto max-w-7xl">
+      <section className="relative overflow-hidden px-6 pb-18 pt-28 lg:px-12 lg:pb-24 lg:pt-32">
+        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.1]" />
+        <div className="relative z-10 mx-auto max-w-7xl">
           <div className="portfolio-reveal mb-10 grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
             <div>
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
@@ -528,8 +531,9 @@ export default function PortfolioContent() {
         </div>
       </section>
 
-      <section className="border-t border-black/10 px-6 py-12 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section className="relative overflow-hidden border-t border-black/10 px-6 py-12 lg:px-12">
+        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="portfolio-reveal">
             <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
               Ready to compare notes

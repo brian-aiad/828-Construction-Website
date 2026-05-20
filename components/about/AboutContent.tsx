@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICE_AREAS, SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -127,7 +128,7 @@ function AboutHero() {
     <section ref={sectionRef} className="relative min-h-[100svh] overflow-x-clip bg-black text-white">
       <div ref={bgRef} className="absolute inset-0" style={{ willChange: "transform" }}>
         <Image
-          src="/images/generated/about-planning-table.png"
+          src="/images/generated/about-planning-table.jpg"
           alt="Residential construction planning table with drawings and materials"
           fill
           priority
@@ -279,6 +280,7 @@ function OriginSection() {
   return (
     <section ref={sectionRef} className="relative overflow-x-clip bg-[#050505] py-20 text-white lg:py-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(123,45,38,0.18),transparent_28%)]" />
+      <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.18]" />
       <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.94fr_1.06fr] lg:items-center lg:px-12">
         <div className="relative">
           <div
@@ -287,7 +289,7 @@ function OriginSection() {
             style={{ aspectRatio: "4 / 5", willChange: "clip-path, transform" }}
           >
             <Image
-              src="/images/generated/about-framing-interior.png"
+              src="/images/generated/about-framing-interior.jpg"
               alt="Clean residential framing and construction interior"
               fill
               sizes="(max-width: 1024px) 100vw, 48vw"
@@ -412,8 +414,9 @@ function FieldMethodSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="overflow-x-clip bg-white py-20 text-black lg:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-12">
+    <section ref={sectionRef} className="relative overflow-x-clip bg-white py-20 text-black lg:py-32">
+      <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.13]" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[0.74fr_1.26fr] lg:items-start">
           <div className="lg:sticky lg:top-28">
             <p data-method-reveal className="mb-5 font-labels text-[10px] uppercase tracking-[0.28em] text-black/42">
@@ -439,7 +442,7 @@ function FieldMethodSection() {
                 className="relative min-w-0 max-w-full overflow-hidden border border-black/10 bg-black"
               >
                 <Image
-                  src="/images/generated/about-planning-table.png"
+                  src="/images/generated/about-planning-table.jpg"
                   alt="Construction plans and material samples on a work table"
                   width={1800}
                   height={1012}
@@ -584,6 +587,7 @@ function SouthBaySection() {
           backgroundSize: "78px 78px",
         }}
       />
+      <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.16]" />
       <div ref={compassRef} className="pointer-events-none absolute -right-24 top-12 hidden h-[32rem] w-[32rem] rounded-full border border-white/10 lg:block">
         <div className="absolute left-1/2 top-0 h-full w-px bg-white/8" />
         <div className="absolute left-0 top-1/2 h-px w-full bg-white/8" />
@@ -659,7 +663,7 @@ function AboutCTA() {
     <section ref={sectionRef} className="relative overflow-x-clip bg-black text-white">
       <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
         <Image
-          src="/images/generated/about-planning-table.png"
+          src="/images/generated/about-planning-table.jpg"
           alt=""
           fill
           sizes="100vw"

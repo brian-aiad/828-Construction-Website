@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ContactForm from "@/components/contact/ContactForm";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { SERVICE_AREAS, SERVICES, SITE } from "@/lib/constants";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -240,8 +241,9 @@ function ContactMain() {
 
 function ContactPrep() {
   return (
-    <section className="bg-black px-6 py-14 text-white lg:px-12 lg:py-18">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative overflow-hidden bg-black px-6 py-14 text-white lg:px-12 lg:py-18">
+      <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.16]" />
+      <div className="relative z-10 mx-auto max-w-7xl">
         <div className="contact-reveal grid gap-8 lg:grid-cols-[0.62fr_1.38fr] lg:items-end">
           <div>
             <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/38">
@@ -269,8 +271,9 @@ function ContactPrep() {
 
 function ServiceAreaFooter() {
   return (
-    <section className="bg-[#f5f0e9] px-6 py-14 text-black lg:px-12 lg:py-18">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+    <section className="relative overflow-hidden bg-[#f5f0e9] px-6 py-14 text-black lg:px-12 lg:py-18">
+      <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.11]" />
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
         <div className="contact-reveal">
           <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
             Focused service paths

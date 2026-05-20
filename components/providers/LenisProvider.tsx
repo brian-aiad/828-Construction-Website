@@ -1,12 +1,14 @@
 "use client";
 
-import { ReactNode, useEffect, useLayoutEffect, useRef } from "react";
+import { ReactNode, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
+gsap.config({ nullTargetWarn: false });
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 // ── Global animation failsafe ──────────────────────────────────────────────────
 // Elements with data-gsap-reveal="true" start at opacity:0 or clipPath:hidden via
@@ -94,6 +96,13 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   const isFirstMount = useRef(true);
   const failsafeObserverRef = useRef<IntersectionObserver | null>(null);
 
+  const refreshMotion = useCallback(() => {
+    if (lenisRef.current) lenisRef.current.resize();
+    ScrollTrigger.refresh(true);
+    failsafeObserverRef.current?.disconnect();
+    failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+  }, []);
+
   // ── Scroll restoration — fires synchronously before any useEffect ──────────
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
@@ -123,11 +132,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       // On hard refresh: trigger positions are calculated before images finish
       // loading. Refresh after window.load so layout is final.
       const doRefresh = () => {
-        if (lenisRef.current) lenisRef.current.resize();
-        ScrollTrigger.refresh(true);
-        // Attach failsafe after refresh so all elements exist in DOM
-        failsafeObserverRef.current?.disconnect();
-        failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+        refreshMotion();
       };
 
       if (document.readyState === "complete") {
@@ -161,12 +166,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     }
 
     const refreshTimer = setTimeout(() => {
-      if (lenisRef.current) lenisRef.current.resize();
-      ScrollTrigger.refresh(true);
-
-      // Re-attach failsafe for new page's elements
-      failsafeObserverRef.current?.disconnect();
-      failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+      refreshMotion();
     }, 300);
 
     return () => {
@@ -176,16 +176,16 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       window.scrollTo(0, 0);
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
-  }, [pathname]);
+  }, [pathname, refreshMotion]);
 
   useEffect(() => {
-    if (window.innerWidth < 768) return;
+    if (window.innerWidth < 1024 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({
-      duration: 1.15,
+      duration: 1.08,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      touchMultiplier: 1.35,
+      wheelMultiplier: 0.92,
     });
 
     lenisRef.current = lenis;
@@ -199,16 +199,19 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     // ScrollTriggers. Recalculates positions with correct scroll origin (Y=0).
     ScrollTrigger.refresh();
 
+    document.fonts?.ready
+      .then(() => {
+        lenis.resize();
+        ScrollTrigger.refresh(true);
+      })
+      .catch(() => {});
+
     // ── Resize ───────────────────────────────────────────────────────────────
     let resizeTimer: ReturnType<typeof setTimeout> | undefined;
     const onResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        lenis.resize();
-        ScrollTrigger.refresh(true);
-        // Re-observe after resize in case new elements appeared
-        failsafeObserverRef.current?.disconnect();
-        failsafeObserverRef.current = attachRevealFailsafe() ?? null;
+        refreshMotion();
       }, 200);
     };
     window.addEventListener("resize", onResize, { passive: true });
@@ -230,7 +233,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       lenisRef.current = null;
       gsap.ticker.remove(tick);
     };
-  }, []);
+  }, [refreshMotion]);
 
   return <>{children}</>;
 }

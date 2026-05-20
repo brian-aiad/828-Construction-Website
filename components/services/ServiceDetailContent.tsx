@@ -261,7 +261,7 @@ function DetailHero({
     };
   }, [service.slug]);
 
-  const heroImg = serviceImageSrc || "/images/hero/hero-1.jpg";
+  const heroImg = serviceImageSrc || "/images/hero/hero-night.jpg";
 
   return (
     <section

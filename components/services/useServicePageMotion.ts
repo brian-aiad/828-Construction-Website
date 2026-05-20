@@ -38,6 +38,11 @@ export function useServicePageMotion() {
         return;
       }
 
+      gsap.set([...reveals, ...images, ...lines, ...scans], {
+        force3D: true,
+        willChange: "transform, opacity, clip-path",
+      });
+
       reveals.forEach((el) => {
         gsap.fromTo(
           el,
@@ -46,6 +51,7 @@ export function useServicePageMotion() {
             autoAlpha: 1,
             y: 0,
             ease: "power3.out",
+            overwrite: "auto",
             scrollTrigger: { trigger: el, start: "top 88%", end: "top 58%", scrub: 1.35 },
           }
         );
@@ -58,15 +64,18 @@ export function useServicePageMotion() {
           {
             clipPath: "inset(0% 0% 0% 0%)",
             ease: "none",
+            overwrite: "auto",
             scrollTrigger: { trigger: el, start: "top 88%", end: "top 46%", scrub: 1.45 },
           }
         );
 
         const img = el.querySelector("img");
         if (img) {
+          gsap.set(img, { force3D: true, willChange: "transform" });
           gsap.to(img, {
             yPercent: -7,
             ease: "none",
+            overwrite: "auto",
             scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: 1.75 },
           });
         }
@@ -79,6 +88,7 @@ export function useServicePageMotion() {
           {
             scaleX: 1,
             ease: "none",
+            overwrite: "auto",
             scrollTrigger: { trigger: el, start: "top 88%", end: "top 60%", scrub: 1.2 },
           }
         );
@@ -92,6 +102,7 @@ export function useServicePageMotion() {
             xPercent: 110,
             autoAlpha: 0.8,
             ease: "none",
+            overwrite: "auto",
             scrollTrigger: { trigger: el.parentElement ?? el, start: "top 82%", end: "bottom 42%", scrub: 1.7 },
           }
         );
@@ -107,6 +118,7 @@ export function useServicePageMotion() {
             y: 0,
             stagger: 0.08,
             ease: "power3.out",
+            overwrite: "auto",
             scrollTrigger: { trigger: wrap, start: "top 86%", end: "top 58%", scrub: 1.25 },
           }
         );

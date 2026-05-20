@@ -10,6 +10,7 @@ import Image from "next/image";
 import { PROJECTS, Project, ProjectCategory } from "@/lib/constants";
 import Lightbox from "@/components/gallery/Lightbox";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { AnimationController } from "@/utils/animationControl";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -639,9 +640,10 @@ function ProjectsHighlights() {
     <section
       ref={sectionRef}
       data-section="projects-highlights"
-      className="bg-[#0a0a0a] py-16 lg:py-24"
+      className="relative overflow-hidden bg-[#0a0a0a] py-16 lg:py-24"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         {/* Header row */}
         <div className="flex items-center justify-between mb-10 lg:mb-14">
           <div>
@@ -827,10 +829,11 @@ export default function ProjectsGallery() {
       {/* Gallery grid */}
       <section
         data-section="projects-gallery"
-        className="bg-black py-10 lg:py-14 min-h-[60vh]"
+        className="overflow-hidden bg-black py-10 lg:py-14 min-h-[60vh]"
         style={{ position: "relative", zIndex: 2 }}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.11]" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCategory}

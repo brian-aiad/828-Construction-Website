@@ -19,8 +19,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const SERVICE_IMAGES: Record<string, string> = {
   adu: "/images/projects/service-adu.jpg",
-  remediation: "/images/chatpics/10_remediation_diagnostic_hero.png",
-  consulting: "/images/chatpics/03_home_active_listening_table.png",
+  remediation: "/images/projects/remediation-active.jpg",
+  consulting: "/images/projects/consulting-plans.jpg",
 };
 
 const SERVICE_TAGLINES: Record<string, string> = {

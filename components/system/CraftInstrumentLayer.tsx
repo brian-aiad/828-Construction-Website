@@ -37,6 +37,11 @@ export default function CraftInstrumentLayer({
       if (!AnimationController.shouldAnimate()) return;
 
       const objects = [levelRef.current, compassRef.current, blueprintRef.current, railRef.current].filter(Boolean);
+      gsap.set(objects, {
+        force3D: true,
+        transformPerspective: 1000,
+        willChange: "transform, opacity",
+      });
 
       gsap.fromTo(
         objects,
@@ -47,6 +52,7 @@ export default function CraftInstrumentLayer({
           stagger: 0.12,
           duration: 0.9,
           ease: "power3.out",
+          overwrite: "auto",
           scrollTrigger: { trigger: root, start: "top 82%", once: true },
         }
       );
@@ -56,7 +62,9 @@ export default function CraftInstrumentLayer({
           xPercent: density === "rich" ? 18 : 10,
           yPercent: density === "quiet" ? -8 : -18,
           rotate: density === "rich" ? -5 : -3,
+          force3D: true,
           ease: "none",
+          overwrite: "auto",
           scrollTrigger: { trigger: root, start: "top bottom", end: "bottom top", scrub: 1.2 },
         });
       }
@@ -65,7 +73,9 @@ export default function CraftInstrumentLayer({
         gsap.to(compassRef.current, {
           yPercent: density === "rich" ? -34 : -22,
           rotate: density === "rich" ? 14 : 8,
+          force3D: true,
           ease: "none",
+          overwrite: "auto",
           scrollTrigger: { trigger: root, start: "top bottom", end: "bottom top", scrub: 1.6 },
         });
       }
@@ -75,7 +85,9 @@ export default function CraftInstrumentLayer({
           xPercent: density === "rich" ? -18 : -10,
           yPercent: density === "quiet" ? -10 : -26,
           rotate: density === "rich" ? 7 : 4,
+          force3D: true,
           ease: "none",
+          overwrite: "auto",
           scrollTrigger: { trigger: root, start: "top bottom", end: "bottom top", scrub: 1.35 },
         });
       }
@@ -86,7 +98,9 @@ export default function CraftInstrumentLayer({
           { scaleX: 0.35, transformOrigin: "left center" },
           {
             scaleX: 1,
+            force3D: true,
             ease: "none",
+            overwrite: "auto",
             scrollTrigger: { trigger: root, start: "top 80%", end: "bottom 30%", scrub: 1 },
           }
         );
@@ -101,13 +115,15 @@ export default function CraftInstrumentLayer({
   }, [density]);
 
   const colorClass = tone === "dark" ? "text-black" : "text-white";
-  const opacity = density === "quiet" ? "opacity-[0.12]" : density === "rich" ? "opacity-[0.2]" : "opacity-[0.16]";
+  const opacity = density === "quiet"
+    ? tone === "dark" ? "opacity-[0.055]" : "opacity-[0.12]"
+    : density === "rich" ? "opacity-[0.2]" : "opacity-[0.16]";
 
   return (
     <div
       ref={rootRef}
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 hidden overflow-hidden lg:block ${colorClass} ${className}`}
+      className={`pointer-events-none absolute inset-0 z-0 hidden overflow-hidden lg:block ${colorClass} ${className}`}
     >
       <div
         ref={railRef}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SITE } from "@/lib/constants";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 import CraftInstrumentLayer from "@/components/system/CraftInstrumentLayer";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { useServicePageMotion } from "@/components/services/useServicePageMotion";
 
 const DIAGNOSTICS = [
@@ -20,7 +21,7 @@ export default function RemediationServiceContent() {
     <div ref={rootRef} className="bg-black text-white">
       <section className="relative min-h-screen overflow-hidden">
         <Image
-          src="/images/services/generated/remediation-service-hero-clean.png"
+          src="/images/projects/remediation-active.jpg"
           alt="Clean remediation work area with exposed framing and drying equipment"
           fill
           priority
@@ -87,12 +88,13 @@ export default function RemediationServiceContent() {
         </div>
       </section>
 
-      <section className="bg-[#f7f4f0] py-20 text-black lg:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
+      <section className="relative overflow-hidden bg-[#f7f4f0] py-20 text-black lg:py-28">
+        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.12]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="detail-image relative min-h-[24rem] overflow-hidden">
               <Image
-                src="/images/projects/generated/remediation-pack-02.jpg"
+                src="/images/projects/remediation-damage.jpg"
                 alt="Opened wall condition before remediation repair"
                 fill
                 sizes="(max-width: 1024px) 100vw, 26vw"
@@ -101,7 +103,7 @@ export default function RemediationServiceContent() {
             </div>
             <div className="detail-image relative min-h-[24rem] overflow-hidden">
               <Image
-                src="/images/projects/generated/remediation-pack-03.jpg"
+                src="/images/projects/remediation-work.jpg"
                 alt="Remediation drying equipment in a clean work area"
                 fill
                 sizes="(max-width: 1024px) 100vw, 26vw"

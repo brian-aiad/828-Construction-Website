@@ -164,7 +164,7 @@ export default function HeroV2() {
       <div ref={stickyRef} className="sticky top-0 h-[100svh] overflow-hidden">
         <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/generated/home-hero-simple-adu-bluehour.png"
+            src="/images/generated/home-hero-simple-adu-bluehour.jpg"
             alt="Modern ADU and outdoor living build at blue hour"
             fill
             priority

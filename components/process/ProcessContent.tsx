@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import MagneticButton from "@/components/ui/MagneticButton";
+import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { AnimationController } from "@/utils/animationControl";
 import { useMobile } from "@/hooks/useMobile";
 
@@ -53,7 +54,7 @@ const steps = [
       "A thorough walkthrough, full documentation, and continued availability after handoff. The job isn't done when the tools leave the site.",
     promise:
       "We stay available. If a question comes up six months later, we're still here.",
-    image: "/images/process/completion-post-construction.png",
+    image: "/images/process/completion-post-construction.jpg",
     tag: "Done Right, Not Just Done",
   },
 ];
@@ -654,7 +655,8 @@ function EditorialStandards() {
       className="bg-[#0a0a0a] py-24 lg:py-36"
       style={{ position: "relative", zIndex: 2, overflowX: "clip" }}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         {/* Copper hairline */}
         <div
           ref={hairlineRef}
@@ -830,12 +832,13 @@ function ProcessCTA() {
 
   return (
     <section ref={sectionRef} data-section="process-cta" className="bg-black py-28 lg:py-36" style={{ position: "relative", zIndex: 2, overflowX: "clip" }}>
+      <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.13]" />
       <div
         ref={hairlineRef}
-        className="max-w-7xl mx-auto px-6 lg:px-12 mb-16"
+        className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 mb-16"
         style={{ height: 1, background: "#B87333", opacity: 0.5, transformOrigin: "left" }}
       />
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-6">
             <span className="cta-el font-labels text-[10px] text-gray-400 tracking-[0.22em] uppercase block mb-5">

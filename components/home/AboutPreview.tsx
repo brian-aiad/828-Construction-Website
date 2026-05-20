@@ -154,7 +154,7 @@ export default function AboutPreview() {
             data-gsap-reveal="true"
           >
             <Image
-              src="/images/generated/home-about-workbench.png"
+              src="/images/generated/home-about-workbench.jpg"
               alt="828 Construction — craftsmanship"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
