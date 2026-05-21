@@ -339,7 +339,7 @@ export default function HomeVisionSequence() {
                       loading="eager"
                       sizes="(max-width: 1024px) 100vw, 58vw"
                       className="object-cover object-center"
-                      style={{ filter: "contrast(1.04) saturate(0.96) brightness(0.86)" }}
+                      style={{ filter: "contrast(1.04) saturate(0.98) brightness(0.94)" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-black/42 via-black/8 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/86 via-black/36 to-transparent p-5 md:p-7">

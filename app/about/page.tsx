@@ -3,7 +3,7 @@ import { SITE } from "@/lib/constants";
 import AboutContent from "@/components/about/AboutContent";
 
 export const metadata: Metadata = {
-  title: "About - Building Science & Craft | 828 Construction",
+  title: "About - Building Science & Craft",
   description:
     "Meet 828 Construction. Hands-on residential construction experience serving Torrance and South Bay, CA. CA License #1141119.",
   alternates: { canonical: `${SITE.url}/about` },

@@ -14,8 +14,9 @@ _Last generated: 2026-04-21_
 | `/services/adu` | `app/services/[slug]/page.tsx` | `components/services/ServiceDetailContent.tsx` | 87 | 96 | master audit |
 | `/services/remediation` | `app/services/[slug]/page.tsx` | `components/services/ServiceDetailContent.tsx` | 87 | 96 | master audit |
 | `/services/consulting` | `app/services/[slug]/page.tsx` | `components/services/ServiceDetailContent.tsx` | 87 | 96 | master audit |
-| `/process` | `app/process/page.tsx` | `components/process/ProcessContent.tsx` | 86 | 96 | master audit |
-| `/projects` | `app/projects/page.tsx` | `components/gallery/ProjectsGallery.tsx` | 99 | 96 | revamped v2 |
+| `/portfolio` | `app/portfolio/page.tsx` | `components/portfolio/PortfolioContent.tsx` | pass | pass | production QA |
+| `/process` | `app/process/page.tsx` | redirects to `/portfolio` | pass | pass | legacy redirect |
+| `/projects` | `app/projects/page.tsx` | redirects to `/portfolio` | pass | pass | legacy redirect |
 | `/contact` | `app/contact/page.tsx` | `components/contact/ContactContent.tsx` | 86 | 96 | master audit |
 
 ---
@@ -157,9 +158,9 @@ consulting-detail.jpg
 ## npm Scripts
 
 ```bash
-npm run dev              # next dev (Turbopack)
+npm run dev              # next dev on :3001 (Turbopack)
 npm run build            # next build
-npm run start            # next start :3000
+npm run start            # next start (pass -p 4001/4028 for production QA)
 npm run preflight        # fast check (server must be on :4001)
 npm run preflight:full   # build + full check (pre-push)
 npm run preflight:desktop # desktop only (fast)

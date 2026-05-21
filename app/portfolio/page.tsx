@@ -3,7 +3,7 @@ import { SITE } from "@/lib/constants";
 import PortfolioContent from "@/components/portfolio/PortfolioContent";
 
 export const metadata: Metadata = {
-  title: "Portfolio | Our Work in Torrance & South Bay | 828 Construction",
+  title: "Portfolio | Our Work in Torrance & South Bay",
   description:
     "828 Construction's portfolio — ADU builds, structural remediation, and consulting projects across Torrance and South Bay, CA. Building science over guesswork.",
   alternates: { canonical: `${SITE.url}/portfolio` },

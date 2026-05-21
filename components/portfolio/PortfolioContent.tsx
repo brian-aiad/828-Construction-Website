@@ -244,23 +244,24 @@ function ProjectIndexRow({
   project,
   active,
   number,
-  onFocus,
+  onSelect,
   onOpen,
 }: {
   project: Project;
   active: boolean;
   number: number;
-  onFocus: () => void;
+  onSelect: () => void;
   onOpen: () => void;
 }) {
   return (
     <button
       type="button"
-      onMouseEnter={onFocus}
-      onFocus={onFocus}
+      onPointerEnter={onSelect}
+      onFocus={onSelect}
+      onMouseDown={onSelect}
       onClick={onOpen}
       className={`index-row group grid w-full grid-cols-[3.5rem_1fr] gap-4 border-t py-5 text-left transition-colors sm:grid-cols-[4.5rem_1fr_8rem] sm:items-center ${
-        active ? "border-white/28 text-white" : "border-white/10 text-white/58 hover:text-white"
+        active ? "border-white/28 bg-white/[0.035] text-white" : "border-white/10 text-white/58 hover:text-white"
       }`}
     >
       <span className={`font-numbers text-2xl font-bold leading-none ${active ? "text-[var(--color-accent)]" : "text-white/22"}`}>
@@ -413,7 +414,7 @@ export default function PortfolioContent() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-black px-6 pb-18 pt-28 text-white lg:px-12 lg:pb-24 lg:pt-32">
+      <section className="relative bg-black px-6 pb-18 pt-28 text-white lg:px-12 lg:pb-24 lg:pt-32">
         <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
         <div className="absolute inset-y-0 left-0 hidden w-px bg-white/12 lg:block" />
         <div className="absolute bottom-10 right-10 hidden h-36 w-36 rounded-full border border-white/10 lg:block" />
@@ -430,9 +431,17 @@ export default function PortfolioContent() {
             <button
               type="button"
               onClick={() => setLightboxProject(activeIndexProject)}
-              className="portfolio-reveal mb-8 block w-full text-left lg:hidden"
+              className="mb-8 block w-full text-left lg:hidden"
             >
-              <div className="relative min-h-[18rem] overflow-hidden bg-[#111]">
+              <div className="mb-3 flex items-center justify-between border-y border-white/12 py-3">
+                <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/46">
+                  Selected preview
+                </span>
+                <span className="font-numbers text-sm font-bold text-[var(--color-accent)]">
+                  {String(indexProjects.findIndex((project) => project.id === activeIndexProject.id) + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <div className="relative min-h-[18rem] overflow-hidden border border-white/12 bg-[#111]">
                 <Image
                   key={`mobile-${activeIndexProject.id}`}
                   src={projectImage(activeIndexProject)}
@@ -449,7 +458,7 @@ export default function PortfolioContent() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
-                    Preview / {activeIndexProject.category}
+                    {activeIndexProject.category}
                   </span>
                   <h3 className="mt-3 font-editorial text-[clamp(1.9rem,10vw,3rem)] leading-[0.9] text-white">
                     {cleanText(activeIndexProject.title)}
@@ -464,46 +473,60 @@ export default function PortfolioContent() {
                 project={project}
                 active={project.id === activeIndexProject.id}
                 number={index + 1}
-                onFocus={() => setActiveIndexId(project.id)}
+                onSelect={() => setActiveIndexId(project.id)}
                 onOpen={() => setLightboxProject(project)}
               />
             ))}
           </div>
 
-          <div className="portfolio-reveal hidden lg:sticky lg:top-24 lg:block">
-            <button
-              type="button"
-              onClick={() => setLightboxProject(activeIndexProject)}
-              className="group block w-full text-left"
-            >
-              <div className="relative min-h-[28rem] overflow-hidden bg-[#111]">
-                <Image
-                  key={activeIndexProject.id}
-                  src={projectImage(activeIndexProject)}
-                  alt={activeIndexProject.title}
-                  fill
-                  loading="eager"
-                  sizes="(max-width: 1024px) 100vw, 42vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                  style={{ filter: "contrast(1.06) saturate(1.04)" }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
-                    Live preview / {activeIndexProject.category}
+          <div
+            className="hidden lg:block lg:self-stretch"
+            style={{ opacity: 1, transform: "none", visibility: "visible" }}
+          >
+            <div className="sticky top-24">
+              <button
+                type="button"
+                onClick={() => setLightboxProject(activeIndexProject)}
+                className="group block w-full text-left"
+                aria-live="polite"
+              >
+                <div className="mb-4 flex items-center justify-between border-y border-white/12 py-3">
+                  <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/46">
+                    Selected preview / {activeIndexProject.category}
                   </span>
-                  <h3 className="mt-3 font-editorial text-[clamp(2rem,4vw,4rem)] leading-[0.9] text-white">
-                    {cleanText(activeIndexProject.title)}
-                  </h3>
+                  <span className="font-numbers text-sm font-bold text-[var(--color-accent)]">
+                    {String(indexProjects.findIndex((project) => project.id === activeIndexProject.id) + 1).padStart(2, "0")}
+                  </span>
                 </div>
-              </div>
-              <p className="mt-5 max-w-lg text-sm leading-7 text-white/50">
-                {cleanText(activeIndexProject.description)}
-              </p>
-            </button>
+                <div className="relative min-h-[28rem] overflow-hidden border border-white/12 bg-[#111]">
+                  <Image
+                    key={activeIndexProject.id}
+                    src={projectImage(activeIndexProject)}
+                    alt={activeIndexProject.title}
+                    fill
+                    loading="eager"
+                    sizes="(max-width: 1024px) 100vw, 42vw"
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    onError={imgError}
+                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                    style={{ filter: "contrast(1.06) saturate(1.04)" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
+                      {cleanText(activeIndexProject.location)}
+                    </span>
+                    <h3 className="mt-3 font-editorial text-[clamp(2rem,4vw,4rem)] leading-[0.9] text-white">
+                      {cleanText(activeIndexProject.title)}
+                    </h3>
+                  </div>
+                </div>
+                <p className="mt-5 max-w-lg text-sm leading-7 text-white/50">
+                  {cleanText(activeIndexProject.description)}
+                </p>
+              </button>
+            </div>
           </div>
         </div>
       </section>

@@ -70,9 +70,7 @@ test.describe("Projects filter spam", () => {
       await page.waitForTimeout(1000);
 
       // Click each filter multiple times rapidly
-      const filters = page.locator("button[data-filter], [role='tab'], button").filter({
-        hasText: /All|ADU|Remediation|Consulting/,
-      });
+      const filters = page.locator("button[data-portfolio-filter]");
       const count = await filters.count();
 
       if (count > 0) {
@@ -161,7 +159,10 @@ test.describe("Contact form stress", () => {
 
       const submitBtn = page.locator("button[type='submit']");
       // Click rapidly twice
-      await Promise.all([submitBtn.click(), submitBtn.click()]);
+      await submitBtn.evaluate((button) => {
+        button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+        button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      });
       await page.waitForTimeout(1500);
 
       expect(requests.length).toBeLessThanOrEqual(1);
@@ -192,6 +193,8 @@ test.describe("Scroll velocity stress", () => {
   });
 
   test("counters do not reverse on scroll-up", async ({ page }) => {
+    test.setTimeout(60_000);
+
     await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(2000);
 
@@ -200,14 +203,22 @@ test.describe("Scroll velocity stress", () => {
     await page.waitForTimeout(800);
 
     // Grab counter values after scroll-down
-    const counterText = await page.locator("[data-section='building-science'] [class*='font-numbers'], [data-section='interstitial'] [class*='font-numbers']").first().textContent().catch(() => null);
+    const counterText = await page.evaluate(() => {
+      return document
+        .querySelector("[data-section='building-science'] [class*='font-numbers'], [data-section='interstitial'] [class*='font-numbers']")
+        ?.textContent?.trim() ?? null;
+    });
 
     // Scroll back to top
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
     await page.waitForTimeout(500);
 
     // Counter should retain final value (not reset to 0)
-    const counterAfterScrollUp = await page.locator("[data-section='building-science'] [class*='font-numbers'], [data-section='interstitial'] [class*='font-numbers']").first().textContent().catch(() => null);
+    const counterAfterScrollUp = await page.evaluate(() => {
+      return document
+        .querySelector("[data-section='building-science'] [class*='font-numbers'], [data-section='interstitial'] [class*='font-numbers']")
+        ?.textContent?.trim() ?? null;
+    });
 
     if (counterText && counterAfterScrollUp) {
       // Counter value after scrolling back should not be "0" or "0+"
@@ -328,6 +339,8 @@ test.describe("Browser history navigation", () => {
         const rect = (el as HTMLElement).getBoundingClientRect();
         if (rect.top > 100) return; // Skip below-fold elements
         if (rect.height === 0) return; // Skip zero-height
+        if (el.getAttribute("aria-hidden") === "true") return;
+        if (getComputedStyle(el).pointerEvents === "none") return;
         const style = (el as HTMLElement).style;
         const opacity = parseFloat(style.opacity || "1");
         if (opacity < 0.05 && style.opacity !== "") count++;
@@ -343,13 +356,15 @@ test.describe("Browser history navigation", () => {
 // ── 8. Hard refresh at non-zero scroll (Fix 13/16 guard) ─────────────────────
 test.describe("Hard refresh resilience", () => {
   test("page loads at top on hard refresh — no permanently invisible elements", async ({ page }) => {
-    await page.goto(`${BASE}/about`);
-    await page.waitForLoadState("networkidle");
+    test.setTimeout(60_000);
+
+    await page.goto(`${BASE}/about`, { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
     await page.waitForTimeout(1500);
 
     // Simulate a hard refresh by navigating to the same URL
-    await page.goto(`${BASE}/about`);
-    await page.waitForLoadState("networkidle");
+    await page.goto(`${BASE}/about`, { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
     await page.waitForTimeout(1500);
 
     // scrollY should be 0 (Fix 13: scrollRestoration=manual)

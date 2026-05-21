@@ -134,10 +134,11 @@ npx.cmd eslint app/page.tsx components/home/HeroV2.tsx components/home/HomeVisio
 Visual verification:
 
 - Port `3000` is serving a different app on this machine. Do **not** use `localhost:3000` to judge 828.
+- 828 local development is pinned to `localhost:3001`.
 - Started the 828 project on:
 
 ```text
-http://localhost:3028
+http://localhost:3001
 ```
 
 - Captured Playwright screenshots and visually checked:
@@ -156,7 +157,7 @@ These are verification artifacts only and do not need to be committed.
 ## Important Notes For Next Terminal
 
 - `localhost:3000` is not reliable for this repo right now because another app is running there.
-- Use `http://localhost:3028` for local visual review unless the conflicting app is stopped.
+- Use `http://localhost:3001` for local visual review. This is the canonical dev port for this repo.
 - `.preflight-passed` was already modified by local preflight/visual verification activity. It was left untouched intentionally.
 - Do not reintroduce:
   - `Improving the unimproved.`
@@ -167,7 +168,7 @@ These are verification artifacts only and do not need to be committed.
 
 ## Suggested Next Step
 
-Run a real browser review at `http://localhost:3028`, scroll the homepage manually, then decide whether to:
+Run a real browser review at `http://localhost:3001`, scroll the homepage manually, then decide whether to:
 
 1. Commit this homepage remodel as-is.
 2. Do a small visual polish pass on `HomeVisionSequence` spacing/brightness.

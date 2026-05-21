@@ -8,7 +8,7 @@ import JsonLd from "@/components/shared/JsonLd";
 import { SITE } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "828 Construction | ADU, Remediation & Consulting - Torrance, CA",
+  title: "ADU, Remediation & Consulting - Torrance, CA",
   description:
     "828 Construction brings 20+ years of building science expertise to Torrance and South Bay. Specializing in ADU construction, remediation, and consulting. CA License #1141119.",
   alternates: {

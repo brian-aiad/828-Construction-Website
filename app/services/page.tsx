@@ -3,7 +3,7 @@ import { SITE } from "@/lib/constants";
 import ServicesContent from "@/components/services/ServicesContent";
 
 export const metadata: Metadata = {
-  title: "Services | ADU Construction, Remediation & Consulting | 828 Construction",
+  title: "Services | ADU Construction, Remediation & Consulting",
   description:
     "828 Construction specializes in ADU construction, structural remediation, and construction consulting in Torrance and South Bay, CA. See which service fits your project.",
   alternates: { canonical: `${SITE.url}/services` },

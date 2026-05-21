@@ -4,7 +4,7 @@ import JsonLd from "@/components/shared/JsonLd";
 import RemediationServiceContent from "@/components/services/remediation/RemediationServiceContent";
 
 export const metadata: Metadata = {
-  title: "Construction Remediation Torrance | Mold & Structural Repair | 828 Construction",
+  title: "Construction Remediation Torrance | Mold & Structural Repair",
   description:
     "Expert remediation services in Torrance: mold remediation, foundation repair, structural damage, and building defect correction. 20+ years experience. CA License #1141119.",
   keywords: [

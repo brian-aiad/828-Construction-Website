@@ -2,6 +2,24 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Sitewide Cleanup + Production QA (2026-05-21)
+
+All public routes were visually reviewed at desktop and mobile, portfolio imagery was pulled back from generated-looking live project slots, page metadata titles were normalized, and about-page mid-scroll image loading was hardened.
+
+- Latest report: `.claude-work/preflight/2026-05-21-22-57/report.json`
+- Verification: `npm run lint`, `npx tsc --noEmit --pretty false`, `npm run build`, production desktop+mobile visual audit, `npx playwright test tests/portfolio-production.spec.ts --project=chromium`, `npx playwright test tests/stress.spec.ts --project=chromium --workers=1`, `npm run preflight:full`
+
+## Local Dev Port Pin (2026-05-21)
+
+This repo is permanently pinned to `http://localhost:3001` for local development. `npm run dev` runs `next dev -p 3001`. Port `3000` is another local app and must not be used to review 828 Construction.
+
+## Portfolio Production Hardening + Client-Ready QA (2026-05-21)
+
+Portfolio case-index preview, client-facing project imagery, contact above-fold image visibility, and stress tests were hardened for production refresh/navigation use.
+
+- Latest report: `.claude-work/preflight/2026-05-21-20-51/report.json`
+- Verification: `npm run lint`, `npx tsc --noEmit --pretty false`, `npm run build`, production route/image audit at desktop+mobile, `npx playwright test tests/portfolio-production.spec.ts --project=chromium`, `npx playwright test tests/stress.spec.ts --project=chromium --workers=1`, `npm run preflight:full`
+
 ## Mobile Polish + Image Loading Hardening (2026-05-20)
 
 Shared header/footer tap targets, services mobile spacing, and portfolio/lightbox image loading were tightened. Full production preflight passed with all 16 route/viewport checks plus nav cleanup and hard-refresh stability.

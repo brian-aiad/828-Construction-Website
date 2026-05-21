@@ -135,7 +135,7 @@ function AboutHero() {
           fetchPriority="high"
           sizes="100vw"
           className="object-cover"
-          style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.88)" }}
+          style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.92)" }}
         />
       </div>
       <div
@@ -446,6 +446,7 @@ function FieldMethodSection() {
                   alt="Construction plans and material samples on a work table"
                   width={1800}
                   height={1012}
+                  loading="eager"
                   sizes="(max-width: 1024px) 100vw, 38vw"
                   className="block object-cover"
                   style={{
@@ -471,6 +472,7 @@ function FieldMethodSection() {
                   alt="Finished residential exterior by 828 Construction"
                   width={1536}
                   height={1024}
+                  loading="eager"
                   sizes="(max-width: 1024px) 100vw, 38vw"
                   className="block object-cover"
                   style={{
@@ -668,7 +670,7 @@ function AboutCTA() {
           fill
           sizes="100vw"
           className="object-cover"
-          style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.72)" }}
+          style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.92)" }}
         />
       </div>
       <div className="absolute inset-0 bg-black/76" aria-hidden="true" />

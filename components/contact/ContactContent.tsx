@@ -201,8 +201,8 @@ function ContactMain() {
             ))}
           </div>
 
-          <div className="contact-reveal mt-8 hidden overflow-hidden border border-black/10 bg-black text-white lg:block">
-            <div className="contact-photo relative h-56">
+          <div className="mt-8 hidden overflow-hidden border border-black/10 bg-black text-white lg:block">
+            <div className="relative h-56">
               <Image
                 src="/images/contact/map-detail.jpg"
                 alt="Construction plans and review material for a project inquiry"

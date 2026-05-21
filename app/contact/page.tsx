@@ -5,7 +5,7 @@ import ContactContent from "@/components/contact/ContactContent";
 import PhoneCopyToast from "@/components/ui/PhoneCopyToast";
 
 export const metadata: Metadata = {
-  title: "Contact 828 Construction | Free Estimate - Torrance, CA",
+  title: "Contact | Free Estimate - Torrance, CA",
   description:
     "Contact 828 Construction for a free estimate. Call 213-828-2388 or send a message. Serving Torrance, Redondo Beach, Manhattan Beach & South Bay. License #1141119.",
   alternates: { canonical: `${SITE.url}/contact` },

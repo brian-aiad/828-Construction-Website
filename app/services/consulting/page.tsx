@@ -4,7 +4,7 @@ import JsonLd from "@/components/shared/JsonLd";
 import ConsultingServiceContent from "@/components/services/consulting/ConsultingServiceContent";
 
 export const metadata: Metadata = {
-  title: "Construction Consulting Torrance | Building Science Expert | 828 Construction",
+  title: "Construction Consulting Torrance | Building Science Expert",
   description:
     "Professional construction consulting in Torrance. Pre-construction advisory, project feasibility, and building science expertise. 20+ years experience. CA License #1141119.",
   keywords: [

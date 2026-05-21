@@ -2,6 +2,31 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-05-21 — Sitewide cleanup, image credibility pass, and full QA
+
+- Visually reviewed every public route at desktop and mobile, including legacy `/process` and `/projects` redirects into `/portfolio`.
+- Replaced live portfolio references to generated-angle and v2 generated project images with existing local project/worksite assets; removed the unused untracked v2 generated portfolio files.
+- Normalized page metadata titles so pages no longer duplicate `828 Construction` in the browser title.
+- Raised too-dark image brightness filters to meet the project image readability rules.
+- Hardened the About method section images with eager loading so fast scroll/review does not show black image plates.
+- Tightened portfolio production and stress tests after rerunning them against `next start`.
+- `npm run lint`, `npx tsc --noEmit --pretty false`, `npm run build`, `npx playwright test tests/portfolio-production.spec.ts --project=chromium`, `npx playwright test tests/stress.spec.ts --project=chromium --workers=1`, and `npm run preflight:full` pass. Latest full report: `.claude-work/preflight/2026-05-21-22-57/report.json`.
+
+## 2026-05-21 — Local dev pinned to localhost:3001
+
+- `npm run dev` now runs `next dev -p 3001`.
+- README, CLAUDE project rules, project map, and homepage handoff notes now mark `http://localhost:3001` as the canonical local review URL.
+- Port `3000` is documented as another local app and should not be used to review this repo.
+
+## 2026-05-21 — Portfolio production hardening + client-ready QA
+
+- Portfolio case-index preview now remains visible through hard refreshes and all selected rows; desktop uses a stable sticky selected-preview panel and mobile/tablet gets an immediate selected preview.
+- Portfolio main project imagery was tightened using stronger existing local assets for weak bath/outdoor slots and five generated replacement images were wired where they improved the client-facing archive.
+- Contact above-fold plans image no longer starts hidden behind GSAP reveal state.
+- Added `tests/portfolio-production.spec.ts` for portfolio hard-refresh preview/image regressions.
+- Stress tests were updated for the current `/portfolio` implementation and custom cursor behavior.
+- `npm run lint`, `npx tsc --noEmit --pretty false`, `npm run build`, production route/image audit, portfolio production Playwright test, Chromium stress suite, and `npm run preflight:full` pass. Latest full report: `.claude-work/preflight/2026-05-21-20-51/report.json`.
+
 ## 2026-05-20 — Mobile polish + image loading hardening verified
 
 - Header/footer mobile tap targets tightened for the phone link, menu button, footer links, and footer contact CTA.

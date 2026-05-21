@@ -34,6 +34,7 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 - If an image reads as generic or AI-like, replace it with a better-fitting asset or crop rather than repeating the same visual trick.
 
 ### Standing rules
+- **Local dev URL:** Always use `http://localhost:3001` for this repo. `npm run dev` is pinned to `next dev -p 3001`. Port `3000` belongs to another local app and must not be used to judge 828.
 - All factual data traces to `lib/constants.ts`.
 - Production build only for verification (port 4000).
 - Chrome DevTools MCP for animation/scroll verification — Playwright is functional only.
@@ -120,15 +121,15 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 | Page | Status | Date |
 |------|--------|------|
 | Splash | V2.5 Cinematic — rotateX 88→0 3-channel reveal, maroon radial ignition pulse on entry, curtain-wipe exit (clipPath inset). V2 base: vertical gradient, ONE LINE wordmark, maroon underline, sessionStorage gate. | 2026-05-06 |
-| Home (`/`) | V2.5 homepage remodel handoff in `docs/828_HOME_REMODEL_HANDOFF.md`. Route now renders HeroV2 + ServicesPreviewV2 + new HomeVisionSequence + AboutPreview + HomeCTA. Hero copy changed to `Built with intent. Not by accident.` with active-listening glass card and CA license badge. New HomeVisionSequence adds Joseph-note language: first step is listening, one conversation begins the build, build your vision, dedicated to your dream, build philosophy/process cards, rolling marquee, blueprint/level silhouettes, pinned horizontal process track. HomeCTA restored and cleaned to 2004/maroon/conversation-first copy. Verify locally on `http://localhost:3028`; port 3000 may be another app. | 2026-05-07 |
-| About (`/about`) | V2 + V2.5 elevation — documentary/editorial profile layout with its own motion grammar: split hero dossier, origin story, field notes, South Bay coverage band, and CTA. Do not mirror the homepage scroll stack. | 2026-05-18 |
+| Home (`/`) | V2.5 homepage remodel handoff in `docs/828_HOME_REMODEL_HANDOFF.md`. Route now renders HeroV2 + ServicesPreviewV2 + new HomeVisionSequence + AboutPreview + HomeCTA. Hero copy changed to `Built with intent. Not by accident.` with active-listening glass card and CA license badge. New HomeVisionSequence adds Joseph-note language: first step is listening, one conversation begins the build, build your vision, dedicated to your dream, build philosophy/process cards, rolling marquee, blueprint/level silhouettes, pinned horizontal process track. HomeCTA restored and cleaned to 2004/maroon/conversation-first copy. Verify locally on `http://localhost:3001`; port 3000 is another app. | 2026-05-21 |
+| About (`/about`) | V2 + V2.5 elevation — documentary/editorial profile layout with its own motion grammar: split hero dossier, origin story, field notes, South Bay coverage band, and CTA. Method imagery now loads eagerly enough to avoid black plates during fast scroll audits. Do not mirror the homepage scroll stack. | 2026-05-21 |
 | Services (`/services`) | V2 + V2.5 elevation — asymmetric 3-tile gateway, 3D tilt (useTilt 10deg), maroon ghost shadow, ConstructionLine silhouette backdrop, magnetic CTAs. | 2026-05-06 |
 | Services/ADU (`/services/adu`) | V2 + V2.5 elevation — visual hero (ArchOutline silhouette 0.55), Need+FAQ glass cards, 5-step process, ADU acronym glass definitions, Start Here BOOK CALL. | 2026-05-06 |
 | Services/Remediation (`/services/remediation`) | V2 + V2.5 elevation — visual hero (ConstructionLine silhouette), Need+FAQ glass, 4-step process, Why 828, equipment placeholder TODO. | 2026-05-06 |
 | Services/Consulting (`/services/consulting`) | V2 + V2.5 elevation — visual hero (BlueprintCorner silhouette), 5 benefits, 3 Q&A, CTA. | 2026-05-06 |
 | Process (`/process`) | DELETED — 308 redirect to /portfolio | 2026-05-06 |
 | Contact (`/contact`) | ON HOLD — form infrastructure (email/DNS/Resend) pending Joe | — |
-| Portfolio (`/portfolio`) | V2 + V2.5 elevation — renamed from /projects, 14-photo gallery, cinema row, 5-step process, compass silhouette CTA. Real photos pending Joe mid-May. | 2026-05-06 |
+| Portfolio (`/portfolio`) | V2 + V2.5 elevation — renamed from /projects, 14-photo gallery, cinema row, 5-step process, compass silhouette CTA. Case-index preview hardened, and live project slots now avoid generated-angle/v2 generated portfolio images while real photos remain pending. | 2026-05-21 |
 | Footer (site-wide) | V2 + V2.5 elevation — 2-layer marquee (2.2rem bg reversed + 9px fg, visually distinct), magnetic 828 anchor, license badge glow, BOOK CALL dropdown CTA, broken-color info blocks. | 2026-05-06 |
 
 ## Project context

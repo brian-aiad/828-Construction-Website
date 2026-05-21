@@ -14,7 +14,9 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) with your browser to see the result.
+
+This project is pinned to port `3001`. Port `3000` is used by another local app on this machine; do not use `localhost:3000` to review 828 Construction.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
