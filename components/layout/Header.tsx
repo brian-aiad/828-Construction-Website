@@ -297,27 +297,28 @@ export default function Header() {
             <div className="flex lg:hidden items-center gap-5">
               <a
                 href={SITE.phoneHref}
-                className="font-numbers text-xs text-gray-400 hover:text-white transition-colors"
+                className="inline-flex min-h-11 items-center font-numbers text-xs text-gray-400 transition-colors hover:text-white"
               >
                 {SITE.phone}
               </a>
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="flex flex-col gap-[5px] w-6 py-1"
+                className="flex h-11 w-11 flex-col items-center justify-center gap-[5px]"
                 aria-label="Toggle menu"
+                aria-expanded={mobileOpen}
               >
                 <span
-                  className={`block h-px bg-white transition-all duration-300 origin-center ${
+                  className={`block h-px w-6 bg-white transition-all duration-300 origin-center ${
                     mobileOpen ? "rotate-45 translate-y-[6px]" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px bg-white transition-all duration-300 ${
+                  className={`block h-px w-6 bg-white transition-all duration-300 ${
                     mobileOpen ? "opacity-0 scale-x-0" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px bg-white transition-all duration-300 origin-center ${
+                  className={`block h-px w-6 bg-white transition-all duration-300 origin-center ${
                     mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""
                   }`}
                 />

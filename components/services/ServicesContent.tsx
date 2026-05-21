@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { type SyntheticEvent, useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -12,6 +12,13 @@ import CraftInstrumentLayer from "@/components/system/CraftInstrumentLayer";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
 
 const SERVICE_VISUALS: Record<string, { image: string; label: string; line: string }> = {
   adu: {
@@ -120,36 +127,40 @@ function ServiceCard({ slug, index }: { slug: string; index: number }) {
   return (
     <Link
       href={`/services/${slug}`}
-      className="services-reveal group grid min-h-[28rem] grid-cols-1 overflow-hidden border border-white/10 bg-black lg:grid-cols-[1.1fr_0.9fr]"
+      className="services-reveal group grid grid-cols-1 overflow-hidden border border-white/10 bg-black lg:min-h-[28rem] lg:grid-cols-[1.1fr_0.9fr]"
       aria-label={`View ${service.title}`}
     >
-      <div className={`services-image relative min-h-[18rem] overflow-hidden ${index % 2 === 1 ? "lg:order-2" : ""}`}>
+      <div className={`services-image relative min-h-[13.5rem] overflow-hidden sm:min-h-[16rem] lg:min-h-[18rem] ${index % 2 === 1 ? "lg:order-2" : ""}`}>
         <Image
           src={visual.image}
           alt={`${service.title} by 828 Construction`}
           fill
+          loading="lazy"
           sizes="(max-width: 1024px) 100vw, 48vw"
+          placeholder="blur"
+          blurDataURL={BLUR_PLACEHOLDER}
+          onError={imgError}
           className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
           style={{ filter: "contrast(1.04) saturate(1.03)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/76 via-black/12 to-transparent" />
       </div>
-      <div className="relative flex flex-col justify-between p-7 sm:p-9 lg:p-12">
+      <div className="relative flex flex-col justify-between p-5 sm:p-7 lg:p-12">
         <div>
-          <div className="mb-8 flex items-center gap-4">
+          <div className="mb-5 flex items-center gap-4 lg:mb-8">
             <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
               {visual.label}
             </span>
             <span className="services-line h-px flex-1 origin-left bg-[var(--color-accent)]/55" />
           </div>
-          <h2 className="font-editorial text-[clamp(2.25rem,5vw,5rem)] leading-[0.9] text-white">
+          <h2 className="font-editorial text-[clamp(2rem,11vw,5rem)] leading-[0.9] text-white">
             {service.title}
           </h2>
-          <p className="mt-6 max-w-md text-sm leading-7 text-white/58 sm:text-base">
+          <p className="mt-4 max-w-md text-sm leading-6 text-white/58 sm:text-base lg:mt-6 lg:leading-7">
             {visual.line}
           </p>
         </div>
-        <div className="mt-10 flex items-center justify-between border-t border-white/10 pt-6">
+        <div className="mt-6 flex items-center justify-between gap-4 border-t border-white/10 pt-4 lg:mt-10 lg:pt-6">
           <span className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/42">
             {service.short}
           </span>
@@ -173,7 +184,11 @@ export default function ServicesContent() {
           alt="Framed construction interior for 828 Construction services"
           fill
           priority
+          fetchPriority="high"
           sizes="100vw"
+          placeholder="blur"
+          blurDataURL={BLUR_PLACEHOLDER}
+          onError={imgError}
           className="object-cover"
           style={{ filter: "contrast(1.05) saturate(1.02) brightness(0.92)" }}
         />
@@ -234,7 +249,11 @@ export default function ServicesContent() {
               src="/images/projects/consulting-plans.jpg"
               alt="Construction plans, measure, and material samples"
               fill
+              loading="lazy"
               sizes="(max-width: 1024px) 100vw, 48vw"
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+              onError={imgError}
               className="object-cover"
             />
           </div>

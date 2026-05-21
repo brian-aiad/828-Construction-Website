@@ -485,9 +485,9 @@ function PinnedWhy() {
       className="bg-black"
       style={{ minHeight: isMobile ? "auto" : "280vh", position: "relative", zIndex: 2 }}
     >
-      <div ref={stickyRef} className="sticky top-0 flex items-center justify-center" style={{ minHeight: "100vh" }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full py-24">
-          <div className="flex items-end justify-between mb-16">
+      <div ref={stickyRef} className="flex items-center justify-center lg:sticky lg:top-0" style={{ minHeight: isMobile ? "auto" : "100vh" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full py-16 lg:py-24">
+          <div className="flex items-end justify-between mb-10 lg:mb-16">
             <div>
               <div
                 ref={hairlineRef}
@@ -516,10 +516,10 @@ function PinnedWhy() {
               <div
                 key={panel.num}
                 ref={(el) => { panelRefs.current[i] = el; }}
-                className="why-panel py-8 border border-transparent"
+                className="why-panel border border-transparent py-6 lg:py-8"
                 style={{ borderColor: "rgba(255,255,255,0.04)" }}
               >
-                <div className="flex items-start gap-8">
+                <div className="flex items-start gap-5 lg:gap-8">
                   <span
                     ref={(el) => { numRefs.current[i] = el; }}
                     className="font-numbers font-bold flex-shrink-0"
@@ -650,26 +650,26 @@ function DetailContent({
     <section
       ref={sectionRef}
       data-section="service-detail-content"
-      className="bg-white py-24"
+      className="bg-white py-16 lg:py-24"
       style={{ position: "relative", zIndex: 3, marginTop: "-5vh" }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div
           ref={hairlineRef}
-          className="mb-16"
+          className="mb-10 lg:mb-16"
           style={{ height: 1, background: "#B87333", transformOrigin: "left", maxWidth: "60px" }}
         />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-16">
 
           {/* ── Main Column ────────────────────────────────────────────────── */}
           <div className="lg:col-span-2">
-            <p className="main-el text-xl text-gray-600 leading-relaxed mb-12">
+            <p className="main-el mb-10 text-lg leading-relaxed text-gray-600 lg:mb-12 lg:text-xl">
               {service.description}
             </p>
             <h2 ref={h2Ref} className="font-display font-bold text-2xl text-black mb-6 tracking-tight">
               What&apos;s Included
             </h2>
-            <ul className="main-el space-y-4 mb-16">
+            <ul className="main-el mb-12 space-y-4 lg:mb-16">
               {service.details.map((detail) => (
                 <li key={detail} className="flex items-start gap-4 group">
                   <span
@@ -684,7 +684,7 @@ function DetailContent({
             </ul>
 
             {aduFaq && aduFaq.length > 0 && (
-              <div className="main-el border-t border-gray-100 pt-12 mb-16">
+              <div className="main-el mb-12 border-t border-gray-100 pt-10 lg:mb-16 lg:pt-12">
                 <h2 className="font-display font-bold text-2xl text-black mb-8 tracking-tight">
                   ADU Questions &amp; Answers
                 </h2>

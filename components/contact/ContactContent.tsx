@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { type SyntheticEvent, useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -11,6 +11,13 @@ import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { SERVICE_AREAS, SERVICES, SITE } from "@/lib/constants";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
 
 const prepItems = [
   "Property address or city",
@@ -200,7 +207,13 @@ function ContactMain() {
                 src="/images/contact/map-detail.jpg"
                 alt="Construction plans and review material for a project inquiry"
                 fill
+                priority
+                loading="eager"
+                fetchPriority="high"
                 sizes="(max-width: 1024px) 100vw, 38vw"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
+                onError={imgError}
                 className="object-cover"
                 style={{ filter: "contrast(1.04) saturate(0.95)" }}
               />

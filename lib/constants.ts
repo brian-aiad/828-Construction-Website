@@ -247,6 +247,23 @@ const PROJECT_GALLERIES = {
   ],
 } as const;
 
+const PROJECT_MAIN_IMAGES = {
+  modernHerringboneBath: "/images/projects/bathroom-herringbone.jpg",
+  geometricFeatureBath: "/images/projects/bathroom-geometric.jpg",
+  southBayOutdoorLiving: "/images/projects/outdoor-patio-pergola.jpg",
+  showerRemediationNicheRebuild: "/images/projects/shower-black-fixtures.jpg",
+  recessedCeilingLedBath: "/images/projects/bathroom-led.jpg",
+  customShowerNicheProgress: "/images/projects/niche-detail.jpg",
+  vanityLedStripRenovation: "/images/projects/bathroom-warm.jpg",
+  outdoorLivingPoolSurround: "/images/projects/outdoor-patio-pergola.jpg",
+  detachedAduNewConstruction: "/images/projects/adu-exterior-new.jpg",
+  garageConversionGlassEntryAdu: "/images/projects/garage-conversion.jpg",
+  kitchenRenovationDarkCabinetBuild: "/images/projects/kitchen-dark.jpg",
+  foundationNewAduConstruction: "/images/projects/foundation-concrete.jpg",
+  prePurchaseStructuralEvaluation: "/images/projects/consulting-inspection.jpg",
+  waterIntrusionRemediation: "/images/projects/remediation-damage.jpg",
+} as const;
+
 export const PROJECTS: Project[] = [
   {
     id: 1,
@@ -256,8 +273,8 @@ export const PROJECTS: Project[] = [
     spec: "Custom herringbone tile · Wall-mount toilet · Stone accent wall",
     description:
       "Full bathroom renovation featuring a floor-to-ceiling herringbone tile shower wall, wall-mounted toilet with in-wall tank, natural stone accent, and recessed niche. A complete gut-and-rebuild executed to the millimeter.",
-    image: PROJECT_GALLERIES.modernHerringboneBath[0],
-    images: [...PROJECT_GALLERIES.modernHerringboneBath],
+    image: PROJECT_MAIN_IMAGES.modernHerringboneBath,
+    images: [PROJECT_MAIN_IMAGES.modernHerringboneBath, ...PROJECT_GALLERIES.modernHerringboneBath],
     featured: true,
   },
   {
@@ -268,8 +285,8 @@ export const PROJECTS: Project[] = [
     spec: "Geometric tile · Matte black fixtures · Glass partition",
     description:
       "Bold starburst geometric tile dominates this ADU bathroom — black matte fixtures, frameless glass shower partition, and warm wood vanity. Proof that a small space can have maximum personality.",
-    image: PROJECT_GALLERIES.geometricFeatureBath[0],
-    images: [...PROJECT_GALLERIES.geometricFeatureBath],
+    image: PROJECT_MAIN_IMAGES.geometricFeatureBath,
+    images: [PROJECT_MAIN_IMAGES.geometricFeatureBath, ...PROJECT_GALLERIES.geometricFeatureBath],
   },
   {
     id: 3,
@@ -279,8 +296,8 @@ export const PROJECTS: Project[] = [
     spec: "Pergola · Pool deck · Custom wood decking",
     description:
       "Luxury outdoor living space built around an existing pool — custom wood deck, pergola with pendant lighting, and seamless indoor-outdoor flow. Designed for California life, built to last decades.",
-    image: PROJECT_GALLERIES.southBayOutdoorLiving[0],
-    images: [...PROJECT_GALLERIES.southBayOutdoorLiving],
+    image: PROJECT_MAIN_IMAGES.southBayOutdoorLiving,
+    images: [PROJECT_MAIN_IMAGES.southBayOutdoorLiving, ...PROJECT_GALLERIES.southBayOutdoorLiving],
     featured: true,
   },
   {
@@ -291,8 +308,8 @@ export const PROJECTS: Project[] = [
     spec: "Waterproofing · Dual shower heads · Herringbone niche",
     description:
       "Shower torn out to the studs — improper waterproofing removed, rebuilt to code, large-format white tile installed with a custom herringbone-tile niche and dual shower system. The kind of work that fixes it right.",
-    image: PROJECT_GALLERIES.showerRemediationNicheRebuild[0],
-    images: [...PROJECT_GALLERIES.showerRemediationNicheRebuild],
+    image: PROJECT_MAIN_IMAGES.showerRemediationNicheRebuild,
+    images: [PROJECT_MAIN_IMAGES.showerRemediationNicheRebuild, ...PROJECT_GALLERIES.showerRemediationNicheRebuild],
   },
   {
     id: 5,
@@ -302,8 +319,8 @@ export const PROJECTS: Project[] = [
     spec: "Tile ceiling · LED downlights · Copper sconce",
     description:
       "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a warm copper wall sconce. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
-    image: PROJECT_GALLERIES.recessedCeilingLedBath[0],
-    images: [...PROJECT_GALLERIES.recessedCeilingLedBath],
+    image: PROJECT_MAIN_IMAGES.recessedCeilingLedBath,
+    images: [PROJECT_MAIN_IMAGES.recessedCeilingLedBath, ...PROJECT_GALLERIES.recessedCeilingLedBath],
   },
   {
     id: 6,
@@ -313,8 +330,8 @@ export const PROJECTS: Project[] = [
     spec: "Microcement finish · Recessed niche · Dark tile ceiling",
     description:
       "Mid-project documentation of a precision shower niche in microcement finish — dark tile ceiling contrasts the light walls. This is what the work looks like before the glamour shot. Detail-first, always.",
-    image: PROJECT_GALLERIES.customShowerNicheProgress[0],
-    images: [...PROJECT_GALLERIES.customShowerNicheProgress],
+    image: PROJECT_MAIN_IMAGES.customShowerNicheProgress,
+    images: [PROJECT_MAIN_IMAGES.customShowerNicheProgress, ...PROJECT_GALLERIES.customShowerNicheProgress],
   },
   {
     id: 7,
@@ -324,8 +341,8 @@ export const PROJECTS: Project[] = [
     spec: "LED strip lighting · Warm ambiance · Wood plank floor",
     description:
       "Bathroom renovation focused on atmosphere — LED strip lighting under the vanity shelf creates warm, indirect glow. Wood plank flooring and clean white walls complete a space designed for long-term comfort.",
-    image: PROJECT_GALLERIES.vanityLedStripRenovation[0],
-    images: [...PROJECT_GALLERIES.vanityLedStripRenovation],
+    image: PROJECT_MAIN_IMAGES.vanityLedStripRenovation,
+    images: [PROJECT_MAIN_IMAGES.vanityLedStripRenovation, ...PROJECT_GALLERIES.vanityLedStripRenovation],
   },
   {
     id: 8,
@@ -335,8 +352,8 @@ export const PROJECTS: Project[] = [
     spec: "Teak decking · Pergola · Woven pendant lighting · Pool surround",
     description:
       "Full outdoor living transformation — custom teak deck, pergola with statement woven pendants, and a complete pool surround redesign. The kind of project where every material decision matters for long-term performance outdoors.",
-    image: PROJECT_GALLERIES.outdoorLivingPoolSurround[0],
-    images: [...PROJECT_GALLERIES.outdoorLivingPoolSurround],
+    image: PROJECT_MAIN_IMAGES.outdoorLivingPoolSurround,
+    images: [PROJECT_MAIN_IMAGES.outdoorLivingPoolSurround, ...PROJECT_GALLERIES.outdoorLivingPoolSurround],
     featured: true,
   },
   {
@@ -347,8 +364,8 @@ export const PROJECTS: Project[] = [
     spec: "Detached unit · 420 sq ft · Permit expedited",
     description:
       "Full-build detached ADU from foundation to finish — permitted, framed, wrapped, and finished to match the main structure. Built for long-term rental income with durable materials throughout.",
-    image: PROJECT_GALLERIES.detachedAduNewConstruction[0],
-    images: [...PROJECT_GALLERIES.detachedAduNewConstruction],
+    image: PROJECT_MAIN_IMAGES.detachedAduNewConstruction,
+    images: [PROJECT_MAIN_IMAGES.detachedAduNewConstruction, ...PROJECT_GALLERIES.detachedAduNewConstruction],
     featured: true,
   },
   {
@@ -359,8 +376,8 @@ export const PROJECTS: Project[] = [
     spec: "Garage conversion · Steel glass doors · Polished concrete",
     description:
       "Former two-car garage converted to a full ADU — steel-framed glass bifold doors replace the garage opening, polished concrete floors, open kitchen, and seamless indoor-outdoor flow. Permitted and built to code.",
-    image: PROJECT_GALLERIES.garageConversionGlassEntryAdu[0],
-    images: [...PROJECT_GALLERIES.garageConversionGlassEntryAdu],
+    image: PROJECT_MAIN_IMAGES.garageConversionGlassEntryAdu,
+    images: [PROJECT_MAIN_IMAGES.garageConversionGlassEntryAdu, ...PROJECT_GALLERIES.garageConversionGlassEntryAdu],
     featured: true,
   },
   {
@@ -371,8 +388,8 @@ export const PROJECTS: Project[] = [
     spec: "Matte black cabinetry · Waterfall island · Pendant lighting",
     description:
       "Full kitchen renovation with custom matte black lower cabinets, white uppers, waterfall-edge island with flush sink, and minimal pendant lighting. Part of a whole-home ADU conversion project.",
-    image: PROJECT_GALLERIES.kitchenRenovationDarkCabinetBuild[0],
-    images: [...PROJECT_GALLERIES.kitchenRenovationDarkCabinetBuild],
+    image: PROJECT_MAIN_IMAGES.kitchenRenovationDarkCabinetBuild,
+    images: [PROJECT_MAIN_IMAGES.kitchenRenovationDarkCabinetBuild, ...PROJECT_GALLERIES.kitchenRenovationDarkCabinetBuild],
     featured: false,
   },
   {
@@ -383,8 +400,8 @@ export const PROJECTS: Project[] = [
     spec: "Continuous footings · Rebar grid · Engineered pour",
     description:
       "Foundation work for a new detached ADU — continuous concrete footings with engineered rebar placement. This is the part no one photographs but everyone relies on. Built to outlast the structure above it.",
-    image: PROJECT_GALLERIES.foundationNewAduConstruction[0],
-    images: [...PROJECT_GALLERIES.foundationNewAduConstruction],
+    image: PROJECT_MAIN_IMAGES.foundationNewAduConstruction,
+    images: [PROJECT_MAIN_IMAGES.foundationNewAduConstruction, ...PROJECT_GALLERIES.foundationNewAduConstruction],
     featured: false,
   },
   {
@@ -395,8 +412,8 @@ export const PROJECTS: Project[] = [
     spec: "Feasibility study · Defect report · Contractor review",
     description:
       "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and delivered a written feasibility analysis. Client negotiated $80K off the purchase price.",
-    image: PROJECT_GALLERIES.prePurchaseStructuralEvaluation[0],
-    images: [...PROJECT_GALLERIES.prePurchaseStructuralEvaluation],
+    image: PROJECT_MAIN_IMAGES.prePurchaseStructuralEvaluation,
+    images: [PROJECT_MAIN_IMAGES.prePurchaseStructuralEvaluation, ...PROJECT_GALLERIES.prePurchaseStructuralEvaluation],
   },
   {
     id: 10,
@@ -406,8 +423,8 @@ export const PROJECTS: Project[] = [
     spec: "Envelope failure · Moisture remediation · Rebuilt to code",
     description:
       "Chronic water intrusion traced to failed flashing and improper window installation — not a roofing issue as originally diagnosed. Scope rebuilt correctly, structure dried, and building envelope sealed. No recurrence.",
-    image: PROJECT_GALLERIES.waterIntrusionRemediation[0],
-    images: [...PROJECT_GALLERIES.waterIntrusionRemediation],
+    image: PROJECT_MAIN_IMAGES.waterIntrusionRemediation,
+    images: [PROJECT_MAIN_IMAGES.waterIntrusionRemediation, ...PROJECT_GALLERIES.waterIntrusionRemediation],
   },
 ];
 

@@ -12,6 +12,14 @@ import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Dark 1×1 SVG — shows instantly while real image loads, no blank flash
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
+
 type Filter = "All" | ProjectCategory;
 
 const CATEGORIES: Filter[] = ["All", "ADU Construction", "Remediation", "Consulting"];
@@ -211,10 +219,13 @@ function ArchiveFrame({
         src={projectImage(project)}
         alt={project.title}
         fill
-        preload={index < 3}
+        priority={index < 3}
         loading={index < 3 ? "eager" : "lazy"}
         fetchPriority={index < 3 ? "high" : "auto"}
         sizes="(max-width: 1024px) 50vw, 28vw"
+        placeholder="blur"
+        blurDataURL={BLUR_PLACEHOLDER}
+        onError={imgError}
         className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         style={{ filter: "contrast(1.06) saturate(1.04)" }}
       />
@@ -222,7 +233,7 @@ function ArchiveFrame({
       <span className="absolute left-3 top-3 bg-black/72 px-2.5 py-1 font-labels text-[8px] uppercase tracking-[0.18em] text-white/58 backdrop-blur">
         {String(index + 1).padStart(2, "0")}
       </span>
-      <span className="absolute bottom-3 left-3 right-3 truncate font-labels text-[8px] uppercase tracking-[0.16em] text-white/62">
+      <span className="absolute bottom-3 left-3 right-3 font-labels text-[7px] uppercase leading-[1.35] tracking-[0.14em] text-white/62 sm:text-[8px] sm:tracking-[0.16em]">
         {cleanText(project.location)} / {project.category}
       </span>
     </button>
@@ -295,7 +306,11 @@ function ProjectWallTile({
         src={projectImage(project)}
         alt={project.title}
         fill
+        loading="lazy"
         sizes={spanClass.includes("col-span-2") ? "(max-width: 1024px) 100vw, 58vw" : "(max-width: 1024px) 100vw, 31vw"}
+        placeholder="blur"
+        blurDataURL={BLUR_PLACEHOLDER}
+        onError={imgError}
         className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
         style={{ filter: "contrast(1.05) saturate(1.04)" }}
       />
@@ -423,7 +438,11 @@ export default function PortfolioContent() {
                   src={projectImage(activeIndexProject)}
                   alt={activeIndexProject.title}
                   fill
+                  loading="lazy"
                   sizes="100vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
                   className="object-cover"
                   style={{ filter: "contrast(1.06) saturate(1.04)" }}
                 />
@@ -463,7 +482,11 @@ export default function PortfolioContent() {
                   src={projectImage(activeIndexProject)}
                   alt={activeIndexProject.title}
                   fill
+                  loading="eager"
                   sizes="(max-width: 1024px) 100vw, 42vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
                   className="object-cover transition duration-500 group-hover:scale-[1.03]"
                   style={{ filter: "contrast(1.06) saturate(1.04)" }}
                 />
@@ -504,6 +527,8 @@ export default function PortfolioContent() {
                   <button
                     key={category}
                     type="button"
+                    data-portfolio-filter={category}
+                    aria-label={`Filter portfolio by ${category}`}
                     onClick={() => setActiveFilter(category)}
                     className={`border px-4 py-3 font-labels text-[9px] uppercase tracking-[0.16em] transition-colors ${
                       active

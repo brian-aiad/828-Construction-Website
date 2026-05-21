@@ -17,7 +17,12 @@ export default function SplashScreen() {
   const tlRef        = useRef<gsap.core.Timeline | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
-  const dismiss = () => setDismissed(true);
+  const dismiss = () => {
+    try {
+      window.sessionStorage.setItem("828:splash-seen", "1");
+    } catch {}
+    setDismissed(true);
+  };
   const skip    = () => {
     if (tlRef.current) {
       tlRef.current.progress(1);
@@ -27,6 +32,13 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
+    try {
+      if (window.sessionStorage.getItem("828:splash-seen") === "1") {
+        const frame = requestAnimationFrame(() => setDismissed(true));
+        return () => cancelAnimationFrame(frame);
+      }
+    } catch {}
+
     const splash    = splashRef.current;
     const underline = underlineRef.current;
     const tagline   = taglineRef.current;
@@ -69,28 +81,28 @@ export default function SplashScreen() {
     // tagline fades in quietly during hold
     tl.to(tagline, { opacity: 1, yPercent: 0, duration: 0.55, ease: "power2.out" }, 1.64);
 
-    // hold — the mark sits
-    tl.to({}, { duration: 1.05 }, 1.92);
+    // hold — the mark sits briefly, then clears fast enough for repeat visits to feel direct
+    tl.to({}, { duration: 0.42 }, 1.74);
 
     // exit — tagline fades first
-    tl.to(tagline, { opacity: 0, duration: 0.28, ease: "sine.in" }, 2.97);
+    tl.to(tagline, { opacity: 0, duration: 0.22, ease: "sine.in" }, 2.18);
 
     // chars drift upward and dissolve
     tl.to(allChars, {
       yPercent: -38, opacity: 0, filter: "blur(4px)",
       stagger: { each: 0.016, from: "start" },
-      duration: 0.55, ease: "power2.inOut",
-    }, 3.05);
+      duration: 0.45, ease: "power2.inOut",
+    }, 2.22);
 
     // underline retracts
-    tl.to(underline, { scaleX: 0, opacity: 0, duration: 0.34, ease: "power3.inOut" }, 3.07);
+    tl.to(underline, { scaleX: 0, opacity: 0, duration: 0.28, ease: "power3.inOut" }, 2.24);
 
     // curtain wipes up
     tl.to(splash, {
       clipPath: "inset(0 0 100% 0)",
-      duration: 0.8, ease: "expo.inOut",
+      duration: 0.58, ease: "expo.inOut",
       onComplete: dismiss,
-    }, 3.38);
+    }, 2.54);
 
     return () => { tl.kill(); tlRef.current = null; };
   }, []);

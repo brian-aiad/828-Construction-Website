@@ -21,7 +21,7 @@ const eyebrowClass =
   "font-labels text-[11px] uppercase tracking-[0.2em] text-white/50";
 const bodyClass = "text-[12px] leading-[1.55] text-white/60";
 const linkClass =
-  "group/link relative w-fit text-[14px] leading-snug text-white/80 transition-colors duration-300 hover:text-white";
+  "group/link relative flex min-h-8 w-fit items-center text-[14px] leading-snug text-white/80 transition-colors duration-300 hover:text-white lg:min-h-0";
 const underlineClass =
   "absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-accent)] transition-transform duration-300 group-hover/link:scale-x-100";
 
@@ -116,7 +116,7 @@ export default function Footer() {
 
             <Link
               href="/contact"
-              className="mt-4 inline-flex w-fit items-center gap-2 border-b border-white/15 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-white/50 transition-colors hover:border-white hover:text-white"
+              className="mt-4 inline-flex min-h-8 w-fit items-center gap-2 border-b border-white/15 py-1 font-labels text-[10px] uppercase tracking-[0.18em] text-white/50 transition-colors hover:border-white hover:text-white lg:min-h-0"
             >
               Get in touch
               <span aria-hidden="true">+</span>

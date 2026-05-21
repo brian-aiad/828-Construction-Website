@@ -2,6 +2,13 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Mobile Polish + Image Loading Hardening (2026-05-20)
+
+Shared header/footer tap targets, services mobile spacing, and portfolio/lightbox image loading were tightened. Full production preflight passed with all 16 route/viewport checks plus nav cleanup and hard-refresh stability.
+
+- Latest report: `.claude-work/preflight/2026-05-20-19-55/report.json`
+- Verification: `npm run lint`, `npx tsc --noEmit --pretty false`, `npm run build`, `npm run preflight:full`
+
 ## V2.5 FIX — Homepage Cinematic Overhaul (2026-05-06)
 
 **Session:** Prompt 1 of the cinematic fix series. 10 feature commits + 12 preflight stability commits. All 16/16 routes passing. Branch: `main`.

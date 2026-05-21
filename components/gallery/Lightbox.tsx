@@ -5,6 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Project } from "@/lib/constants";
 
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
+
 interface LightboxProps {
   project: Project | null;
   onClose: () => void;
@@ -113,6 +120,11 @@ export default function Lightbox({ project, onClose }: LightboxProps) {
                     src={images[safeActiveIndex] ?? project.image}
                     alt={`${project.title} image ${safeActiveIndex + 1}`}
                     fill
+                    loading="eager"
+                    fetchPriority="high"
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    onError={imgError}
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, 82vw"
                   />
@@ -175,6 +187,10 @@ export default function Lightbox({ project, onClose }: LightboxProps) {
                         src={image}
                         alt=""
                         fill
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL={BLUR_PLACEHOLDER}
+                        onError={imgError}
                         className="object-cover"
                         sizes="96px"
                       />

@@ -2,6 +2,14 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-05-20 — Mobile polish + image loading hardening verified
+
+- Header/footer mobile tap targets tightened for the phone link, menu button, footer links, and footer contact CTA.
+- Services and service-detail mobile spacing reduced to avoid oversized stacked cards and dead space.
+- Home services preview card heights/type scales tuned for 390px mobile widths while retaining the desktop V2.5 layout.
+- Portfolio, lightbox, services, home services preview, and contact images now use blur placeholders, eager/priority loading for above-fold imagery, and graceful image-error opacity handling.
+- `npm run lint`, `npx tsc --noEmit --pretty false`, `npm run build`, and `npm run preflight:full` pass. Latest full report: `.claude-work/preflight/2026-05-20-19-55/report.json`.
+
 ## 2026-05-06 — V2 full rebuild + V2.5 elevation + Homepage Cinematic Overhaul
 
 ### Phase 0 — Context rewire

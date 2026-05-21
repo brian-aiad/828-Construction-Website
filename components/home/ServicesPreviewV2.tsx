@@ -29,6 +29,13 @@ const SERVICE_TAGLINES: Record<string, string> = {
   consulting: "Clarity before commitment.",
 };
 
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
+
 export default function ServicesPreviewV2() {
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -148,13 +155,13 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-black py-20 lg:py-28"
+      className="relative overflow-hidden bg-black py-16 lg:py-28"
       data-section="services-v2"
     >
       <DraftingMotionLayer intensity="standard" className="opacity-35" />
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section header */}
-        <div className="mb-10 grid gap-8 lg:mb-14 lg:grid-cols-[0.92fr_1fr] lg:items-end">
+        <div className="mb-8 grid gap-6 lg:mb-14 lg:grid-cols-[0.92fr_1fr] lg:items-end lg:gap-8">
           <div>
             <p className="font-labels text-[10px] text-white/40 tracking-[0.25em] uppercase mb-3">
               What we build
@@ -164,8 +171,8 @@ export default function ServicesPreviewV2() {
               Three disciplines.<br className="hidden lg:block" /> One standard.
             </h2>
           </div>
-          <div className="max-w-xl border-l border-white/10 pl-6 lg:justify-self-end lg:pl-8">
-            <p className="font-body text-base leading-relaxed text-white/58 lg:text-lg">
+          <div className="max-w-xl border-l border-white/10 pl-5 lg:justify-self-end lg:pl-8">
+            <p className="font-body text-sm leading-6 text-white/58 sm:text-base lg:text-lg lg:leading-relaxed">
               A premium build starts before the first cut. 828 combines field
               knowledge, planning discipline, and clean execution across the
               work that matters most to South Bay homeowners.
@@ -189,8 +196,8 @@ export default function ServicesPreviewV2() {
               cardRefs.current[0] = el;
               tilt0Ref.current = el;
             }}
-            className="relative group overflow-hidden cursor-pointer"
-            style={{ minHeight: "clamp(360px, 60vh, 600px)", transformStyle: "preserve-3d", willChange: "transform" }}
+            className="relative group min-h-[21rem] overflow-hidden cursor-pointer sm:min-h-[24rem] lg:min-h-[clamp(360px,60vh,600px)]"
+            style={{ transformStyle: "preserve-3d", willChange: "transform" }}
             data-gsap-reveal="true"
           >
             <Link href={`/services/${adu.slug}`} className="absolute inset-0 z-20" aria-label={adu.title} />
@@ -199,7 +206,11 @@ export default function ServicesPreviewV2() {
                 src={SERVICE_IMAGES[adu.slug]}
                 alt={adu.title}
                 fill
+                loading="lazy"
                 sizes="(max-width: 1024px) 100vw, 60vw"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
+                onError={imgError}
                 className="object-cover"
                 style={{ filter: "contrast(1.05) saturate(1.08)" }}
               />
@@ -213,12 +224,12 @@ export default function ServicesPreviewV2() {
               aria-hidden="true"
             />
 
-            <div className="svc-card-copy absolute bottom-0 left-0 right-0 p-6 lg:p-8 z-10">
+            <div className="svc-card-copy absolute bottom-0 left-0 right-0 z-10 p-5 lg:p-8">
               <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-2">
                 {adu.short}
               </p>
               <h3 className="font-editorial font-semibold text-white tracking-normal mb-2"
-                style={{ fontSize: "clamp(1.4rem, 2.8vw, 2.2rem)" }}>
+                style={{ fontSize: "clamp(1.55rem, 7vw, 2.2rem)" }}>
                 {adu.title}
               </h3>
               <p className="font-body text-white/55 text-sm leading-relaxed max-w-xs">
@@ -236,8 +247,8 @@ export default function ServicesPreviewV2() {
                 cardRefs.current[1] = el;
                 tilt1Ref.current = el;
               }}
-              className="relative group overflow-hidden cursor-pointer flex-1"
-              style={{ minHeight: "clamp(180px, 28vh, 290px)", transformStyle: "preserve-3d", willChange: "transform" }}
+              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(180px,28vh,290px)]"
+              style={{ transformStyle: "preserve-3d", willChange: "transform" }}
               data-gsap-reveal="true"
             >
               <Link href={`/services/${remediation.slug}`} className="absolute inset-0 z-20" aria-label={remediation.title} />
@@ -246,7 +257,11 @@ export default function ServicesPreviewV2() {
                   src={SERVICE_IMAGES[remediation.slug]}
                   alt={remediation.title}
                   fill
+                  loading="lazy"
                   sizes="(max-width: 1024px) 100vw, 40vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
                   className="object-cover"
                   style={{ filter: "contrast(1.05) saturate(1.08)" }}
                 />
@@ -257,12 +272,12 @@ export default function ServicesPreviewV2() {
                 style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
                 aria-hidden="true"
               />
-              <div className="svc-card-copy absolute bottom-0 left-0 right-0 p-5 lg:p-6 z-10">
+              <div className="svc-card-copy absolute bottom-0 left-0 right-0 z-10 p-5 lg:p-6">
                 <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
                   {remediation.short}
                 </p>
                 <h3 className="font-editorial font-semibold text-white tracking-normal"
-                  style={{ fontSize: "clamp(1.2rem, 2.2vw, 1.8rem)" }}>
+                  style={{ fontSize: "clamp(1.35rem, 6vw, 1.8rem)" }}>
                   {remediation.title}
                 </h3>
                 <p className="font-body text-white/50 text-xs leading-relaxed mt-1">
@@ -277,8 +292,8 @@ export default function ServicesPreviewV2() {
                 cardRefs.current[2] = el;
                 tilt2Ref.current = el;
               }}
-              className="relative group overflow-hidden cursor-pointer flex-1"
-              style={{ minHeight: "clamp(180px, 28vh, 290px)", transformStyle: "preserve-3d", willChange: "transform" }}
+              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(180px,28vh,290px)]"
+              style={{ transformStyle: "preserve-3d", willChange: "transform" }}
               data-gsap-reveal="true"
             >
               <Link href={`/services/${consulting.slug}`} className="absolute inset-0 z-20" aria-label={consulting.title} />
@@ -287,7 +302,11 @@ export default function ServicesPreviewV2() {
                   src={SERVICE_IMAGES[consulting.slug]}
                   alt={consulting.title}
                   fill
+                  loading="lazy"
                   sizes="(max-width: 1024px) 100vw, 40vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
                   className="object-cover"
                   style={{ filter: "contrast(1.05) saturate(1.08)" }}
                 />
@@ -298,12 +317,12 @@ export default function ServicesPreviewV2() {
                 style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
                 aria-hidden="true"
               />
-              <div className="svc-card-copy absolute bottom-0 left-0 right-0 p-5 lg:p-6 z-10">
+              <div className="svc-card-copy absolute bottom-0 left-0 right-0 z-10 p-5 lg:p-6">
                 <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
                   {consulting.short}
                 </p>
                 <h3 className="font-editorial font-semibold text-white tracking-normal"
-                  style={{ fontSize: "clamp(1.2rem, 2.2vw, 1.8rem)" }}>
+                  style={{ fontSize: "clamp(1.35rem, 6vw, 1.8rem)" }}>
                   {consulting.title}
                 </h3>
                 <p className="font-body text-white/50 text-xs leading-relaxed mt-1">
