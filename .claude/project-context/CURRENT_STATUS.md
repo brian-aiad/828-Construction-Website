@@ -2,6 +2,17 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Push + Local Cleanup Handoff (2026-05-26)
+
+Requested action was `PUSH AND CLEAN`. No source changes were pending at the start. `git push` ran the repo pre-push gate, which performed a full production build and route audit; all 16 desktop/mobile route checks plus nav/SplitType cleanup and hard-refresh stability passed.
+
+- Latest pushed commit before notes: `44ae824 chore: update preflight marker`
+- Latest preflight report: `.claude-work/preflight/2026-05-26-21-09/report.json`
+- Verification from push hook: `npm run preflight:full` equivalent, 16/16 route checks passing
+- Safe local cleanup performed: removed `.next`, server logs, Playwright report/output, and TypeScript build info; did not remove `.env.local`, `node_modules`, source files, docs, or client assets
+- Local servers on `3001`, `4000`, `4001`, and `4028` were stopped after cleanup
+- Working tree was clean and `main` matched `origin/main` after pushing the updated preflight marker
+
 ## Sitewide Cleanup + Production QA (2026-05-21)
 
 All public routes were visually reviewed at desktop and mobile, portfolio imagery was pulled back from generated-looking live project slots, page metadata titles were normalized, and about-page mid-scroll image loading was hardened.

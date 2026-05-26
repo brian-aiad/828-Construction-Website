@@ -2,6 +2,13 @@
 
 _Add todos here. Remove when done. Date all entries._
 
+## Next AI Handoff Notes (2026-05-26)
+
+- The repo was pushed and locally cleaned on 2026-05-26. Do not assume `.next`, server logs, or prior Playwright output still exist locally.
+- Use `npm run dev` / `npm run dev:3001` to restart local review at `http://localhost:3001`.
+- If you need a production QA server, rebuild first (`npm run build`) and use `next start` on the expected QA port.
+- Do not run blanket `git clean -X` in this repo without reviewing the dry run; it includes `.env.local` and `node_modules`.
+
 ## Blocked on Client (Joe P)
 
 - Real project photography — ADU at-night hero (Joe was sending via text during V2 call), photographer shots mid-May

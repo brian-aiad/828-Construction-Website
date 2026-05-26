@@ -2,6 +2,16 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-05-26 — Push and local cleanup handoff
+
+- Confirmed `main` was aligned with `origin/main` before cleanup; no source edits were pending.
+- Ran `git push`, which triggered the full pre-push production preflight. Build succeeded and all 16 route/viewport checks passed, including nav/SplitType cleanup and hard-refresh stability.
+- Pushed the hook-updated `.preflight-passed` marker as `44ae824 chore: update preflight marker`.
+- Removed safe generated local clutter: `.next`, server logs, Playwright report/output, and `tsconfig.tsbuildinfo`.
+- Avoided blanket `git clean -X` because the dry run included important ignored files such as `.env.local` and `node_modules`.
+- Stopped local servers on ports `3001`, `4000`, `4001`, and `4028`.
+- End state before this note commit: clean working tree, `main...origin/main`, latest preflight report `.claude-work/preflight/2026-05-26-21-09/report.json`.
+
 ## 2026-05-21 — Sitewide cleanup, image credibility pass, and full QA
 
 - Visually reviewed every public route at desktop and mobile, including legacy `/process` and `/projects` redirects into `/portfolio`.
