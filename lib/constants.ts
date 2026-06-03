@@ -128,7 +128,7 @@ export const ACCENTS = {
 export const ACCENT_PRIMARY = ACCENTS.maroon.DEFAULT;
 
 // ── Project types ─────────────────────────────────────────────────────────
-export type ProjectCategory = "ADU Construction" | "Remediation" | "Consulting";
+export type ProjectCategory = "Bath Remodel" | "ADU Construction" | "Remediation" | "Consulting";
 
 export interface Project {
   id: number;
@@ -142,53 +142,102 @@ export interface Project {
   /** Optional additional images for lightbox */
   images?: string[];
   featured?: boolean;
+  /** True when the project has an image strong enough for the portfolio hero grid */
+  heroReady?: boolean;
+  /** Lower values appear earlier in the portfolio hero grid */
+  portfolioRank?: number;
   /** True if image is a temporary stock photo pending replacement */
   tempPhoto?: boolean;
 }
 
 const PROJECT_GALLERIES = {
+  cerritosResidence: [
+    "/images/projects/cerritos-residence/02-2132.jpg",
+    "/images/projects/cerritos-residence/03-2077.jpg",
+    "/images/projects/cerritos-residence/07-2082.jpg",
+    "/images/projects/cerritos-residence/08-2085.jpg",
+    "/images/projects/cerritos-residence/25-2127.jpg",
+    "/images/projects/cerritos-residence/26-2128.jpg",
+    "/images/projects/cerritos-residence/21-2088.jpg",
+    "/images/projects/cerritos-residence/20-2083.jpg",
+    "/images/projects/cerritos-residence/06-2062.jpg",
+    "/images/projects/cerritos-residence/04-2070.jpg",
+    "/images/projects/cerritos-residence/05-2069.jpg",
+    "/images/projects/cerritos-residence/12-2150.jpg",
+    "/images/projects/cerritos-residence/28-2146.jpg",
+    "/images/projects/cerritos-residence/27-2141.jpg",
+    "/images/projects/cerritos-residence/10-2138.jpg",
+    "/images/projects/cerritos-residence/11-2144.jpg",
+    "/images/projects/cerritos-residence/17-2063.jpg",
+    "/images/projects/cerritos-residence/18-2064.jpg",
+    "/images/projects/cerritos-residence/15-2169.jpg",
+    "/images/projects/cerritos-residence/30-2160.jpg",
+    "/images/projects/cerritos-residence/31-2161.jpg",
+    "/images/projects/cerritos-residence/33-2164.jpg",
+    "/images/projects/cerritos-residence/13-2110.jpg",
+    "/images/projects/cerritos-residence/14-2115.jpg",
+    "/images/projects/cerritos-residence/16-2182.jpg",
+    "/images/projects/cerritos-residence/35-2186.jpg",
+  ],
+  tustinResidence: [
+    "/images/projects/tustin-residence/02-1905.jpg",
+    "/images/projects/tustin-residence/25-1889.jpg",
+    "/images/projects/tustin-residence/03-1893.jpg",
+    "/images/projects/tustin-residence/04-1838.jpg",
+    "/images/projects/tustin-residence/05-1845.jpg",
+    "/images/projects/tustin-residence/08-1900.jpg",
+    "/images/projects/tustin-residence/10-1928.jpg",
+    "/images/projects/tustin-residence/11-1933.jpg",
+    "/images/projects/tustin-residence/09-1909.jpg",
+    "/images/projects/tustin-residence/13-1947.jpg",
+    "/images/projects/tustin-residence/12-1940.jpg",
+    "/images/projects/tustin-residence/14-1951.jpg",
+    "/images/projects/tustin-residence/19-2054.jpg",
+    "/images/projects/tustin-residence/17-2010.jpg",
+    "/images/projects/tustin-residence/15-1974.jpg",
+    "/images/projects/tustin-residence/34-1975.jpg",
+    "/images/projects/tustin-residence/35-1977.jpg",
+    "/images/projects/tustin-residence/07-1852.jpg",
+    "/images/projects/tustin-residence/28-1920.jpg",
+    "/images/projects/tustin-residence/43-2034.jpg",
+    "/images/projects/tustin-residence/36-1978.jpg",
+    "/images/projects/tustin-residence/41-2019.jpg",
+    "/images/projects/tustin-residence/40-2006.jpg",
+  ],
   modernHerringboneBath: [
-    "/images/projects/bathroom-geometric.jpg",
-    "/images/projects/bathroom-led.jpg",
+    "/images/projects/bathroom-herringbone.jpg",
+    "/images/projects/bathroom-shower.jpg",
     "/images/projects/niche-detail.jpg",
-    "/images/projects/bathroom-warm.jpg",
   ],
   geometricFeatureBath: [
-    "/images/projects/bathroom-herringbone.jpg",
+    "/images/projects/bathroom-geometric.jpg",
     "/images/projects/shower-black-fixtures.jpg",
-    "/images/projects/bathroom-led.jpg",
-    "/images/projects/bathroom-warm.jpg",
+    "/images/projects/niche-detail.jpg",
   ],
   southBayOutdoorLiving: [
     "/images/projects/outdoor-patio-pergola.jpg",
     "/images/projects/outdoor-living-editorial.jpg",
-    "/images/projects/adu-exterior.jpg",
   ],
   showerRemediationNicheRebuild: [
-    "/images/projects/bathroom-shower.jpg",
+    "/images/projects/shower-black-fixtures.jpg",
     "/images/projects/waterproofing-membrane.jpg",
-    "/images/projects/remediation-work.jpg",
     "/images/projects/niche-detail.jpg",
   ],
   recessedCeilingLedBath: [
+    "/images/projects/bathroom-led.jpg",
     "/images/projects/bathroom-warm.jpg",
     "/images/projects/bathroom-herringbone.jpg",
-    "/images/projects/bathroom-geometric.jpg",
   ],
   customShowerNicheProgress: [
-    "/images/projects/shower-black-fixtures.jpg",
-    "/images/projects/bathroom-shower.jpg",
-    "/images/projects/waterproofing-membrane.jpg",
+    "/images/projects/niche-detail.jpg",
   ],
   vanityLedStripRenovation: [
+    "/images/projects/bathroom-warm.jpg",
     "/images/projects/bathroom-led.jpg",
-    "/images/projects/bathroom-herringbone.jpg",
-    "/images/projects/bathroom-geometric.jpg",
   ],
   outdoorLivingPoolSurround: [
     "/images/projects/outdoor-patio-pergola.jpg",
-    "/images/projects/adu-exterior.jpg",
-    "/images/projects/adu-exterior-new.jpg",
+    "/images/projects/outdoor-living-editorial.jpg",
   ],
   detachedAduNewConstruction: [
     "/images/projects/adu-construction.jpg",
@@ -214,9 +263,6 @@ const PROJECT_GALLERIES = {
   ],
   prePurchaseStructuralEvaluation: [
     "/images/projects/consulting-blueprints.jpg",
-    "/images/projects/consulting-plans.jpg",
-    "/images/projects/consulting-report.jpg",
-    "/images/projects/consulting-crawlspace.jpg",
   ],
   waterIntrusionRemediation: [
     "/images/projects/remediation-active.jpg",
@@ -228,9 +274,11 @@ const PROJECT_GALLERIES = {
 } as const;
 
 const PROJECT_MAIN_IMAGES = {
+  cerritosResidence: "/images/projects/cerritos-residence/01-2176.jpg",
+  tustinResidence: "/images/projects/tustin-residence/01-1883.jpg",
   modernHerringboneBath: "/images/projects/bathroom-herringbone.jpg",
   geometricFeatureBath: "/images/projects/bathroom-geometric.jpg",
-  southBayOutdoorLiving: "/images/projects/outdoor-living-editorial.jpg",
+  southBayOutdoorLiving: "/images/projects/outdoor-patio-pergola.jpg",
   showerRemediationNicheRebuild: "/images/projects/shower-black-fixtures.jpg",
   recessedCeilingLedBath: "/images/projects/bathroom-led.jpg",
   customShowerNicheProgress: "/images/projects/niche-detail.jpg",
@@ -246,25 +294,53 @@ const PROJECT_MAIN_IMAGES = {
 
 export const PROJECTS: Project[] = [
   {
+    id: 16,
+    title: "Cerritos Residence Bath Remodel",
+    category: "Bath Remodel",
+    location: "Cerritos, CA",
+    spec: "Glass shower enclosure · Dark feature tile · Dual marble vanity · Rain + hand shower",
+    description:
+      "Full master bath remodel in Cerritos: frameless sliding glass shower enclosure, dark vertical tile feature wall, recessed shower niches, dual-sink marble vanity with Pfister brushed-nickel faucets, and LED backlit mirror. Gallery runs from wide room overviews down to millimeter-level fixture details.",
+    image: PROJECT_MAIN_IMAGES.cerritosResidence,
+    images: [PROJECT_MAIN_IMAGES.cerritosResidence, ...PROJECT_GALLERIES.cerritosResidence],
+    featured: true,
+    heroReady: true,
+    portfolioRank: 5,
+  },
+  {
+    id: 17,
+    title: "Tustin Residence Bath Refresh",
+    category: "Bath Remodel",
+    location: "Tustin, CA",
+    spec: "Tub/shower surround · Blue herringbone niche · Barn-door hardware · Wood bath tray",
+    description:
+      "Tustin bathroom remodel across two spaces: light blue soaking tub with ribbed white tile surround and custom blue herringbone-tile recessed niche, plus a second room with white square soaking tub, lit alcove, and wall-mount fixtures. Barn-door sliding hardware throughout. Gallery covers wide room views, fixture details, and material close-ups.",
+    image: PROJECT_MAIN_IMAGES.tustinResidence,
+    images: [PROJECT_MAIN_IMAGES.tustinResidence, ...PROJECT_GALLERIES.tustinResidence],
+    featured: true,
+    heroReady: true,
+    portfolioRank: 6,
+  },
+  {
     id: 1,
     title: "Modern Herringbone Bath Remodel",
-    category: "ADU Construction",
+    category: "Bath Remodel",
     location: "Torrance, CA",
-    spec: "Custom herringbone tile · Wall-mount toilet · Stone accent wall",
+    spec: "Custom herringbone tile · Wall-mount toilet · Recessed niche",
     description:
-      "Full bathroom renovation featuring a floor-to-ceiling herringbone tile shower wall, wall-mounted toilet with in-wall tank, natural stone accent, and recessed niche. A complete gut-and-rebuild executed to the millimeter.",
+      "Bathroom detail set focused on the herringbone shower wall, recessed niche, wall-mounted toilet, and clean compact-room finish work.",
     image: PROJECT_MAIN_IMAGES.modernHerringboneBath,
     images: [PROJECT_MAIN_IMAGES.modernHerringboneBath, ...PROJECT_GALLERIES.modernHerringboneBath],
     featured: true,
   },
   {
     id: 2,
-    title: "Geometric Feature Bath",
-    category: "ADU Construction",
+    title: "Geometric Feature Shower",
+    category: "Bath Remodel",
     location: "Redondo Beach, CA",
     spec: "Geometric tile · Matte black fixtures · Glass partition",
     description:
-      "Bold starburst geometric tile dominates this ADU bathroom — black matte fixtures, frameless glass shower partition, and warm wood vanity. Proof that a small space can have maximum personality.",
+      "Compact bath detail set centered on the geometric tile wall, matte black shower hardware, and clean glass partition line.",
     image: PROJECT_MAIN_IMAGES.geometricFeatureBath,
     images: [PROJECT_MAIN_IMAGES.geometricFeatureBath, ...PROJECT_GALLERIES.geometricFeatureBath],
   },
@@ -275,30 +351,32 @@ export const PROJECTS: Project[] = [
     location: "South Bay, CA",
     spec: "Pergola · Pool deck · Custom wood decking",
     description:
-      "Luxury outdoor living space built around an existing pool — custom wood deck, pergola with pendant lighting, and seamless indoor-outdoor flow. Designed for California life, built to last decades.",
+      "Outdoor living scope built around a pool edge: custom deck surface, pergola structure, pendant lighting, and warm material detailing.",
     image: PROJECT_MAIN_IMAGES.southBayOutdoorLiving,
     images: [PROJECT_MAIN_IMAGES.southBayOutdoorLiving, ...PROJECT_GALLERIES.southBayOutdoorLiving],
     featured: true,
+    heroReady: true,
+    portfolioRank: 1,
   },
   {
     id: 4,
     title: "Shower Remediation & Niche Rebuild",
     category: "Remediation",
     location: "Torrance, CA",
-    spec: "Waterproofing · Dual shower heads · Herringbone niche",
+    spec: "Waterproofing · Dual shower heads · Recessed niche",
     description:
-      "Shower torn out to the studs — improper waterproofing removed, rebuilt to code, large-format white tile installed with a custom herringbone-tile niche and dual shower system. The kind of work that fixes it right.",
+      "Shower scope focused on the finished shower hardware, niche detail, and waterproofing layer instead of mixing in unrelated room photography.",
     image: PROJECT_MAIN_IMAGES.showerRemediationNicheRebuild,
     images: [PROJECT_MAIN_IMAGES.showerRemediationNicheRebuild, ...PROJECT_GALLERIES.showerRemediationNicheRebuild],
   },
   {
     id: 5,
     title: "Recessed Ceiling & LED Bath",
-    category: "ADU Construction",
+    category: "Bath Remodel",
     location: "Manhattan Beach, CA",
-    spec: "Tile ceiling · LED downlights · Copper sconce",
+    spec: "Tile ceiling · LED downlights · Warm wall lighting",
     description:
-      "Contemporary bathroom with a fully tiled coffered ceiling, recessed LED downlights, and a warm copper wall sconce. Every surface considered — part of a larger ADU build for a long-term rental portfolio.",
+      "Contemporary bathroom detail set with a tiled ceiling plane, recessed lighting, warm wall glow, and restrained finish palette.",
     image: PROJECT_MAIN_IMAGES.recessedCeilingLedBath,
     images: [PROJECT_MAIN_IMAGES.recessedCeilingLedBath, ...PROJECT_GALLERIES.recessedCeilingLedBath],
   },
@@ -309,18 +387,18 @@ export const PROJECTS: Project[] = [
     location: "Torrance, CA",
     spec: "Microcement finish · Recessed niche · Dark tile ceiling",
     description:
-      "Mid-project documentation of a precision shower niche in microcement finish — dark tile ceiling contrasts the light walls. This is what the work looks like before the glamour shot. Detail-first, always.",
+      "Single-photo field record of the in-progress recessed shower niche. This gallery intentionally stays limited to the niche instead of mixing in unrelated shower photos.",
     image: PROJECT_MAIN_IMAGES.customShowerNicheProgress,
     images: [PROJECT_MAIN_IMAGES.customShowerNicheProgress, ...PROJECT_GALLERIES.customShowerNicheProgress],
   },
   {
     id: 7,
     title: "Vanity & LED Strip Renovation",
-    category: "ADU Construction",
+    category: "Bath Remodel",
     location: "South Bay, CA",
     spec: "LED strip lighting · Warm ambiance · Wood plank floor",
     description:
-      "Bathroom renovation focused on atmosphere — LED strip lighting under the vanity shelf creates warm, indirect glow. Wood plank flooring and clean white walls complete a space designed for long-term comfort.",
+      "Bathroom renovation focused on atmosphere: indirect LED strip lighting, warm wall tone, and simple finish details for a compact bath.",
     image: PROJECT_MAIN_IMAGES.vanityLedStripRenovation,
     images: [PROJECT_MAIN_IMAGES.vanityLedStripRenovation, ...PROJECT_GALLERIES.vanityLedStripRenovation],
   },
@@ -329,12 +407,13 @@ export const PROJECTS: Project[] = [
     title: "Outdoor Living & Pool Surround",
     category: "ADU Construction",
     location: "Torrance, CA",
-    spec: "Teak decking · Pergola · Woven pendant lighting · Pool surround",
+    spec: "Decking · Pergola · Pendant lighting · Pool surround",
     description:
-      "Full outdoor living transformation — custom teak deck, pergola with statement woven pendants, and a complete pool surround redesign. The kind of project where every material decision matters for long-term performance outdoors.",
+      "Outdoor living transformation with a custom deck, pergola, and pool surround composition. Kept to exterior photos so the gallery reads as one project type.",
     image: PROJECT_MAIN_IMAGES.outdoorLivingPoolSurround,
     images: [PROJECT_MAIN_IMAGES.outdoorLivingPoolSurround, ...PROJECT_GALLERIES.outdoorLivingPoolSurround],
-    featured: true,
+    featured: false,
+    tempPhoto: true,
   },
   {
     id: 12,
@@ -347,6 +426,8 @@ export const PROJECTS: Project[] = [
     image: PROJECT_MAIN_IMAGES.detachedAduNewConstruction,
     images: [PROJECT_MAIN_IMAGES.detachedAduNewConstruction, ...PROJECT_GALLERIES.detachedAduNewConstruction],
     featured: true,
+    heroReady: true,
+    portfolioRank: 2,
   },
   {
     id: 13,
@@ -359,6 +440,8 @@ export const PROJECTS: Project[] = [
     image: PROJECT_MAIN_IMAGES.garageConversionGlassEntryAdu,
     images: [PROJECT_MAIN_IMAGES.garageConversionGlassEntryAdu, ...PROJECT_GALLERIES.garageConversionGlassEntryAdu],
     featured: true,
+    heroReady: true,
+    portfolioRank: 3,
   },
   {
     id: 14,
@@ -383,6 +466,7 @@ export const PROJECTS: Project[] = [
     image: PROJECT_MAIN_IMAGES.foundationNewAduConstruction,
     images: [PROJECT_MAIN_IMAGES.foundationNewAduConstruction, ...PROJECT_GALLERIES.foundationNewAduConstruction],
     featured: false,
+    tempPhoto: true,
   },
   {
     id: 9,
@@ -394,6 +478,7 @@ export const PROJECTS: Project[] = [
       "Pre-purchase consulting for a $1.4M investment property. Identified 11 hidden defects, reviewed contractor bids, and delivered a written feasibility analysis. Client negotiated $80K off the purchase price.",
     image: PROJECT_MAIN_IMAGES.prePurchaseStructuralEvaluation,
     images: [PROJECT_MAIN_IMAGES.prePurchaseStructuralEvaluation, ...PROJECT_GALLERIES.prePurchaseStructuralEvaluation],
+    tempPhoto: true,
   },
   {
     id: 10,
@@ -405,6 +490,7 @@ export const PROJECTS: Project[] = [
       "Chronic water intrusion traced to failed flashing and improper window installation — not a roofing issue as originally diagnosed. Scope rebuilt correctly, structure dried, and building envelope sealed. No recurrence.",
     image: PROJECT_MAIN_IMAGES.waterIntrusionRemediation,
     images: [PROJECT_MAIN_IMAGES.waterIntrusionRemediation, ...PROJECT_GALLERIES.waterIntrusionRemediation],
+    tempPhoto: true,
   },
 ];
 

@@ -129,7 +129,7 @@ export default function SplashScreen() {
       }} />
 
       {/* wordmark */}
-      <div style={{
+      <div className="splash-wordmark" style={{
         position: "relative",
         display: "flex", alignItems: "baseline", gap: "0.18em",
         fontFamily: "var(--font-space-grotesk), sans-serif",
@@ -182,6 +182,7 @@ export default function SplashScreen() {
       {/* quiet tagline that fades in during hold */}
       <span
         ref={taglineRef}
+        className="splash-tagline"
         aria-hidden="true"
         style={{
           fontFamily: "var(--font-space-mono), monospace",
@@ -198,6 +199,7 @@ export default function SplashScreen() {
       <button
         onClick={skip}
         aria-label="Skip intro"
+        className="splash-skip"
         style={{
           position: "absolute", bottom: "2rem", right: "2rem",
           fontFamily: "var(--font-space-mono), monospace",

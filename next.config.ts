@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  images: {
+    formats: ["image/webp", "image/avif"],
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    qualities: [75, 88, 92],
+    minimumCacheTTL: 31536000,
+  },
   // TypeScript check is already verified via npx tsc --noEmit in CI.
   // Skipping the redundant build-time check avoids OOM crashes on Windows
   // when the build runs inside the git pre-push hook environment.

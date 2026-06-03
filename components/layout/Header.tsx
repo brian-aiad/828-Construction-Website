@@ -98,7 +98,7 @@ export default function Header() {
             : "bg-black/90 backdrop-blur-xl border-b border-white/10"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex items-center justify-between h-18 lg:h-22">
             {/* Logo */}
             <Link
@@ -294,10 +294,10 @@ export default function Header() {
             </div>
 
             {/* Mobile: phone + hamburger */}
-            <div className="flex lg:hidden items-center gap-5">
+            <div className="flex lg:hidden items-center gap-3 sm:gap-5">
               <a
                 href={SITE.phoneHref}
-                className="inline-flex min-h-11 items-center font-numbers text-xs text-gray-400 transition-colors hover:text-white"
+                className="inline-flex min-h-11 items-center font-numbers text-[11px] text-gray-400 transition-colors hover:text-white sm:text-xs"
               >
                 {SITE.phone}
               </a>

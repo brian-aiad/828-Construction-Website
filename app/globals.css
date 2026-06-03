@@ -30,6 +30,34 @@
   [data-service] {
     min-height: auto !important;
   }
+
+  .splash-wordmark {
+    max-width: calc(100vw - 2rem);
+    justify-content: center;
+    font-size: clamp(2.05rem, 9.3vw, 2.7rem) !important;
+    gap: 0.16em !important;
+    letter-spacing: -0.015em !important;
+  }
+
+  .splash-tagline {
+    max-width: calc(100vw - 2rem);
+    text-align: center;
+    line-height: 1.55 !important;
+    letter-spacing: 0.16em !important;
+    color: rgba(255, 255, 255, 0.38) !important;
+  }
+
+  .splash-tagline::before {
+    font-size: clamp(0.64rem, 2.8vw, 0.82rem) !important;
+  }
+
+  .splash-skip {
+    right: 1rem !important;
+    bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 10px !important;
+  }
 }
 
 @theme inline {
@@ -70,6 +98,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
   overscroll-behavior-x: none;
+}
+
+.splash-tagline {
+  font-size: 0 !important;
+}
+
+.splash-tagline::before {
+  content: "Torrance / CA / Since 2004";
+  font-size: clamp(0.48rem, 0.9vw, 0.68rem);
 }
 
 img,
@@ -155,6 +192,18 @@ textarea {
 .ken-burns-img {
   animation: kenBurns 18s ease-in-out infinite alternate;
 }
+
+/* Lightbox directional Ken Burns — restarts per image via React key */
+@keyframes kenBurnsL {
+  0%   { transform: scale(1.0) translate(0, 0); }
+  100% { transform: scale(1.055) translate(-1.2%, -0.6%); }
+}
+@keyframes kenBurnsR {
+  0%   { transform: scale(1.0) translate(0, 0); }
+  100% { transform: scale(1.055) translate(1.2%, 0.6%); }
+}
+.lb-ken-l { animation: kenBurnsL 14s ease-in-out forwards; }
+.lb-ken-r { animation: kenBurnsR 14s ease-in-out forwards; }
 
 /* ── Contact form checkmark draw animation ──────────────────────────────── */
 @keyframes drawCircle {

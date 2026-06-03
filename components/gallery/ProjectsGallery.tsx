@@ -17,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORIES: ("ALL" | ProjectCategory)[] = [
   "ALL",
+  "Bath Remodel",
   "ADU Construction",
   "Remediation",
   "Consulting",
