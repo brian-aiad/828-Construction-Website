@@ -1,8 +1,13 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/constants";
 
 export default function VerticalBrandMark() {
+  const pathname = usePathname();
+  // Removed from the home hero per client review (round 1). Other routes unchanged.
+  if (pathname === "/") return null;
+
   return (
     <div
       aria-hidden="true"

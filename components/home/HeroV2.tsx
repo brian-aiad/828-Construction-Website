@@ -5,11 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { useMagnetic } from "@/lib/hooks/useMagnetic";
-import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,19 +17,14 @@ export default function HeroV2() {
   const imageRef = useRef<HTMLDivElement>(null);
   const veilRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
   const licenseRef = useRef<HTMLDivElement>(null);
-  const splitRef = useRef<SplitType | null>(null);
-  const splitFrameRef = useRef(-1);
   const magneticRef = useMagnetic(0.45) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     const section = sectionRef.current;
-    const headlineEl = headlineRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
@@ -39,38 +32,15 @@ export default function HeroV2() {
         eyebrowRef.current,
         subRef.current,
         ctaRef.current,
-        lineRef.current,
         licenseRef.current,
       ].filter(Boolean) as HTMLElement[];
 
       gsap.set(revealEls, { y: 22, opacity: 0 });
-      if (headlineRef.current) gsap.set(headlineRef.current, { opacity: 1 });
 
       if (!AnimationController.shouldAnimate()) {
         gsap.set(revealEls, { y: 0, opacity: 1 });
         return;
       }
-
-      splitFrameRef.current = requestAnimationFrame(() => {
-        if (!headlineRef.current?.isConnected) return;
-        splitRef.current = new SplitType(headlineRef.current, {
-          types: "words,chars",
-        });
-
-        gsap.fromTo(
-          splitRef.current.chars ?? [],
-          { yPercent: 112, opacity: 0, rotationX: 54 },
-          {
-            yPercent: 0,
-            opacity: 1,
-            rotationX: 0,
-            stagger: 0.017,
-            duration: 1.05,
-            ease: "power4.out",
-            delay: 0.1,
-          }
-        );
-      });
 
       gsap.to(revealEls, {
         y: 0,
@@ -78,7 +48,7 @@ export default function HeroV2() {
         stagger: 0.09,
         duration: 0.85,
         ease: "power3.out",
-        delay: 0.32,
+        delay: 0.2,
       });
 
       if (imageRef.current) {
@@ -142,13 +112,6 @@ export default function HeroV2() {
     }, sectionRef);
 
     return () => {
-      cancelAnimationFrame(splitFrameRef.current);
-      if (splitRef.current && headlineEl?.isConnected) {
-        try {
-          splitRef.current.revert();
-        } catch {}
-      }
-      splitRef.current = null;
       try {
         ctx.revert();
       } catch {}
@@ -185,8 +148,6 @@ export default function HeroV2() {
           }}
         />
 
-        <DraftingMotionLayer intensity="quiet" className="opacity-25" />
-
         <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-14 pt-32 lg:px-12 lg:pb-16">
           <div
             ref={copyRef}
@@ -196,20 +157,10 @@ export default function HeroV2() {
             <div>
               <p
                 ref={eyebrowRef}
-                className="mb-7 font-labels text-[10px] uppercase tracking-[0.28em] text-white/58"
+                className="font-labels uppercase tracking-[0.3em] text-white/72 text-[clamp(0.9rem,1.5vw,1.2rem)]"
               >
                 Torrance / South Bay
               </p>
-
-              <h1
-                ref={headlineRef}
-                className="font-editorial text-[clamp(4.2rem,10vw,10.8rem)] font-semibold leading-[0.78]"
-                style={{ perspective: "1000px" }}
-              >
-                Build your vision.
-              </h1>
-
-              <div ref={lineRef} className="mt-8 h-px w-24 bg-white/38" aria-hidden="true" />
             </div>
 
             <div className="flex max-w-md flex-col gap-7 border-l border-white/12 pl-6 lg:mb-2 lg:pl-8">
@@ -217,8 +168,8 @@ export default function HeroV2() {
                 ref={subRef}
                 className="font-body text-[clamp(1rem,1.35vw,1.18rem)] leading-relaxed text-white/72"
               >
-                ADU construction, remediation, and consulting shaped with
-                discipline from first conversation to final detail.
+                Transforming properties, delivering solutions. 828 Construction
+                is the partner of choice for your next project.
               </p>
 
               <div ref={ctaRef} className="shrink-0">
@@ -227,7 +178,7 @@ export default function HeroV2() {
                     href="/contact"
                     className="btn-shine btn-lift inline-flex items-center justify-center bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black"
                   >
-                    Start a Project
+                    Book Call
                   </Link>
                 </div>
               </div>
