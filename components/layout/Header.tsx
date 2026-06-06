@@ -2,23 +2,19 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SERVICES, SITE } from "@/lib/constants";
-import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [bookCallOpen, setBookCallOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [torTime, setTorTime] = useState("");
   const lastScrollY = useRef(0);
   const pathname = usePathname();
-  const bookCallMagRef = useMagnetic(0.55) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,17 +45,6 @@ export default function Header() {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
-
-  // Close BOOK CALL dropdown when clicking outside it
-  useEffect(() => {
-    if (!bookCallOpen) return;
-    const handler = (e: MouseEvent) => {
-      const el = bookCallMagRef.current;
-      if (el && !el.contains(e.target as Node)) setBookCallOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [bookCallOpen, bookCallMagRef]);
 
   // Live Torrance time — updates every second
   useEffect(() => {
@@ -94,28 +79,24 @@ export default function Header() {
           scrolled
             ? "bg-black/90 backdrop-blur-xl border-b border-white/10"
             : isHome
-            ? "bg-black/40 backdrop-blur-[6px] border-b border-white/5"
+            ? "bg-black/[0.32] backdrop-blur-[6px]"
             : "bg-black/90 backdrop-blur-xl border-b border-white/10"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="flex items-center justify-between h-18 lg:h-22">
-            {/* Logo */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-14 lg:h-16">
+            {/* Logo — text wordmark, uniform weight */}
             <Link
               href="/"
+              aria-label="828 Construction"
               className="flex shrink-0 items-center"
               onClick={() => {
                 if (pathname === "/") window.scrollTo(0, 0);
               }}
             >
-              <Image
-                src="/images/logo/828logo_new_header.png"
-                alt="828 Construction"
-                width={360}
-                height={48}
-                className="h-5 w-auto sm:h-6 lg:h-8 xl:h-9"
-                priority
-              />
+              <span className="font-display font-medium text-white text-[15px] sm:text-base lg:text-lg tracking-[0.14em] whitespace-nowrap">
+                828 CONSTRUCTION
+              </span>
             </Link>
 
             {/* Desktop nav */}
@@ -239,58 +220,13 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Right side: location + timestamp + BOOK CALL asterisk dropdown */}
-            <div className="hidden lg:flex items-center gap-6">
+            {/* Right side: location + timestamp */}
+            <div className="hidden lg:flex items-center">
               {torTime && (
-                <span className="hidden xl:block font-labels text-[9px] text-white/30 tracking-[0.14em] uppercase whitespace-nowrap">
+                <span className="font-labels text-[9px] text-white/30 tracking-[0.14em] uppercase whitespace-nowrap">
                   Torrance · {torTime}
                 </span>
               )}
-              {/* BOOK CALL — asterisk reveals phone number on click */}
-              <div ref={bookCallMagRef} style={{ display: "inline-block" }} className="relative">
-                <button
-                  onClick={() => setBookCallOpen(!bookCallOpen)}
-                  aria-expanded={bookCallOpen}
-                  className="btn-shine book-call-cta flex items-center gap-2 bg-white text-black px-5 py-2.5 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-gray-100 transition-colors duration-200"
-                >
-                  BOOK CALL
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      display: "inline-block",
-                      transition: "transform 0.3s ease",
-                      transform: bookCallOpen ? "rotate(45deg)" : "rotate(0deg)",
-                      fontWeight: 400,
-                      lineHeight: 1,
-                    }}
-                  >
-                    +
-                  </span>
-                </button>
-                {bookCallOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 8px)",
-                      right: 0,
-                      background: "#000",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderTop: `1px solid var(--color-accent)`,
-                      padding: "12px 20px",
-                      animation: "dropReveal 0.35s cubic-bezier(0.16,1,0.3,1) both",
-                      zIndex: 60,
-                      minWidth: "180px",
-                    }}
-                  >
-                    <a
-                      href={SITE.phoneHref}
-                      className="font-numbers text-sm text-white hover:text-gray-300 transition-colors whitespace-nowrap tracking-wide"
-                    >
-                      {SITE.phone}
-                    </a>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Mobile: phone + hamburger */}
@@ -323,27 +259,6 @@ export default function Header() {
                   }`}
                 />
               </button>
-            </div>
-          </div>
-
-          {/* Sub-header marquee strip — always on, below nav row */}
-          <div
-            className="overflow-hidden border-t hidden lg:block"
-            style={{ height: 22, borderColor: "rgba(123,45,38,0.15)", background: "rgba(123,45,38,0.08)" }}
-            aria-hidden="true"
-          >
-            <div
-              style={{ display: "flex", alignItems: "center", width: "max-content", height: "100%", animation: "marqueeScroll 35s linear infinite" }}
-            >
-              {[...Array(2)].map((_, i) => (
-                <span key={i} style={{ display: "flex", alignItems: "center", gap: "2.5rem", paddingRight: "2.5rem" }}>
-                  {["BUILT WITH INTENT", `CA LICENSE #${SITE.license}`, "20+ YRS EXPERIENCE", "828 CONSTRUCTION", "SOUTH BAY NATIVE", "QUALITY OVER QUANTITY"].map((text, j) => (
-                    <span key={j} style={{ fontFamily: "var(--font-space-mono)", fontSize: 9, letterSpacing: "0.18em", color: "var(--color-accent)", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-                      {text}
-                    </span>
-                  ))}
-                </span>
-              ))}
             </div>
           </div>
         </div>
