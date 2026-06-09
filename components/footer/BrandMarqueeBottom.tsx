@@ -7,23 +7,19 @@ const REPETITIONS = 6;
 type BrandMarqueeBottomProps = {
   className?: string;
   itemClassName?: string;
-  separatorClassName?: string;
   compact?: boolean;
   panel?: boolean;
   text?: string;
   color?: string;
-  showSeparator?: boolean;
 };
 
 export default function BrandMarqueeBottom({
   className = "",
   itemClassName = "",
-  separatorClassName = "",
   compact = false,
   panel = false,
   text = "828 CONSTRUCTION · TORRANCE / SOUTH BAY / LA COUNTY ·",
   color = "rgba(255, 255, 255, 0.28)",
-  showSeparator = true,
 }: BrandMarqueeBottomProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const heightClass = panel
@@ -37,8 +33,6 @@ export default function BrandMarqueeBottom({
       ? "clamp(1.25rem, 2.2vw, 2.35rem)"
       : "clamp(1.9rem, 3.6vw, 3.75rem)";
   const paddingClass = panel ? "pr-14" : compact ? "pr-10" : "pr-16";
-  const separatorClass = panel ? "mx-10" : compact ? "mx-7" : "mx-12";
-  const separatorSize = panel ? "0.3rem" : compact ? "0.24rem" : "0.35rem";
 
   const setPaused = (paused: boolean) => {
     if (!trackRef.current) return;
@@ -68,16 +62,6 @@ export default function BrandMarqueeBottom({
             }}
           >
             {text}
-            {showSeparator ? (
-              <span
-                className={`inline-block rounded-full bg-[var(--color-accent)] opacity-60 ${separatorClass} ${separatorClassName}`}
-                style={{
-                  width: separatorSize,
-                  height: separatorSize,
-                  transform: "translateY(-0.4em)",
-                }}
-              />
-            ) : null}
           </span>
         ))}
       </div>

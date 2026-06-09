@@ -45,7 +45,7 @@ export default function Footer() {
 
   return (
     <footer className="relative overflow-hidden bg-black text-white" data-section="footer">
-      <section className="bg-black px-6 pb-14 pt-[4.5rem] md:px-8 md:pb-16 md:pt-[5.5rem] lg:px-14 lg:pb-20 lg:pt-24" data-footer-section="top-band">
+      <section className="bg-black px-6 pb-14 pt-24 md:px-8 md:pb-16 md:pt-28 lg:px-14 lg:pb-20 lg:pt-36" data-footer-section="top-band">
         <div className="grid w-full gap-12 lg:grid-cols-[0.43fr_0.57fr] lg:items-start">
           <div>
             <h2 className="max-w-3xl font-display text-[clamp(3rem,4.05vw,4.1rem)] font-medium leading-[0.92] tracking-normal text-white">
@@ -78,7 +78,7 @@ export default function Footer() {
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="mt-5 block font-display text-[clamp(1.55rem,2.85vw,3.35rem)] font-medium leading-[0.98] text-white/30 transition-colors hover:text-white/62"
+              className="mt-7 block font-display text-[clamp(1.55rem,2.85vw,3.35rem)] font-medium leading-[0.98] text-white/30 transition-colors hover:text-white/62"
             >
               <span className="inline-block">828constructionca</span>
               <span className="inline-block">@gmail.com</span>
@@ -87,7 +87,7 @@ export default function Footer() {
         </div>
       </section>
 
-      <section className="grid min-h-[34rem] grid-cols-1 lg:grid-cols-[4fr_3.3fr_2.7fr]" data-footer-section="panels">
+      <section className="grid min-h-[34rem] grid-cols-1 lg:grid-cols-[10fr_8fr_7fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
           className="group relative min-h-[26rem] overflow-hidden bg-black text-white lg:min-h-[34.4rem]"
@@ -109,7 +109,7 @@ export default function Footer() {
           </div>
         </a>
 
-        <div className="flex min-h-[30rem] flex-col bg-[#e7e7e2] px-7 py-8 text-black md:px-9 lg:min-h-[34.4rem] lg:px-[8vw] lg:py-24">
+        <div className="flex min-h-[30rem] flex-col bg-[#e7e7e2] px-7 py-8 text-black md:px-9 lg:min-h-[34.4rem] lg:px-[5vw] lg:py-24">
           <nav aria-label="Footer navigation" className="mt-4 flex flex-col gap-[0.7rem] lg:mt-10">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
@@ -158,7 +158,6 @@ export default function Footer() {
           <BrandMarqueeBottom
             panel
             color="rgb(0, 0, 0)"
-            showSeparator={false}
             className="mt-auto -mx-7 w-[calc(100%+3.5rem)] translate-y-[0.12rem] md:-mx-9 md:w-[calc(100%+4.5rem)] lg:-mx-[5.2vw] lg:w-[calc(100%+10.4vw)]"
             itemClassName="text-black"
           />

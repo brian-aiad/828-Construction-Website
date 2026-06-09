@@ -40,7 +40,7 @@ export default function SocialIcons() {
             rel="noopener noreferrer"
             className="group inline-flex min-h-11 items-center gap-3 text-white/70 transition-colors duration-300 hover:text-white"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 transition-colors duration-300 group-hover:border-[var(--color-accent)] group-hover:bg-[var(--color-accent)]/10 md:h-9 md:w-9">
+            <span className="flex h-11 w-11 items-center justify-center border border-white/15 transition-colors duration-300 group-hover:border-[var(--color-accent)] group-hover:bg-[var(--color-accent)]/10 md:h-9 md:w-9">
               <span className="block h-4 w-4">{social.icon}</span>
             </span>
             <span className="hidden font-labels text-[10px] uppercase tracking-[0.18em] md:inline">
