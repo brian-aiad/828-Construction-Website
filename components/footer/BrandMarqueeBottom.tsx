@@ -3,13 +3,16 @@
 import { useRef } from "react";
 
 const REPETITIONS = 6;
-const MARQUEE_TEXT = "828 CONSTRUCTION · TORRANCE / SOUTH BAY / LA COUNTY ·";
 
 type BrandMarqueeBottomProps = {
   className?: string;
   itemClassName?: string;
   separatorClassName?: string;
   compact?: boolean;
+  panel?: boolean;
+  text?: string;
+  color?: string;
+  showSeparator?: boolean;
 };
 
 export default function BrandMarqueeBottom({
@@ -17,8 +20,25 @@ export default function BrandMarqueeBottom({
   itemClassName = "",
   separatorClassName = "",
   compact = false,
+  panel = false,
+  text = "828 CONSTRUCTION · TORRANCE / SOUTH BAY / LA COUNTY ·",
+  color = "rgba(255, 255, 255, 0.28)",
+  showSeparator = true,
 }: BrandMarqueeBottomProps) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const heightClass = panel
+    ? "h-[4.3rem]"
+    : compact
+      ? "h-12"
+      : "h-[clamp(4.4rem,9vw,8.4rem)]";
+  const fontSize = panel
+    ? "clamp(2.55rem, 4.25vw, 3.45rem)"
+    : compact
+      ? "clamp(1.25rem, 2.2vw, 2.35rem)"
+      : "clamp(1.9rem, 3.6vw, 3.75rem)";
+  const paddingClass = panel ? "pr-14" : compact ? "pr-10" : "pr-16";
+  const separatorClass = panel ? "mx-10" : compact ? "mx-7" : "mx-12";
+  const separatorSize = panel ? "0.3rem" : compact ? "0.24rem" : "0.35rem";
 
   const setPaused = (paused: boolean) => {
     if (!trackRef.current) return;
@@ -28,7 +48,7 @@ export default function BrandMarqueeBottom({
   return (
     <div
       aria-hidden="true"
-      className={`brand-marquee-bottom relative w-full overflow-hidden motion-reduce:hidden ${compact ? "h-12" : "h-[clamp(4.4rem,9vw,8.4rem)]"} ${className}`}
+      className={`brand-marquee-bottom relative w-full overflow-hidden motion-reduce:hidden ${heightClass} ${className}`}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
     >
@@ -39,23 +59,25 @@ export default function BrandMarqueeBottom({
         {Array.from({ length: REPETITIONS }).map((_, i) => (
           <span
             key={i}
-            className={`inline-flex items-center font-display font-bold uppercase ${compact ? "pr-10" : "pr-16"} ${itemClassName}`}
+            className={`inline-flex items-center font-display font-bold uppercase ${paddingClass} ${itemClassName}`}
             style={{
-              fontSize: compact ? "clamp(1.25rem, 2.2vw, 2.35rem)" : "clamp(1.9rem, 3.6vw, 3.75rem)",
-              color: "rgba(255, 255, 255, 0.28)",
+              fontSize,
+              color,
               letterSpacing: 0,
               lineHeight: 1,
             }}
           >
-            {MARQUEE_TEXT}
-            <span
-              className={`inline-block rounded-full bg-[var(--color-accent)] opacity-60 ${compact ? "mx-7" : "mx-12"} ${separatorClassName}`}
-              style={{
-                width: compact ? "0.24rem" : "0.35rem",
-                height: compact ? "0.24rem" : "0.35rem",
-                transform: "translateY(-0.4em)",
-              }}
-            />
+            {text}
+            {showSeparator ? (
+              <span
+                className={`inline-block rounded-full bg-[var(--color-accent)] opacity-60 ${separatorClass} ${separatorClassName}`}
+                style={{
+                  width: separatorSize,
+                  height: separatorSize,
+                  transform: "translateY(-0.4em)",
+                }}
+              />
+            ) : null}
           </span>
         ))}
       </div>

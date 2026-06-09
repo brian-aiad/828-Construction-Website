@@ -14,9 +14,17 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
+const FOOTER_LINKS = [
+  ...NAV_LINKS,
+  ...SERVICES.map((service) => ({
+    href: `/services/${service.slug}`,
+    label: service.title,
+  })),
+];
+
 const labelClass = "font-labels text-[10px] uppercase tracking-[0.22em]";
 const panelLinkClass =
-  "group relative w-fit font-labels text-[11px] uppercase tracking-[0.16em] text-black/70 transition-colors hover:text-black";
+  "group relative w-fit font-labels text-[11px] uppercase tracking-[0.16em] text-black/72 transition-colors hover:text-black";
 
 function formatPhone(phone: string) {
   const digits = phone.replace(/\D/g, "");
@@ -37,14 +45,14 @@ export default function Footer() {
 
   return (
     <footer className="relative overflow-hidden bg-black text-white" data-section="footer">
-      <section className="bg-black px-6 pb-16 pt-28 md:pb-20 md:pt-32 lg:px-12 lg:pb-24 lg:pt-44" data-footer-section="top-band">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
+      <section className="bg-black px-6 pb-14 pt-[4.5rem] md:px-8 md:pb-16 md:pt-[5.5rem] lg:px-14 lg:pb-20 lg:pt-24" data-footer-section="top-band">
+        <div className="grid w-full gap-12 lg:grid-cols-[0.43fr_0.57fr] lg:items-start">
           <div>
-            <h2 className="max-w-4xl font-display text-[clamp(2.85rem,5.4vw,5.9rem)] font-medium leading-[0.9] tracking-normal text-white">
+            <h2 className="max-w-3xl font-display text-[clamp(3rem,4.05vw,4.1rem)] font-medium leading-[0.92] tracking-normal text-white">
               Quality is the strategy.
             </h2>
 
-            <ul className="mt-8 flex items-center gap-4" aria-label="Social links">
+            <ul className="mt-8 flex items-center gap-5" aria-label="Social links">
               {SOCIAL_LINKS.map((social) => (
                 <li key={social.label}>
                   <a
@@ -52,44 +60,37 @@ export default function Footer() {
                     aria-label={social.label}
                     target={social.href === "#" ? undefined : "_blank"}
                     rel={social.href === "#" ? undefined : "noopener noreferrer"}
-                    className="group flex h-10 w-10 items-center justify-center border border-white/14 text-white/54 transition-colors hover:border-white/34 hover:text-white"
+                    className="group flex h-9 w-9 items-center justify-center text-white/42 transition-colors hover:text-white/72"
                   >
-                    <span className="h-4 w-4">{social.icon}</span>
+                    <span className="h-6 w-6">{social.icon}</span>
                   </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="lg:text-right">
+          <div className="lg:pt-2">
             <a
               href={SITE.phoneHref}
-              className="block font-display text-[clamp(2.15rem,3.7vw,4.2rem)] font-medium leading-[0.95] text-white/34 transition-colors hover:text-white/68"
+              className="block font-display text-[clamp(2.35rem,3.95vw,4.05rem)] font-medium leading-[0.95] text-white/38 transition-colors hover:text-white/68"
             >
               {formattedPhone}
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="mt-3 block font-display text-[clamp(1.22rem,2.55vw,2.95rem)] font-medium leading-[0.98] text-white/28 transition-colors hover:text-white/62"
+              className="mt-5 block font-display text-[clamp(1.55rem,2.85vw,3.35rem)] font-medium leading-[0.98] text-white/30 transition-colors hover:text-white/62"
             >
               <span className="inline-block">828constructionca</span>
               <span className="inline-block">@gmail.com</span>
             </a>
-            <Link
-              href="/contact"
-              className="mt-8 inline-flex w-fit items-center gap-2 border-b border-white/16 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-white/48 transition-colors hover:border-white/50 hover:text-white lg:ml-auto"
-            >
-              Get in touch
-              <span aria-hidden="true">+</span>
-            </Link>
           </div>
         </div>
       </section>
 
-      <section className="grid min-h-[34rem] grid-cols-1 lg:grid-cols-3" data-footer-section="panels">
+      <section className="grid min-h-[34rem] grid-cols-1 lg:grid-cols-[4fr_3.3fr_2.7fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
-          className="group relative flex min-h-[26rem] overflow-hidden bg-black text-white lg:min-h-[38rem]"
+          className="group relative min-h-[26rem] overflow-hidden bg-black text-white lg:min-h-[34.4rem]"
         >
           <Image
             src="/images/generated/footer-consultation-cta.webp"
@@ -100,46 +101,25 @@ export default function Footer() {
             style={{ filter: "contrast(1.04) saturate(0.96) brightness(0.92)" }}
           />
           <div className="absolute inset-0 bg-black/18" aria-hidden="true" />
-          <div className="relative z-10 mt-auto w-full p-7 md:p-9 lg:p-10">
-            <span className="block border-b border-white/58 pb-4 font-display text-[clamp(2.1rem,3.8vw,4.4rem)] font-medium leading-none text-white">
+          <div className="absolute left-0 right-0 top-[62%] z-10 px-7 md:px-9 lg:px-10">
+            <span className="block border-b border-white/62 pb-2 font-display text-[clamp(1.9rem,2.7vw,2.85rem)] font-medium leading-none text-white">
               Book a Call
               <span className="ml-3" aria-hidden="true">→</span>
             </span>
           </div>
         </a>
 
-        <div className="flex min-h-[30rem] flex-col bg-[#e7e7e2] px-7 py-8 text-black md:px-9 lg:min-h-[38rem] lg:p-10">
-          <div className="grid gap-10 sm:grid-cols-2">
-            <nav aria-label="Footer navigation">
-              <p className={`${labelClass} text-black/42`}>Navigate</p>
-              <div className="mt-6 flex flex-col gap-4">
-                {NAV_LINKS.map((link) => (
-                  <Link key={link.href} href={link.href} className={panelLinkClass}>
-                    {link.label}
-                    <Underline />
-                  </Link>
-                ))}
-              </div>
-            </nav>
+        <div className="flex min-h-[30rem] flex-col bg-[#e7e7e2] px-7 py-8 text-black md:px-9 lg:min-h-[34.4rem] lg:px-[8vw] lg:py-24">
+          <nav aria-label="Footer navigation" className="mt-4 flex flex-col gap-[0.7rem] lg:mt-10">
+            {FOOTER_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className={panelLinkClass}>
+                {link.label}
+                <Underline />
+              </Link>
+            ))}
+          </nav>
 
-            <nav aria-label="Footer services">
-              <p className={`${labelClass} text-black/42`}>Services</p>
-              <div className="mt-6 flex flex-col gap-4">
-                {SERVICES.map((service) => (
-                  <Link
-                    key={service.slug}
-                    href={`/services/${service.slug}`}
-                    className={panelLinkClass}
-                  >
-                    {service.title}
-                    <Underline />
-                  </Link>
-                ))}
-              </div>
-            </nav>
-          </div>
-
-          <div className="mt-auto pt-12">
+          <div className="mt-10 lg:mt-auto">
             <p className="font-labels text-[10px] uppercase tracking-[0.18em] text-black/44">
               &copy; {year} 828 Construction
             </p>
@@ -149,39 +129,40 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex min-h-[30rem] flex-col bg-[#f7f7f3] px-7 py-8 text-black md:px-9 lg:min-h-[38rem] lg:p-10">
+        <div className="flex min-h-[30rem] flex-col overflow-hidden bg-[#f7f7f3] px-7 py-8 text-black md:px-9 lg:min-h-[34.4rem] lg:px-[5.2vw] lg:pb-0 lg:pt-24">
           <div>
             <p className={`${labelClass} text-black/42`}>Serving</p>
-            <h3 className="mt-5 font-display text-[clamp(2.4rem,4vw,4.6rem)] font-medium leading-[0.92] text-black">
+            <h3 className="mt-4 font-display text-[clamp(1.6rem,1.45vw,1.75rem)] font-medium leading-tight text-black">
               Torrance, CA
             </h3>
-            <address className="mt-8 not-italic text-sm leading-7 text-black/62">
+            <address className="mt-4 not-italic text-sm leading-6 text-black/72">
               {streetLine}
               <br />
               {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
             </address>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-8">
             <p className={`${labelClass} text-black/42`}>Service Area</p>
-            <p className="mt-4 max-w-md text-sm leading-7 text-black/58">
+            <p className="mt-3 max-w-md text-[13px] leading-6 text-black/62">
               {SITE.serviceArea.join(" / ")}
             </p>
           </div>
 
-          <div className="mt-auto pt-12">
-            <p className="inline-flex border border-[var(--color-accent)]/55 px-4 py-3 font-labels text-[10px] uppercase tracking-[0.18em] text-black/72">
+          <div className="mt-10">
+            <p className="inline-flex border border-[var(--color-accent)]/55 px-4 py-2.5 font-labels text-[10px] uppercase tracking-[0.18em] text-black/72">
               CA License #{SITE.license}
             </p>
           </div>
-        </div>
-      </section>
 
-      <section className="relative overflow-hidden border-t border-white/10 bg-black py-4" data-footer-section="wordmark">
-        <BrandMarqueeBottom
-          itemClassName="text-white/24"
-          separatorClassName="bg-[var(--color-accent)]"
-        />
+          <BrandMarqueeBottom
+            panel
+            color="rgb(0, 0, 0)"
+            showSeparator={false}
+            className="mt-auto -mx-7 w-[calc(100%+3.5rem)] translate-y-[0.12rem] md:-mx-9 md:w-[calc(100%+4.5rem)] lg:-mx-[5.2vw] lg:w-[calc(100%+10.4vw)]"
+            itemClassName="text-black"
+          />
+        </div>
       </section>
     </footer>
   );
