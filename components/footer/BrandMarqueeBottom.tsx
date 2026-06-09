@@ -18,7 +18,7 @@ export default function BrandMarqueeBottom({
   itemClassName = "",
   compact = false,
   panel = false,
-  text = "828 CONSTRUCTION · TORRANCE / SOUTH BAY / LA COUNTY ·",
+  text = "828 CONSTRUCTION",
   color = "rgba(255, 255, 255, 0.28)",
 }: BrandMarqueeBottomProps) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export default function BrandMarqueeBottom({
     : compact
       ? "clamp(1.25rem, 2.2vw, 2.35rem)"
       : "clamp(1.9rem, 3.6vw, 3.75rem)";
-  const paddingClass = panel ? "pr-14" : compact ? "pr-10" : "pr-16";
+  const paddingClass = panel ? "pr-16" : compact ? "pr-10" : "pr-16";
 
   const setPaused = (paused: boolean) => {
     if (!trackRef.current) return;
