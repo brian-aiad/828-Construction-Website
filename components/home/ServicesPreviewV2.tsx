@@ -163,19 +163,16 @@ export default function ServicesPreviewV2() {
         {/* Section header */}
         <div className="mb-8 grid gap-6 lg:mb-14 lg:grid-cols-[0.92fr_1fr] lg:items-end lg:gap-8">
           <div>
-            <p className="font-labels text-[10px] text-white/40 tracking-[0.25em] uppercase mb-3">
-              What we build
-            </p>
             <h2 className="font-editorial font-semibold text-white leading-[0.92]"
               style={{ fontSize: "clamp(3rem, 6vw, 6rem)" }}>
-              Three disciplines.<br className="hidden lg:block" /> One standard.
+              One company,<br className="hidden lg:block" /> <span className="text-white/40">multiple solutions.</span>
             </h2>
           </div>
           <div className="max-w-xl border-l border-white/10 pl-5 lg:justify-self-end lg:pl-8">
             <p className="font-body text-sm leading-6 text-white/58 sm:text-base lg:text-lg lg:leading-relaxed">
-              A premium build starts before the first cut. 828 combines field
-              knowledge, planning discipline, and clean execution across the
-              work that matters most to South Bay homeowners.
+              Whether it&apos;s an ongoing maintenance, essential repairs, or a
+              new ADU. 828 Construction helps homeowners bring their vision to
+              life and keep their homes performing at their best.
             </p>
             <Link
               href="/services"
