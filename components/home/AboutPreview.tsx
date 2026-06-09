@@ -5,43 +5,35 @@ import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
 import { EXPERIENCE_SINCE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
 import { useMagnetic } from "@/lib/hooks/useMagnetic";
-import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
-
-// V3 About Preview — SplitType char clip-reveal on headline + ConstructionLineSilhouette backdrop.
-// Glass/depth overlay per PATTERNS.md to prevent flat look.
-// Pulls from EXPERIENCE_SINCE constant (2004 — Joe's field experience, not company founding).
 
 export default function AboutPreview() {
   const sectionRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
+  const imgInnerRef = useRef<HTMLDivElement>(null);
   const textRefs = useRef<(HTMLElement | null)[]>([]);
   const silhouetteParallaxRef = useRef<HTMLDivElement>(null);
-  const splitRef = useRef<SplitType | null>(null);
-  const splitFrameRef = useRef(-1);
   const ctaMagRef = useMagnetic(0.45) as React.RefObject<HTMLDivElement>;
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-    const headlineEl = textRefs.current[1] as HTMLHeadingElement | null;
+    const headlineEl = textRefs.current[0] as HTMLHeadingElement | null;
 
     const ctx = gsap.context(() => {
-      // Set initial states (Fix 14)
       const textEls = textRefs.current.filter(Boolean) as HTMLElement[];
-      // Exclude headline (index 1) from generic stagger — handled by SplitType below
-      const nonHeadlineEls = textEls.filter((_, i) => i !== 1);
+      const nonHeadlineEls = textEls.filter((_, i) => i !== 0);
       gsap.set(nonHeadlineEls, { y: 24, opacity: 0 });
-      if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(8% 0 8% 0)" });
+      if (headlineEl) gsap.set(headlineEl, { y: 34, opacity: 0, clipPath: "inset(0 0 18% 0)" });
+      if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(8% 8% 8% 0)" });
 
       if (!AnimationController.shouldAnimate()) {
-        gsap.set(textEls, { y: 0, opacity: 1 });
+        gsap.set(textEls, { y: 0, opacity: 1, clipPath: "inset(0%)" });
         if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(0%)" });
         return;
       }
@@ -56,7 +48,6 @@ export default function AboutPreview() {
         });
       }
 
-      // Text reveals scrub-tied per element (non-headline)
       nonHeadlineEls.forEach((el, i) => {
         gsap.to(el, {
           y: 0, opacity: 1,
@@ -64,39 +55,38 @@ export default function AboutPreview() {
           ease: "power3.out",
           scrollTrigger: {
             trigger: el,
-            start: "top 85%",
-            end: "top 55%",
+            start: "top 92%",
+            end: "top 62%",
             scrub: 1.1,
           },
           delay: i * 0.08,
         });
       });
 
-      // Headline SplitType char clip-reveal (curtain wipe, not fade)
       if (headlineEl) {
-        splitFrameRef.current = requestAnimationFrame(() => {
-          if (!headlineEl.isConnected) return;
-          splitRef.current = new SplitType(headlineEl, { types: "chars,words" });
-          const chars = splitRef.current.chars ?? [];
-          gsap.fromTo(chars,
-            { clipPath: "inset(0 100% 0 0)", x: 12 },
-            {
-              clipPath: "inset(0 0% 0 0)",
-              x: 0,
-              stagger: 0.022,
-              duration: 0.85,
-              ease: "power4.out",
-              scrollTrigger: { trigger: headlineEl, start: "top 80%", once: true },
-            }
-          );
-          gsap.set(headlineEl, { opacity: 1 });
+        gsap.to(headlineEl, {
+          y: 0,
+          opacity: 1,
+          clipPath: "inset(0%)",
+          duration: 1,
+          ease: "power4.out",
+          scrollTrigger: { trigger: headlineEl, start: "top 82%", once: true },
         });
       }
 
-      // Silhouette parallax
+      if (imgInnerRef.current) {
+        gsap.to(imgInnerRef.current, {
+          yPercent: -8,
+          scale: 1.04,
+          ease: "none",
+          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.35 },
+        });
+      }
+
       if (silhouetteParallaxRef.current) {
         gsap.to(silhouetteParallaxRef.current, {
-          yPercent: -40,
+          yPercent: -24,
+          rotate: 1.5,
           ease: "none",
           scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.5 },
         });
@@ -104,11 +94,6 @@ export default function AboutPreview() {
     }, sectionRef);
 
     return () => {
-      cancelAnimationFrame(splitFrameRef.current);
-      if (splitRef.current && headlineEl?.isConnected) {
-        try { splitRef.current.revert(); } catch {}
-      }
-      splitRef.current = null;
       try { ctx.revert(); } catch {}
     };
   }, []);
@@ -116,12 +101,10 @@ export default function AboutPreview() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#0a0a0a] overflow-hidden"
-      style={{ minHeight: "min(90vh, 700px)" }}
+      className="relative overflow-hidden bg-[#050505] text-white"
+      style={{ minHeight: "min(100vh, 820px)" }}
       data-section="about-preview"
     >
-      <DraftingMotionLayer intensity="quiet" className="opacity-35" />
-      {/* Glass/depth noise overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
@@ -133,98 +116,89 @@ export default function AboutPreview() {
         }}
       />
 
-      {/* Architectural line silhouette — parallax depth */}
       <div
         ref={silhouetteParallaxRef}
         aria-hidden="true"
-        className="absolute left-[-5%] top-1/2 -translate-y-1/2 pointer-events-none hidden lg:block"
-        style={{ width: "55%", opacity: 0.08, color: "white", zIndex: 1 }}
+        className="pointer-events-none absolute -right-[14%] top-[6%] hidden lg:block"
+        style={{ width: "44rem", opacity: 0.045, color: "white", zIndex: 1 }}
       >
         <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 h-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[min(90vh,700px)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-0 top-0 hidden h-px w-[42vw] origin-left bg-[var(--color-accent)]/55 lg:block"
+      />
 
-          {/* Image side */}
-          <div
-            ref={imgRef}
-            className="relative overflow-hidden order-2 lg:order-1"
-            style={{ aspectRatio: "4/3", clipPath: "inset(0%)" }}
-            data-gsap-reveal="true"
-          >
-            <Image
-              src="/images/generated/home-about-workbench.jpg"
-              alt="828 Construction — craftsmanship"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              style={{
-                filter: "contrast(1.05) saturate(1.08)",
-                objectPosition: "18% center",
-              }}
-            />
-            {/* Est. badge */}
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 lg:px-12 lg:py-32">
+        <div className="grid min-h-[min(82vh,720px)] grid-cols-1 items-center gap-12 lg:grid-cols-[0.72fr_1fr] lg:gap-16">
+          <div className="relative order-2 lg:order-1">
             <div
-              className="absolute top-4 right-4 px-3 py-1.5"
-              style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.6)" }}
+              ref={imgRef}
+              className="relative min-h-[24rem] overflow-hidden border border-white/10 bg-white/[0.025] md:min-h-[34rem] lg:-ml-12 lg:min-h-[42rem]"
+              style={{ clipPath: "inset(0%)" }}
+              data-gsap-reveal="true"
             >
-              <span className="font-labels text-[8px] text-white/50 tracking-[0.22em] uppercase">
-                Since {EXPERIENCE_SINCE}
-              </span>
+              <div ref={imgInnerRef} className="absolute inset-0">
+                <Image
+                  src="/images/generated/home-about-story-editorial.webp"
+                  alt="Architectural plans and finish samples on a residential construction worktable"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  className="object-cover"
+                  style={{
+                    filter: "contrast(1.04) saturate(0.96) brightness(0.94)",
+                    objectPosition: "42% center",
+                  }}
+                />
+              </div>
+              <div className="absolute bottom-0 left-0 h-px w-2/5 bg-[var(--color-accent)]" aria-hidden="true" />
+              <div className="absolute left-5 top-5 border border-white/10 bg-black/56 px-3 py-2 backdrop-blur-sm md:left-7 md:top-7">
+                <span className="font-labels text-[8px] uppercase tracking-[0.22em] text-white/48">
+                  Since {EXPERIENCE_SINCE}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Text side */}
-          <div className="order-1 lg:order-2 flex flex-col justify-center">
-            <p
-              ref={(el) => { textRefs.current[0] = el; }}
-              className="font-labels text-[10px] tracking-[0.25em] uppercase mb-6"
-              style={{ color: "var(--color-accent)", opacity: 0 }}
-            >
-              Our story
-            </p>
-
+          <div className="order-1 flex flex-col justify-center lg:order-2 lg:pl-4">
             <h2
-              ref={(el) => { textRefs.current[1] = el as HTMLElement; }}
-              className="font-editorial font-semibold text-white leading-[0.94] mb-6"
-              style={{ fontSize: "clamp(3rem, 5.2vw, 5.4rem)", opacity: 0 }}
+              ref={(el) => { textRefs.current[0] = el as HTMLElement; }}
+              className="max-w-[10ch] font-editorial text-[clamp(3.2rem,6vw,6.8rem)] font-semibold leading-[0.86] text-white"
+              style={{ opacity: 0 }}
             >
-              Two decades building what others overlook.
+              Refining industry standards.
             </h2>
 
             <p
-              ref={(el) => { textRefs.current[2] = el; }}
-              className="font-body text-white/55 leading-relaxed mb-8"
-              style={{ fontSize: "clamp(0.9rem, 1.3vw, 1rem)", opacity: 0, maxWidth: "42ch" }}
+              ref={(el) => { textRefs.current[1] = el; }}
+              className="mt-7 max-w-xl text-base leading-8 text-white/68 lg:ml-16 lg:text-lg lg:leading-9"
+              style={{ opacity: 0 }}
             >
-              Joe has been in the field since {EXPERIENCE_SINCE} — over two decades of
-              hands-on residential construction experience built working directly alongside
-              skilled tradesmen. That knowledge shapes every 828 decision, from structural
-              integrity to refined finishing details.
+              With more than 20 years of experience across multiple construction trades, 828 Construction brings a comprehensive understanding of the building process. Our mission is to make every project as seamless, effective, and stress-free as possible.
             </p>
 
-            {/* Maroon hairline */}
             <div
-              ref={(el) => { textRefs.current[3] = el; }}
-              style={{ height: 1, background: "var(--color-accent)", opacity: 0.4, width: 48, marginBottom: "2rem" }}
+              ref={(el) => { textRefs.current[2] = el; }}
+              className="mt-7 h-px w-16 bg-[var(--color-accent)]"
+              style={{ opacity: 0.55 }}
               aria-hidden="true"
             />
 
-            {/* Magnetic CTA wrapper */}
-            <div ref={ctaMagRef} style={{ display: "inline-block", alignSelf: "flex-start" }}>
+            <div
+              ref={ctaMagRef}
+              className="mt-7"
+              style={{ display: "inline-block", alignSelf: "flex-start" }}
+            >
               <Link
-                ref={(el) => { textRefs.current[4] = el as HTMLAnchorElement; }}
                 href="/about"
-                className="cta-pulse inline-flex items-center gap-2 font-labels text-[11px] text-white/50 tracking-[0.18em] uppercase hover:text-white transition-colors group border-b border-white/15 hover:border-white/40 pb-1"
-                style={{ opacity: 0 }}
+                className="inline-flex items-center gap-3 bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
               >
                 Learn more
-                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                <span aria-hidden="true">→</span>
               </Link>
             </div>
           </div>
-
         </div>
       </div>
     </section>
