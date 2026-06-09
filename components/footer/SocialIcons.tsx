@@ -1,4 +1,4 @@
-const SOCIAL_LINKS = [
+export const SOCIAL_LINKS = [
   {
     label: "LinkedIn",
     href: "#", // TODO: replace with Joe's actual LinkedIn URL when ready.

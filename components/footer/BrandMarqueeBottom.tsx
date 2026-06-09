@@ -3,6 +3,7 @@
 import { useRef } from "react";
 
 const REPETITIONS = 6;
+const MARQUEE_TEXT = "828 CONSTRUCTION · TORRANCE / SOUTH BAY / LA COUNTY ·";
 
 type BrandMarqueeBottomProps = {
   className?: string;
@@ -27,7 +28,7 @@ export default function BrandMarqueeBottom({
   return (
     <div
       aria-hidden="true"
-      className={`brand-marquee-bottom relative w-full overflow-hidden ${compact ? "h-12" : "h-20"} ${className}`}
+      className={`brand-marquee-bottom relative w-full overflow-hidden motion-reduce:hidden ${compact ? "h-12" : "h-[clamp(4.4rem,9vw,8.4rem)]"} ${className}`}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
     >
@@ -46,7 +47,7 @@ export default function BrandMarqueeBottom({
               lineHeight: 1,
             }}
           >
-            828 Construction
+            {MARQUEE_TEXT}
             <span
               className={`inline-block rounded-full bg-[var(--color-accent)] opacity-60 ${compact ? "mx-7" : "mx-12"} ${separatorClassName}`}
               style={{
