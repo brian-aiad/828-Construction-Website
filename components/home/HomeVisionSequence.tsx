@@ -28,29 +28,10 @@ const processImages = [
   "/images/process/completion-post-construction.jpg",
 ];
 
-const listeningSteps = [
-  {
-    num: "01",
-    title: "Listen",
-    body: "Goals. Site. Timing.",
-  },
-  {
-    num: "02",
-    title: "Measure",
-    body: "Scope. Risk. Access.",
-  },
-  {
-    num: "03",
-    title: "Direct",
-    body: "A clear next step.",
-  },
-];
-
 export default function HomeVisionSequence() {
   const sectionRef = useRef<HTMLElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const trackRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -65,16 +46,12 @@ export default function HomeVisionSequence() {
     const ctx = gsap.context(() => {
       const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
       const introSteps = gsap.utils.toArray<HTMLElement>(".vision-step");
-      const introPhotos = gsap.utils.toArray<HTMLElement>(".vision-photo-frame");
-      const rulerTicks = gsap.utils.toArray<HTMLElement>(".vision-ruler-tick");
       const approachDrift = gsap.utils.toArray<HTMLElement>(".approach-bg-drift");
       const approachRules = gsap.utils.toArray<HTMLElement>(".approach-rule");
       gsap.set(cards, { y: 48, opacity: 0, rotateX: 18 });
-      if (lineRef.current) gsap.set(lineRef.current, { scaleY: 0 });
 
       if (!AnimationController.shouldAnimate()) {
         gsap.set(cards, { y: 0, opacity: 1, rotateX: 0 });
-        if (lineRef.current) gsap.set(lineRef.current, { scaleY: 1 });
         gsap.set(approachRules, { scaleX: 1 });
         return;
       }
@@ -127,47 +104,6 @@ export default function HomeVisionSequence() {
         }
       );
 
-      introPhotos.forEach((photo, index) => {
-        gsap.fromTo(
-          photo,
-          { clipPath: index === 0 ? "inset(0% 0% 16% 0%)" : "inset(16% 0% 0% 0%)", opacity: 0, y: 24 },
-          {
-            clipPath: "inset(0% 0% 0% 0%)",
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            ease: "power3.out",
-            scrollTrigger: { trigger: photo, start: "top 84%", once: true },
-          }
-        );
-
-        const image = photo.querySelector("img");
-        if (image) {
-          gsap.to(image, {
-            yPercent: index === 0 ? -7 : 6,
-            ease: "none",
-            scrollTrigger: { trigger: introRef.current ?? section, start: "top bottom", end: "bottom top", scrub: 1.35 },
-          });
-        }
-      });
-
-      gsap.fromTo(
-        rulerTicks,
-        { opacity: 0.18, x: -6 },
-        {
-          opacity: 1,
-          x: 0,
-          stagger: 0.045,
-          ease: "none",
-          scrollTrigger: {
-            trigger: introRef.current ?? section,
-            start: "top 68%",
-            end: "bottom 35%",
-            scrub: 1.2,
-          },
-        }
-      );
-
       approachDrift.forEach((item, index) => {
         gsap.to(item, {
           xPercent: index % 2 === 0 ? 6 : -5,
@@ -198,19 +134,6 @@ export default function HomeVisionSequence() {
           },
         }
       );
-
-      if (lineRef.current) {
-        gsap.to(lineRef.current, {
-          scaleY: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: introRef.current ?? section,
-            start: "top 68%",
-            end: "bottom 35%",
-            scrub: 1,
-          },
-        });
-      }
 
       gsap.to(cards, {
         y: 0,
@@ -257,17 +180,22 @@ export default function HomeVisionSequence() {
 
   return (
     <section ref={sectionRef} data-section="vision" className="relative overflow-hidden bg-[#050505] text-white">
-      <div className="relative z-10 overflow-hidden px-6 py-24 lg:px-12 lg:py-36">
-        <DraftingMotionLayer
-          intensity="strong"
-          variant="intro"
-          className="hidden lg:block"
+      <div className="relative z-10 overflow-hidden px-6 py-24 lg:min-h-screen lg:px-12 lg:py-36">
+        <Image
+          src="/images/generated/home-process-fireplace-bg.webp"
+          alt=""
+          fill
+          loading="eager"
+          sizes="100vw"
+          className="object-cover object-center"
+          aria-hidden="true"
         />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_26%,rgba(123,45,38,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.035),transparent_55%)]" />
-
-        <div ref={introRef} className="mx-auto max-w-7xl">
-          <div className="relative z-10 grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-start lg:gap-12 xl:gap-16">
-            <div className="relative">
+        <div ref={introRef} className="relative z-10 mx-auto flex min-h-[42rem] max-w-7xl flex-col justify-center lg:min-h-[calc(100vh-18rem)]">
+          <div className="max-w-[43rem]">
+            <div
+              className="bg-black/42 p-5 backdrop-blur-[2px] sm:p-7 lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
+              style={{ textShadow: "0 2px 22px rgba(0,0,0,0.78)" }}
+            >
               <p className="mb-6 font-labels text-[10px] uppercase tracking-[0.28em] text-white/40">
                 Our first step is listening
               </p>
@@ -276,10 +204,13 @@ export default function HomeVisionSequence() {
                 className="max-w-[12ch] break-normal font-editorial text-[clamp(3.15rem,5.35vw,5.9rem)] font-semibold leading-[0.88] [&_.word]:inline-block [&_.word]:whitespace-nowrap"
                 style={{ perspective: "1000px" }}
               >
-                One conversation begins the build.
+                Refining industry standards.
               </h2>
               <p className="mt-7 max-w-md text-base leading-8 text-white/58">
                 A short call to understand the project, the site, and the right next move.
+              </p>
+              <p className="vision-step mt-6 max-w-[36rem] border-l border-[var(--color-accent)]/70 bg-black/38 p-5 pl-6 text-sm leading-7 text-white/76 shadow-[0_18px_70px_rgba(0,0,0,0.32)] backdrop-blur-[2px] sm:text-base sm:leading-8 lg:bg-black/28">
+                Embodying meticulous planning, seamless communication, and unparalleled craftsmanship from the first consultation through post-construction, ensuring every detail exceeds expectation.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <a
@@ -294,87 +225,6 @@ export default function HomeVisionSequence() {
                 >
                   Send project details
                 </Link>
-              </div>
-            </div>
-
-            <div className="grid gap-5 xl:grid-cols-[4.2rem_1fr]">
-              <div className="relative hidden xl:block" aria-hidden="true">
-                <div className="absolute left-5 top-1 h-full w-px bg-white/12" />
-                <div
-                  ref={lineRef}
-                  className="absolute left-5 top-1 h-full w-px origin-top bg-[var(--color-accent)]"
-                />
-                <div className="absolute left-0 top-0 flex h-full flex-col justify-between py-1">
-                  {Array.from({ length: 13 }).map((_, index) => (
-                    <div key={index} className="vision-ruler-tick flex items-center gap-2">
-                      <span className={`h-px bg-white/42 ${index % 3 === 0 ? "w-8" : "w-4"}`} />
-                      {index % 3 === 0 && (
-                        <span className="font-labels text-[8px] uppercase tracking-[0.14em] text-white/24">
-                          {String(index * 4).padStart(2, "0")}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative">
-                <div
-                  aria-hidden="true"
-                  className="vision-step pointer-events-none absolute -right-4 top-8 z-20 hidden w-32 rotate-6 border-y border-white/24 opacity-75 xl:block"
-                  style={{
-                    height: "3.75rem",
-                    background:
-                      "repeating-linear-gradient(90deg, rgba(255,255,255,0.44) 0 1px, transparent 1px 16px, rgba(123,45,38,0.38) 16px 17px, transparent 17px 32px)",
-                  }}
-                >
-                  <span className="absolute left-4 top-1/2 h-7 w-7 -translate-y-1/2 rounded-full border border-white/28" />
-                </div>
-
-                <div className="vision-photo-frame relative min-h-[22rem] overflow-hidden border border-white/10 bg-white/[0.025] shadow-[0_32px_90px_rgba(0,0,0,0.38)] md:min-h-[30rem] xl:min-h-[34rem]">
-                    <Image
-                      src="/images/projects/outdoor-patio-pergola.jpg"
-                      alt="Completed outdoor living project with wood decking, patio cover, and pool"
-                      fill
-                      loading="eager"
-                      sizes="(max-width: 1024px) 100vw, 58vw"
-                      className="object-cover object-center"
-                      style={{ filter: "contrast(1.04) saturate(0.98) brightness(0.94)" }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/42 via-black/8 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/86 via-black/36 to-transparent p-5 md:p-7">
-                      <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/52">
-                        Real project context
-                      </span>
-                      <div className="mt-4 h-px w-full bg-white/12">
-                        <div className="h-px w-2/5 bg-[var(--color-accent)]" />
-                      </div>
-                    </div>
-                    <div className="vision-step absolute left-5 top-5 border border-white/12 bg-black/58 px-4 py-3 backdrop-blur-md md:left-7 md:top-7">
-                      <p className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/42">
-                        Scope / Site / Timing
-                      </p>
-                    </div>
-                  </div>
-
-                <div className="mt-5 grid gap-px bg-white/10 md:grid-cols-3">
-                  {listeningSteps.map((step) => (
-                    <div key={step.num} className="vision-step bg-black/62 p-5">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="font-numbers text-2xl font-bold text-[var(--color-accent)]">
-                          {step.num}
-                        </span>
-                        <span className="h-px flex-1 bg-white/10" />
-                      </div>
-                      <h3 className="mt-5 font-editorial text-3xl leading-none text-white md:text-4xl">
-                        {step.title}
-                      </h3>
-                      <p className="mt-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white/42">
-                        {step.body}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
