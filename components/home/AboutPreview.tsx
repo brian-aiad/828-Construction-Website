@@ -133,7 +133,7 @@ export default function AboutPreview() {
             </p>
             <h2
               ref={headlineRef}
-              className="font-editorial text-[clamp(2.1rem,3.5vw,3.55rem)] font-normal leading-[1.06] tracking-[-0.01em]"
+              className="font-editorial text-[clamp(2.1rem,3.2vw,3.4rem)] font-normal leading-[1.06] tracking-[-0.01em]"
             >
               <span className="block overflow-hidden">
                 <span className="about-headline-line block whitespace-nowrap max-lg:whitespace-normal">

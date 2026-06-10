@@ -126,7 +126,7 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
     <div
       ref={wrapRef}
       data-editorial-flow=""
-      className="relative z-10"
+      className="relative z-10 mt-[4svh]"
     >
       {/* Plumb line — lives in the outer margin, desktop only */}
       <div

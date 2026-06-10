@@ -163,8 +163,10 @@ export default function HomeVisionSequence() {
         });
       });
 
-      // Step-by-step: exactly ONE row is lit at a time as the reader scrolls
-      // through the panel (Fix 2 — single driver, snap assignment)
+      // Step-by-step: exactly ONE row is lit at a time. The panel lives
+      // inside a sticky-stacked surface, so document-offset bands go stale
+      // once the surface pins — select the active row from the rows' actual
+      // on-screen rects instead (sticky-proof).
       const stepList = section.querySelector<HTMLElement>(".process-list");
       if (stepList && processRows.length) {
         const setActive = (idx: number) => {
@@ -172,22 +174,52 @@ export default function HomeVisionSequence() {
             row.classList.toggle("process-row-active", i === idx)
           );
         };
+        let lastListTop = Infinity;
+        let stuckStartY: number | null = null;
+        const updateActive = () => {
+          const focusY = window.innerHeight * 0.55;
+          const listRect = stepList.getBoundingClientRect();
+          let idx: number;
+          if (listRect.top > focusY) {
+            idx = -1;
+          } else if (listRect.bottom < focusY) {
+            idx = processRows.length - 1;
+          } else {
+            idx = 0;
+            processRows.forEach((row, i) => {
+              if (row.getBoundingClientRect().top <= focusY) idx = i;
+            });
+          }
+          // Once the surface pins beneath the next one, rects freeze while
+          // scrolling continues — keep the walk advancing through the
+          // remaining steps over the cover distance.
+          const moving = Math.abs(listRect.top - lastListTop) > 0.5;
+          lastListTop = listRect.top;
+          if (!moving && idx >= 0) {
+            if (stuckStartY === null) stuckStartY = window.scrollY;
+            const p = Math.min(
+              1,
+              Math.max(0, (window.scrollY - stuckStartY) / (window.innerHeight * 0.8))
+            );
+            idx = Math.min(
+              processRows.length - 1,
+              idx + Math.round(p * (processRows.length - 1 - idx))
+            );
+          } else if (moving) {
+            stuckStartY = null;
+          }
+          setActive(idx);
+        };
         ScrollTrigger.create({
           trigger: stepList,
-          start: "top 62%",
-          end: "bottom 42%",
-          onUpdate: (self) => {
-            setActive(
-              Math.min(
-                processRows.length - 1,
-                Math.floor(self.progress * processRows.length)
-              )
-            );
-          },
-          onEnter: () => setActive(0),
+          start: "top bottom",
+          end: "bottom top",
+          onUpdate: updateActive,
+          onRefresh: updateActive,
+          onEnter: updateActive,
           onLeaveBack: () => setActive(-1),
-          onLeave: () => setActive(processRows.length - 1),
         });
+        updateActive();
       }
 
       // Progress rail — maroon fill draws down alongside the rows
@@ -276,7 +308,7 @@ export default function HomeVisionSequence() {
             </p>
             <h2
               ref={headlineRef}
-              className="font-editorial text-[clamp(2.1rem,3.5vw,3.55rem)] font-normal leading-[1.06] tracking-[-0.01em]"
+              className="font-editorial text-[clamp(2.1rem,3.2vw,3.4rem)] font-normal leading-[1.06] tracking-[-0.01em]"
             >
               <span className="block overflow-hidden">
                 <span className="vision-headline-line block whitespace-nowrap max-lg:whitespace-normal">

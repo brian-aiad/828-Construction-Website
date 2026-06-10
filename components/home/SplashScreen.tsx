@@ -21,6 +21,9 @@ export default function SplashScreen() {
     try {
       window.sessionStorage.setItem("828:splash-seen", "1");
     } catch {}
+    // Release the splash scroll lock and guarantee the hero lands full-frame
+    document.body.style.overflow = "";
+    window.scrollTo(0, 0);
     setDismissed(true);
   };
   const skip    = () => {
@@ -46,6 +49,12 @@ export default function SplashScreen() {
     const sChars    = suffixRefs.current.filter(Boolean) as HTMLSpanElement[];
     const allChars  = [...pChars, ...sChars];
     if (!splash || !underline || !tagline || allChars.length === 0) return;
+
+    // Lock scrolling while the splash plays — wheel input during the intro
+    // was leaving the page slightly scrolled, revealing a sliver of the
+    // next section under the hero on first land.
+    document.body.style.overflow = "hidden";
+    window.scrollTo(0, 0);
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       gsap.set(splash, { opacity: 1 });
@@ -104,7 +113,11 @@ export default function SplashScreen() {
       onComplete: dismiss,
     }, 2.54);
 
-    return () => { tl.kill(); tlRef.current = null; };
+    return () => {
+      document.body.style.overflow = "";
+      tl.kill();
+      tlRef.current = null;
+    };
   }, []);
 
   if (dismissed) return null;

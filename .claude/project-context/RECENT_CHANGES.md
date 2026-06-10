@@ -2,6 +2,21 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-06-10 (first-land fix) — Hero always lands full-frame
+
+- Bug: on first land the hero sometimes showed a sliver of the light surface at the bottom — the surface started exactly at the fold, and wheel input during the splash (or any stray scroll offset) revealed it.
+- Fix, three layers: (1) body scroll locked while the splash plays; (2) scrollTo(0,0) on splash dismiss; (3) the editorial surface now starts 4svh below the fold (mt-[4svh] on EditorialFlow — the pinned hero shows through the gap, so the curtain is unchanged).
+- Verified with a wheel-during-splash probe: scrollY stays 0, surface rests 36px below the fold in both splash and no-splash paths.
+
+## 2026-06-10 (responsive) — Mobile / iPad / small-window pass
+
+- Audited 390, 768, 834, 1024, 1280 widths with an automated overflow + headline-fit + console-error sweep (all clean) plus visual review of key frames.
+- FIXED: process rows were permanently dim below 1024px — AnimationController gates at <1024 (not <768 as the step-driver assumed), so tablets/mobile never ran the highlighter. CSS override at max-width:1023px now keeps rows fully readable (white titles, maroon numbers) on non-desktop.
+- FIXED: step-by-step highlighter used document-offset ScrollTrigger bands which go stale once the stacked surface pins (rects freeze while scroll continues) — broken on iPad-height viewports. Rewrote as rect-based selection against a 55%-viewport focus line, with a stuck-phase fallback that keeps the walk advancing over the cover distance. Verified progressive walk -1→0→…→4 at 1280.
+- Single-line "Refining industry standards." clamp tightened (3.2vw, cap 3.4rem) so it can't overflow its column at 1024–1280.
+- NOTE: dev-server CSS went stale during this pass (served chunk missing new globals.css rules) — fixed by clean .next restart; worth checking when a CSS edit "doesn't apply."
+- Verified: tsc clean, five-viewport audit all green, preflight:full PASS.
+
 ## 2026-06-10 (reorganization) — Hero one-sentence, compact statement, step-by-step process, zone-aware navbar
 
 - Hero: replaced the four stacked giant words with one readable block — "Transforming properties, delivering solutions." as the lead line, partner line dimmed beneath, Book Call under. clamp(1.8–2.95rem), max-w-46rem, bottom-left.

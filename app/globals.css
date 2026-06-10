@@ -185,6 +185,21 @@ textarea {
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* Mobile + tablet: the step-by-step scroll driver is desktop-only
+   (AnimationController gates below 1024px), so rows must rest fully
+   readable there. */
+@media (max-width: 1023px) {
+  .process-num {
+    color: var(--color-accent-light) !important;
+  }
+  .process-title {
+    color: #ffffff !important;
+  }
+  .process-sub {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+}
+
 /* Hero photo — slow perpetual drift beneath the scroll scrub (living image) */
 @keyframes heroKenBurns {
   from { transform: scale(1.02) translateY(0); }
