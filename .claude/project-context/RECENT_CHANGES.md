@@ -2,6 +2,56 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-06-10 (reorganization) — Hero one-sentence, compact statement, step-by-step process, zone-aware navbar
+
+- Hero: replaced the four stacked giant words with one readable block — "Transforming properties, delivering solutions." as the lead line, partner line dimmed beneath, Book Call under. clamp(1.8–2.95rem), max-w-46rem, bottom-left.
+- "Embodying meticulous planning…" demoted from billboard display text to a compact maroon-edged reading block in the vision intro right column (word-fill scrub kept, subtle 0.28→1).
+- Marquee reverted from oversized editorial text (read tacky) to the refined 11px mono strip, hairline-bounded, maroon diamonds + one maroon item per cycle.
+- Process panel is now true step-by-step: rows rest dimmed (white/25–35); a single ScrollTrigger driver lights exactly ONE row at a time (white title + maroon number + 0.5rem shift) as the reader scrolls — Fix 2 single-driver pattern.
+- Navbar is now zone-aware via document.elementsFromPoint sampling at (center, 40px): dark glass over hero/photo/black-panel/footer, cream glass over light surfaces. Marked zones with data-header-dark / data-header-light. A 300ms poll keeps it honest because scrub animations (expanding photo) settle after the last scroll event — verified ink matches underlying zone at 10 scroll depths.
+- Verified: tsc clean, zero console errors/overflow at both viewports, preflight:full PASS.
+
+## 2026-06-10 (cleanup) — Sentence splits fixed, decisive reveals
+
+- Fixed the awkward hard line break "Refining industry / standards." in BOTH vision and about headlines — now one clean single line on desktop (sized to fit, natural wrap below lg). Vision headline column widened to col-span-7 to guarantee fit.
+- Text reveals (section headlines, process rows, row hairlines) converted from scrub-parked to decisive once-based animations — they always complete, never sit half-revealed. The living scrub layer stays: stacked surfaces, photo expansion, word-fill statement, progress rail, plumb line, row ignition.
+- Word-fill statement range tightened (completes by 42% viewport). About photos gain the same hover zoom as services.
+- Verified: tsc clean, desktop+mobile captures (zero errors/overflow), preflight:full PASS.
+
+## 2026-06-10 (latest) — Color & hierarchy pass (wording untouched)
+
+- Hero re-hierarchy: "Transforming properties, delivering solutions." is now the large two-line h1; "828 Construction is the partner of choice for your next project." moved to a small supporting paragraph (maroon-edged) beside it with the Book Call button. Same words, new placement.
+- Navbar: Book Call button added on the desktop right side (inverts with the morphing header: white-on-dark over hero, black-on-cream over the surface, maroon hover).
+- Color system: maroon eyebrow labels with tick lines (hero, vision, about), maroon "multiple solutions." headline line, maroon service index numbers, maroon ticks under about photos, one soft-maroon marquee item per cycle, plumb line strengthened to 65% opacity.
+- Process block re-staged as a full-bleed BLACK panel: white type, maroon-light numbers/eyebrow, scroll-filled maroon progress rail beside the rows, row ignition (maroon number + title shift) tuned for dark. Page color rhythm is now: dark hero → cream → giant photo → cream marquee → black process → cream about → black footer.
+- Branch: work now lives on `ns-preview` (git/deploy policy in CLAUDE.md — never push main without explicit instruction).
+- Verified: tsc clean, desktop+mobile full-page captures (zero errors/overflow), stacked-surface mechanics re-probed, preflight:full PASS.
+
+## 2026-06-10 (later) — Extravagant pass: morphing header, stacked surfaces, showpieces
+
+- Researched nsbuilders.com live in Playwright (10 scroll-frame captures + computed-style probe): their hero is a FIXED layer the page rides over; light header with dark ink over light sections; persistent bottom-left CTA card through the whole scroll.
+- **Morphing header** (user's explicit ask): on home, header is white-on-transparent over the dark hero, then re-forms to `#f7f7f3/90` glass with dark ink the moment the light editorial surface reaches it. Reverts on scroll-up. Other routes unchanged.
+- **Stacked surfaces**: every home section now holds still once fully read (JS-measured sticky tops in `EditorialFlow`) while the next surface rides over it; covered surfaces settle to scale 0.975 / opacity 0.72 for depth. Last section stays in flow for a clean footer junction.
+- **Docked CTA** (`DockedCTA.tsx`): persistent "Book Call" card bottom-left, appears after the hero, hides at the footer. Desktop only.
+- **Expanding photograph**: the fireplace landscape now scrubs from an inset frame (`inset(10% 9%)`) to full-bleed 92vh as the reader passes it.
+- **Editorial marquee**: vision marquee upscaled from 10px mono to clamp(1.6–3.3rem) display text at black/16 with maroon diamonds, 52s.
+- **Living hero**: slow Ken Burns drift (26s alternate) on the hero photo beneath the scroll scrub.
+- **Process ignition**: each process row's number turns maroon and title shifts 0.5rem while the row holds the reader's focus band.
+- Verified: tsc clean, behavioral Playwright probe (header morph colors, sticky stack tops, clipPath expansion, dock show/hide), full-page scroll captures both viewports, zero console errors/overflow, preflight:full 16/16 PASS.
+
+## 2026-06-10 — Home page NS-grammar rebuild (one-surface scroll)
+
+- Rebuilt all four home sections to the NS Builders editorial grammar with ALL copy verbatim (client requirement — no rewording).
+- Hero: simplified to one full viewport, statement headline bottom-left (now the page h1), single veil. Hero is CSS-sticky pinned beneath the page; the light editorial surface slides over it as a curtain (one-surface scroll feel).
+- Services / Vision / About sections moved from dark gradient-wash panels to a warm off-white editorial surface (#f7f7f3, matches footer panels). Captions sit below image frames, never overlaid. Removed 3D tilt, maroon glow shadows, DraftingMotionLayer usage, drifting decorative shapes, and the pinned horizontal process track.
+- New `EditorialFlow` wrapper: continuous scroll-drawn maroon plumb line down the left margin of the entire light region with nodes that ignite per section — the page's connective scroll signature.
+- "Embodying meticulous planning…" brand statement elevated to a full-width word-fill scrub moment (SplitType words, Fix 1 four-guard cleanup).
+- Headline mask reveals converted to scrub-tied (Fix 15). Process steps are hairline rows revealing per-row on scroll.
+- About preview now uses three REAL project detail photos (Cerritos, outdoor pergola, Tustin) instead of a generated image.
+- Lenis glide deepened (duration 1.08 → 1.35, wheelMultiplier 0.88) for the continuous one-surface feel.
+- KNOWN CONTENT BUG (flagged for client, not fixed per copy-verbatim rule): "Refining industry standards." appears as the headline of BOTH the vision section (HomeVisionSequence) and the about preview (AboutPreview).
+- Verified: tsc clean, preflight:full 16/16 PASS, zero console errors, zero horizontal overflow at 1440 and 390 widths, full-page scroll captures at both viewports.
+
 ## 2026-05-26 — Push and local cleanup handoff
 
 - Confirmed `main` was aligned with `origin/main` before cleanup; no source edits were pending.

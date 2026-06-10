@@ -33,6 +33,12 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 - About should feel like a documentary/editorial profile: different section pacing, different reveal logic, and more proof-led composition.
 - If an image reads as generic or AI-like, replace it with a better-fitting asset or crop rather than repeating the same visual trick.
 
+### Git & deploy policy (LOCKED — June 2026, Brian's explicit instruction)
+- **NEVER push to `main` unless Brian explicitly says "push to main."** Pushing `main` auto-deploys to the LIVE site 828constructions.com via Vercel git integration.
+- **"Commit and push" (or just "push") means: update the CLIENT PREVIEW, not the live site.** Concretely: commit on the `ns-preview` branch, push that branch to GitHub, then redeploy the separate Vercel project `828-ns-preview` (CLI: sync working tree to a clean copy excluding node_modules/.next/.git/.claude-work/research/"joes pics"/chatpics/docx, then `npx vercel deploy --yes --scope aiadcollc` from that copy). Client preview URL: https://828-ns-preview.vercel.app
+- The `828-ns-preview` Vercel project is NOT git-connected and has no custom domain — it can never affect 828constructions.com.
+- Work happens on the `ns-preview` branch, not `main`.
+
 ### Standing rules
 - **Local dev URL:** Always use `http://localhost:3001` for this repo. `npm run dev` is pinned to `next dev -p 3001`. Port `3000` belongs to another local app and must not be used to judge 828.
 - All factual data traces to `lib/constants.ts`.
@@ -121,7 +127,7 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 | Page | Status | Date |
 |------|--------|------|
 | Splash | V2.5 Cinematic — rotateX 88→0 3-channel reveal, maroon radial ignition pulse on entry, curtain-wipe exit (clipPath inset). V2 base: vertical gradient, ONE LINE wordmark, maroon underline, sessionStorage gate. | 2026-05-06 |
-| Home (`/`) | V2.5 homepage remodel handoff in `docs/828_HOME_REMODEL_HANDOFF.md`. Route now renders HeroV2 + ServicesPreviewV2 + new HomeVisionSequence + AboutPreview + HomeCTA. Hero copy changed to `Built with intent. Not by accident.` with active-listening glass card and CA license badge. New HomeVisionSequence adds Joseph-note language: first step is listening, one conversation begins the build, build your vision, dedicated to your dream, build philosophy/process cards, rolling marquee, blueprint/level silhouettes, pinned horizontal process track. HomeCTA restored and cleaned to 2004/maroon/conversation-first copy. Verify locally on `http://localhost:3001`; port 3000 is another app. | 2026-05-21 |
+| Home (`/`) | V3.5 NS-grammar stacked-surface build — hero CSS-sticky pinned with Ken Burns drift; EVERY section holds still once read while the next surface rides over it (EditorialFlow measured sticky tops + cover scale/dim). Morphing header: white-on-photo over hero → #f7f7f3 glass with dark ink over the light surface (home only). Persistent DockedCTA "Book Call" card bottom-left (appears after hero, hides at footer). Fireplace photo scrubs inset-frame → full-bleed 92vh. Editorial-scale marquee. Maroon plumb line + ignition nodes. Word-fill scrub statement. Process rows ignite in the focus band. All copy verbatim. KNOWN CONTENT BUG flagged for client: "Refining industry standards." duplicated in HomeVisionSequence AND AboutPreview. Verify on `http://localhost:3001`; port 3000 is another app. | 2026-06-10 |
 | About (`/about`) | V2 + V2.5 elevation — documentary/editorial profile layout with its own motion grammar: split hero dossier, origin story, field notes, South Bay coverage band, and CTA. Method imagery now loads eagerly enough to avoid black plates during fast scroll audits. Do not mirror the homepage scroll stack. | 2026-05-21 |
 | Services (`/services`) | V2 + V2.5 elevation — asymmetric 3-tile gateway, 3D tilt (useTilt 10deg), maroon ghost shadow, ConstructionLine silhouette backdrop, magnetic CTAs. | 2026-05-06 |
 | Services/ADU (`/services/adu`) | V2 + V2.5 elevation — visual hero (ArchOutline silhouette 0.55), Need+FAQ glass cards, 5-step process, ADU acronym glass definitions, Start Here BOOK CALL. | 2026-05-06 |

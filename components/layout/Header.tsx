@@ -12,11 +12,36 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [overLight, setOverLight] = useState(false);
   const [torTime, setTorTime] = useState("");
   const lastScrollY = useRef(0);
   const pathname = usePathname();
 
   useEffect(() => {
+    // Home: the header re-forms to match whatever section is actually
+    // painted beneath it — dark zones (hero, photographs, black panels,
+    // footer) get the dark glass, light surfaces get the cream glass.
+    const checkZone = () => {
+      if (pathname !== "/") {
+        setOverLight(false);
+        return;
+      }
+      const stack = document.elementsFromPoint(window.innerWidth / 2, 40);
+      let isLight = false;
+      for (const el of stack) {
+        if (el.closest("header")) continue;
+        if (el.closest("[data-header-dark]")) {
+          isLight = false;
+          break;
+        }
+        if (el.closest("[data-header-light]")) {
+          isLight = true;
+          break;
+        }
+      }
+      setOverLight(isLight);
+    };
+
     const handleScroll = () => {
       const currentY = window.scrollY;
       setScrolled(currentY > 32);
@@ -26,10 +51,19 @@ export default function Header() {
         setHidden(false);
       }
       lastScrollY.current = currentY;
+      checkZone();
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // Scrub animations (e.g. the expanding photograph) keep settling AFTER
+    // the last scroll event — a light poll keeps the header honest. The
+    // check is a no-op re-render-wise unless the zone actually changes.
+    const zonePoll = pathname === "/" ? setInterval(checkZone, 300) : undefined;
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (zonePoll) clearInterval(zonePoll);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -68,6 +102,12 @@ export default function Header() {
   const isServicesActive =
     pathname === "/services" || pathname.startsWith("/services/");
 
+  // Light header mode — only on home, once the editorial surface is under it,
+  // and never while the (black) mobile menu overlay is open.
+  const light = isHome && overLight && !mobileOpen;
+  const inkBase = light ? "text-black/60 hover:text-black" : "text-white/60 hover:text-white";
+  const inkActive = light ? "text-black" : "text-white";
+
   return (
     <>
       <motion.header
@@ -76,7 +116,9 @@ export default function Header() {
         transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         style={{ transform: hidden ? "translateY(-100%)" : "translateY(0)" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
+          light
+            ? "bg-[#f7f7f3]/90 backdrop-blur-xl border-b border-black/10"
+            : scrolled
             ? "bg-black/90 backdrop-blur-xl border-b border-white/10"
             : isHome
             ? "bg-black/[0.32] backdrop-blur-[6px]"
@@ -94,7 +136,11 @@ export default function Header() {
                 if (pathname === "/") window.scrollTo(0, 0);
               }}
             >
-              <span className="font-display font-medium text-white text-[15px] sm:text-base lg:text-lg tracking-[0.14em] whitespace-nowrap">
+              <span
+                className={`font-display font-medium text-[15px] sm:text-base lg:text-lg tracking-[0.14em] whitespace-nowrap transition-colors duration-500 ${
+                  light ? "text-[#111]" : "text-white"
+                }`}
+              >
                 828 CONSTRUCTION
               </span>
             </Link>
@@ -114,9 +160,7 @@ export default function Header() {
                       <Link
                         href="/services"
                         className={`font-labels text-[10px] tracking-[0.18em] uppercase transition-colors duration-200 relative flex items-center gap-1.5 ${
-                          isServicesActive
-                            ? "text-white"
-                            : "text-white/60 hover:text-white"
+                          isServicesActive ? inkActive : inkBase
                         }`}
                       >
                         {link.label}
@@ -124,7 +168,7 @@ export default function Header() {
                           className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                             isServicesActive
                               ? "bg-[var(--color-accent)] scale-x-100"
-                              : `bg-white origin-left transition-transform duration-300 ${servicesOpen ? "scale-x-100" : "scale-x-0"}`
+                              : `${light ? "bg-black" : "bg-white"} origin-left transition-transform duration-300 ${servicesOpen ? "scale-x-100" : "scale-x-0"}`
                           }`}
                         />
                       </Link>
@@ -202,9 +246,7 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     className={`font-labels text-[10px] tracking-[0.18em] uppercase transition-colors duration-200 relative group ${
-                      pathname === link.href
-                        ? "text-white"
-                        : "text-white/60 hover:text-white"
+                      pathname === link.href ? inkActive : inkBase
                     }`}
                   >
                     {link.label}
@@ -212,7 +254,7 @@ export default function Header() {
                       className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                         pathname === link.href
                           ? "bg-[var(--color-accent)] scale-x-100"
-                          : "bg-white scale-x-0 group-hover:scale-x-100"
+                          : `${light ? "bg-black" : "bg-white"} scale-x-0 group-hover:scale-x-100`
                       }`}
                     />
                   </Link>
@@ -223,7 +265,11 @@ export default function Header() {
             {/* Right side: location + timestamp */}
             <div className="hidden lg:flex items-center justify-end">
               {torTime && (
-                <span className="font-labels text-[9px] text-white/30 tracking-[0.14em] uppercase whitespace-nowrap">
+                <span
+                  className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-500 ${
+                    light ? "text-black/40" : "text-white/30"
+                  }`}
+                >
                   Torrance · {torTime}
                 </span>
               )}
@@ -233,7 +279,9 @@ export default function Header() {
             <div className="flex lg:hidden items-center gap-3 sm:gap-5">
               <a
                 href={SITE.phoneHref}
-                className="inline-flex min-h-11 items-center font-numbers text-[11px] text-gray-400 transition-colors hover:text-white sm:text-xs"
+                className={`inline-flex min-h-11 items-center font-numbers text-[11px] transition-colors sm:text-xs ${
+                  light ? "text-black/55 hover:text-black" : "text-gray-400 hover:text-white"
+                }`}
               >
                 {SITE.phone}
               </a>
@@ -244,17 +292,17 @@ export default function Header() {
                 aria-expanded={mobileOpen}
               >
                 <span
-                  className={`block h-px w-6 bg-white transition-all duration-300 origin-center ${
+                  className={`block h-px w-6 transition-all duration-300 origin-center ${light ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "rotate-45 translate-y-[6px]" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px w-6 bg-white transition-all duration-300 ${
+                  className={`block h-px w-6 transition-all duration-300 ${light ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "opacity-0 scale-x-0" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px w-6 bg-white transition-all duration-300 origin-center ${
+                  className={`block h-px w-6 transition-all duration-300 origin-center ${light ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""
                   }`}
                 />

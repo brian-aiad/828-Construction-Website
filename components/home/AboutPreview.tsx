@@ -7,202 +7,190 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { EXPERIENCE_SINCE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
-import { ConstructionLineSilhouette } from "@/components/system/silhouettes";
-import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// NS-grammar about preview: light editorial close to the page — big quiet
+// statement headline, supporting copy, then a horizontal row of real project
+// detail photographs with staggered reveal and inner parallax.
+
+const DETAIL_IMAGES = [
+  {
+    src: "/images/projects/cerritos-residence/13-2110.jpg",
+    alt: "Dark vertical tile feature wall with recessed shower niche, Cerritos residence",
+  },
+  {
+    src: "/images/projects/outdoor-patio-pergola.jpg",
+    alt: "Custom pergola and pool deck outdoor living build in South Bay",
+  },
+  {
+    src: "/images/projects/tustin-residence/13-1947.jpg",
+    alt: "Blue herringbone tile niche detail, Tustin residence bath remodel",
+  },
+];
+
 export default function AboutPreview() {
   const sectionRef = useRef<HTMLElement>(null);
-  const imgRef = useRef<HTMLDivElement>(null);
-  const imgInnerRef = useRef<HTMLDivElement>(null);
-  const textRefs = useRef<(HTMLElement | null)[]>([]);
-  const silhouetteParallaxRef = useRef<HTMLDivElement>(null);
-  const ctaMagRef = useMagnetic(0.45) as React.RefObject<HTMLDivElement>;
+  const headlineRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-    const headlineEl = textRefs.current[0] as HTMLHeadingElement | null;
 
     const ctx = gsap.context(() => {
-      const textEls = textRefs.current.filter(Boolean) as HTMLElement[];
-      const nonHeadlineEls = textEls.filter((_, i) => i !== 0);
-      gsap.set(nonHeadlineEls, { y: 24, opacity: 0 });
-      if (headlineEl) gsap.set(headlineEl, { y: 34, opacity: 0, clipPath: "inset(0 0 18% 0)" });
-      if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(8% 8% 8% 0)" });
+      const headlineLines = gsap.utils.toArray<HTMLElement>(".about-headline-line");
+      const copyEls = gsap.utils.toArray<HTMLElement>(".about-copy-el");
+      const frames = gsap.utils.toArray<HTMLElement>(".about-frame");
+
+      gsap.set(headlineLines, { yPercent: 110 });
+      gsap.set(copyEls, { y: 20, opacity: 0 });
+      gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
 
       if (!AnimationController.shouldAnimate()) {
-        gsap.set(textEls, { y: 0, opacity: 1, clipPath: "inset(0%)" });
-        if (imgRef.current) gsap.set(imgRef.current, { clipPath: "inset(0%)" });
+        gsap.set(headlineLines, { yPercent: 0 });
+        gsap.set(copyEls, { y: 0, opacity: 1 });
+        gsap.set(frames, { clipPath: "inset(0%)" });
         return;
       }
 
-      // Image clip-path reveal
-      if (imgRef.current) {
-        gsap.to(imgRef.current, {
-          clipPath: "inset(0%)",
-          duration: 1.2,
-          ease: "power3.inOut",
-          scrollTrigger: { trigger: section, start: "top 75%", once: true },
-        });
-      }
+      gsap.to(headlineLines, {
+        yPercent: 0,
+        duration: 0.95,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: headlineRef.current ?? section,
+          start: "top 85%",
+          once: true,
+        },
+      });
 
-      nonHeadlineEls.forEach((el, i) => {
+      copyEls.forEach((el, i) => {
         gsap.to(el, {
-          y: 0, opacity: 1,
+          y: 0,
+          opacity: 1,
           duration: 0.8,
+          delay: i * 0.07,
           ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 92%",
-            end: "top 62%",
-            scrub: 1.1,
-          },
-          delay: i * 0.08,
+          scrollTrigger: { trigger: el, start: "top 86%", once: true },
         });
       });
 
-      if (headlineEl) {
-        gsap.to(headlineEl, {
-          y: 0,
-          opacity: 1,
+      frames.forEach((frame, i) => {
+        gsap.to(frame, {
           clipPath: "inset(0%)",
-          duration: 1,
-          ease: "power4.out",
-          scrollTrigger: { trigger: headlineEl, start: "top 82%", once: true },
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: frame,
+            start: "top 92%",
+            end: "top 58%",
+            scrub: 1,
+          },
         });
-      }
 
-      if (imgInnerRef.current) {
-        gsap.to(imgInnerRef.current, {
-          yPercent: -8,
-          scale: 1.04,
-          ease: "none",
-          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.35 },
-        });
-      }
-
-      if (silhouetteParallaxRef.current) {
-        gsap.to(silhouetteParallaxRef.current, {
-          yPercent: -24,
-          rotate: 1.5,
-          ease: "none",
-          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.5 },
-        });
-      }
+        const inner = frame.querySelector<HTMLElement>(".about-img-inner");
+        if (inner) {
+          gsap.fromTo(
+            inner,
+            { yPercent: -6 },
+            {
+              yPercent: 6,
+              ease: "none",
+              scrollTrigger: {
+                trigger: frame,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.2 + i * 0.15,
+              },
+            }
+          );
+        }
+      });
     }, sectionRef);
 
     return () => {
-      try { ctx.revert(); } catch {}
+      try {
+        ctx.revert();
+      } catch {}
     };
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#050505] text-white"
-      style={{ minHeight: "min(100vh, 760px)" }}
+      className="relative bg-[#f7f7f3] text-[#111]"
       data-section="about-preview"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#030303] to-transparent"
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
-          backgroundSize: "256px 256px",
-          opacity: 0.03,
-          mixBlendMode: "overlay",
-        }}
-      />
-
-      <div
-        ref={silhouetteParallaxRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-[14%] top-[6%] hidden lg:block"
-        style={{ width: "44rem", opacity: 0.045, color: "white", zIndex: 1 }}
-      >
-        <ConstructionLineSilhouette style={{ width: "100%", height: "auto" }} />
-      </div>
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 hidden h-px w-[42vw] origin-left bg-[var(--color-accent)]/55 lg:block"
-      />
-
-      <div className="relative z-20 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
-        <div className="grid min-h-[min(76vh,660px)] grid-cols-1 items-center gap-12 lg:grid-cols-[0.76fr_1fr] lg:gap-14">
-          <div className="relative order-2 lg:order-1">
-            <div
-              ref={imgRef}
-              className="relative min-h-[24rem] overflow-hidden border border-white/10 bg-white/[0.025] md:min-h-[32rem] lg:-ml-12 lg:min-h-[36rem]"
-              style={{ clipPath: "inset(0%)" }}
-              data-gsap-reveal="true"
+      <div className="mx-auto max-w-[1680px] px-6 pb-24 lg:px-12 lg:pb-36">
+        <div className="grid gap-10 pt-10 lg:grid-cols-12 lg:gap-12 lg:pt-14">
+          <div className="lg:col-span-7">
+            <p className="about-copy-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent)] lg:mb-8">
+              <span
+                aria-hidden="true"
+                className="inline-block h-px w-10 bg-[var(--color-accent)]"
+              />
+              Since {EXPERIENCE_SINCE}
+            </p>
+            <h2
+              ref={headlineRef}
+              className="font-editorial text-[clamp(2.1rem,3.5vw,3.55rem)] font-normal leading-[1.06] tracking-[-0.01em]"
             >
-              <div ref={imgInnerRef} className="absolute inset-0">
-                <Image
-                  src="/images/generated/home-about-story-editorial.webp"
-                  alt="Architectural plans and finish samples on a residential construction worktable"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 58vw"
-                  className="object-cover"
-                  style={{
-                    filter: "contrast(1.04) saturate(0.96) brightness(0.94)",
-                    objectPosition: "42% center",
-                  }}
-                />
-              </div>
-              <div className="absolute bottom-0 left-0 h-px w-2/5 bg-[var(--color-accent)]" aria-hidden="true" />
-              <div className="absolute left-5 top-5 border border-white/10 bg-black/56 px-3 py-2 backdrop-blur-sm md:left-7 md:top-7">
-                <span className="font-labels text-[8px] uppercase tracking-[0.22em] text-white/48">
-                  Since {EXPERIENCE_SINCE}
+              <span className="block overflow-hidden">
+                <span className="about-headline-line block whitespace-nowrap max-lg:whitespace-normal">
+                  Refining industry standards.
                 </span>
-              </div>
-            </div>
+              </span>
+            </h2>
           </div>
 
-          <div className="order-1 flex flex-col justify-center lg:order-2 lg:pl-4">
-            <h2
-              ref={(el) => { textRefs.current[0] = el as HTMLElement; }}
-              className="max-w-[11ch] font-editorial text-[clamp(3.05rem,5.35vw,5.75rem)] font-semibold leading-[0.88] text-white"
-              style={{ opacity: 0 }}
-            >
-              Refining industry standards.
-            </h2>
-
-            <p
-              ref={(el) => { textRefs.current[1] = el; }}
-              className="mt-7 max-w-xl text-base leading-8 text-white/68 lg:ml-12 lg:text-lg lg:leading-9"
-              style={{ opacity: 0 }}
-            >
-              With more than 20 years of experience across multiple construction trades, 828 Construction brings a comprehensive understanding of the building process. Our mission is to make every project as seamless, effective, and stress-free as possible.
+          <div className="flex flex-col justify-end lg:col-span-4 lg:col-start-9">
+            <p className="about-copy-el max-w-md text-[15px] leading-7 text-black/60">
+              With more than 20 years of experience across multiple
+              construction trades, 828 Construction brings a comprehensive
+              understanding of the building process. Our mission is to make
+              every project as seamless, effective, and stress-free as
+              possible.
             </p>
-
-            <div
-              ref={(el) => { textRefs.current[2] = el; }}
-              className="mt-7 h-px w-16 bg-[var(--color-accent)]"
-              style={{ opacity: 0.55 }}
-              aria-hidden="true"
-            />
-
-            <div
-              ref={ctaMagRef}
-              className="mt-7"
-              style={{ display: "inline-block", alignSelf: "flex-start" }}
-            >
+            <div className="about-copy-el mt-8">
               <Link
                 href="/about"
-                className="inline-flex items-center gap-3 bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+                className="group inline-flex items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black"
               >
                 Learn more
-                <span aria-hidden="true">→</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Detail photography row */}
+        <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-3 lg:mt-20 lg:gap-8">
+          {DETAIL_IMAGES.map((img) => (
+            <div key={img.src}>
+              <div
+                className="about-frame group relative aspect-[4/5] overflow-hidden bg-[#e8e8e3]"
+                data-gsap-reveal="true"
+              >
+                <div className="about-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    style={{ filter: "contrast(1.04) saturate(1.06)" }}
+                  />
+                </div>
+              </div>
+              <div
+                aria-hidden="true"
+                className="mt-3 h-px w-10 bg-[var(--color-accent)] opacity-70"
+              />
+            </div>
+          ))}
         </div>
       </div>
     </section>

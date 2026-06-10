@@ -7,15 +7,12 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICES } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
-import { useTilt } from "@/lib/hooks/useTilt";
-import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V3 asymmetric 3-card services grid with 3D tilt + z-lift + maroon shadow.
-// Layout: one tall featured card (ADU) left + two stacked smaller cards right.
-// Hover: image scale 1.08 + z:40 + maroon box-shadow + 3D tilt.
-// Pattern B (clip-path punch-in + rotateY) on scroll enter. Fix 20 (hover cleanup).
+// NS-grammar services: light editorial section, big quiet headline row,
+// large photography with captions BELOW the frame (never overlaid),
+// parallax scrub inside each frame, hover scale. One spacing rhythm.
 
 const SERVICE_IMAGES: Record<string, string> = {
   adu: "/images/projects/service-adu.jpg",
@@ -30,7 +27,7 @@ const SERVICE_TAGLINES: Record<string, string> = {
 };
 
 const BLUR_PLACEHOLDER =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNlOGU4ZTMiLz48L3N2Zz4=";
 
 function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
   e.currentTarget.style.opacity = "0";
@@ -38,101 +35,118 @@ function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
 
 export default function ServicesPreviewV2() {
   const sectionRef = useRef<HTMLElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const hoverCleanups = useRef<Array<() => void>>([]);
-
-  // 3D tilt refs — one per card
-  const tilt0Ref = useTilt(10) as React.MutableRefObject<HTMLDivElement | null>;
-  const tilt1Ref = useTilt(10) as React.MutableRefObject<HTMLDivElement | null>;
-  const tilt2Ref = useTilt(10) as React.MutableRefObject<HTMLDivElement | null>;
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
-    if (!cards.length) return;
 
     const ctx = gsap.context(() => {
+      const headlineLines = gsap.utils.toArray<HTMLElement>(".svc-headline-line");
+      const frames = cards
+        .map((card) => card.querySelector<HTMLElement>(".svc-frame"))
+        .filter(Boolean) as HTMLElement[];
+      const captions = cards
+        .map((card) => card.querySelector<HTMLElement>(".svc-caption"))
+        .filter(Boolean) as HTMLElement[];
+
+      gsap.set(headlineLines, { yPercent: 110 });
+      gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
+      gsap.set(captions, { y: 18, opacity: 0 });
+      if (introRef.current) gsap.set(introRef.current, { y: 20, opacity: 0 });
+
       if (!AnimationController.shouldAnimate()) {
-        // Mobile: immediate reveal
-        gsap.set(cards, { clipPath: "inset(0%)", opacity: 1, rotationY: 0, y: 0 });
+        gsap.set(headlineLines, { yPercent: 0 });
+        gsap.set(frames, { clipPath: "inset(0%)" });
+        gsap.set(captions, { y: 0, opacity: 1 });
+        if (introRef.current) gsap.set(introRef.current, { y: 0, opacity: 1 });
         return;
       }
 
-      const imageEls = cards
-        .map((card) => card.querySelector<HTMLElement>(".svc-card-img"))
-        .filter(Boolean) as HTMLElement[];
-      const textEls = cards
-        .flatMap((card) => Array.from(card.querySelectorAll<HTMLElement>(".svc-card-copy > *")));
-
-      gsap.set(cards, {
-        clipPath: "inset(16% 5% 16% 5%)",
-        opacity: 0,
-        y: 58,
-        rotationY: 10,
-      });
-      gsap.set(imageEls, { scale: 1.14, yPercent: 4 });
-      gsap.set(textEls, { y: 14, opacity: 0 });
-
-      const revealTl = gsap.timeline({
-        defaults: { ease: "power3.out" },
+      // Headline mask reveal — decisive one-shot so it always completes
+      gsap.to(headlineLines, {
+        yPercent: 0,
+        duration: 0.95,
+        stagger: 0.1,
+        ease: "power3.out",
         scrollTrigger: {
-          trigger: gridRef.current ?? section,
-          start: "top 92%",
-          end: "top 32%",
-          scrub: 0.85,
+          trigger: headlineRef.current ?? section,
+          start: "top 85%",
+          once: true,
         },
       });
 
-      revealTl
-        .to(cards, {
-          clipPath: "inset(0%)",
-          opacity: 1,
+      if (introRef.current) {
+        gsap.to(introRef.current, {
           y: 0,
-          rotationY: 0,
-          stagger: { each: 0.22, from: "start" },
-          duration: 1.35,
-        })
-        .to(
-          imageEls,
-          {
-            scale: 1,
-            yPercent: 0,
-            stagger: { each: 0.22, from: "start" },
-            duration: 1.45,
-          },
-          "<0.05"
-        )
-        .to(
-          textEls,
-          {
+          opacity: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: introRef.current, start: "top 84%", once: true },
+        });
+      }
+
+      // Each card: frame clip-reveal + caption rise, tied to its own position
+      cards.forEach((card) => {
+        const frame = card.querySelector<HTMLElement>(".svc-frame");
+        const caption = card.querySelector<HTMLElement>(".svc-caption");
+        const inner = card.querySelector<HTMLElement>(".svc-img-inner");
+
+        if (frame) {
+          gsap.to(frame, {
+            clipPath: "inset(0%)",
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 88%",
+              end: "top 55%",
+              scrub: 1,
+            },
+          });
+        }
+        if (caption) {
+          gsap.to(caption, {
             y: 0,
             opacity: 1,
-            stagger: 0.045,
             duration: 0.75,
-          },
-          "<0.42"
-        );
+            ease: "power3.out",
+            scrollTrigger: { trigger: card, start: "top 70%", once: true },
+          });
+        }
+        // Parallax inside the frame
+        if (inner) {
+          gsap.fromTo(
+            inner,
+            { yPercent: -6 },
+            {
+              yPercent: 6,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.2,
+              },
+            }
+          );
+        }
+      });
 
-      // Hover: image scale + maroon border + z-lift + box-shadow (Fix 20 — store removers)
+      // Hover — quiet image scale only (Fix 20: store removers)
       if (window.matchMedia("(hover: hover)").matches) {
         cards.forEach((card) => {
-          const imgEl = card.querySelector<HTMLElement>(".svc-card-img");
-          const barEl = card.querySelector<HTMLElement>(".svc-card-bar");
-
+          const img = card.querySelector<HTMLElement>(".svc-img-inner img");
           const onEnter = () => {
-            if (imgEl) gsap.to(imgEl, { scale: 1.08, duration: 0.7, ease: "power2.out" });
-            if (barEl) gsap.to(barEl, { scaleX: 1, duration: 0.3, ease: "power2.out" });
-            gsap.to(card, { z: 40, boxShadow: "0 30px 60px -20px rgba(99,26,22,0.5)", duration: 0.5, ease: "power2.out" });
+            if (img) gsap.to(img, { scale: 1.045, duration: 0.8, ease: "power2.out" });
           };
           const onLeave = () => {
-            if (imgEl) gsap.to(imgEl, { scale: 1, duration: 0.7, ease: "power2.out" });
-            if (barEl) gsap.to(barEl, { scaleX: 0, duration: 0.3, ease: "power2.in" });
-            gsap.to(card, { z: 0, boxShadow: "none", duration: 0.5, ease: "power2.out" });
+            if (img) gsap.to(img, { scale: 1, duration: 0.8, ease: "power2.out" });
           };
-
           card.addEventListener("mouseenter", onEnter);
           card.addEventListener("mouseleave", onLeave);
           hoverCleanups.current.push(() => {
@@ -144,205 +158,163 @@ export default function ServicesPreviewV2() {
     }, sectionRef);
 
     return () => {
-      hoverCleanups.current.forEach(fn => fn());
+      hoverCleanups.current.forEach((fn) => fn());
       hoverCleanups.current = [];
-      try { ctx.revert(); } catch {}
+      try {
+        ctx.revert();
+      } catch {}
     };
   }, []);
 
   const [adu, remediation, consulting] = SERVICES;
 
+  const renderCaption = (
+    service: (typeof SERVICES)[number],
+    index: number
+  ) => (
+    <div className="svc-caption mt-5 flex items-baseline justify-between gap-6 lg:mt-6">
+      <div>
+        <h3 className="font-editorial text-[clamp(1.25rem,1.7vw,1.65rem)] font-normal leading-tight text-[#111]">
+          {service.title}
+        </h3>
+        <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-black/52">
+          {SERVICE_TAGLINES[service.slug]}
+        </p>
+      </div>
+      <div className="hidden shrink-0 text-right sm:block">
+        <p className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/40">
+          {service.short}
+        </p>
+        <p className="mt-1.5 font-numbers text-[10px] text-[var(--color-accent)]">
+          0{index + 1}
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <section
       ref={sectionRef}
-      className="relative -mt-[16svh] overflow-hidden bg-black pb-24 pt-[22svh] lg:pb-40 lg:pt-[26svh]"
+      className="relative bg-[#f7f7f3] py-24 text-[#111] lg:py-36"
       data-section="services-v2"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[24svh] bg-gradient-to-b from-transparent via-black/78 to-black"
-      />
-      <DraftingMotionLayer intensity="standard" className="opacity-35" />
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-        {/* Section header */}
-        <div className="mb-10 grid gap-7 lg:mb-16 lg:grid-cols-[0.9fr_1fr] lg:items-end lg:gap-12">
-          <div>
-            <h2 className="max-w-[12ch] font-editorial font-semibold text-white leading-[0.88]"
-              style={{ fontSize: "clamp(3.2rem, 5.5vw, 5.8rem)" }}>
-              One company,<br className="hidden lg:block" /> <span className="text-white/40">multiple solutions.</span>
+      <div className="mx-auto max-w-[1680px] px-6 lg:px-12">
+        {/* Header row — headline left, copy + link right */}
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7">
+            <h2
+              ref={headlineRef}
+              className="font-editorial text-[clamp(2.5rem,4.6vw,4.5rem)] font-normal leading-[1.04] tracking-[-0.01em] text-[#111]"
+            >
+              <span className="block overflow-hidden">
+                <span className="svc-headline-line block">One company,</span>
+              </span>
+              <span className="block overflow-hidden">
+                <span className="svc-headline-line block text-[var(--color-accent)]">
+                  multiple solutions.
+                </span>
+              </span>
             </h2>
           </div>
-          <div className="max-w-xl border-l border-white/10 pl-5 lg:justify-self-end lg:pl-8">
-            <p className="font-body text-sm leading-6 text-white/58 sm:text-base lg:text-lg lg:leading-relaxed">
+          <div ref={introRef} className="flex flex-col justify-end lg:col-span-4 lg:col-start-9">
+            <p className="max-w-md text-[15px] leading-7 text-black/60">
               Whether it&apos;s an ongoing maintenance, essential repairs, or a
               new ADU. 828 Construction helps homeowners bring their vision to
               life and keep their homes performing at their best.
             </p>
             <Link
               href="/services"
-              className="mt-7 hidden w-fit items-center gap-2 border-b border-white/15 pb-1 font-labels text-[11px] uppercase tracking-[0.18em] text-white/45 transition-colors hover:text-white lg:flex group"
+              className="group mt-7 hidden w-fit items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black lg:inline-flex"
             >
               All Services
-              <span className="transition-transform duration-200 group-hover:translate-x-1">-&gt;</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
             </Link>
           </div>
         </div>
 
-        {/* Asymmetric grid: ADU tall left | Remediation + Consulting stacked right */}
-        <div ref={gridRef} className="grid grid-cols-1 gap-3 lg:grid-cols-[3fr_2fr] lg:gap-4">
-
-          {/* ADU — tall featured card with 3D tilt */}
+        {/* Work grid — one tall frame left, two stacked right, captions below */}
+        <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 lg:mt-20 lg:grid-cols-12 lg:gap-y-0">
           <div
             ref={(el) => {
               cardRefs.current[0] = el;
-              tilt0Ref.current = el;
             }}
-            className="relative group min-h-[21rem] overflow-hidden cursor-pointer sm:min-h-[24rem] lg:min-h-[clamp(350px,58vh,560px)]"
-            style={{ transformStyle: "preserve-3d", willChange: "transform" }}
-            data-gsap-reveal="true"
+            className="lg:col-span-7"
           >
-            <Link href={`/services/${adu.slug}`} className="absolute inset-0 z-20" aria-label={adu.title} />
-            <div className="svc-card-img absolute inset-0" style={{ willChange: "transform" }}>
-              <Image
-                src={SERVICE_IMAGES[adu.slug]}
-                alt={adu.title}
-                fill
-                loading="lazy"
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                placeholder="blur"
-                blurDataURL={BLUR_PLACEHOLDER}
-                onError={imgError}
-                className="object-cover"
-                style={{ filter: "contrast(1.05) saturate(1.08)" }}
-              />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" aria-hidden="true" />
-
-            {/* Maroon bottom bar — scaleX 0→1 on hover */}
-            <div
-              className="svc-card-bar absolute bottom-0 left-0 right-0 z-10"
-              style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
-              aria-hidden="true"
-            />
-
-            <div className="svc-card-copy absolute bottom-0 left-0 right-0 z-10 p-5 lg:p-8">
-              <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-2">
-                {adu.short}
-              </p>
-              <h3 className="font-editorial font-semibold text-white tracking-normal mb-2 leading-none"
-                style={{ fontSize: "clamp(1.65rem, 6vw, 2.35rem)" }}>
-                {adu.title}
-              </h3>
-              <p className="font-body text-white/55 text-sm leading-relaxed max-w-xs">
-                {SERVICE_TAGLINES[adu.slug]}
-              </p>
-            </div>
+            <Link href={`/services/${adu.slug}`} aria-label={adu.title} className="block">
+              <div
+                className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3] lg:aspect-[5/5.4]"
+                data-gsap-reveal="true"
+              >
+                <div className="svc-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
+                  <Image
+                    src={SERVICE_IMAGES[adu.slug]}
+                    alt={adu.title}
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 56vw"
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    onError={imgError}
+                    className="object-cover"
+                    style={{ filter: "contrast(1.04) saturate(1.06)" }}
+                  />
+                </div>
+              </div>
+              {renderCaption(adu, 0)}
+            </Link>
           </div>
 
-          {/* Right column: Remediation + Consulting stacked */}
-          <div className="flex flex-col gap-3">
-
-            {/* Remediation — 3D tilt */}
-            <div
-              ref={(el) => {
-                cardRefs.current[1] = el;
-                tilt1Ref.current = el;
-              }}
-              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(170px,27vh,272px)]"
-              style={{ transformStyle: "preserve-3d", willChange: "transform" }}
-              data-gsap-reveal="true"
-            >
-              <Link href={`/services/${remediation.slug}`} className="absolute inset-0 z-20" aria-label={remediation.title} />
-              <div className="svc-card-img absolute inset-0" style={{ willChange: "transform" }}>
-                <Image
-                  src={SERVICE_IMAGES[remediation.slug]}
-                  alt={remediation.title}
-                  fill
-                  loading="lazy"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover"
-                  style={{ filter: "contrast(1.05) saturate(1.08)" }}
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden="true" />
+          <div className="flex flex-col gap-12 lg:col-span-4 lg:col-start-9 lg:gap-14 lg:pt-24">
+            {[remediation, consulting].map((service, i) => (
               <div
-                className="svc-card-bar absolute bottom-0 left-0 right-0 z-10"
-                style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
-                aria-hidden="true"
-              />
-              <div className="svc-card-copy absolute bottom-0 left-0 right-0 z-10 p-5 lg:p-6">
-                <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
-                  {remediation.short}
-                </p>
-                <h3 className="font-editorial font-semibold text-white tracking-normal leading-none"
-                  style={{ fontSize: "clamp(1.4rem, 5vw, 1.9rem)" }}>
-                  {remediation.title}
-                </h3>
-                <p className="font-body text-white/50 text-xs leading-relaxed mt-1">
-                  {SERVICE_TAGLINES[remediation.slug]}
-                </p>
+                key={service.slug}
+                ref={(el) => {
+                  cardRefs.current[i + 1] = el;
+                }}
+              >
+                <Link
+                  href={`/services/${service.slug}`}
+                  aria-label={service.title}
+                  className="block"
+                >
+                  <div
+                    className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3]"
+                    data-gsap-reveal="true"
+                  >
+                    <div className="svc-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
+                      <Image
+                        src={SERVICE_IMAGES[service.slug]}
+                        alt={service.title}
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 1024px) 100vw, 34vw"
+                        placeholder="blur"
+                        blurDataURL={BLUR_PLACEHOLDER}
+                        onError={imgError}
+                        className="object-cover"
+                        style={{ filter: "contrast(1.04) saturate(1.06)" }}
+                      />
+                    </div>
+                  </div>
+                  {renderCaption(service, i + 1)}
+                </Link>
               </div>
-            </div>
-
-            {/* Consulting — 3D tilt */}
-            <div
-              ref={(el) => {
-                cardRefs.current[2] = el;
-                tilt2Ref.current = el;
-              }}
-              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(170px,27vh,272px)]"
-              style={{ transformStyle: "preserve-3d", willChange: "transform" }}
-              data-gsap-reveal="true"
-            >
-              <Link href={`/services/${consulting.slug}`} className="absolute inset-0 z-20" aria-label={consulting.title} />
-              <div className="svc-card-img absolute inset-0" style={{ willChange: "transform" }}>
-                <Image
-                  src={SERVICE_IMAGES[consulting.slug]}
-                  alt={consulting.title}
-                  fill
-                  loading="lazy"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover"
-                  style={{ filter: "contrast(1.05) saturate(1.08)" }}
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden="true" />
-              <div
-                className="svc-card-bar absolute bottom-0 left-0 right-0 z-10"
-                style={{ height: 2, background: "var(--color-accent)", transform: "scaleX(0)", transformOrigin: "left" }}
-                aria-hidden="true"
-              />
-              <div className="svc-card-copy absolute bottom-0 left-0 right-0 z-10 p-5 lg:p-6">
-                <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
-                  {consulting.short}
-                </p>
-                <h3 className="font-editorial font-semibold text-white tracking-normal leading-none"
-                  style={{ fontSize: "clamp(1.4rem, 5vw, 1.9rem)" }}>
-                  {consulting.title}
-                </h3>
-                <p className="font-body text-white/50 text-xs leading-relaxed mt-1">
-                  {SERVICE_TAGLINES[consulting.slug]}
-                </p>
-              </div>
-            </div>
-
+            ))}
           </div>
         </div>
 
-        {/* Mobile "All Services" CTA */}
-        <div className="mt-8 lg:hidden text-center">
+        {/* Mobile "All Services" link */}
+        <div className="mt-12 lg:hidden">
           <Link
             href="/services"
-            className="inline-flex items-center gap-2 font-labels text-[11px] text-white/40 tracking-[0.18em] uppercase hover:text-white transition-colors group border-b border-white/15 pb-1"
+            className="group inline-flex items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60"
           >
             All Services
-            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-1">
+              →
+            </span>
           </Link>
         </div>
       </div>

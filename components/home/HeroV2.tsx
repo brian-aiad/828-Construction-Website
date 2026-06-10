@@ -7,105 +7,112 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
-import { useMagnetic } from "@/lib/hooks/useMagnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// NS-grammar hero: one full viewport, full-bleed photography, statement
+// headline bottom-left, small mono metadata top/bottom corners. Motion is
+// restrained — line mask reveal on load, image parallax scrub on scroll.
+
 export default function HeroV2() {
   const sectionRef = useRef<HTMLElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const veilRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const licenseRef = useRef<HTMLDivElement>(null);
-  const magneticRef = useMagnetic(0.45) as React.RefObject<HTMLDivElement>;
+  const scrollHintRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      const revealEls = [
+      const lines = gsap.utils.toArray<HTMLElement>(".hero-line-inner");
+      const support = section.querySelector<HTMLElement>(".hero-support");
+      const metaEls = [
         eyebrowRef.current,
-        subRef.current,
+        support,
         ctaRef.current,
         licenseRef.current,
+        scrollHintRef.current,
       ].filter(Boolean) as HTMLElement[];
 
-      gsap.set(revealEls, { y: 22, opacity: 0 });
+      gsap.set(lines, { yPercent: 110 });
+      gsap.set(metaEls, { y: 14, opacity: 0 });
 
       if (!AnimationController.shouldAnimate()) {
-        gsap.set(revealEls, { y: 0, opacity: 1 });
+        gsap.set(lines, { yPercent: 0 });
+        gsap.set(metaEls, { y: 0, opacity: 1 });
         return;
       }
 
-      gsap.to(revealEls, {
+      // Entry — line-by-line mask reveal, then metadata
+      gsap.to(lines, {
+        yPercent: 0,
+        duration: 0.95,
+        stagger: 0.09,
+        ease: "power3.out",
+        delay: 0.15,
+      });
+      gsap.to(metaEls, {
         y: 0,
         opacity: 1,
-        stagger: 0.09,
-        duration: 0.85,
+        duration: 0.75,
+        stagger: 0.08,
         ease: "power3.out",
-        delay: 0.2,
+        delay: 0.55,
       });
+
+      // Scroll — the hero is pinned (CSS sticky) beneath the page surface.
+      // All scrub motion is driven by the covering surface's position so the
+      // hero recedes (scale, dim, drift) as the light surface rides over it.
+      const surface = document.querySelector<HTMLElement>("[data-editorial-flow]");
+      const coverTrigger = surface
+        ? { trigger: surface, start: "top bottom", end: "top top" }
+        : { trigger: section, start: "top top", end: "bottom top" };
 
       if (imageRef.current) {
         gsap.fromTo(
           imageRef.current,
-          { scale: 1.04, yPercent: 0 },
+          { scale: 1, yPercent: 0 },
           {
-            scale: 1.22,
+            scale: 1.1,
             yPercent: -4,
             ease: "none",
-            scrollTrigger: {
-              trigger: section,
-              start: "top top",
-              end: "bottom top",
-              scrub: 1.2,
-            },
+            scrollTrigger: { ...coverTrigger, scrub: 1 },
           }
         );
       }
 
-      if (copyRef.current) {
-        gsap.to(copyRef.current, {
-          yPercent: -28,
-          opacity: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "10% top",
-            end: "42% top",
-            scrub: 1,
-          },
-        });
-      }
-
       if (veilRef.current) {
         gsap.to(veilRef.current, {
-          opacity: 0.34,
+          opacity: 0.55,
           ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1,
-          },
+          scrollTrigger: { ...coverTrigger, scrub: 1 },
         });
       }
 
-      if (licenseRef.current) {
-        gsap.to(licenseRef.current, {
-          yPercent: -130,
+      if (copyRef.current) {
+        gsap.to(copyRef.current, {
+          yPercent: -16,
+          opacity: 0.3,
+          ease: "none",
+          scrollTrigger: { ...coverTrigger, scrub: 0.9 },
+        });
+      }
+
+      if (scrollHintRef.current && surface) {
+        gsap.to(scrollHintRef.current, {
           opacity: 0,
           ease: "none",
           scrollTrigger: {
-            trigger: section,
-            start: "30% top",
-            end: "82% top",
-            scrub: 1.1,
+            trigger: surface,
+            start: "top 95%",
+            end: "top 75%",
+            scrub: 1,
           },
         });
       }
@@ -121,83 +128,100 @@ export default function HeroV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[158svh] bg-black text-white"
+      data-header-dark=""
+      className="sticky top-0 z-0 h-[100svh] overflow-hidden bg-black text-white"
       aria-label="828 Construction homepage hero"
     >
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] overflow-hidden">
-        <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
-          <Image
-            src="/images/generated/home-hero-simple-adu-bluehour.jpg"
-            alt="Modern ADU and outdoor living build at blue hour"
-            fill
-            priority
-            fetchPriority="high"
-            sizes="100vw"
-            className="object-cover"
-          />
+      <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
+        <Image
+          src="/images/generated/home-hero-simple-adu-bluehour.jpg"
+          alt="Modern ADU and outdoor living build at blue hour"
+          fill
+          priority
+          fetchPriority="high"
+          sizes="100vw"
+          className="hero-kenburns object-cover"
+        />
+      </div>
+
+      {/* Single quiet veil — bottom-weighted so the photo stays readable */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.06) 38%, rgba(0,0,0,0.16) 62%, rgba(0,0,0,0.64) 100%)",
+        }}
+      />
+
+      {/* Cover dim — darkens as the page surface rides over the pinned hero */}
+      <div
+        ref={veilRef}
+        aria-hidden="true"
+        className="absolute inset-0 bg-black"
+        style={{ opacity: 0 }}
+      />
+
+      <div className="relative z-10 mx-auto flex h-full max-w-[1680px] flex-col justify-end px-6 pb-12 pt-28 lg:px-12 lg:pb-16">
+        <div ref={copyRef} style={{ willChange: "transform, opacity" }}>
+          <p
+            ref={eyebrowRef}
+            className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-white/70 lg:mb-8"
+          >
+            <span
+              aria-hidden="true"
+              className="inline-block h-px w-10"
+              style={{ background: "var(--color-accent-light)" }}
+            />
+            Torrance / South Bay
+          </p>
+
+          {/* One flowing statement, organized as a single readable block —
+              lead sentence, quiet support line, then the CTA */}
+          <div className="max-w-[46rem]">
+            <h1
+              ref={headlineRef}
+              className="font-editorial text-[clamp(1.8rem,2.95vw,2.95rem)] font-normal leading-[1.18] tracking-[-0.01em] text-white"
+            >
+              <span className="block overflow-hidden">
+                <span className="hero-line-inner block">
+                  Transforming properties, delivering solutions.
+                </span>
+              </span>
+              <span className="block overflow-hidden">
+                <span className="hero-line-inner block text-white/62">
+                  828 Construction is the partner of choice for your next
+                  project.
+                </span>
+              </span>
+            </h1>
+
+            <div ref={ctaRef} className="mt-8">
+              <Link
+                href="/contact"
+                className="btn-shine btn-lift inline-flex items-center justify-center bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+              >
+                Book Call
+              </Link>
+            </div>
+          </div>
         </div>
 
         <div
-          ref={veilRef}
+          ref={licenseRef}
+          className="absolute bottom-12 right-6 hidden font-labels text-[9px] uppercase tracking-[0.22em] text-white/42 lg:right-12 lg:bottom-16 lg:block"
+        >
+          CA License #{SITE.license}
+        </div>
+
+        <div
+          ref={scrollHintRef}
           aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            opacity: 0.74,
-            background:
-              "linear-gradient(90deg, rgba(0,0,0,0.86) 0%, rgba(0,0,0,0.62) 38%, rgba(0,0,0,0.18) 70%, rgba(0,0,0,0.42) 100%), linear-gradient(180deg, rgba(0,0,0,0.34) 0%, rgba(0,0,0,0.04) 48%, rgba(0,0,0,0.82) 100%)",
-          }}
-        />
-
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-14 pt-32 lg:px-12 lg:pb-[13vh]">
-          <div
-            ref={copyRef}
-            className="grid max-w-6xl gap-8 lg:grid-cols-[1.12fr_0.72fr] lg:items-end lg:gap-16"
-            style={{ willChange: "transform, opacity" }}
-          >
-            <div>
-              <p
-                ref={eyebrowRef}
-                className="font-labels uppercase tracking-[0.3em] text-white/72 text-[clamp(0.9rem,1.5vw,1.2rem)]"
-              >
-                Torrance / South Bay
-              </p>
-            </div>
-
-            <div className="flex max-w-md flex-col gap-7 border-l border-white/12 pl-6 lg:mb-2 lg:pl-8">
-              <p
-                ref={subRef}
-                className="font-body text-[clamp(1rem,1.35vw,1.18rem)] leading-relaxed text-white/72"
-              >
-                Transforming properties, delivering solutions. 828 Construction
-                is the partner of choice for your next project.
-              </p>
-
-              <div ref={ctaRef} className="shrink-0">
-                <div ref={magneticRef} className="inline-block">
-                  <Link
-                    href="/contact"
-                    className="btn-shine btn-lift inline-flex items-center justify-center bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black"
-                  >
-                    Book Call
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            ref={licenseRef}
-            className="absolute bottom-8 right-6 hidden font-labels text-[9px] uppercase tracking-[0.22em] text-white/38 lg:block lg:right-12"
-            style={{ willChange: "transform, opacity" }}
-          >
-            CA License #{SITE.license}
-          </div>
+          className="absolute bottom-12 left-1/2 hidden -translate-x-1/2 items-center gap-3 lg:flex lg:bottom-16"
+        >
+          <span className="block h-10 w-px bg-white/35" />
         </div>
       </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[28svh] bg-gradient-to-b from-transparent via-black/70 to-black"
-      />
     </section>
   );
 }

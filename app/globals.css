@@ -166,6 +166,35 @@ textarea {
   to   { transform: translateX(-50%); }
 }
 
+/* Home editorial plumb-line nodes — lit when the drawn thread passes them */
+.flow-node-lit {
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+
+/* Home process rows — step-by-step: rows rest dimmed, exactly one lit.
+   (Rows live on the black panel, so the lighter maroon reads.) */
+.process-row-active .process-num {
+  color: var(--color-accent-light);
+}
+.process-row-active .process-title {
+  transform: translateX(0.5rem);
+  color: #ffffff;
+}
+.process-row-active .process-sub {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Hero photo — slow perpetual drift beneath the scroll scrub (living image) */
+@keyframes heroKenBurns {
+  from { transform: scale(1.02) translateY(0); }
+  to   { transform: scale(1.075) translateY(-1.2%); }
+}
+.hero-kenburns {
+  animation: heroKenBurns 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
 @keyframes brand-marquee-scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
