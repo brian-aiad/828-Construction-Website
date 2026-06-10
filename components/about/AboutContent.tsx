@@ -279,7 +279,7 @@ function OriginSection() {
 
   return (
     <section ref={sectionRef} className="relative overflow-x-clip bg-[#050505] py-20 text-white lg:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(123,45,38,0.18),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(99,26,22,0.18),transparent_28%)]" />
       <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.18]" />
       <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.94fr_1.06fr] lg:items-center lg:px-12">
         <div className="relative">

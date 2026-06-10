@@ -114,14 +114,14 @@ export const SERVICE_AREAS = [
 // ── Accent tokens ─────────────────────────────────────────────────────────
 export const ACCENTS = {
   maroon: {
-    DEFAULT: '#7B2D26',
-    light: '#9A3F38',
-    dark: '#5C1F1A',
+    DEFAULT: '#631A16',
+    light: '#872720',
+    dark: '#3F0F0C',
   },
   copper: {
-    DEFAULT: '#B87333',
-    light: '#D4A574',
-    dark: '#8B5A2B',
+    DEFAULT: '#631A16',
+    light: '#872720',
+    dark: '#3F0F0C',
   },
 } as const;
 

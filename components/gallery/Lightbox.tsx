@@ -30,7 +30,7 @@ function PendingPlate({ project }: { project: Project }) {
   return (
     <div className="relative flex h-full min-h-[26rem] w-full overflow-hidden bg-[#101010] text-white">
       <div className="absolute inset-0 blueprint-grid opacity-[0.18]" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_20%,rgba(123,45,38,0.24),transparent_34%),linear-gradient(135deg,#171717_0%,#050505_76%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_20%,rgba(99,26,22,0.24),transparent_34%),linear-gradient(135deg,#171717_0%,#050505_76%)]" />
       <div className="relative z-10 m-auto w-full max-w-2xl px-8 py-12">
         <span className="font-labels text-[9px] uppercase tracking-[0.24em] text-white/38">
           Project documentation pending

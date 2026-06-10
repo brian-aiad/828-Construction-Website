@@ -180,7 +180,11 @@ export default function HomeVisionSequence() {
 
   return (
     <section ref={sectionRef} data-section="vision" className="relative overflow-hidden bg-[#050505] text-white">
-      <div className="relative z-10 overflow-hidden px-6 py-24 lg:min-h-screen lg:px-12 lg:py-36">
+      <div className="relative z-10 overflow-hidden px-6 py-24 lg:min-h-screen lg:px-12 lg:py-32">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-black to-transparent"
+        />
         <Image
           src="/images/generated/home-process-fireplace-bg.webp"
           alt=""
@@ -190,10 +194,10 @@ export default function HomeVisionSequence() {
           className="object-cover object-center"
           aria-hidden="true"
         />
-        <div ref={introRef} className="relative z-10 mx-auto flex min-h-[42rem] max-w-7xl flex-col justify-center lg:min-h-[calc(100vh-18rem)]">
-          <div className="max-w-[43rem]">
+        <div ref={introRef} className="relative z-20 mx-auto flex min-h-[42rem] max-w-7xl flex-col justify-center lg:min-h-[calc(100vh-16rem)]">
+          <div className="max-w-[45rem]">
             <div
-              className="bg-black/42 p-5 backdrop-blur-[2px] sm:p-7 lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
+              className="bg-black/48 p-5 backdrop-blur-[2px] sm:p-7 lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
               style={{ textShadow: "0 2px 22px rgba(0,0,0,0.78)" }}
             >
               <p className="mb-6 font-labels text-[10px] uppercase tracking-[0.28em] text-white/40">
@@ -201,7 +205,7 @@ export default function HomeVisionSequence() {
               </p>
               <h2
                 ref={headlineRef}
-                className="max-w-[12ch] break-normal font-editorial text-[clamp(3.15rem,5.35vw,5.9rem)] font-semibold leading-[0.88] [&_.word]:inline-block [&_.word]:whitespace-nowrap"
+                className="max-w-[12ch] break-normal font-editorial text-[clamp(3.1rem,5vw,5.45rem)] font-semibold leading-[0.88] [&_.word]:inline-block [&_.word]:whitespace-nowrap"
                 style={{ perspective: "1000px" }}
               >
                 Refining industry standards.
@@ -209,7 +213,7 @@ export default function HomeVisionSequence() {
               <p className="mt-7 max-w-md text-base leading-8 text-white/58">
                 A short call to understand the project, the site, and the right next move.
               </p>
-              <p className="vision-step mt-6 max-w-[36rem] border-l border-[var(--color-accent)]/70 bg-black/38 p-5 pl-6 text-sm leading-7 text-white/76 shadow-[0_18px_70px_rgba(0,0,0,0.32)] backdrop-blur-[2px] sm:text-base sm:leading-8 lg:bg-black/28">
+              <p className="vision-step mt-6 max-w-[36rem] border-l border-[var(--color-accent)]/80 bg-black/42 p-5 pl-6 text-sm leading-7 text-white/78 shadow-[0_18px_70px_rgba(0,0,0,0.32)] backdrop-blur-[2px] sm:text-base sm:leading-8 lg:bg-black/30">
                 Embodying meticulous planning, seamless communication, and unparalleled craftsmanship from the first consultation through post-construction, ensuring every detail exceeds expectation.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
@@ -247,7 +251,7 @@ export default function HomeVisionSequence() {
 
       <div ref={panelRef} className="relative z-10 overflow-hidden bg-[linear-gradient(180deg,#050505_0%,#080808_42%,#030303_100%)] py-20 lg:min-h-screen lg:py-0">
         <DraftingMotionLayer intensity="quiet" className="opacity-40" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_18%,rgba(123,45,38,0.16),transparent_28%),radial-gradient(circle_at_16%_76%,rgba(255,255,255,0.055),transparent_32%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_18%,rgba(99,26,22,0.18),transparent_28%),radial-gradient(circle_at_16%_76%,rgba(255,255,255,0.055),transparent_32%)]" />
         <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-white/10 lg:inset-x-12" />
         <div
           aria-hidden="true"
@@ -262,7 +266,7 @@ export default function HomeVisionSequence() {
           className="approach-bg-drift pointer-events-none absolute bottom-[34%] left-[-9rem] h-12 w-[24rem] -rotate-6 border-y border-white/12 opacity-40 lg:bottom-28 lg:left-[-7rem] lg:h-16 lg:w-[34rem] lg:border-white/14 lg:opacity-70"
           style={{
             background:
-              "repeating-linear-gradient(90deg, rgba(255,255,255,0.26) 0 1px, transparent 1px 18px, rgba(123,45,38,0.3) 18px 19px, transparent 19px 54px)",
+              "repeating-linear-gradient(90deg, rgba(255,255,255,0.26) 0 1px, transparent 1px 18px, rgba(99,26,22,0.34) 18px 19px, transparent 19px 54px)",
           }}
         />
         <div
@@ -278,7 +282,7 @@ export default function HomeVisionSequence() {
             <p className="mb-3 font-labels text-[10px] uppercase tracking-[0.28em] text-white/40">
               The approach
             </p>
-            <h3 className="max-w-4xl font-editorial text-[clamp(3rem,6vw,6.2rem)] font-semibold leading-[0.86]">
+            <h3 className="max-w-4xl font-editorial text-[clamp(3rem,5.25vw,5.35rem)] font-semibold leading-[0.88]">
               Build philosophy, made visible.
             </h3>
           </div>
@@ -288,7 +292,7 @@ export default function HomeVisionSequence() {
               <div
                 key={step.number}
                 ref={(el) => { cardsRef.current[i] = el; }}
-                className="group relative min-h-[22rem] overflow-hidden border border-white/12 bg-black/60 p-7 backdrop-blur-xl lg:w-[34vw] lg:min-w-[28rem]"
+                className="group relative min-h-[20rem] overflow-hidden border border-white/12 bg-black/60 p-6 backdrop-blur-xl lg:min-h-[19rem] lg:w-[29vw] lg:min-w-[24rem] lg:p-7"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 <Image
@@ -302,10 +306,10 @@ export default function HomeVisionSequence() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/5" aria-hidden="true" />
                 <div className="relative z-10 flex h-full flex-col justify-between">
                   <div>
-                    <span className="font-numbers text-[clamp(4rem,9vw,8rem)] font-bold leading-none text-white/16">
+                    <span className="font-numbers text-[clamp(3.5rem,7vw,6.2rem)] font-bold leading-none text-white/16">
                       {step.number}
                     </span>
-                    <h4 className="mt-6 font-editorial text-4xl font-semibold leading-none">
+                    <h4 className="mt-6 font-editorial text-[clamp(2rem,3vw,2.6rem)] font-semibold leading-none">
                       {step.title}
                     </h4>
                     <p className="mt-3 font-labels text-[10px] uppercase tracking-[0.22em] text-white/45">

@@ -61,7 +61,7 @@ export default function PrecisionOverlay({
           stroke="var(--color-accent)"
           strokeOpacity="0.72"
           strokeWidth="1.2"
-          style={{ filter: "drop-shadow(0 0 10px rgba(123,45,38,0.45))" }}
+          style={{ filter: "drop-shadow(0 0 10px rgba(99,26,22,0.45))" }}
         />
         <text x="120" y="132" fill="currentColor" fillOpacity="0.42" fontFamily="monospace" fontSize="12" letterSpacing="3">
           MEASURE / ALIGN / BUILD

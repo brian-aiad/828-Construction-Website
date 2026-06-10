@@ -45,14 +45,14 @@ export default function Footer() {
 
   return (
     <footer className="relative overflow-hidden bg-black text-white" data-section="footer">
-      <section className="bg-black px-6 pb-14 pt-24 md:px-8 md:pb-16 md:pt-28 lg:px-3 lg:pb-10 lg:pt-[15.6rem]" data-footer-section="top-band">
-        <div className="grid w-full gap-12 lg:grid-cols-[10fr_15fr] lg:items-start lg:gap-0">
+      <section className="bg-black px-6 pb-12 pt-20 md:px-8 md:pb-12 md:pt-24 lg:px-3 lg:pb-9 lg:pt-28" data-footer-section="top-band">
+        <div className="grid w-full gap-10 lg:grid-cols-[10fr_15fr] lg:items-start lg:gap-0">
           <div>
-            <h2 className="max-w-[27rem] font-display text-[clamp(3rem,3.85vw,3.75rem)] font-medium leading-[0.92] tracking-normal text-white">
+            <h2 className="max-w-[24rem] font-display text-[clamp(2.4rem,3.7vw,3.4rem)] font-normal leading-[1.02] tracking-[-0.01em] text-white">
               Quality is the strategy.
             </h2>
 
-            <ul className="mt-8 flex items-center gap-5" aria-label="Social links">
+            <ul className="mt-7 flex items-center gap-5" aria-label="Social links">
               {SOCIAL_LINKS.map((social) => (
                 <li key={social.label}>
                   <a
@@ -60,7 +60,7 @@ export default function Footer() {
                     aria-label={social.label}
                     target={social.href === "#" ? undefined : "_blank"}
                     rel={social.href === "#" ? undefined : "noopener noreferrer"}
-                    className="group flex h-9 w-9 items-center justify-center text-white/42 transition-colors hover:text-white/72"
+                    className="group flex h-10 w-10 items-center justify-center text-white/42 transition-colors hover:text-white/72"
                   >
                     <span className="h-6 w-6">{social.icon}</span>
                   </a>
@@ -69,16 +69,16 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="lg:pt-2">
+          <div className="lg:pt-1">
             <a
               href={SITE.phoneHref}
-              className="block font-display text-[clamp(2.35rem,3.65vw,3.65rem)] font-medium leading-[0.95] text-white/38 transition-colors hover:text-white/68"
+              className="block font-display text-[clamp(2.2rem,3.7vw,3.4rem)] font-normal leading-[1.05] text-white/38 transition-colors hover:text-white/68"
             >
               {formattedPhone}
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="mt-5 block font-display text-[clamp(1.55rem,2.65vw,3rem)] font-medium leading-[0.98] text-white/30 transition-colors hover:text-white/62"
+              className="mt-4 block font-display text-[clamp(1.5rem,3.4vw,3.15rem)] font-normal leading-[1.08] text-white/30 transition-colors hover:text-white/62"
             >
               <span className="inline-block">828constructionca</span>
               <span className="inline-block">@gmail.com</span>
@@ -87,10 +87,10 @@ export default function Footer() {
         </div>
       </section>
 
-      <section className="grid min-h-[30rem] grid-cols-1 lg:min-h-0 lg:grid-cols-[10fr_8fr_7fr]" data-footer-section="panels">
+      <section className="grid min-h-[28rem] grid-cols-1 lg:min-h-0 lg:grid-cols-[10fr_8fr_7fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
-          className="group relative min-h-[24rem] overflow-hidden bg-black text-white lg:min-h-[34.4rem]"
+          className="group relative min-h-[22rem] overflow-hidden bg-black text-white lg:min-h-[30rem]"
         >
           <Image
             src="/images/generated/footer-consultation-cta.webp"
@@ -101,15 +101,15 @@ export default function Footer() {
             style={{ filter: "contrast(1.04) saturate(0.96) brightness(0.92)" }}
           />
           <div className="absolute inset-0 bg-black/18" aria-hidden="true" />
-          <div className="absolute left-0 right-0 top-[43%] z-10 px-7 md:px-9 lg:px-[5vw]">
-            <span className="block border-b border-white/62 pb-2 font-display text-[clamp(1.9rem,3vw,3.35rem)] font-medium leading-none text-white">
+          <div className="absolute left-0 right-0 top-[44%] z-10 px-7 md:px-9 lg:px-[5vw]">
+            <span className="block border-b border-white/62 pb-2 font-display text-[clamp(1.5rem,2vw,1.85rem)] font-normal leading-none text-white">
               Book a Call
               <span className="ml-3" aria-hidden="true">→</span>
             </span>
           </div>
         </a>
 
-        <div className="flex min-h-[27rem] flex-col bg-[#e7e7e2] px-7 py-8 text-black md:px-9 lg:min-h-[34.4rem] lg:px-[5.1vw] lg:py-[6.1rem]">
+        <div className="flex min-h-[25rem] flex-col bg-[#e7e7e2] px-7 py-8 text-black md:px-9 lg:min-h-[30rem] lg:px-[5.1vw] lg:py-[4.5rem]">
           <nav aria-label="Footer navigation" className="mt-4 flex flex-col gap-[0.7rem] lg:mt-0">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
@@ -129,13 +129,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex min-h-[27rem] flex-col overflow-hidden bg-[#f7f7f3] px-7 py-8 text-black md:px-9 lg:min-h-[34.4rem] lg:px-[5.2vw] lg:pb-0 lg:pt-[9.5rem]">
+        <div className="flex min-h-[25rem] flex-col overflow-hidden bg-[#f7f7f3] px-7 py-8 text-black md:px-9 lg:min-h-[30rem] lg:px-[5.2vw] lg:pb-0 lg:pt-[5.5rem]">
           <div>
             <p className={`${labelClass} text-black/42`}>Serving</p>
-            <h3 className="mt-4 font-display text-[clamp(1.6rem,1.45vw,1.75rem)] font-medium leading-tight text-black">
+            <h3 className="mt-3 font-display text-[clamp(1.2rem,1.25vw,1.4rem)] font-medium leading-tight text-black">
               Torrance, CA
             </h3>
-            <address className="mt-4 not-italic text-sm leading-6 text-black/72">
+            <address className="mt-3 not-italic text-sm leading-6 text-black/72">
               {streetLine}
               <br />
               {SITE.address.city}, {SITE.address.state} {SITE.address.zip}

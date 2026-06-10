@@ -113,7 +113,7 @@ export default function SectionMotionBackdrop({
   }, [density]);
 
   const ink = tone === "dark" ? "0,0,0" : "255,255,255";
-  const accent = tone === "dark" ? "123,45,38" : "184,115,51";
+  const accent = tone === "dark" ? "99,26,22" : "184,115,51";
   const baseOpacity = density === "standard" ? "opacity-[0.32]" : "opacity-[0.22]";
 
   return (

@@ -5,15 +5,15 @@
   --foreground: #000000;
 
   /* V2 primary accent — maroon (Joe's iteration, May 2026) */
-  --color-accent: #7B2D26;
-  --color-accent-light: #9A3F38;
-  --color-accent-dark: #5C1F1A;
+  --color-accent: #631A16;
+  --color-accent-light: #872720;
+  --color-accent-dark: #3F0F0C;
 
   /* Copper retained as fallback per client approval */
-  --color-accent-fallback: #B87333;
-  --accent-copper: #B87333;
-  --accent-copper-light: #D4A574;
-  --accent-copper-dark: #8B5A2B;
+  --color-accent-fallback: #631A16;
+  --accent-copper: #631A16;
+  --accent-copper-light: #872720;
+  --accent-copper-dark: #3F0F0C;
 
   /* Gradient tokens for splash + dark-section depth */
   --gradient-splash-vertical: linear-gradient(180deg, #000000 0%, #0A0A0A 60%, #1A1A1A 100%);
@@ -64,12 +64,16 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Font families wired to CSS vars set by next/font */
-  --font-family-display: var(--font-space-grotesk);
-  --font-family-editorial: var(--font-editorial);
+  /* Font families wired to CSS vars set by next/font.
+     Cohesion pass (Jun 2026): display + editorial + body unified on one
+     neutral grotesque (Inter) to echo NS Builders' Neue Haas Grotesk Display.
+     To swap in licensed Neue Haas later, repoint --font-primary only. */
+  --font-primary: var(--font-inter);
+  --font-family-display: var(--font-primary);
+  --font-family-editorial: var(--font-primary);
   --font-family-numbers: var(--font-ibm-plex-mono);
   --font-family-labels: var(--font-space-mono);
-  --font-family-body: var(--font-inter);
+  --font-family-body: var(--font-primary);
 
   /* Extended font sizes */
   --font-size-10xl: 10rem;
@@ -353,9 +357,10 @@ h1, h2, h3 {
 }
 
 .font-editorial {
-  font-family: var(--font-family-editorial), Georgia, serif;
-  font-feature-settings: "liga" 1, "kern" 1;
-  letter-spacing: 0;
+  font-family: var(--font-family-editorial), "Helvetica Neue", Arial, sans-serif;
+  /* ss01 gives Inter its single-story grotesque letterforms (Neue Haas feel) */
+  font-feature-settings: "liga" 1, "kern" 1, "ss01" 1, "cv05" 1;
+  letter-spacing: -0.02em;
 }
 
 .premium-object {
@@ -485,7 +490,7 @@ html.lenis body {
 
 /* ── Copper glow — hover shimmer for copper-accent elements ──────────────── */
 .copper-glow:hover {
-  box-shadow: 0 0 20px rgba(123, 45, 38, 0.2);
+  box-shadow: 0 0 20px rgba(99, 26, 22, 0.2);
 }
 
 /* ── Skip to main content — accessibility ────────────────────────────────── */
@@ -580,14 +585,14 @@ html.lenis body {
 
 /* ── License badge glow — Footer CA License element ─────────────────────── */
 .license-badge:hover {
-  box-shadow: 0 0 24px 4px rgba(123, 45, 38, 0.4);
+  box-shadow: 0 0 24px 4px rgba(99, 26, 22, 0.4);
   transition: box-shadow 0.6s ease;
 }
 
 /* ── Pulse glow — BOOK CALL CTAs on service + about pages ───────────────── */
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(123, 45, 38, 0); }
-  50%       { box-shadow: 0 0 0 8px rgba(123, 45, 38, 0.22), 0 0 20px rgba(123, 45, 38, 0.12); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 26, 22, 0); }
+  50%       { box-shadow: 0 0 0 8px rgba(99, 26, 22, 0.22), 0 0 20px rgba(99, 26, 22, 0.12); }
 }
 
 @keyframes precisionNeedle {
@@ -604,8 +609,8 @@ html.lenis body {
 
 /* ── BOOK CALL header CTA — outer-ring pulse glow ───────────────────────── */
 @keyframes bookCallPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(123, 45, 38, 0.5); }
-  50%       { box-shadow: 0 0 0 14px rgba(123, 45, 38, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 26, 22, 0.5); }
+  50%       { box-shadow: 0 0 0 14px rgba(99, 26, 22, 0); }
 }
 .book-call-cta {
   animation: bookCallPulse 2.4s ease-in-out infinite;

@@ -99,7 +99,7 @@ function PendingProjectPlate({
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#111] text-white">
       <div className="absolute inset-0 blueprint-grid opacity-[0.18]" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(123,45,38,0.20),transparent_34%),linear-gradient(135deg,#161616_0%,#080808_72%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(99,26,22,0.20),transparent_34%),linear-gradient(135deg,#161616_0%,#080808_72%)]" />
       <div className="absolute left-0 top-0 h-px w-full bg-white/12" />
       <div className="absolute bottom-0 left-0 h-px w-full bg-[var(--color-accent)]/45" />
       <div className="relative z-10 flex h-full flex-col justify-between p-4 lg:p-6">
@@ -461,7 +461,7 @@ function PortfolioHero({
   return (
     <section className="relative overflow-hidden bg-black px-4 pb-4 pt-24 text-white sm:px-6 lg:px-8 lg:pt-28">
       <DraftingMotionLayer intensity="quiet" variant="intro" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_14%,rgba(123,45,38,0.14),transparent_28%)]" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_14%,rgba(99,26,22,0.14),transparent_28%)]" aria-hidden="true" />
       <div className="relative z-10 mx-auto max-w-[92rem]">
         <div className="grid auto-rows-[16rem] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:auto-rows-[15.5rem]">
           <div className="relative row-span-2 flex min-h-[31rem] flex-col gap-10 border border-white/10 bg-white/[0.025] p-5 backdrop-blur-sm sm:col-span-2 sm:min-h-[29rem] lg:col-span-5 lg:row-span-2 lg:min-h-0 lg:justify-between lg:gap-0 lg:p-7">

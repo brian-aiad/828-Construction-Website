@@ -125,14 +125,14 @@ export default function SplashScreen() {
       {/* maroon vignette from bottom */}
       <div aria-hidden="true" style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        background: "linear-gradient(to top, rgba(123,45,38,0.20) 0%, rgba(123,45,38,0.06) 28%, transparent 52%)",
+        background: "linear-gradient(to top, rgba(99,26,22,0.20) 0%, rgba(99,26,22,0.06) 28%, transparent 52%)",
       }} />
 
       {/* wordmark */}
       <div className="splash-wordmark" style={{
         position: "relative",
         display: "flex", alignItems: "baseline", gap: "0.18em",
-        fontFamily: "var(--font-space-grotesk), sans-serif",
+        fontFamily: "var(--font-inter), 'Helvetica Neue', Arial, sans-serif",
         fontWeight: 700,
         fontSize: "clamp(0.82rem, 2.4vw, 1.82rem)",
         letterSpacing: "-0.01em",

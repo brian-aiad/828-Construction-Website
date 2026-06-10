@@ -125,7 +125,7 @@ export default function ServicesPreviewV2() {
           const onEnter = () => {
             if (imgEl) gsap.to(imgEl, { scale: 1.08, duration: 0.7, ease: "power2.out" });
             if (barEl) gsap.to(barEl, { scaleX: 1, duration: 0.3, ease: "power2.out" });
-            gsap.to(card, { z: 40, boxShadow: "0 30px 60px -20px rgba(123,45,38,0.5)", duration: 0.5, ease: "power2.out" });
+            gsap.to(card, { z: 40, boxShadow: "0 30px 60px -20px rgba(99,26,22,0.5)", duration: 0.5, ease: "power2.out" });
           };
           const onLeave = () => {
             if (imgEl) gsap.to(imgEl, { scale: 1, duration: 0.7, ease: "power2.out" });
@@ -155,16 +155,20 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-black py-16 lg:py-28"
+      className="relative -mt-[16svh] overflow-hidden bg-black pb-24 pt-[22svh] lg:pb-40 lg:pt-[26svh]"
       data-section="services-v2"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[24svh] bg-gradient-to-b from-transparent via-black/78 to-black"
+      />
       <DraftingMotionLayer intensity="standard" className="opacity-35" />
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section header */}
-        <div className="mb-8 grid gap-6 lg:mb-14 lg:grid-cols-[0.92fr_1fr] lg:items-end lg:gap-8">
+        <div className="mb-10 grid gap-7 lg:mb-16 lg:grid-cols-[0.9fr_1fr] lg:items-end lg:gap-12">
           <div>
-            <h2 className="font-editorial font-semibold text-white leading-[0.92]"
-              style={{ fontSize: "clamp(3rem, 6vw, 6rem)" }}>
+            <h2 className="max-w-[12ch] font-editorial font-semibold text-white leading-[0.88]"
+              style={{ fontSize: "clamp(3.2rem, 5.5vw, 5.8rem)" }}>
               One company,<br className="hidden lg:block" /> <span className="text-white/40">multiple solutions.</span>
             </h2>
           </div>
@@ -185,7 +189,7 @@ export default function ServicesPreviewV2() {
         </div>
 
         {/* Asymmetric grid: ADU tall left | Remediation + Consulting stacked right */}
-        <div ref={gridRef} className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
+        <div ref={gridRef} className="grid grid-cols-1 gap-3 lg:grid-cols-[3fr_2fr] lg:gap-4">
 
           {/* ADU — tall featured card with 3D tilt */}
           <div
@@ -193,7 +197,7 @@ export default function ServicesPreviewV2() {
               cardRefs.current[0] = el;
               tilt0Ref.current = el;
             }}
-            className="relative group min-h-[21rem] overflow-hidden cursor-pointer sm:min-h-[24rem] lg:min-h-[clamp(360px,60vh,600px)]"
+            className="relative group min-h-[21rem] overflow-hidden cursor-pointer sm:min-h-[24rem] lg:min-h-[clamp(350px,58vh,560px)]"
             style={{ transformStyle: "preserve-3d", willChange: "transform" }}
             data-gsap-reveal="true"
           >
@@ -225,8 +229,8 @@ export default function ServicesPreviewV2() {
               <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-2">
                 {adu.short}
               </p>
-              <h3 className="font-editorial font-semibold text-white tracking-normal mb-2"
-                style={{ fontSize: "clamp(1.55rem, 7vw, 2.2rem)" }}>
+              <h3 className="font-editorial font-semibold text-white tracking-normal mb-2 leading-none"
+                style={{ fontSize: "clamp(1.65rem, 6vw, 2.35rem)" }}>
                 {adu.title}
               </h3>
               <p className="font-body text-white/55 text-sm leading-relaxed max-w-xs">
@@ -244,7 +248,7 @@ export default function ServicesPreviewV2() {
                 cardRefs.current[1] = el;
                 tilt1Ref.current = el;
               }}
-              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(180px,28vh,290px)]"
+              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(170px,27vh,272px)]"
               style={{ transformStyle: "preserve-3d", willChange: "transform" }}
               data-gsap-reveal="true"
             >
@@ -273,8 +277,8 @@ export default function ServicesPreviewV2() {
                 <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
                   {remediation.short}
                 </p>
-                <h3 className="font-editorial font-semibold text-white tracking-normal"
-                  style={{ fontSize: "clamp(1.35rem, 6vw, 1.8rem)" }}>
+                <h3 className="font-editorial font-semibold text-white tracking-normal leading-none"
+                  style={{ fontSize: "clamp(1.4rem, 5vw, 1.9rem)" }}>
                   {remediation.title}
                 </h3>
                 <p className="font-body text-white/50 text-xs leading-relaxed mt-1">
@@ -289,7 +293,7 @@ export default function ServicesPreviewV2() {
                 cardRefs.current[2] = el;
                 tilt2Ref.current = el;
               }}
-              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(180px,28vh,290px)]"
+              className="relative group min-h-[13.75rem] flex-1 overflow-hidden cursor-pointer sm:min-h-[15rem] lg:min-h-[clamp(170px,27vh,272px)]"
               style={{ transformStyle: "preserve-3d", willChange: "transform" }}
               data-gsap-reveal="true"
             >
@@ -318,8 +322,8 @@ export default function ServicesPreviewV2() {
                 <p className="font-labels text-[9px] text-white/40 tracking-[0.22em] uppercase mb-1.5">
                   {consulting.short}
                 </p>
-                <h3 className="font-editorial font-semibold text-white tracking-normal"
-                  style={{ fontSize: "clamp(1.35rem, 6vw, 1.8rem)" }}>
+                <h3 className="font-editorial font-semibold text-white tracking-normal leading-none"
+                  style={{ fontSize: "clamp(1.4rem, 5vw, 1.9rem)" }}>
                   {consulting.title}
                 </h3>
                 <p className="font-body text-white/50 text-xs leading-relaxed mt-1">

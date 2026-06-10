@@ -102,9 +102,13 @@ export default function AboutPreview() {
     <section
       ref={sectionRef}
       className="relative overflow-hidden bg-[#050505] text-white"
-      style={{ minHeight: "min(100vh, 820px)" }}
+      style={{ minHeight: "min(100vh, 760px)" }}
       data-section="about-preview"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#030303] to-transparent"
+      />
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
@@ -130,12 +134,12 @@ export default function AboutPreview() {
         className="pointer-events-none absolute left-0 top-0 hidden h-px w-[42vw] origin-left bg-[var(--color-accent)]/55 lg:block"
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 lg:px-12 lg:py-32">
-        <div className="grid min-h-[min(82vh,720px)] grid-cols-1 items-center gap-12 lg:grid-cols-[0.72fr_1fr] lg:gap-16">
+      <div className="relative z-20 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <div className="grid min-h-[min(76vh,660px)] grid-cols-1 items-center gap-12 lg:grid-cols-[0.76fr_1fr] lg:gap-14">
           <div className="relative order-2 lg:order-1">
             <div
               ref={imgRef}
-              className="relative min-h-[24rem] overflow-hidden border border-white/10 bg-white/[0.025] md:min-h-[34rem] lg:-ml-12 lg:min-h-[42rem]"
+              className="relative min-h-[24rem] overflow-hidden border border-white/10 bg-white/[0.025] md:min-h-[32rem] lg:-ml-12 lg:min-h-[36rem]"
               style={{ clipPath: "inset(0%)" }}
               data-gsap-reveal="true"
             >
@@ -164,7 +168,7 @@ export default function AboutPreview() {
           <div className="order-1 flex flex-col justify-center lg:order-2 lg:pl-4">
             <h2
               ref={(el) => { textRefs.current[0] = el as HTMLElement; }}
-              className="max-w-[10ch] font-editorial text-[clamp(3.2rem,6vw,6.8rem)] font-semibold leading-[0.86] text-white"
+              className="max-w-[11ch] font-editorial text-[clamp(3.05rem,5.35vw,5.75rem)] font-semibold leading-[0.88] text-white"
               style={{ opacity: 0 }}
             >
               Refining industry standards.
@@ -172,7 +176,7 @@ export default function AboutPreview() {
 
             <p
               ref={(el) => { textRefs.current[1] = el; }}
-              className="mt-7 max-w-xl text-base leading-8 text-white/68 lg:ml-16 lg:text-lg lg:leading-9"
+              className="mt-7 max-w-xl text-base leading-8 text-white/68 lg:ml-12 lg:text-lg lg:leading-9"
               style={{ opacity: 0 }}
             >
               With more than 20 years of experience across multiple construction trades, 828 Construction brings a comprehensive understanding of the building process. Our mission is to make every project as seamless, effective, and stress-free as possible.

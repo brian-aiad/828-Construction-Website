@@ -121,7 +121,7 @@ export default function HeroV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[165svh] bg-black text-white"
+      className="relative h-[158svh] bg-black text-white"
       aria-label="828 Construction homepage hero"
     >
       <div ref={stickyRef} className="sticky top-0 h-[100svh] overflow-hidden">
@@ -148,7 +148,7 @@ export default function HeroV2() {
           }}
         />
 
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-14 pt-32 lg:px-12 lg:pb-16">
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-14 pt-32 lg:px-12 lg:pb-[13vh]">
           <div
             ref={copyRef}
             className="grid max-w-6xl gap-8 lg:grid-cols-[1.12fr_0.72fr] lg:items-end lg:gap-16"
@@ -194,6 +194,10 @@ export default function HeroV2() {
           </div>
         </div>
       </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[28svh] bg-gradient-to-b from-transparent via-black/70 to-black"
+      />
     </section>
   );
 }

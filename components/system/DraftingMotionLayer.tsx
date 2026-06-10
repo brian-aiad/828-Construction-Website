@@ -129,7 +129,7 @@ export default function DraftingMotionLayer({
         className={`absolute ${variant === "intro" ? "inset-[-18%] opacity-[0.5]" : "inset-[-12%] opacity-[0.28]"}`}
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px), linear-gradient(rgba(123,45,38,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(123,45,38,0.16) 1px, transparent 1px)",
+            "linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px), linear-gradient(rgba(99,26,22,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(99,26,22,0.16) 1px, transparent 1px)",
           backgroundSize: variant === "intro" ? "78px 78px, 78px 78px, 19.5px 19.5px, 19.5px 19.5px" : "96px 96px, 96px 96px, 24px 24px, 24px 24px",
           maskImage: variant === "intro"
             ? "linear-gradient(90deg, black 0%, rgba(0,0,0,0.92) 48%, rgba(0,0,0,0.34) 72%, transparent 100%)"

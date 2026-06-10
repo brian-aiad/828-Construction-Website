@@ -83,8 +83,8 @@ export default function Header() {
             : "bg-black/90 backdrop-blur-xl border-b border-white/10"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-          <div className="flex items-center justify-between h-14 lg:h-16">
+        <div className="w-full px-3 sm:px-4 lg:px-8 2xl:px-10">
+          <div className="flex h-14 items-center justify-between lg:grid lg:h-16 lg:grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] lg:gap-10">
             {/* Logo — text wordmark, uniform weight */}
             <Link
               href="/"
@@ -100,7 +100,7 @@ export default function Header() {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center justify-center gap-8">
               {NAV_LINKS.map((link) => {
                 if (link.href === "/services") {
                   return (
@@ -123,7 +123,7 @@ export default function Header() {
                         <span
                           className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                             isServicesActive
-                              ? "bg-[#7B2D26] scale-x-100"
+                              ? "bg-[var(--color-accent)] scale-x-100"
                               : `bg-white origin-left transition-transform duration-300 ${servicesOpen ? "scale-x-100" : "scale-x-0"}`
                           }`}
                         />
@@ -211,7 +211,7 @@ export default function Header() {
                     <span
                       className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                         pathname === link.href
-                          ? "bg-[#7B2D26] scale-x-100"
+                          ? "bg-[var(--color-accent)] scale-x-100"
                           : "bg-white scale-x-0 group-hover:scale-x-100"
                       }`}
                     />
@@ -221,7 +221,7 @@ export default function Header() {
             </nav>
 
             {/* Right side: location + timestamp */}
-            <div className="hidden lg:flex items-center">
+            <div className="hidden lg:flex items-center justify-end">
               {torTime && (
                 <span className="font-labels text-[9px] text-white/30 tracking-[0.14em] uppercase whitespace-nowrap">
                   Torrance · {torTime}
@@ -303,7 +303,7 @@ export default function Header() {
                         <span
                           className={`font-labels text-[9px] tracking-[0.2em] uppercase transition-colors duration-200 ${
                             mobileServicesOpen
-                              ? "text-[#7B2D26]"
+                              ? "text-[var(--color-accent-light)]"
                               : "text-gray-600"
                           }`}
                         >
@@ -340,7 +340,7 @@ export default function Header() {
                                   href={`/services/${service.slug}`}
                                   className={`flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0 transition-colors duration-150 ${
                                     pathname === `/services/${service.slug}`
-                                      ? "text-[#7B2D26]"
+                                      ? "text-[var(--color-accent-light)]"
                                       : "text-gray-400 hover:text-white"
                                   }`}
                                 >
