@@ -2,6 +2,12 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-06-10 (refresh fix) — Hard refresh always lands at top, no white strip
+
+- ScrollRestorationReset was useEffect-only — it ran after hydration, so a mid-page hard refresh painted one frame at the restored position (cream strip) before jumping to top.
+- Now also renders an inline synchronous <script> (Fix 13 pattern) that sets history.scrollRestoration='manual' + scrollTo(0,0) during HTML parse, before first paint. useEffect kept as second layer.
+- Verified: scrollY === 0 at commit, domcontentloaded, and settled after a 3000px-deep hard refresh; hero full-frame.
+
 ## 2026-06-10 (first-land fix) — Hero always lands full-frame
 
 - Bug: on first land the hero sometimes showed a sliver of the light surface at the bottom — the surface started exactly at the fold, and wheel input during the splash (or any stray scroll offset) revealed it.
