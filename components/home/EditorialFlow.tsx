@@ -76,16 +76,17 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
     }
 
     const ctx = gsap.context(() => {
-      // Covered surfaces settle back and dim as the next rides over them
+      // Covered surfaces settle back while the next rides over them. Keep the
+      // surface itself opaque; fading the whole section makes unrelated layers
+      // bleed through during the overlap.
       stacks.forEach((el, i) => {
         const next = stacks[i + 1];
         if (!next) return;
         gsap.fromTo(
           el,
-          { scale: 1, opacity: 1 },
+          { scale: 1 },
           {
             scale: 0.975,
-            opacity: 0.72,
             ease: "none",
             transformOrigin: "center 80%",
             scrollTrigger: {
@@ -145,7 +146,7 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
           key={i}
           data-stack-surface=""
           data-header-light=""
-          className="bg-[#f7f7f3]"
+          className="bg-[#f7f7f3] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.55)]"
           style={{ zIndex: i + 1, willChange: i < items.length - 1 ? "transform" : undefined }}
         >
           {child}

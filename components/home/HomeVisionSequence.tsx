@@ -296,8 +296,9 @@ export default function HomeVisionSequence() {
       className="relative bg-[#f7f7f3] text-[#111]"
     >
       {/* Intro — asymmetric editorial split */}
-      <div className="mx-auto max-w-[1680px] px-6 pb-20 lg:px-12 lg:pb-28">
-        <div className="grid gap-10 pt-10 lg:grid-cols-12 lg:gap-12 lg:pt-14">
+      <div className="relative w-full bg-[#f7f7f3]">
+        <div className="mx-auto max-w-[1680px] px-6 pb-12 lg:px-12 lg:pb-16">
+          <div className="grid gap-10 pt-16 lg:grid-cols-12 lg:gap-12 lg:pt-20">
           <div className="lg:col-span-7">
             <p className="vision-intro-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent)] lg:mb-8">
               <span
@@ -306,7 +307,7 @@ export default function HomeVisionSequence() {
               />
               Our first step is listening
             </p>
-            <h2
+            <h3
               ref={headlineRef}
               className="font-editorial text-[clamp(2.1rem,3.2vw,3.4rem)] font-normal leading-[1.06] tracking-[-0.01em]"
             >
@@ -315,7 +316,7 @@ export default function HomeVisionSequence() {
                   Refining industry standards.
                 </span>
               </span>
-            </h2>
+            </h3>
           </div>
 
           <div className="flex flex-col justify-end lg:col-span-5 lg:col-start-8">
@@ -355,7 +356,7 @@ export default function HomeVisionSequence() {
         <div
           ref={photoRef}
           data-header-dark=""
-          className="relative h-[58vh] overflow-hidden bg-[#e8e8e3] sm:h-[72vh] lg:h-[92vh]"
+          className="relative h-[58vh] overflow-hidden bg-[#e8e8e3] sm:h-[72vh] lg:h-[86vh]"
           data-gsap-reveal="true"
         >
           <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
@@ -370,6 +371,8 @@ export default function HomeVisionSequence() {
             />
           </div>
         </div>
+      </div>
+
       </div>
 
       {/* Marquee — refined mono strip, hairline-bounded */}

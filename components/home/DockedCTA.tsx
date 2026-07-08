@@ -16,11 +16,15 @@ export default function DockedCTA() {
     const update = () => {
       raf = 0;
       const pastHero = window.scrollY > window.innerHeight * 0.85;
+      const vision = document.querySelector('[data-section="vision"]');
+      const visionEntering = vision
+        ? vision.getBoundingClientRect().top < window.innerHeight * 0.86
+        : false;
       const footer = document.querySelector("footer");
       const footerNear = footer
         ? footer.getBoundingClientRect().top < window.innerHeight * 0.92
         : false;
-      setVisible(pastHero && !footerNear);
+      setVisible(pastHero && !visionEntering && !footerNear);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
