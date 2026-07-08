@@ -18,11 +18,13 @@ export default function Header() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Home: the header re-forms to match whatever section is actually
-    // painted beneath it — dark zones (hero, photographs, black panels,
-    // footer) get the dark glass, light surfaces get the cream glass.
+    // The header re-forms to match whatever section is actually painted
+    // beneath it — dark zones (hero, photographs, black panels, footer) get
+    // the dark glass, light surfaces get the cream glass. Active on any page
+    // that marks zones with data-header-light (V4 direction: every page).
+    const zoneAware = !!document.querySelector("[data-header-light]");
     const checkZone = () => {
-      if (pathname !== "/") {
+      if (!zoneAware) {
         setOverLight(false);
         return;
       }
@@ -58,7 +60,7 @@ export default function Header() {
     // Scrub animations (e.g. the expanding photograph) keep settling AFTER
     // the last scroll event — a light poll keeps the header honest. The
     // check is a no-op re-render-wise unless the zone actually changes.
-    const zonePoll = pathname === "/" ? setInterval(checkZone, 300) : undefined;
+    const zonePoll = zoneAware ? setInterval(checkZone, 300) : undefined;
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (zonePoll) clearInterval(zonePoll);
@@ -102,9 +104,9 @@ export default function Header() {
   const isServicesActive =
     pathname === "/services" || pathname.startsWith("/services/");
 
-  // Light header mode — only on home, once the editorial surface is under it,
+  // Light header mode — whenever a light-marked surface is under the bar,
   // and never while the (black) mobile menu overlay is open.
-  const light = isHome && overLight && !mobileOpen;
+  const light = overLight && !mobileOpen;
   const inkBase = light ? "text-black/60 hover:text-black" : "text-white/60 hover:text-white";
   const inkActive = light ? "text-black" : "text-white";
 

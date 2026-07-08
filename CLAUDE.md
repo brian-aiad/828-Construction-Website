@@ -65,6 +65,7 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 
 ## Read these before any code change
 
+0. `design/828_DESIGN_DIRECTION_V4.md` — Brian's standing directive (2026-07-08): verbiage frozen, NS-simple + page-animated, NO billboard-scale text, asymmetric alternating motion, morphing header on every page, mobile designed not just tested. Applies to ALL future page passes and video batches.
 1. `design/828_DESIGN_SYSTEM.md` — palette, type, animation catalog, component primitives
 2. `design/PATTERNS.md` — Known Fixes section (21 solved bugs + 4 V2 patterns; use these, do not re-solve)
 3. `~/.claude/skills/828-construction-methodology/SKILL.md` — the v3 autonomous build protocol

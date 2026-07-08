@@ -2,6 +2,26 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 (evening) — About V4 simplicity pass + standing design direction
+
+- NEW STANDING DIRECTIVE from Brian recorded in `design/828_DESIGN_DIRECTION_V4.md`
+  (linked from CLAUDE.md "read these" #0): verbiage frozen, NS-simple +
+  page-animated, NO billboard-scale text, asymmetric alternating motion
+  (sticky side vs scrolling side), morphing header on every page, one signature
+  moment per page, mobile designed at 390px. Applies to every future page pass
+  and client-video batch.
+- About V4 applied: hero h1 4.6rem cap (was 9.6rem), South Bay/CTA h2s ~3.4rem
+  cap, watermark quieter; origin image column now sticky (left) while copy
+  scrolls; CRAFT flipped — statements left, sticky letter rail right
+  (alternating sides); South Bay copy block moved right over the full-bleed
+  city marquee; CTA bg varied to home-about-workbench.jpg.
+- Header zone-morph generalized: was pathname==="/" only, now activates on any
+  page containing [data-header-light] (About's white CRAFT section is marked).
+  Dark stays default; loop order means only mark LIGHT zones inside AboutFlow.
+- No image generation tool available this session — imagery varied from the
+  existing generated library instead (noted in V4 doc).
+- QA: functional-qa PASS both viewports, captures re-verified, tsc clean.
+
 ## 2026-07-08 - Home scroll cleanup and reveal stabilization
 
 - Home process panel now has more scroll runway before the next stacked surface

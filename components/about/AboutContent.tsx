@@ -195,8 +195,8 @@ function AboutHero() {
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] -translate-y-1/2 select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.07]"
-        style={{ fontSize: "clamp(4.2rem, 11.5vw, 12rem)", letterSpacing: "0.04em", willChange: "transform" }}
+        className="pointer-events-none absolute inset-x-0 top-[38%] z-[1] -translate-y-1/2 select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.05]"
+        style={{ fontSize: "clamp(3.6rem, 10vw, 10.5rem)", letterSpacing: "0.05em", willChange: "transform" }}
       >
         828 Construction
       </div>
@@ -209,7 +209,7 @@ function AboutHero() {
             <p className="mb-6 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
               About / 828 Construction
             </p>
-            <h1 className="max-w-5xl font-editorial text-[clamp(3.6rem,9vw,9.6rem)] font-semibold leading-[0.82]">
+            <h1 className="max-w-3xl font-editorial text-[clamp(2.4rem,4.6vw,4.6rem)] font-semibold leading-[0.92]">
               Where quality meets quiet luxury.
             </h1>
           </div>
@@ -336,8 +336,8 @@ function OriginSection() {
     <section ref={sectionRef} data-section="" className="relative bg-[#050505] py-20 text-white lg:py-32" style={{ overflowX: "clip" }}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(99,26,22,0.18),transparent_28%)]" />
       <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.18]" />
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.94fr_1.06fr] lg:items-center lg:px-12">
-        <div className="relative">
+      <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.94fr_1.06fr] lg:items-start lg:px-12">
+        <div className="relative lg:sticky lg:top-24">
           <div
             ref={imageRef}
             className="relative overflow-hidden border border-white/10 bg-white/[0.03]"
@@ -481,7 +481,7 @@ function CraftSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="" className="relative bg-white py-20 text-black lg:py-32" style={{ overflowX: "clip" }}>
+    <section ref={sectionRef} data-section="" data-header-light="" className="relative bg-white py-20 text-black lg:py-32" style={{ overflowX: "clip" }}>
       <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.13]" />
 
       {/* Joe (IMG_1020): "The word craft dropped in the background, bold." */}
@@ -495,15 +495,15 @@ function CraftSection() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="grid gap-12 lg:grid-cols-[0.42fr_1.58fr] lg:items-start">
-          <div className="lg:sticky lg:top-28">
+        <div className="grid gap-12 lg:grid-cols-[1.58fr_0.42fr] lg:items-start">
+          <div className="lg:order-2 lg:sticky lg:top-28 lg:text-right">
             <p data-craft-reveal className="mb-5 font-labels text-[10px] uppercase tracking-[0.28em] text-black/42">
               Method
             </p>
             <h2 data-craft-reveal className="font-editorial text-[clamp(2.2rem,3.6vw,3.4rem)] font-light leading-[0.95]">
               The principles behind the work.
             </h2>
-            <div className="mt-9 hidden flex-col gap-1 lg:flex" aria-hidden="true">
+            <div className="mt-9 hidden flex-col gap-1 lg:flex lg:items-end" aria-hidden="true">
               {craft.map((item, index) => (
                 <span
                   key={item.letter}
@@ -518,7 +518,7 @@ function CraftSection() {
             </div>
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 lg:order-1">
             <div className="divide-y divide-black/10 border-y border-black/10">
               {craft.map((item, index) => (
                 <div
@@ -594,7 +594,7 @@ function SouthBaySection() {
           <div key={copy} className="flex items-center">
             {SERVICE_AREAS.map((area) => (
               <span key={`${copy}-${area}`} className="flex items-center">
-                <span className="font-editorial text-[clamp(2.6rem,6.5vw,6.2rem)] font-semibold uppercase leading-none text-white/[0.09]">
+                <span className="font-editorial text-[clamp(2.2rem,5vw,4.8rem)] font-semibold uppercase leading-none text-white/[0.09]">
                   {area}
                 </span>
                 <span className="mx-8 h-2 w-2 rotate-45 bg-accent/50 lg:mx-12" />
@@ -631,14 +631,14 @@ function SouthBaySection() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="max-w-3xl">
+        <div className="max-w-xl border-l border-white/12 pl-6 lg:ml-auto lg:pl-8">
           <p data-area-copy className="mb-5 font-labels text-[10px] uppercase tracking-[0.28em] text-white/40">
             South Bay native
           </p>
-          <h2 data-area-copy className="font-editorial text-[clamp(3.2rem,6.6vw,6.8rem)] font-semibold leading-[0.86]">
+          <h2 data-area-copy className="font-editorial text-[clamp(2.2rem,3.6vw,3.4rem)] font-semibold leading-[0.95]">
             Looking for a local contractor?
           </h2>
-          <p data-area-copy className="mt-7 max-w-xl text-[clamp(1.05rem,1.3vw,1.2rem)] leading-relaxed text-white/64">
+          <p data-area-copy className="mt-6 max-w-xl text-[clamp(1.02rem,1.25vw,1.15rem)] leading-relaxed text-white/64">
             828 Construction — servicing the South Bay for over two decades.
           </p>
         </div>
@@ -689,7 +689,7 @@ function AboutCTA() {
     <section ref={sectionRef} data-section="" className="relative bg-black text-white" style={{ overflowX: "clip" }}>
       <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
         <Image
-          src="/images/generated/about-planning-table.jpg"
+          src="/images/generated/home-about-workbench.jpg"
           alt=""
           fill
           sizes="100vw"
@@ -703,7 +703,7 @@ function AboutCTA() {
           <p data-cta-reveal className="mb-5 font-labels text-[10px] uppercase tracking-[0.28em] text-white/42">
             The first conversation
           </p>
-          <h2 data-cta-reveal className="max-w-5xl font-editorial text-[clamp(3.2rem,6.6vw,7rem)] font-semibold leading-[0.84]">
+          <h2 data-cta-reveal className="max-w-2xl font-editorial text-[clamp(2.2rem,3.8vw,3.6rem)] font-semibold leading-[0.95]">
             For those who value experience and quality.
           </h2>
         </div>
