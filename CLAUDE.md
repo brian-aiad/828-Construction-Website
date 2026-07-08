@@ -35,6 +35,7 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 
 ### Standing rules
 - **Dual-machine workflow:** Brian works on this repo from BOTH a Windows desktop PC (`C:\Users\kingt\Desktop\828_website`) and a Mac laptop, syncing through GitHub (`brian-aiad/828_Construction_Website`). At the START of every session: `git fetch` and fast-forward if behind before doing any work. At the END of any session that changed files: commit and push so the other machine picks it up. Never leave finished work sitting uncommitted — it strands the other machine on stale files.
+- **Deploy environments (verbiage):** Two Vercel projects point at this repo. **Production** ("prod", "the live site") = `828constructions.com` — Vercel project `828-construction-website`, deploys from `main`. **Preview** ("staging", "the test site") = `https://828-ns-preview.vercel.app` — Vercel project `828-ns-preview`, deploys from the `ns-preview` branch. Flow: build on `ns-preview` → push → verify at the preview URL → when approved, merge `ns-preview` into `main` and push ("promote to production"). Never experiment directly on `main`.
 - **Local dev URL:** Always use `http://localhost:3001` for this repo. `npm run dev` is pinned to `next dev -p 3001`. Port `3000` belongs to another local app and must not be used to judge 828.
 - All factual data traces to `lib/constants.ts`.
 - Production build only for verification (port 4000).
