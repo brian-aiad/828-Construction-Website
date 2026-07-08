@@ -16,6 +16,12 @@ export default function DockedCTA() {
     const update = () => {
       raf = 0;
       const pastHero = window.scrollY > window.innerHeight * 0.85;
+      const services = document.querySelector('[data-section="services-v2"]');
+      const servicesRect = services?.getBoundingClientRect();
+      const servicesInView = servicesRect
+        ? servicesRect.top < window.innerHeight * 0.9 &&
+          servicesRect.bottom > window.innerHeight * 0.12
+        : false;
       const vision = document.querySelector('[data-section="vision"]');
       const visionEntering = vision
         ? vision.getBoundingClientRect().top < window.innerHeight * 0.86
@@ -24,7 +30,7 @@ export default function DockedCTA() {
       const footerNear = footer
         ? footer.getBoundingClientRect().top < window.innerHeight * 0.92
         : false;
-      setVisible(pastHero && !visionEntering && !footerNear);
+      setVisible(pastHero && !servicesInView && !visionEntering && !footerNear);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);

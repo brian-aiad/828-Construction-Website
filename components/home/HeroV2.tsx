@@ -178,25 +178,28 @@ export default function HeroV2() {
 
           {/* One flowing statement, organized as a single readable block —
               lead sentence, quiet support line, then the CTA */}
-          <div className="max-w-[46rem]">
+          <div className="max-w-[42rem]">
             <h1
               ref={headlineRef}
-              className="font-editorial text-[clamp(1.8rem,2.95vw,2.95rem)] font-normal leading-[1.18] tracking-[-0.01em] text-white"
+              className="font-editorial text-[clamp(2.25rem,4.15vw,4.25rem)] font-normal leading-[1.02] tracking-[-0.01em] text-white"
             >
               <span className="block overflow-hidden">
                 <span className="hero-line-inner block">
-                  Transforming properties, delivering solutions.
+                  Transforming properties,
                 </span>
               </span>
               <span className="block overflow-hidden">
-                <span className="hero-line-inner block text-white/62">
-                  828 Construction is the partner of choice for your next
-                  project.
+                <span className="hero-line-inner block">
+                  delivering solutions.
                 </span>
               </span>
             </h1>
 
-            <div ref={ctaRef} className="mt-8">
+            <p className="hero-support mt-4 max-w-[38rem] font-editorial text-[clamp(1.3rem,2.25vw,2.15rem)] font-normal leading-[1.16] tracking-[-0.01em] text-white/62">
+              828 Construction is the partner of choice for your next project.
+            </p>
+
+            <div ref={ctaRef} className="mt-7">
               <Link
                 href="/contact"
                 className="btn-shine btn-lift inline-flex items-center justify-center bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"

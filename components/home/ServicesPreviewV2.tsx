@@ -172,12 +172,12 @@ export default function ServicesPreviewV2() {
     service: (typeof SERVICES)[number],
     index: number
   ) => (
-    <div className="svc-caption mt-5 flex items-baseline justify-between gap-6 lg:mt-6">
+    <div className="svc-caption mt-4 flex items-baseline justify-between gap-6 lg:mt-5">
       <div>
         <h3 className="font-editorial text-[clamp(1.25rem,1.7vw,1.65rem)] font-normal leading-tight text-[#111]">
           {service.title}
         </h3>
-        <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-black/52">
+        <p className="mt-1 max-w-sm text-sm leading-6 text-black/52">
           {SERVICE_TAGLINES[service.slug]}
         </p>
       </div>
@@ -195,16 +195,16 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#f7f7f3] py-24 text-[#111] lg:py-36"
+      className="relative bg-[#f7f7f3] py-16 text-[#111] lg:py-18"
       data-section="services-v2"
     >
       <div className="mx-auto max-w-[1680px] px-6 lg:px-12">
         {/* Header row — headline left, copy + link right */}
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+        <div className="grid gap-7 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">
             <h2
               ref={headlineRef}
-              className="font-editorial text-[clamp(2.5rem,4.6vw,4.5rem)] font-normal leading-[1.04] tracking-[-0.01em] text-[#111]"
+              className="font-editorial text-[clamp(2.25rem,3.8vw,3.7rem)] font-normal leading-[1.04] tracking-[-0.01em] text-[#111]"
             >
               <span className="block overflow-hidden">
                 <span className="svc-headline-line block">One company,</span>
@@ -217,14 +217,14 @@ export default function ServicesPreviewV2() {
             </h2>
           </div>
           <div ref={introRef} className="flex flex-col justify-end lg:col-span-4 lg:col-start-9">
-            <p className="max-w-md text-[15px] leading-7 text-black/60">
+            <p className="max-w-md text-[15px] leading-7 text-black/60 lg:max-w-sm">
               Whether it&apos;s an ongoing maintenance, essential repairs, or a
               new ADU. 828 Construction helps homeowners bring their vision to
               life and keep their homes performing at their best.
             </p>
             <Link
               href="/services"
-              className="group mt-7 hidden w-fit items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black lg:inline-flex"
+              className="group mt-5 hidden w-fit items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black lg:inline-flex"
             >
               All Services
               <span className="transition-transform duration-200 group-hover:translate-x-1">
@@ -235,7 +235,7 @@ export default function ServicesPreviewV2() {
         </div>
 
         {/* Work grid — one tall frame left, two stacked right, captions below */}
-        <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 lg:mt-20 lg:grid-cols-12 lg:gap-y-0">
+        <div className="mt-9 grid grid-cols-1 gap-x-8 gap-y-10 lg:mt-10 lg:grid-cols-12 lg:gap-y-0">
           <div
             ref={(el) => {
               cardRefs.current[0] = el;
@@ -244,7 +244,7 @@ export default function ServicesPreviewV2() {
           >
             <Link href={`/services/${adu.slug}`} aria-label={adu.title} className="block">
               <div
-                className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3] lg:aspect-[5/5.4]"
+                className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3] lg:aspect-[5/3.85]"
                 data-gsap-reveal="true"
               >
                 <div className="svc-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
@@ -266,7 +266,7 @@ export default function ServicesPreviewV2() {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-12 lg:col-span-4 lg:col-start-9 lg:gap-14 lg:pt-24">
+          <div className="flex flex-col gap-10 lg:col-span-4 lg:col-start-9 lg:gap-8 lg:pt-6">
             {[remediation, consulting].map((service, i) => (
               <div
                 key={service.slug}
@@ -280,7 +280,7 @@ export default function ServicesPreviewV2() {
                   className="block"
                 >
                   <div
-                    className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3]"
+                    className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3] lg:aspect-[16/10]"
                     data-gsap-reveal="true"
                   >
                     <div className="svc-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
