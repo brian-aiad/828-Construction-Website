@@ -2,6 +2,55 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 (late night) — About V6: Brian's screenshot feedback executed
+
+- Spec: `docs/828_ABOUT_BRIAN_FEEDBACK_V5.md`. All verbiage untouched.
+- HERO: dead middle killed — dossier panel is one continuous centered
+  composition (eyebrow → headline → paragraph → proof rows with animated
+  hairline draws → inline tick trio); section 92svh.
+- BUILDER PROFILE: condensed; "Observed/Not assumed." and "Field standard"
+  chrome DELETED; photos replaced by the JOE PORTRAIT SLOT — server-side
+  existence check (app/about/page.tsx fs.existsSync) so dropping
+  public/images/about/joe-portrait.jpg in renders it next build/refresh with
+  zero failed requests; pending plate = JP monogram + "Portrait — coming
+  soon" + Joe P / Founder bar.
+- CRAFT: full revamp to Joe's literal sketch — words complete OUT of their
+  letters ("C"+"uriosity." slides from behind the maroon-igniting capital,
+  scrubbed, descender-safe); C/R/A/F/T reads down the left; index labels
+  deleted; compact rows; watermark 0.03 bottom-right. Signature updated in
+  PATTERNS.md.
+- SOUTH BAY: dead height cut (min-h removed, py-20/24), compass centered left.
+- CTA: maroon seam draws on scrub.
+- AboutFlow cover-scale transformOrigin → "center top" (kills the V5
+  top-sliver junction artifact).
+- QA: tsc clean; 0 console errors; functional-qa PASS desktop+mobile; 3 visual
+  critique rounds at 1440×900 + 390×844.
+
+## 2026-07-08 (late night) — Home approach panel: void fix, walk timing, sticky-proof reveals (Fix 22)
+
+- Approach panel (`HomeVisionSequence`): removed forced `min-h-[165svh]` +
+  `pb-[52vh]` (the giant black void before "Since 2004"); panel now sizes to
+  content (~1008px at 1440×900). Rows condensed `py-10 → py-7` (lg), top
+  padding and footnote spacing tightened.
+- Step-walk timing: focus line `0.55 → 0.66 * vh`, stuck-walk window
+  `0.8 → 0.35 * vh` — all five rows now light while still visible before the
+  About surface covers the panel (probe scenario F asserts this).
+- **Fix 22 (PATTERNS.md):** "Refining industry standards." headlines (vision
+  intro + AboutPreview) permanently hidden after client-side nav round-trips —
+  positional `once: true` ScrollTriggers go stale after route transitions /
+  inside the sticky stack. All one-shot entrance reveals in
+  ServicesPreviewV2 / HomeVisionSequence / AboutPreview now ride
+  `utils/revealOnVisible.ts` (IntersectionObserver). Rule: hidden-initial-state
+  + positional once-trigger is forbidden; scrubs keep ScrollTrigger.
+- Break-test harness added: `break-probe.mjs` (slow scroll, instant jump,
+  reload mid-page, nav round-trip, back-button, walk completeness) and
+  `site-smoke.mjs` (all 7 routes × scroll + mid-page reload + hidden-heading
+  audit) under `.claude-work/research/home-approach-fix/`. All PASS desktop +
+  mobile; functional-qa PASS both viewports.
+- Ops note: dev server on :3001 was corrupted twice by concurrent builds from
+  a parallel agent session (preview deploy flow wiping `.next`); if home 500s
+  with `routes-manifest.json ENOENT`, delete `.next` and restart dev.
+
 ## 2026-07-08 (night) — About V5: full composition redesign (words frozen)
 
 - Brian: V4 "looks nearly identical — work on it like an actual project." V5

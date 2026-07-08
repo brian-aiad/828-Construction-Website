@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:3000/about",
+  "url": "http://localhost:3001/about",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -12,26 +12,29 @@
     "winWidth": 1440
   },
   "heroBrightness": {
-    "found": true,
-    "imgFilter": "contrast(1.08) saturate(1.15) brightness(1.05)",
-    "hasImg": true
+    "found": false
   },
-  "counters": [
-    {
-      "text": "20+"
-    },
-    {
-      "text": "100%"
-    },
-    {
-      "text": "1"
-    },
-    {
-      "text": "3"
-    }
-  ],
+  "counters": [],
   "brokenCounters": [],
   "pinIssues": [],
-  "totalHeight": 9974,
+  "headingsCheck": {
+    "headings": [
+      "Where quality meets quiet luxury.",
+      "The builder profile",
+      "The principles behind the work.",
+      "Looking for a local contractor?",
+      "For those who value experience and quality.",
+      "Quality is the strategy."
+    ],
+    "duplicateHeadings": []
+  },
+  "motionDensity": {
+    "gsapStyledElements": 67,
+    "gsapTransforms": 62,
+    "gsapOpacityLt1": 41,
+    "threshold": ">= 50 GSAP-styled elements",
+    "motionDensityPass": true
+  },
+  "totalHeight": 4611,
   "PASS": true
 }

@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import type { Metadata } from "next";
 import { SITE } from "@/lib/constants";
 import AboutContent from "@/components/about/AboutContent";
@@ -10,5 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  return <AboutContent />;
+  // Joe's headshot slot: drop the file in and the portrait renders on the
+  // next build/refresh — until then the pending plate holds the composition
+  // without firing a failed image request.
+  const hasPortrait = existsSync(
+    join(process.cwd(), "public", "images", "about", "joe-portrait.jpg")
+  );
+  return <AboutContent hasPortrait={hasPortrait} />;
 }

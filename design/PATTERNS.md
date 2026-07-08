@@ -706,6 +706,68 @@ This pattern is already used correctly in `ServicesPreview.tsx`. Apply it to any
 
 ---
 
+### Fix 22 — Section titles never reveal after client-side navigation (stale positional once-triggers)
+
+**Symptom:** A headline (or any element hidden by an entrance state like `yPercent: 110` /
+`opacity: 0`) never appears — the section renders with an empty gap where its title should
+be. Happens intermittently: fresh loads are fine, but navigating to another route and back
+(nav link OR browser back button) leaves the title permanently hidden. Confirmed on both
+"Refining industry standards." headlines (HomeVisionSequence intro + AboutPreview) on
+2026-07-08; reproducible ~100% via Home → About → back → scroll.
+
+**Root cause:** `ScrollTrigger` converts `start: "top 85%"` into an absolute document
+offset at refresh time. Two things make that offset silently wrong on remount:
+1. After a client-side route transition, triggers are recreated while layout/scroll state
+   is mid-flight, and the recomputed start can land beyond any reachable scroll position.
+2. Inside a sticky-stacked region (`EditorialFlow`'s `position: sticky` surfaces), an
+   element's visual position diverges from its layout offset whenever a surface is stuck,
+   so any refresh that runs in that state bakes in garbage offsets.
+With `once: true`, a trigger whose start is never "crossed" never fires — and the initial
+hidden `gsap.set()` state is permanent. No error, no warning.
+
+**Fix:** Entrance reveals must key off *actual on-screen visibility*, not precomputed
+scroll positions. Use `utils/revealOnVisible.ts` (IntersectionObserver wrapper) for every
+one-shot entrance reveal; keep ScrollTrigger only for scrubbed animations:
+
+```tsx
+import { revealOnVisible } from "@/utils/revealOnVisible";
+
+const revealCleanups: Array<() => void> = [];
+// inside gsap.context, after the initial gsap.set(hidden) states:
+revealCleanups.push(
+  revealOnVisible([headlineRef.current ?? section], () => {
+    gsap.to(headlineLines, { yPercent: 0, duration: 0.95, stagger: 0.1, ease: "power3.out" });
+  })
+);
+// effect cleanup, BEFORE ctx.revert():
+revealCleanups.forEach((dispose) => dispose());
+```
+
+**Rules going forward (any new page or section):**
+- `scrollTrigger: { ..., once: true }` on an element with a hidden initial state is
+  FORBIDDEN inside sticky/stacked surfaces and DISCOURAGED everywhere else — use
+  `revealOnVisible` instead. `once: true` + positional start = silent permanent-hide risk.
+- If an element's initial state is hidden, the thing that reveals it must be driven by
+  IntersectionObserver (or an equally visibility-truthful mechanism), never by scroll math.
+- Scrubbed animations (scrub: N) may keep ScrollTrigger, but their initial state must be
+  readable if the trigger never fires (e.g., word-fill starting at opacity 0.28, clip-path
+  starting at a mild inset — never fully invisible).
+- Break-test recipe (run before calling any page done):
+  `node .claude-work/research/home-approach-fix/break-probe.mjs http://localhost:3001 desktop`
+  (and `mobile`) — covers slow scroll, instant jump, reload mid-page, nav round-trip,
+  back-button. All reveal targets must end visible in every scenario. The generic
+  cross-page version is `.claude-work/research/home-approach-fix/site-smoke.mjs`.
+
+**Related timing rule (same session):** the process step-walk in `HomeVisionSequence`
+selects the active row from live `getBoundingClientRect()` (sticky-proof) with the focus
+line at `0.66 * innerHeight` and a `0.35 * innerHeight` stuck-walk window, so all five
+rows light while still visible before the next surface covers the panel. Don't lower the
+focus line or lengthen the stuck window without re-running probe scenario F.
+
+**Files changed:** `utils/revealOnVisible.ts` (new), `components/home/HomeVisionSequence.tsx`, `components/home/AboutPreview.tsx`, `components/home/ServicesPreviewV2.tsx`
+
+---
+
 ---
 
 ### Pattern: Asterisk Dropdown Reveal (V2)
@@ -906,7 +968,7 @@ Each page has one animation moment that does not appear on any other page. These
 | Page | Unique Signature Moment |
 |------|------------------------|
 | Home (`/`) | **HomeInterstitial dual-layer ghost counter** — ghost watermark counter scrubs 0→150 behind SplitType headline chars on a full-bleed editorial section. Two simultaneous scrub-tied layers (large semi-transparent number in background + headline chars revealing at different rate) create a depth effect unique to the home page. No other page has this dual-layer typographic scrub. **Also:** **SplashScreen cinematic intro** — full-viewport black overlay with "828" (IBM Plex Mono, clamp 5rem→13rem) + copper underline scaleX draw (3px, 600ms, power2.inOut) + "CONSTRUCTION" (Space Grotesk, 0.48em tracking) — chars stagger IN 40ms/32ms per char (power3.out), hold 880ms, stagger OUT 25ms per char (power2.in), total 2.9s. sessionStorage gate: once per session. |
-| About (`/about`) | **V3 — CRAFT watermark drift + igniting letter rail** — the word "CRAFT" rendered as a massive low-opacity background watermark (`opacity: 0.04`, ~30vw wide) drifts left via xPercent scrub (`+5 → -12`, scrub 1.5) while Joe's five acronym statements scrub-reveal row by row and a sticky C/R/A/F/T letter rail ignites maroon per row (ScrollTrigger class toggle). Restored per Joe's June 2026 video feedback. The page also carries the stacked-surface flow via `AboutFlow.tsx` (dark-surface port of home's EditorialFlow — Brian's explicit override), but the CRAFT system is the /about-only signature. |
+| About (`/about`) | **V6 — CRAFT letter-completion rows** — Joe's sketch made literal: the five acronym words COMPLETE out of their own capital letters ("C" + "uriosity." slides from behind the letter via overflow-clipped xPercent scrub, letter ignites maroon as the word escapes; descender-safe wrapper pads 0.14em). Letters stack down the left reading C/R/A/F/T; a whisper watermark (0.03) drifts bottom-right. Page carried by `AboutFlow.tsx` stacked surfaces with top-anchored cover-scale (no top-sliver artifact). No other page completes words out of letters. | |
 | Services (`/services`) | **Three-vector mosaic entry** — the asymmetric 3-tile gateway grid reveals with three simultaneous but independent clip-path directions on scroll: ADU wipes horizontally (left→right, `inset(0% 100% 0% 0%)` → `inset(0%)`), Remediation wipes vertically (top→bottom), Consulting wipes from bottom-to-top. Three axes converge simultaneously — no other page has this multi-axis divergent clip entry. |
 | Portfolio (`/portfolio`) | **Horizontal pin-scroll cinema strip + featured full-screen moment** — three photos scroll horizontally (GSAP pin + `containerAnimation`) with scale 1.15→1.0→0.85 + blur 6→0→4 peaking at center. Followed by a full-viewport featured section with scale-settling entry + char-by-char headline reveal. No other page has horizontal pin-scroll with per-photo containerAnimation. |
 | Services/ADU (`/services/adu`) | **ADU watermark vertical drift** — giant "ADU" text (clamp 14rem→36rem, opacity 0.04) positioned absolute behind the acronym section, drifts yPercent: -8 via scrub ScrollTrigger tied to the section's full scroll range. Creates depth as the user reads through A/D/U definitions. Unique to this page — no other page uses a 3-letter-watermark-with-drift. |

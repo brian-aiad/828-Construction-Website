@@ -80,7 +80,9 @@ export default function AboutFlow({ children }: { children: React.ReactNode }) {
           {
             scale: 0.975,
             ease: "none",
-            transformOrigin: "center 80%",
+            // top-anchored so the covered surface never opens a sliver at the
+            // viewport top during the cover transition (Brian's V5 artifact)
+            transformOrigin: "center top",
             scrollTrigger: {
               trigger: next,
               start: "top bottom",
