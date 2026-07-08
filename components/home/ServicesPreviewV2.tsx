@@ -55,7 +55,6 @@ export default function ServicesPreviewV2() {
         .map((card) => card.querySelector<HTMLElement>(".svc-caption"))
         .filter(Boolean) as HTMLElement[];
 
-      gsap.set(headlineLines, { yPercent: 110 });
       gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
       gsap.set(captions, { y: 18, opacity: 0 });
       if (introRef.current) gsap.set(introRef.current, { y: 20, opacity: 0 });
@@ -69,17 +68,22 @@ export default function ServicesPreviewV2() {
       }
 
       // Headline mask reveal — decisive one-shot so it always completes
-      gsap.to(headlineLines, {
-        yPercent: 0,
-        duration: 0.95,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: headlineRef.current ?? section,
-          start: "top 85%",
-          once: true,
-        },
-      });
+      gsap.fromTo(
+        headlineLines,
+        { yPercent: 110 },
+        {
+          yPercent: 0,
+          duration: 0.95,
+          stagger: 0.1,
+          ease: "power3.out",
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: headlineRef.current ?? section,
+            start: "top 92%",
+            once: true,
+          },
+        }
+      );
 
       if (introRef.current) {
         gsap.to(introRef.current, {

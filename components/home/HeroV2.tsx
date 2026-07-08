@@ -163,43 +163,43 @@ export default function HeroV2() {
       />
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1680px] flex-col justify-end px-6 pb-12 pt-28 lg:px-12 lg:pb-16">
-        <div ref={copyRef} style={{ willChange: "transform, opacity" }}>
+        <div
+          ref={copyRef}
+          className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_1px_minmax(24rem,0.62fr)] lg:items-end lg:gap-8"
+          style={{ willChange: "transform, opacity" }}
+        >
           <p
             ref={eyebrowRef}
-            className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-white/70 lg:mb-8"
+            className="flex items-center gap-4 font-labels text-[clamp(0.9rem,1.45vw,1.25rem)] uppercase tracking-[0.34em] text-white/78"
           >
             <span
               aria-hidden="true"
-              className="inline-block h-px w-10"
+              className="inline-block h-px w-10 lg:w-12"
               style={{ background: "var(--color-accent-light)" }}
             />
             Torrance / South Bay
           </p>
 
-          {/* One flowing statement, organized as a single readable block —
-              lead sentence, quiet support line, then the CTA */}
-          <div className="max-w-[42rem]">
+          <div className="hidden h-[9.5rem] w-px bg-white/18 lg:block" aria-hidden="true" />
+
+          {/* Split-bottom statement: compact, deliberate, and anchored to the photo. */}
+          <div className="max-w-[34rem] lg:justify-self-start">
             <h1
               ref={headlineRef}
-              className="font-editorial text-[clamp(2.25rem,4.15vw,4.25rem)] font-normal leading-[1.02] tracking-[-0.01em] text-white"
+              className="font-editorial text-[clamp(1.15rem,1.55vw,1.45rem)] font-medium leading-[1.22] tracking-[-0.005em] text-white"
             >
               <span className="block overflow-hidden">
                 <span className="hero-line-inner block">
-                  Transforming properties,
-                </span>
-              </span>
-              <span className="block overflow-hidden">
-                <span className="hero-line-inner block">
-                  delivering solutions.
+                  Transforming properties, delivering solutions.
                 </span>
               </span>
             </h1>
 
-            <p className="hero-support mt-4 max-w-[38rem] font-editorial text-[clamp(1.3rem,2.25vw,2.15rem)] font-normal leading-[1.16] tracking-[-0.01em] text-white/62">
+            <p className="hero-support mt-2 max-w-[31rem] font-editorial text-[clamp(1.05rem,1.42vw,1.22rem)] font-normal leading-[1.42] tracking-[-0.005em] text-white/66">
               828 Construction is the partner of choice for your next project.
             </p>
 
-            <div ref={ctaRef} className="mt-7">
+            <div ref={ctaRef} className="mt-6">
               <Link
                 href="/contact"
                 className="btn-shine btn-lift inline-flex items-center justify-center bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
@@ -220,7 +220,7 @@ export default function HeroV2() {
         <div
           ref={scrollHintRef}
           aria-hidden="true"
-          className="absolute bottom-12 left-1/2 hidden -translate-x-1/2 items-center gap-3 lg:flex lg:bottom-16"
+          className="hidden"
         >
           <span className="block h-10 w-px bg-white/35" />
         </div>

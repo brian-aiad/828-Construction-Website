@@ -2,6 +2,18 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 - Home scroll cleanup and reveal stabilization
+
+- Home process panel now has more scroll runway before the next stacked surface
+  covers it, so the approach steps can finish reading before the Since 2004
+  section arrives.
+- Added quiet process thumbnails to the five approach rows while keeping all
+  wording unchanged.
+- Services headline reveal now starts visible by default and only animates from
+  hidden when its trigger runs, preventing "One company, multiple solutions."
+  from getting stuck invisible.
+- Signed: CODEX
+
 ## 2026-07-08 — About V3: Joe's video feedback applied + stacked-surface port
 
 - Analyzed Joe's 5 stylus walkthrough videos (OneDrive IMG_1014/1019/1020/1024/1031)

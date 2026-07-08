@@ -24,6 +24,14 @@ const marquee = [
   "lasting partnerships",
 ];
 
+const processImages = [
+  "/images/process/planning.jpg",
+  "/images/process/scope-document.jpg",
+  "/images/process/detail.jpg",
+  "/images/process/execution.jpg",
+  "/images/process/completion.jpg",
+];
+
 export default function HomeVisionSequence() {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
@@ -296,23 +304,44 @@ export default function HomeVisionSequence() {
       className="relative bg-[#f7f7f3] text-[#111]"
     >
       {/* Intro — asymmetric editorial split */}
-      <div className="relative w-full bg-[#f7f7f3]">
-        <div className="mx-auto max-w-[1680px] px-6 pb-12 lg:px-12 lg:pb-16">
-          <div className="grid gap-10 pt-16 lg:grid-cols-12 lg:gap-12 lg:pt-20">
+      <div
+        ref={photoRef}
+        data-header-dark=""
+        className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:min-h-[92vh]"
+        data-gsap-reveal="true"
+      >
+        <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
+          <Image
+            src="/images/generated/home-process-fireplace-bg.webp"
+            alt="Finished interior with stone fireplace and warm built-in lighting"
+            fill
+            loading="lazy"
+            sizes="100vw"
+            className="object-cover"
+            style={{ filter: "contrast(1.04) saturate(1.04)" }}
+          />
+        </div>
+        <div
+          className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.54)_44%,rgba(0,0,0,0.2)_100%),linear-gradient(180deg,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.18)_48%,rgba(0,0,0,0.72)_100%)]"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 py-16 sm:min-h-[48rem] lg:min-h-[92vh] lg:px-12 lg:py-20">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12">
           <div className="lg:col-span-7">
-            <p className="vision-intro-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent)] lg:mb-8">
+            <p className="vision-intro-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-white/64 lg:mb-8">
               <span
                 aria-hidden="true"
-                className="inline-block h-px w-10 bg-[var(--color-accent)]"
+                className="inline-block h-px w-10 bg-[var(--color-accent-light)]"
               />
               Our first step is listening
             </p>
             <h3
               ref={headlineRef}
-              className="font-editorial text-[clamp(2.1rem,3.2vw,3.4rem)] font-normal leading-[1.06] tracking-[-0.01em]"
+              className="max-w-[12ch] font-editorial text-[clamp(3rem,5vw,5.25rem)] font-normal leading-[0.94] tracking-[-0.01em] text-white"
             >
               <span className="block overflow-hidden">
-                <span className="vision-headline-line block whitespace-nowrap max-lg:whitespace-normal">
+                <span className="vision-headline-line block">
                   Refining industry standards.
                 </span>
               </span>
@@ -320,28 +349,28 @@ export default function HomeVisionSequence() {
           </div>
 
           <div className="flex flex-col justify-end lg:col-span-5 lg:col-start-8">
-            <p className="vision-intro-el max-w-md text-[15px] leading-7 text-black/60">
+            <p className="vision-intro-el max-w-md text-[15px] leading-7 text-white/72">
               A short call to understand the project, the site, and the right
               next move.
             </p>
             <p
               ref={statementRef}
-              className="vision-intro-el mt-7 max-w-md border-l-2 border-[var(--color-accent)] pl-5 text-[15px] leading-7 text-black/78 lg:pl-6"
+              className="vision-intro-el mt-7 max-w-md border-l-2 border-[var(--color-accent-light)] pl-5 text-[15px] leading-7 text-white/84 lg:pl-6"
             >
               Embodying meticulous planning, seamless communication, and
               unparalleled craftsmanship from the first consultation through
               post-construction, ensuring every detail exceeds expectation.
             </p>
-            <div className="vision-intro-el mt-9 flex flex-wrap gap-3">
+            <div className="vision-intro-el mt-8 flex flex-wrap gap-3">
               <a
                 href={SITE.phoneHref}
-                className="bg-[#111] px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
+                className="bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
               >
                 Call {SITE.phone}
               </a>
               <Link
                 href="/contact"
-                className="border border-black/15 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/65 transition-colors hover:border-black/45 hover:text-black"
+                className="border border-white/28 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white/74 transition-colors hover:border-white/60 hover:text-white"
               >
                 Send project details
               </Link>
@@ -352,31 +381,10 @@ export default function HomeVisionSequence() {
 
       {/* Landscape photograph — expands from an inset frame to full bleed
           as the reader scrolls through it */}
-      <div className="relative w-full">
-        <div
-          ref={photoRef}
-          data-header-dark=""
-          className="relative h-[58vh] overflow-hidden bg-[#e8e8e3] sm:h-[72vh] lg:h-[86vh]"
-          data-gsap-reveal="true"
-        >
-          <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
-            <Image
-              src="/images/generated/home-process-fireplace-bg.webp"
-              alt="Finished interior with stone fireplace and warm built-in lighting"
-              fill
-              loading="lazy"
-              sizes="100vw"
-              className="object-cover"
-              style={{ filter: "contrast(1.04) saturate(1.04)" }}
-            />
-          </div>
-        </div>
-      </div>
-
       </div>
 
       {/* Marquee — refined mono strip, hairline-bounded */}
-      <div className="mt-20 border-y border-black/10 py-5 lg:mt-28" aria-hidden="true">
+      <div className="border-y border-black/10 py-5" aria-hidden="true">
         <div
           className="flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-black/45"
           style={{ animation: "marqueeScroll 40s linear infinite" }}
@@ -397,7 +405,7 @@ export default function HomeVisionSequence() {
 
       {/* Process — full-bleed black panel, maroon ignition, progress rail */}
       <div data-header-dark="" className="bg-[#0a0a0a] text-white">
-        <div className="mx-auto max-w-[1680px] px-6 py-24 lg:px-12 lg:py-32">
+        <div className="mx-auto min-h-[122svh] max-w-[1680px] px-6 pt-24 pb-44 lg:min-h-[165svh] lg:px-12 lg:pt-32 lg:pb-[52vh]">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
               <p className="process-head-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-8">
@@ -437,13 +445,22 @@ export default function HomeVisionSequence() {
                   className="process-rail-fill absolute bottom-0 left-0 top-0 w-px bg-[var(--color-accent-light)]"
                 />
                 <ol className="border-t border-white/12">
-                  {PROCESS_STEPS_V2.map((step) => (
+                  {PROCESS_STEPS_V2.map((step, i) => (
                     <li key={step.number} className="relative">
-                      <div className="process-row grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-4 py-7 lg:py-8">
+                      <div className="process-row grid grid-cols-[2.75rem_5rem_minmax(0,1fr)] items-center gap-4 py-7 sm:grid-cols-[3.5rem_6.5rem_minmax(0,1fr)_auto] lg:py-10">
                         <span className="process-num font-numbers text-[11px] text-white/25 transition-colors duration-400">
                           {step.number}
                         </span>
-                        <h4 className="process-title font-editorial text-[clamp(1.35rem,2vw,1.9rem)] font-normal leading-tight text-white/35 transition-all duration-400">
+                        <div className="process-thumb relative h-16 overflow-hidden bg-white/5 sm:h-20">
+                          <Image
+                            src={processImages[i] ?? "/images/process/detail.jpg"}
+                            alt=""
+                            fill
+                            sizes="(max-width: 640px) 80px, 104px"
+                            className="object-cover opacity-45 grayscale transition-all duration-500"
+                          />
+                        </div>
+                        <h4 className="process-title font-editorial text-[clamp(1.15rem,2vw,1.9rem)] font-normal leading-tight text-white/35 transition-all duration-400">
                           {step.title}
                         </h4>
                         <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/25 transition-colors duration-400 sm:block">

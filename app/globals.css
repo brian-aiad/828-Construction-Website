@@ -184,6 +184,11 @@ textarea {
 .process-row-active .process-sub {
   color: rgba(255, 255, 255, 0.6);
 }
+.process-row-active .process-thumb img {
+  opacity: 0.9;
+  filter: grayscale(0);
+  transform: scale(1.04);
+}
 
 /* Mobile + tablet: the step-by-step scroll driver is desktop-only
    (AnimationController gates below 1024px), so rows must rest fully
@@ -197,6 +202,10 @@ textarea {
   }
   .process-sub {
     color: rgba(255, 255, 255, 0.6) !important;
+  }
+  .process-thumb img {
+    opacity: 0.78 !important;
+    filter: grayscale(0) !important;
   }
 }
 
