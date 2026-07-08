@@ -34,6 +34,7 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 - If an image reads as generic or AI-like, replace it with a better-fitting asset or crop rather than repeating the same visual trick.
 
 ### Standing rules
+- **Dual-machine workflow:** Brian works on this repo from BOTH a Windows desktop PC (`C:\Users\kingt\Desktop\828_website`) and a Mac laptop, syncing through GitHub (`brian-aiad/828_Construction_Website`). At the START of every session: `git fetch` and fast-forward if behind before doing any work. At the END of any session that changed files: commit and push so the other machine picks it up. Never leave finished work sitting uncommitted — it strands the other machine on stale files.
 - **Local dev URL:** Always use `http://localhost:3001` for this repo. `npm run dev` is pinned to `next dev -p 3001`. Port `3000` belongs to another local app and must not be used to judge 828.
 - All factual data traces to `lib/constants.ts`.
 - Production build only for verification (port 4000).
@@ -129,7 +130,7 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 | Services/Consulting (`/services/consulting`) | V2 + V2.5 elevation — visual hero (BlueprintCorner silhouette), 5 benefits, 3 Q&A, CTA. | 2026-05-06 |
 | Process (`/process`) | DELETED — 308 redirect to /portfolio | 2026-05-06 |
 | Contact (`/contact`) | ON HOLD — form infrastructure (email/DNS/Resend) pending Joe | — |
-| Portfolio (`/portfolio`) | V2 + V2.5 elevation — renamed from /projects, 14-photo gallery, cinema row, 5-step process, compass silhouette CTA. Case-index preview hardened, and live project slots now avoid generated-angle/v2 generated portfolio images while real photos remain pending. | 2026-05-21 |
+| Portfolio (`/portfolio`) | V2 + V2.6 portfolio gallery revamp — photography-first hero board, Cerritos/Tustin bath remodel galleries expanded with real detail shots, case-index hover/click section preserved, bottom work wall preserved, project dossier modal replaces plain photo-flipper lightbox, and foundation placeholder now renders as documentation-pending instead of fake work photography. Full preflight report: `.claude-work/preflight/2026-06-02-04-38/report.json`. | 2026-06-02 |
 | Footer (site-wide) | V2 + V2.5 elevation — 2-layer marquee (2.2rem bg reversed + 9px fg, visually distinct), magnetic 828 anchor, license badge glow, BOOK CALL dropdown CTA, broken-color info blocks. | 2026-05-06 |
 
 ## Project context

@@ -2,6 +2,14 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Portfolio Remodel Gallery Revamp (2026-06-02)
+
+Portfolio was reorganized around the new Cerritos and Tustin bath remodel documentation. The page now opens with a photography-first project board, keeps the existing case-index hover/click section and bottom work wall, and replaces the old lightbox with a project dossier modal. The fake-looking foundation photo is no longer presented as work photography; that project now renders an explicit documentation-pending plate.
+
+- Latest preflight report: `.claude-work/preflight/2026-06-02-04-38/report.json`
+- Verification: `npx tsc --noEmit`, `npm run lint`, `npm run build`, Playwright desktop/mobile portfolio modal checks, `npm run preflight:full`
+- Full preflight result: 16/16 route/viewport checks passing, nav/SplitType cleanup passing, hard-refresh stability passing
+
 ## Push + Local Cleanup Handoff (2026-05-26)
 
 Requested action was `PUSH AND CLEAN`. No source changes were pending at the start. `git push` ran the repo pre-push gate, which performed a full production build and route audit; all 16 desktop/mobile route checks plus nav/SplitType cleanup and hard-refresh stability passed.
