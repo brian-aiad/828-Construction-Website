@@ -45,3 +45,6 @@ next-env.d.ts
 
 # local visual QA artifacts
 /research/
+
+# claude scheduler lock (machine-local)
+.claude/scheduled_tasks.lock
