@@ -2,6 +2,31 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 — About V3: Joe's video feedback applied + stacked-surface port
+
+- Analyzed Joe's 5 stylus walkthrough videos (OneDrive IMG_1014/1019/1020/1024/1031)
+  with a local pipeline (imageio-ffmpeg frame extraction + faster-whisper
+  transcription); every "this here" pointer resolved against extracted frames.
+  Change doc: `docs/828_ABOUT_JOE_FEEDBACK_2026-06.md`. Raw transcripts/frames:
+  `.claude-work/research/about-joe-feedback/`.
+- Applied all dictated changes: hero H1 "Where quality meets quiet luxury." +
+  full-screen faded 828 CONSTRUCTION backdrop; builder-profile big headline
+  deleted, founder lede promoted; cards renamed Communication / Intentions /
+  Execution with rewritten bodies; Field-Method section replaced by Joe's CRAFT
+  acronym system (bold CRAFT watermark + 5 statements); South Bay headline
+  "Looking for a local contractor?" + full-screen rolling city marquee replaces
+  the tile grid; CTA "For those who value experience and quality." + INITIAL
+  CONTACT button.
+- Ported the homepage stacked-surface scroll grammar to About via new
+  `components/about/AboutFlow.tsx` (dark-surface EditorialFlow port with maroon
+  plumb line + per-section nodes) — Brian's explicit override of the
+  route-specific motion rule, recorded in CLAUDE.md.
+- QA: functional-qa PASS desktop+mobile (0 errors, no overflow, no duplicate
+  headings), section-by-section visual audit 5/5 PASS each, visual flow 6/6
+  PASS. Research tree: `.claude-work/research/about-v3/`.
+- The video-intake pipeline is reusable for the NEXT batch of client videos —
+  steps documented at the bottom of `docs/828_ABOUT_JOE_FEEDBACK_2026-06.md`.
+
 ## 2026-06-10 (refresh fix) — Hard refresh always lands at top, no white strip
 
 - ScrollRestorationReset was useEffect-only — it ran after hydration, so a mid-page hard refresh painted one frame at the restored position (cream strip) before jumping to top.

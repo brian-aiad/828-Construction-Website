@@ -9,6 +9,16 @@ _Add todos here. Remove when done. Date all entries._
 - If you need a production QA server, rebuild first (`npm run build`) and use `next start` on the expected QA port.
 - Do not run blanket `git clean -X` in this repo without reviewing the dry run; it includes `.env.local` and `node_modules`.
 
+## Expecting: next batch of Joe's feedback videos (2026-07-08)
+
+- Brian says another batch of client walkthrough videos is coming (other pages/
+  changes). Intake pipeline is ready: copy
+  `.claude-work/research/about-joe-feedback/extract_and_transcribe.py` to a new
+  batch folder, update the VIDEOS list, run it (faster-whisper + imageio-ffmpeg
+  already pip-installed on the desktop PC), then read frames at transcript
+  timestamps to resolve pointer references. Write the change doc in the
+  `docs/828_ABOUT_JOE_FEEDBACK_2026-06.md` format before coding.
+
 ## Blocked on Client (Joe P)
 
 - Real project photography — ADU at-night hero (Joe was sending via text during V2 call), photographer shots mid-May

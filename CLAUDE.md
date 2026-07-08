@@ -29,7 +29,8 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 6. Image-sequence on scroll (reserved for once real photos arrive).
 
 ### Route-specific motion rule
-- Each route must have its own motion grammar. Do not copy the homepage scroll pattern onto About or other pages.
+- Each route must have its own motion grammar. Do not copy the homepage scroll pattern onto pages other than About.
+- **EXCEPTION (Brian, 2026-07-08):** About carries the homepage stacked-surface grammar via `components/about/AboutFlow.tsx` (dark-surface port of EditorialFlow) — explicit owner override. Within-section reveal logic stays About-specific (CRAFT watermark drift + letter rail, documentary pacing).
 - About should feel like a documentary/editorial profile: different section pacing, different reveal logic, and more proof-led composition.
 - If an image reads as generic or AI-like, replace it with a better-fitting asset or crop rather than repeating the same visual trick.
 
@@ -128,7 +129,7 @@ Minimum elapsed for a full page redesign: 45 minutes. Minimum for a bug-fix pass
 |------|--------|------|
 | Splash | V2.5 Cinematic — rotateX 88→0 3-channel reveal, maroon radial ignition pulse on entry, curtain-wipe exit (clipPath inset). V2 base: vertical gradient, ONE LINE wordmark, maroon underline, sessionStorage gate. | 2026-05-06 |
 | Home (`/`) | V3.5 NS-grammar stacked-surface build — hero CSS-sticky pinned with Ken Burns drift; EVERY section holds still once read while the next surface rides over it (EditorialFlow measured sticky tops + cover scale/dim). Morphing header: white-on-photo over hero → #f7f7f3 glass with dark ink over the light surface (home only). Persistent DockedCTA "Book Call" card bottom-left (appears after hero, hides at footer). Fireplace photo scrubs inset-frame → full-bleed 92vh. Editorial-scale marquee. Maroon plumb line + ignition nodes. Word-fill scrub statement. Process rows ignite in the focus band. All copy verbatim. KNOWN CONTENT BUG flagged for client: "Refining industry standards." duplicated in HomeVisionSequence AND AboutPreview. Verify on `http://localhost:3001`; port 3000 is another app. | 2026-06-10 |
-| About (`/about`) | V2 + V2.5 elevation — documentary/editorial profile layout with its own motion grammar: split hero dossier, origin story, field notes, South Bay coverage band, and CTA. Method imagery now loads eagerly enough to avoid black plates during fast scroll audits. Do not mirror the homepage scroll stack. | 2026-05-21 |
+| About (`/about`) | V3 — Joe's video-feedback rebuild (docs/828_ABOUT_JOE_FEEDBACK_2026-06.md): hero "Where quality meets quiet luxury." + faded 828 CONSTRUCTION full-screen watermark, founder lede replaces big profile headline, Communication/Intentions/Execution cards, CRAFT acronym section (watermark drift + igniting letter rail — restored page signature), South Bay "Looking for a local contractor?" + full-screen rolling city marquee, CTA "For those who value experience and quality." + INITIAL CONTACT. Whole page carried by AboutFlow stacked surfaces (home EditorialFlow port, Brian's override). Research: .claude-work/research/about-v3/. | 2026-07-08 |
 | Services (`/services`) | V2 + V2.5 elevation — asymmetric 3-tile gateway, 3D tilt (useTilt 10deg), maroon ghost shadow, ConstructionLine silhouette backdrop, magnetic CTAs. | 2026-05-06 |
 | Services/ADU (`/services/adu`) | V2 + V2.5 elevation — visual hero (ArchOutline silhouette 0.55), Need+FAQ glass cards, 5-step process, ADU acronym glass definitions, Start Here BOOK CALL. | 2026-05-06 |
 | Services/Remediation (`/services/remediation`) | V2 + V2.5 elevation — visual hero (ConstructionLine silhouette), Need+FAQ glass, 4-step process, Why 828, equipment placeholder TODO. | 2026-05-06 |
