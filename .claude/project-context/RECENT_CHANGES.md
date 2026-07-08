@@ -2,6 +2,30 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 (night) — About V5: full composition redesign (words frozen)
+
+- Brian: V4 "looks nearly identical — work on it like an actual project." V5
+  rebuilt every section's composition (3 visual critique rounds, all captures
+  in .claude-work/research/about-v3/visual-audit/):
+  - HERO: text-over-photo replaced by NS-style asymmetric split — near-black
+    dossier panel left (eyebrow, headline, paragraph, hairline spec-sheet
+    stats, maroon-dot trio) / full-height photo right with scale scrub; the
+    828 CONSTRUCTION wordmark rides the seam at the bottom.
+  - BUILDER PROFILE: magazine editorial — founder lede as maroon-ruled
+    pull-quote, framing photo with overlapping materials inset crop
+    (parallax at different rates), caption relocated below the plate, and the
+    three cards flattened into numbered index rows with scrub reveals.
+  - CRAFT: rows tightened to index/title/body columns with a maroon tick that
+    draws in per active row (alongside the igniting rail letters); watermark
+    tucked bottom-right at 0.035.
+  - SOUTH BAY: taller horizon band — rolling cities as the mid layer, copy in
+    a floating glass card (backdrop-blur) anchored right, compass moved left.
+  - CTA: full-bleed dimmed photo replaced by a split panel — workbench photo
+    plate left (scale scrub), black panel right with maroon seam and buttons.
+- Every visible word unchanged from Joe's dictated verbiage.
+- QA: functional-qa PASS desktop+mobile (0 errors, no overflow, no duplicate
+  headings), tsc clean; morphing header verified over light/dark zones.
+
 ## 2026-07-08 (evening) — About V4 simplicity pass + standing design direction
 
 - NEW STANDING DIRECTIVE from Brian recorded in `design/828_DESIGN_DIRECTION_V4.md`
