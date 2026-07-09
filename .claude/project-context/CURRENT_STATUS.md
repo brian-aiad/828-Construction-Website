@@ -2,6 +2,20 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Contact V3 + all-black footer — Joe's video batch (2026-07-09, terminal B)
+
+`/contact` rebuilt from IMG_1123/1125/1127 (ledger docs/828_CONTACT_JOE_
+FEEDBACK_2026-07-09.md, K1–K11 applied, verbiage FROZEN): NS "Get in touch"
+photo hero ("Building lasting partnerships." + listening line off to the
+side) → all-black fat Get-in-touch band (contact ledger + form card; form
+backend STILL ON HOLD) → cream Critical-elements prep strip (items 01–04
+frozen) → full-bleed service-path rows with row-embedded photo ignition
+(page signature) + shrunk South Bay row ("Whether improving your residence…").
+Site-wide: footer panels now ALL BLACK per Joe; stuck-toast failsafe bug fixed
+(PATTERNS.md Fix 24 — it was visible floating in Joe's own video).
+QA: tsc clean, verbiage 15/15, functional-qa PASS both viewports, reveal-probe
+PASS, site-smoke 7/7. Preflight + prod Lighthouse: see below/report.
+
 ## Consulting V3 — Joe's video verbiage batch (2026-07-09)
 
 `/services/consulting` rebuilt from Joe's 4 feedback videos (IMG_1117/1120/

@@ -2,6 +2,34 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Contact V3 + site-wide all-black footer + stuck-toast fix (terminal B)
+
+- Videos IMG_1123/1125/1127 (Camera Roll) transcribed (whisper medium, 1 fps),
+  every frame reviewed via contact sheets, phone notes read at full resolution.
+  Ledger: docs/828_CONTACT_JOE_FEEDBACK_2026-07-09.md — K1–K11 all applied.
+- HERO: NS "Get in touch" photo band — "Building lasting partnerships." +
+  maroon hairline + "Forging exceptional partnership…" support line; the
+  listening line rides the upper right ("off to the side" per Joe). Static-
+  painted H1 (LCP-safe), Ken Burns settle on scrub.
+- GET IN TOUCH: all-black fat band — call/email/base ledger rows (hairline +
+  maroon ticks) + license/Est. 2004 chips + restyled form card. FORM BACKEND
+  STILL ON HOLD — visual form only, no new infrastructure.
+- PREP: cream strip — eyebrow "Critical elements to include in your
+  communication", heading "Your insights help us provide solutions that are
+  thoughtfully tailored to your needs", items 01–04 unchanged (frozen).
+- SERVICE PATHS: 3 full-bleed rows + shrunk South Bay 4th row with the new
+  "Whether improving your residence…" sentence. Row-embedded photo ignition =
+  page signature (desktop clip-wipe plate in the row; mobile photo strip
+  expands under the active title). useFocusIndex live-rect selection.
+- FOOTER (site-wide): cream nav/address panels flipped to BLACK per Joe
+  ("no separation… it's all black… complete"); white/10 hairlines; marquee white.
+- BUG FIX (site-wide, visible in Joe's own video): Fix 18 reveal failsafe was
+  force-showing PhoneCopyToast ~2.5s after load (stuck pill over content).
+  New data-failsafe-exempt opt-out — PATTERNS.md Fix 24.
+- QA: tsc clean; verbiage probe 15/15; functional-qa PASS desktop+mobile;
+  site-smoke 7/7; reveal-probe (4 scenarios × 2 viewports) PASS; 3 screenshot
+  critique rounds (.claude-work/research/contact-fixes/).
+
 ## 2026-07-09 — Consulting V3: Joe's 4-video verbiage batch + V4 grammar rebuild
 
 - Videos IMG_1117/1120/1121/1122 (Gaming_Files) transcribed (whisper medium,
