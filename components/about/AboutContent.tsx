@@ -255,7 +255,7 @@ function AboutHero() {
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-[6%] z-20 select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.07]"
+        className="pointer-events-none absolute inset-x-0 top-[14%] z-20 select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.07]"
         style={{ fontSize: "clamp(2.8rem, 7vw, 7rem)", letterSpacing: "0.08em", willChange: "transform" }}
       >
         828 Construction
