@@ -2,6 +2,38 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Remediation Page V3 — Joe's Video Verbiage Batch (2026-07-08 night)
+
+`/services/remediation` rebuilt from Joe's 4 feedback videos (IMG_1103/1111/
+1112/1113, OneDrive\Pictures); change doc
+`docs/828_REMEDIATION_JOE_FEEDBACK_2026-07-08.md`, verbiage now FROZEN.
+Structure: "828 — creating healthier environments…" asymmetric hero →
+"When mold remediation is necessary" FAQ cards (light zone, header morphs) →
+"The approach / Build philosophy" 01–04 focus rows + sticky photo →
+re-verbiaged method section ("828's integrated remediation and restoration
+approach…") → "Where recovery begins" CTA + Flair E8 / 277 MR equipment
+plates (page signature; REAL EQUIPMENT PHOTOS PENDING from Joe — his note
+attaches a picture but it's unreadable in video). FAQPage JSON-LD added.
+QA: tsc clean, remediation-fixes functional-qa PASS desktop+mobile (0 console
+errors — the old mount warning is gone with the rewrite), npm run
+preflight:full exit 0. Leftover note copy not assigned on camera ("This
+expertise had led to an advanced remediation process…") documented in the
+change doc — confirm placement with Joe.
+
+## ADU Page V3 — Joe's Video Verbiage Batch (2026-07-08 night)
+
+`/services/adu` rebuilt from Joe's 4 feedback videos (IMG_1086/1092/1094/1095);
+change doc `docs/828_ADU_JOE_FEEDBACK_2026-07-08.md`, verbiage now FROZEN.
+Structure: vertical "Built with intent" hero → FAQ card grid (light zone,
+header morphs) → "What ADU means to 828." A/D/U rows + drifting watermark →
+"An invitation to work together" + 01–04 qualifying questions. QA: tsc clean,
+adu-fixes functional-qa PASS desktop+mobile, site-smoke /services/adu OK.
+Shipped to ns-preview (branch + https://828-ns-preview.vercel.app).
+Pre-existing, untouched, still open: /services/remediation React
+state-update-warning on mount; header BOOK CALL button absent (smoke script
+expects it). Services landing V3 (prior batch) was still uncommitted in the
+working tree when this session started.
+
 ## Push + Local Cleanup Handoff (2026-05-26)
 
 Requested action was `PUSH AND CLEAN`. No source changes were pending at the start. `git push` ran the repo pre-push gate, which performed a full production build and route audit; all 16 desktop/mobile route checks plus nav/SplitType cleanup and hard-refresh stability passed.

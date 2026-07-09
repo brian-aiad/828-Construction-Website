@@ -2,6 +2,108 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 (night) — Remediation V3: Joe's video-feedback rebuild (4-video batch)
+
+- Intake: 4 videos (IMG_1103/1111/1112/1113, from OneDrive\Pictures) transcribed +
+  frame-resolved at `.claude-work/research/remediation-joe-feedback/`; change doc
+  written FIRST at `docs/828_REMEDIATION_JOE_FEEDBACK_2026-07-08.md` (verbatim
+  quotes, phone-note transcriptions, typo cleanups documented).
+  `components/services/remediation/RemediationServiceContent.tsx` fully rebuilt;
+  `app/services/remediation/page.tsx` gains FAQPage JSON-LD mirroring Joe's 3 Q&As.
+- HERO (IMG_1103): H1 → "828 — creating healthier environments, one home at a
+  time." (maroon 828); paragraph → "Above all else, your peace of mind is
+  paramount…" (note Section 5); asymmetric copy-left/photo-right split (mirrors
+  ADU), parallax drift.
+- FAQ (IMG_1111): "A cleaner repair starts with restraint." + Trace/Contain/
+  Rebuild DELETED → NS-Perspectives FAQ on light surface: label "Identifying the
+  reason for service", H2 "When mold remediation is necessary", intro paragraph
+  verbatim, 3 alternating Q&A cards with +/× expanders (answers mirror JSON-LD).
+- APPROACH (note Section 3, note-only): "Build philosophy / The approach" — 01
+  Initial call · 02 Visual inspection / Testing · 03 Remediation / Scope of work ·
+  04 Build back / Reconstruction; rows ignite in the live-rect focus band against
+  a sticky reconstruction photo (desktop).
+- METHOD (IMG_1112): "Proof that the repair is controlled." verbiage replaced by
+  Joe's three paragraphs ("828's integrated remediation and restoration
+  approach…" → "…exceeds industry standards."); layout kept ("this section here
+  is fine"), photos unchanged (damage + work).
+- CTA (IMG_1113): "Start restoration" (small letters) / H2 "Where recovery
+  begins" / "Begin the path to renewal" (bold) + the integrated-approach
+  paragraph reused in small print (Joe: "as well"). Page signature = equipment
+  model showcase: Flair E8 + 277 MR dark plates converging from opposite sides
+  with a drawing maroon seam; photo slots PENDING real equipment photos from Joe.
+- Unassigned note copy ("This expertise had led to an advanced remediation
+  process…" + partial paragraphs above it) documented in the change doc — ask Joe.
+- QA: tsc clean; `.claude-work/research/remediation-fixes/functional-qa.mjs` PASS
+  desktop+mobile (verbatim probe 20/20 case-insensitive, header morph, FAQ
+  expanders, approach rows readable, plates visible, 0 console errors, no
+  overflow, no duplicate headings); 3 visual critique rounds at 1440×900 +
+  390×844 (de-duplicated mold imagery: FAQ went type-only asymmetric).
+
+## 2026-07-08 (night) — ADU V3: Joe's video-feedback rebuild (4-video batch)
+
+- Intake: 4 videos (IMG_1086/1092/1094/1095, from OneDrive\Downloads) transcribed +
+  frame-resolved at `.claude-work/research/adu-joe-feedback/` (hi-res phone-note
+  crops in `img_1094/hi_*.jpg`, `img_1095/hi_*.jpg`); change doc written FIRST at
+  `docs/828_ADU_JOE_FEEDBACK_2026-07-08.md` (verbatim quotes, note transcriptions,
+  typo cleanups documented). `components/services/adu/AduServiceContent.tsx`
+  fully rebuilt; `app/services/adu/page.tsx` (SEO/JSON-LD) untouched.
+- HERO (IMG_1086): H1 "Built with intent" running DOWNWARDS (vertical-rl) with a
+  maroon plumb line drawing beside it; hero paragraph replaced with Joe's
+  dictated copy ("Whether looking to refine a private retreat… same seriousness
+  as a primary home."). Photo split retained, parallax drift.
+- FAQ (IMG_1092): "The value is in the planning." section DELETED → FAQ section
+  in NS-Perspectives card grammar: dictated line "Whether your vision is fully
+  defined or still evolving, 828 Construction is here to help." above 4
+  alternating dark/light question cards with +/× expanders (answers mirror the
+  page's FAQ JSON-LD).
+- ACRONYM (IMG_1094): "One accountable build path." section DELETED → "What ADU
+  means to 828." A/D/U value rows verbatim from Joe's phone notes (Aligned /
+  Dedicated / Understanding), letters ignite maroon in the live-rect focus band;
+  page signature = giant ADU watermark (0.04) drifting yPercent -8 (per
+  PATTERNS.md signature table).
+- INVITATION (IMG_1095): CTA heading → "An invitation to work together" + the
+  four qualifying questions in fine print (01–04 rail), note-only swaps applied:
+  resonance line + "Prepared to proceed with your vision?" above the CTAs.
+  "…completing the form…" note line NOT applied (contact form ON HOLD).
+- QA: tsc clean; new `.claude-work/research/adu-fixes/functional-qa.mjs` PASS
+  desktop+mobile (verbatim-copy probe 17/17, header morph dark→cream verified,
+  FAQ expanders, no overflow, no duplicate headings, 0 console errors); 3 visual
+  critique rounds at 1440×900 + 390×844; site-smoke: /services/adu OK all
+  scenarios (pre-existing: remediation React warning + missing header BOOK CALL
+  button flagged, untouched).
+
+## 2026-07-08 (late night) — Services V3: Joe's video-feedback rebuild (4-video batch)
+
+- Intake: 4 videos (IMG_1075/1077/1080/1082) transcribed + frame-resolved at
+  `.claude-work/research/services-joe-feedback/`; change doc written FIRST at
+  `docs/828_SERVICES_JOE_FEEDBACK_2026-07-08.md` (verbatim quotes, phone-note
+  transcriptions, typo cleanups documented).
+- SECTION 1 (IMG_1075): hero whited out to the NS Selected-Works list — ADU /
+  Remediation / Consulting full-width rows, dim until the live-rect focus band
+  illuminates them (maroon rule draws, sticky right photo panel crossfades to
+  that service + caption). Page signature; PATTERNS.md table updated.
+- SECTION 2 (IMG_1077): H2 → "Where your vision meets uncompromising quality."
+  (from Joe's ChatGPT list, exact); instrument doodles ("little guys") DELETED;
+  full-bleed photo split. Placeholder image pending the real homeowner-admiring
+  photo Joe described (flagged TODO in component).
+- SECTION 3 (IMG_1080): "Scope first. Then build." replaced by the values
+  split — label "Through all projects", H2 "Ever present", 01–04 principles
+  verbatim from Joe's phone notes (numbers/titles one side, phrases opposite,
+  sticky herringbone close-up, rows ignite in focus band).
+- SECTION 4 (IMG_1082): CTA heading → "Guided by our foundational principles,
+  we consistently uphold the highest standards in every project, ensuring
+  flawless execution and meticulous attention to detail at every stage." above
+  the 6-stage strip across the screen (Initial Contact / Discovery →
+  Post Construction, maroon progress draw) + media/CTA split ("Committed to
+  bringing your vision to life." + PHASE ONE button per note swaps). Footer
+  untouched per Joe.
+- NEW PATTERNS.md Fix 23: IntersectionObserver never fires on fully-clipped
+  elements (clip-path inset 100% → empty intersection rect) — observe the
+  unclipped parent, reveal the child. Also blinds the Fix 18 failsafe.
+- QA: tsc clean; functional-qa PASS desktop+mobile (0 errors, no overflow, no
+  duplicate headings); site-smoke PASS all 7 routes; 4 visual critique rounds
+  at 1440×900 + 390×844; verbatim-verbiage probe PASS (21/21 strings).
+
 ## 2026-07-08 (late night) — About V6: Brian's screenshot feedback executed
 
 - Spec: `docs/828_ABOUT_BRIAN_FEEDBACK_V5.md`. All verbiage untouched.

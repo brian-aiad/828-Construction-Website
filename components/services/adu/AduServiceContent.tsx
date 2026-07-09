@@ -1,141 +1,572 @@
 "use client";
 
+import {
+  type SyntheticEvent,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
-import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
-import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
-import { useServicePageMotion } from "@/components/services/useServicePageMotion";
+import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 
-const PATH = [
-  ["01", "Feasibility", "Lot, access, setbacks, utilities, and budget direction are checked before design momentum starts."],
-  ["02", "Permit-ready scope", "Plans, finish level, and construction realities are aligned so the build is not guessing."],
-  ["03", "Field execution", "Foundation, framing, envelope, utilities, and finish work stay under one accountable standard."],
+gsap.registerPlugin(ScrollTrigger);
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
+
+// Verbatim from Joe's ADU video batch (docs/828_ADU_JOE_FEEDBACK_2026-07-08.md,
+// typo cleanups documented there). Words are frozen.
+const HERO_PARAGRAPH =
+  "Whether looking to refine a private retreat, ideal for house guests, accommodating family, or simply expanding the living space while elevating the property's value overall — 828 Construction builds with the same seriousness as a primary home.";
+
+// Answers mirror the FAQ JSON-LD in app/services/adu/page.tsx exactly.
+const FAQS = [
+  {
+    q: "How much does an ADU cost in Torrance?",
+    a: "ADU construction costs in Torrance typically range from $150,000 to $350,000 depending on size, design, and finishes. 828 Construction provides detailed estimates after a free consultation.",
+  },
+  {
+    q: "Do I need a permit for an ADU in Torrance?",
+    a: "Yes, all ADU construction in Torrance requires building permits. 828 Construction manages the permitting process and ensures full compliance with Torrance zoning regulations.",
+  },
+  {
+    q: "How long does it take to build an ADU?",
+    a: "A typical ADU takes 6–12 months from initial consultation to completion, including design, permitting, and construction.",
+  },
+  {
+    q: "What types of ADUs can be built on my property?",
+    a: "Depending on your lot and zoning, you may qualify for a detached ADU, an attached ADU, a garage conversion, or a Junior ADU (JADU).",
+  },
 ];
 
-export default function AduServiceContent() {
-  const rootRef = useServicePageMotion();
+// Verbatim from Joe's phone notes ("ADU means to 828").
+const ACRONYM = [
+  {
+    letter: "A",
+    word: "Aligned",
+    body: "With the client's vision, ensuring every detail reflects their lifestyle and goals.",
+  },
+  {
+    letter: "D",
+    word: "Dedicated",
+    body: "Unwavering commitment to exceptional quality, precision, and craftsmanship at every stage.",
+  },
+  {
+    letter: "U",
+    word: "Understanding",
+    body: "The renovation process is both a structural transformation and a personal journey — guiding clients through with clarity, care, and a steady expertise to make the process feel seamless and supportive.",
+  },
+];
 
+// Verbatim from Joe's phone notes ("An invitation to work together").
+const QUALIFIERS = [
+  "Seeking a collaboration with a bespoke builder?",
+  "Is uncompromising quality non-negotiable for your project?",
+  "Prepared to invest time and resources required to realize your vision?",
+  "Do you value clear communication and a highly considerate building experience?",
+];
+
+// Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule).
+function useFocusIndex(
+  refs: React.MutableRefObject<Array<HTMLElement | null>>,
+  focusRatio = 0.52
+) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const focus = window.innerHeight * focusRatio;
+      let best = 0;
+      let bestDist = Infinity;
+      let contained = false;
+      refs.current.forEach((el, i) => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        if (!contained && r.top <= focus && r.bottom >= focus) {
+          best = i;
+          contained = true;
+          return;
+        }
+        if (contained) return;
+        const dist = Math.abs(r.top + r.height / 2 - focus);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      setActive((prev) => (prev === best ? prev : best));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [refs, focusRatio]);
+  return active;
+}
+
+function useAduMotion() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useLayoutEffect(
+    () => () => {
+      try {
+        ctxRef.current?.revert();
+      } catch {}
+    },
+    []
+  );
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const revealCleanups: Array<() => void> = [];
+
+    const ctx = gsap.context(() => {
+      const rises = gsap.utils.toArray<HTMLElement>(".adu-rise");
+      const clips = gsap.utils.toArray<HTMLElement>(".adu-clip");
+      const hairlines = gsap.utils.toArray<HTMLElement>(".adu-hairline");
+      const vlines = gsap.utils.toArray<HTMLElement>(".adu-vline");
+      const parallaxImgs = gsap.utils.toArray<HTMLElement>(".adu-parallax");
+      const watermark = root.querySelector<HTMLElement>(".adu-watermark");
+
+      // Initial states live HERE, not in JSX (Fix 14). Rises use opacity, NOT
+      // autoAlpha — visibility:hidden pulls h2s out of the accessibility tree
+      // and axe then reports h1→h3 as a heading-order violation.
+      gsap.set(rises, { opacity: 0, y: 26 });
+      gsap.set(clips, { clipPath: "inset(0% 0% 100% 0%)" });
+      gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
+      gsap.set(vlines, { scaleY: 0, transformOrigin: "top" });
+
+      if (!AnimationController.shouldAnimate()) {
+        gsap.set(rises, { opacity: 1, y: 0 });
+        gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
+        gsap.set(hairlines, { scaleX: 1 });
+        gsap.set(vlines, { scaleY: 1 });
+        return;
+      }
+
+      // One-shot entrances key off real visibility (Fix 22), never scroll math.
+      revealCleanups.push(
+        revealOnVisible(rises, (el) => {
+          gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+        })
+      );
+      // Fully-clipped nodes have an empty intersection rect (Fix 23) — observe
+      // the unclipped parent, reveal the child.
+      revealCleanups.push(
+        revealOnVisible(
+          clips.map((el) => el.parentElement ?? el),
+          (wrapper) => {
+            const el =
+              (wrapper as HTMLElement).querySelector<HTMLElement>(".adu-clip") ??
+              (wrapper as HTMLElement);
+            gsap.to(el, {
+              clipPath: "inset(0% 0% 0% 0%)",
+              duration: 1.1,
+              ease: "power3.inOut",
+            });
+          }
+        )
+      );
+      revealCleanups.push(
+        revealOnVisible(hairlines, (el) => {
+          gsap.to(el, { scaleX: 1, duration: 0.9, ease: "power2.inOut" });
+        })
+      );
+      revealCleanups.push(
+        revealOnVisible(
+          vlines.map((el) => el.parentElement ?? el),
+          (wrapper) => {
+            const el =
+              (wrapper as HTMLElement).querySelector<HTMLElement>(".adu-vline") ??
+              (wrapper as HTMLElement);
+            gsap.to(el, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
+          }
+        )
+      );
+
+      // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
+      parallaxImgs.forEach((el) => {
+        gsap.to(el, {
+          yPercent: -8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el.parentElement ?? el,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.6,
+          },
+        });
+      });
+
+      // Page signature: the ADU watermark drifts as the acronym is read.
+      if (watermark) {
+        gsap.to(watermark, {
+          yPercent: -8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: watermark.parentElement ?? watermark,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.8,
+          },
+        });
+      }
+    }, root);
+
+    ctxRef.current = ctx;
+    return () => {
+      revealCleanups.forEach((dispose) => dispose());
+      ctxRef.current = null;
+      try {
+        ctx.revert();
+      } catch {}
+    };
+  }, []);
+
+  return rootRef;
+}
+
+// ── Section 1 — hero: "Built with intent" running downwards ─────────────────
+function AduHero() {
   return (
-    <div ref={rootRef} className="bg-black text-white">
-      <section className="relative min-h-screen overflow-hidden">
-        <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[0.56fr_0.44fr]">
-          <div className="detail-image relative order-2 min-h-[52vh] overflow-hidden lg:order-1 lg:min-h-screen">
+    <section
+      data-section="adu-hero"
+      data-header-dark=""
+      className="relative bg-black text-white"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
+        <div className="relative order-2 min-h-[46vh] overflow-hidden lg:order-1 lg:min-h-screen">
+          <div className="adu-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
               src="/images/projects/adu-exterior-new.jpg"
               alt="Modern detached ADU exterior for 828 Construction"
               fill
               priority
-              sizes="(max-width: 1024px) 100vw, 56vw"
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+              onError={imgError}
               className="object-cover"
-              style={{ filter: "contrast(1.03) saturate(1.03)" }}
+              style={{ filter: "contrast(1.04) saturate(1.05)" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10 lg:bg-gradient-to-r lg:from-transparent lg:to-black/72" />
-            <div className="absolute bottom-8 left-8 hidden border border-white/14 bg-black/42 px-5 py-4 backdrop-blur-md lg:block">
-              <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/52">
-                Detached ADU / South Bay scale
-              </span>
-            </div>
           </div>
-          <div className="relative order-1 flex flex-col justify-center px-6 py-28 sm:px-10 lg:order-2 lg:px-16">
-            <DraftingMotionLayer intensity="quiet" variant="intro" className="hidden md:block" />
-            <div className="relative z-10">
-              <Link href="/services" className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/42 hover:text-white">
-                Back to services
-              </Link>
-              <div className="detail-line mt-12 h-px max-w-20 origin-left bg-[var(--color-accent)]" />
-              <span className="mt-7 block font-labels text-[10px] uppercase tracking-[0.24em] text-white/48">
-                ADU Construction
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 lg:bg-gradient-to-r lg:from-transparent lg:to-black/60" />
+          <div className="absolute bottom-7 left-7 hidden lg:block">
+            <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/78">
+              Detached ADU / South Bay scale
+            </span>
+          </div>
+        </div>
+
+        <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:order-2 lg:px-14 lg:py-28">
+          <Link
+            href="/services"
+            className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/65 transition-colors hover:text-white"
+          >
+            Back to services
+          </Link>
+          <span className="mt-9 block font-labels text-[10px] uppercase tracking-[0.24em] text-white/48">
+            ADU Construction / CA License #{SITE.license}
+          </span>
+
+          <div className="mt-9 flex items-stretch gap-6 sm:gap-8">
+            {/* Joe: "the phrase built with intent, but running downwards" */}
+            <h1
+              className="font-display font-bold leading-none tracking-tight text-[clamp(2.6rem,4.5vw,4.4rem)]"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              Built with intent
+            </h1>
+            <div className="relative w-[2px] shrink-0 self-stretch bg-white/12" aria-hidden="true">
+              <div className="adu-vline absolute inset-0 bg-[var(--color-accent-light)]" style={{ opacity: 0.9 }} />
+            </div>
+            <p className="max-w-md self-center text-[15px] leading-8 text-white/62 sm:text-base">
+              {HERO_PARAGRAPH}
+            </p>
+          </div>
+
+          <div className="mt-11 flex flex-wrap gap-4">
+            <a
+              href={SITE.phoneHref}
+              className="btn-shine btn-lift bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+            >
+              Call {SITE.phone}
+            </a>
+            <Link
+              href="/contact"
+              className="border border-white/22 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:border-white"
+            >
+              Start ADU
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 2 — FAQ cards (NS Perspectives grammar) ─────────────────────────
+function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const dark = index % 2 === 0;
+  return (
+    <article
+      className={`flex flex-col justify-between border p-6 sm:p-7 ${
+        dark
+          ? "border-transparent bg-[#111] text-white"
+          : "border-black/12 bg-white text-[#111]"
+      }`}
+    >
+      <div>
+        <span
+          className={`font-numbers text-xs font-bold ${
+            dark ? "text-white/72" : "text-[var(--color-accent)]"
+          }`}
+          aria-hidden="true"
+        >
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <h3 className="mt-4 font-display text-lg leading-snug sm:text-xl">{faq.q}</h3>
+        <div
+          id={panelId}
+          role="region"
+          className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <p className={`pt-4 text-sm leading-7 ${dark ? "text-white/62" : "text-black/60"}`}>
+              {faq.a}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-6">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={panelId}
+          className={`flex min-h-11 items-center gap-2 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors ${
+            dark ? "text-white/65 hover:text-white" : "text-black/55 hover:text-black"
+          }`}
+        >
+          {open ? "Close" : "Answer"}
+          <span
+            aria-hidden="true"
+            className="inline-block text-sm transition-transform duration-300"
+            style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
+          >
+            +
+          </span>
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function AduFaq() {
+  return (
+    <section
+      data-section="adu-faq"
+      data-header-light=""
+      className="relative bg-[#f7f7f3] text-[#111]"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/45">
+          FAQ / Frequently asked questions
+        </span>
+        <h2 className="adu-rise mt-5 max-w-4xl font-display font-light leading-[1.14] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+          Whether your vision is fully defined or still evolving, 828
+          Construction is here to help.
+        </h2>
+        <div
+          className="adu-hairline mt-8 h-px w-24 bg-[var(--color-accent)]"
+          style={{ opacity: 0.6 }}
+          aria-hidden="true"
+        />
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+          {FAQS.map((faq, i) => (
+            <FaqCard key={faq.q} faq={faq} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 3 — what ADU means to 828 (acronym values + watermark drift) ────
+function AduAcronym() {
+  const rowRefs = useRef<Array<HTMLElement | null>>([]);
+  const activeIdx = useFocusIndex(rowRefs, 0.52);
+
+  return (
+    <section
+      data-section="adu-acronym"
+      data-header-dark=""
+      className="relative bg-black text-white"
+      style={{ overflowX: "clip" }}
+    >
+      {/* Page signature (PATTERNS.md): giant ADU watermark, whisper-quiet, drifting */}
+      <div
+        className="adu-watermark pointer-events-none absolute -right-6 top-1/2 select-none font-display font-bold leading-none tracking-tight text-white lg:right-6"
+        style={{ fontSize: "clamp(11rem,26vw,22rem)", opacity: 0.04 }}
+        aria-hidden="true"
+      >
+        ADU
+      </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
+          What we drive for
+        </span>
+        <h2 className="adu-rise mt-5 font-display font-light leading-[1.08] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+          What ADU means to 828.
+        </h2>
+
+        <div className="mt-12 border-b border-white/10 lg:mt-16">
+          {ACRONYM.map((item, i) => {
+            const active = activeIdx === i;
+            return (
+              <div
+                key={item.letter}
+                ref={(el) => {
+                  rowRefs.current[i] = el;
+                }}
+                className="grid grid-cols-[auto_1fr] items-start gap-x-6 gap-y-4 border-t border-white/10 py-8 sm:gap-x-10 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:gap-x-16 lg:py-11"
+              >
+                <div className="flex items-baseline gap-5 sm:gap-7">
+                  <span
+                    className={`font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(3.4rem,6.5vw,6rem)] ${
+                      active ? "text-[var(--color-accent-light)]" : "text-white/[0.22]"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {item.letter}
+                  </span>
+                  <h3
+                    className={`font-display leading-none transition-colors duration-500 text-[clamp(1.4rem,2.4vw,2.1rem)] ${
+                      active ? "text-white" : "text-white/55"
+                    }`}
+                  >
+                    {item.word}
+                  </h3>
+                </div>
+                <p
+                  className={`col-span-2 max-w-xl text-sm leading-7 transition-colors duration-500 lg:col-span-1 lg:text-[15px] lg:leading-8 ${
+                    active ? "text-white/70" : "text-white/52"
+                  }`}
+                >
+                  {item.body}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 4 — an invitation to work together ──────────────────────────────
+function AduInvitation() {
+  return (
+    <section
+      data-section="adu-invitation"
+      data-header-dark=""
+      className="relative border-t border-white/10 bg-[#0a0a0a] text-white"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-20">
+          <div className="flex flex-col justify-between gap-10">
+            <div>
+              <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
+                Start here
               </span>
-              <h1 className="mt-7 font-editorial text-[clamp(4rem,9vw,9rem)] leading-[0.84]">
-                Build more room without lowering the standard.
-              </h1>
-              <p className="mt-8 max-w-lg text-base leading-8 text-white/58">
-                828 builds ADUs with the same seriousness as a primary home: practical planning, clean detailing, and accountable field work from permit through finish.
+              <h2 className="adu-rise mt-5 font-display font-light leading-[1.1] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+                An invitation to work together
+              </h2>
+              <p className="adu-rise mt-7 max-w-md text-sm leading-7 text-white/55">
+                If this resonates with your expectations, we welcome the
+                opportunity to explore your project.
               </p>
-              <div className="mt-10 flex flex-wrap gap-4">
-                <a href={SITE.phoneHref} className="bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black hover:bg-[var(--color-accent)] hover:text-white">
+            </div>
+            <div>
+              <p className="adu-rise font-display text-lg leading-snug text-white/88 lg:text-xl">
+                Prepared to proceed with your vision?
+              </p>
+              <div className="mt-7 flex flex-wrap gap-4">
+                <a
+                  href={SITE.phoneHref}
+                  className="btn-shine btn-lift bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+                >
                   Call {SITE.phone}
                 </a>
-                <Link href="/contact" className="border border-white/18 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white hover:border-white">
-                  Start ADU
+                <Link
+                  href="/contact"
+                  className="border border-white/22 px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:border-white"
+                >
+                  Talk through an ADU
                 </Link>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="relative overflow-hidden bg-[#f7f4f0] py-20 text-black lg:py-28">
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:px-12">
-          <div className="detail-reveal">
-            <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/45">
-              From lot to livable unit
-            </span>
-            <h2 className="mt-5 font-editorial text-[clamp(2.8rem,6vw,6rem)] leading-[0.9]">
-              The value is in the planning.
-            </h2>
-            <p className="mt-7 max-w-md text-base leading-8 text-black/62">
-              The right ADU is not just square footage. It is access, privacy, utilities, durability, and a build sequence that respects the property.
-            </p>
-          </div>
-          <div className="detail-stagger grid gap-4 md:grid-cols-3">
-            {PATH.map(([num, title, body]) => (
-              <article key={num} className="border-t border-black/15 pt-6">
-                <span className="font-numbers text-3xl font-bold text-[var(--color-accent)]">{num}</span>
-                <h3 className="mt-5 font-editorial text-3xl leading-none">{title}</h3>
-                <p className="mt-5 text-sm leading-7 text-black/58">{body}</p>
-              </article>
+          {/* Joe: the qualifying questions "in a finer print … finely written, nothing crazy" */}
+          <div className="border-b border-white/10">
+            {QUALIFIERS.map((q, i) => (
+              <div
+                key={q}
+                className="adu-rise grid grid-cols-[auto_1fr] items-baseline gap-5 border-t border-white/10 py-6 sm:gap-7 lg:py-7"
+              >
+                <span
+                  className="font-numbers text-xs font-bold text-white/72"
+                  aria-hidden="true"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="text-sm leading-7 text-white/65 lg:text-[15px]">{q}</p>
+              </div>
             ))}
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className="relative overflow-hidden py-20 lg:py-28">
-        <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
-          <div className="detail-image relative min-h-[30rem] overflow-hidden">
-            <Image
-              src="/images/projects/foundation-concrete.jpg"
-              alt="ADU framing work"
-              fill
-              sizes="(max-width: 1024px) 100vw, 52vw"
-              className="object-cover"
-              style={{ filter: "contrast(1.05) saturate(1.02)" }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/62 via-transparent to-transparent" />
-          </div>
-          <div className="detail-reveal flex flex-col justify-center">
-            <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
-              What 828 handles
-            </span>
-            <h2 className="mt-5 font-editorial text-[clamp(2.6rem,5.8vw,5.8rem)] leading-[0.9]">
-              One accountable build path.
-            </h2>
-            <div className="mt-9 grid gap-3 sm:grid-cols-2">
-              {["Detached ADUs", "Garage conversions", "Permit coordination", "Foundation to finish"].map((item) => (
-                <div key={item} className="border border-white/10 bg-white/[0.035] px-5 py-5">
-                  <span className="font-labels text-[10px] uppercase tracking-[0.16em] text-white/68">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+export default function AduServiceContent() {
+  const rootRef = useAduMotion();
 
-      <section className="relative overflow-hidden border-t border-white/10 py-20 lg:py-28">
-        <DraftingMotionLayer intensity="quiet" className="hidden md:block" />
-        <div className="detail-reveal relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center">
-            <h2 className="max-w-3xl font-editorial text-[clamp(2.8rem,6vw,6rem)] leading-[0.9]">
-              Start with the property. Then decide what to build.
-            </h2>
-            <Link href="/contact" className="bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black hover:bg-[var(--color-accent)] hover:text-white">
-              Talk through an ADU
-            </Link>
-          </div>
-        </div>
-      </section>
+  return (
+    <div ref={rootRef} className="bg-black text-white">
+      <AduHero />
+      <AduFaq />
+      <AduAcronym />
+      <AduInvitation />
     </div>
   );
 }
