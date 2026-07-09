@@ -830,6 +830,49 @@ Files: `components/providers/LenisProvider.tsx`, `components/ui/PhoneCopyToast.t
 
 ---
 
+### Fix 25 — Scrub reveals inside sticky stacked surfaces never complete (missing text)
+
+**Symptom:** On /about, the CRAFT word-completion rows showed only the bare
+capital + period (R. A. F. T.) — the word-rest spans stayed at their hidden
+initial state. Intermittent: depended on scroll speed and position.
+
+**Root cause:** The rows' reveals were `scrub`-tied ScrollTriggers with
+`trigger: row`. The section lives inside AboutFlow/EditorialFlow **sticky
+stacked surfaces**: once a surface pins (position:sticky engages), the row's
+document offset freezes while scrollY keeps advancing — ScrollTrigger's
+computed start/end positions go stale, the scrub parks at progress 0, and the
+text stays hidden. Same failure class as the home process-row highlighter
+(RECENT_CHANGES 2026-06-10); complements Fixes 15/18/23.
+
+**Fix — rect-based decisive reveals + layered failsafes (never-missing-text
+standard):**
+1. Elements are **visible by default in JSX** (Fix 14). GSAP hides them only
+   inside the gated animation setup, immediately before wiring the reveal.
+2. Reveal via **IntersectionObserver** on each row (rect-based — immune to
+   sticky pinning), playing a **decisive once tween** (`gsap.to`, no scrub,
+   `overwrite: true`) so it always completes; letter ignition is a class add
+   in the same callback.
+3. **Failsafe sweep interval** (~1s): any un-revealed row whose
+   `getBoundingClientRect()` intersects the viewport is force-revealed;
+   interval self-clears when all rows are done.
+4. `data-gsap-reveal="true"` on every GSAP-hidden element so LenisProvider's
+   global failsafe (Fix 18) force-reveals anything still stuck after 2.5s.
+5. Mobile/reduced-motion branch never hides anything.
+
+**Rule:** Inside any sticky stacked surface (EditorialFlow/AboutFlow), do NOT
+use scrub-parked ScrollTriggers for content-critical text. Scrub is fine for
+decorative layers (watermarks, parallax); reading content gets decisive
+rect-based reveals.
+
+**Verified** with a 5-scenario torture test
+(`.claude-work/research/about-v3/craft-torture.mjs`): slow scroll, fast fling
++ return, mid-page hard refresh, client-side nav, mobile 390 — all five words
+fully visible in every scenario.
+
+**Files changed:** `components/about/AboutContent.tsx` (2026-07-09).
+
+---
+
 ---
 
 ### Pattern: Asterisk Dropdown Reveal (V2)

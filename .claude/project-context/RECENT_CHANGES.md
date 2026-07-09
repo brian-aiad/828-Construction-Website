@@ -2,6 +2,22 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — About hero V6.2 (photography-first) + CRAFT never-missing-text fix
+
+- Brian: hero "can look better somehow." Built and compared 3 real variants
+  (captures: .claude-work/research/about-v3/visual-audit/hero-variant-*.png);
+  winner C = photography-first: full-bleed planning-table photo, floating glass
+  dossier panel (black/55 blur, lift shadow), oversized top-cropped
+  "828 Construction" ghost at top-left. Words unchanged.
+- URGENT: CRAFT letter-completion was leaving R/A/F/T bare on Brian's live
+  scroll — scrub ScrollTriggers go stale inside AboutFlow's sticky stacked
+  surfaces (documented as PATTERNS.md Fix 25). Rewritten to rect-based
+  IntersectionObserver decisive reveals + 900ms sweep failsafe +
+  data-gsap-reveal coverage (LenisProvider failsafe). 5-scenario torture test
+  (slow scroll / fling+return / mid-page hard refresh / client-side nav /
+  mobile 390) ALL PASS — script: .claude-work/research/about-v3/craft-torture.mjs.
+- functional-qa PASS desktop+mobile post-change; tsc clean.
+
 ## 2026-07-09 — Contact V3 + site-wide all-black footer + stuck-toast fix (terminal B)
 
 - Videos IMG_1123/1125/1127 (Camera Roll) transcribed (whisper medium, 1 fps),

@@ -183,11 +183,36 @@ function AboutHero() {
     <section
       ref={sectionRef}
       data-section=""
-      className="relative grid bg-[#0a0a0a] text-white lg:min-h-[92svh] lg:grid-cols-[0.46fr_0.54fr]"
+      className="relative bg-[#0a0a0a] text-white lg:min-h-[92svh]"
       style={{ overflowX: "clip" }}
     >
-      {/* Dossier panel — one continuous composition, no dead middle */}
-      <div className="relative z-10 flex flex-col justify-center gap-10 px-6 pb-14 pt-28 lg:px-12 lg:pb-20 lg:pt-32">
+      {/* Full-bleed photo — the hero IS the photograph (NS photography-first) */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div ref={photoRef} className="absolute inset-0" style={{ willChange: "transform" }}>
+          <Image
+            src="/images/generated/about-planning-table.jpg"
+            alt="Residential construction planning table with drawings and materials"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            className="object-cover"
+            style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.94)" }}
+          />
+        </div>
+        <div
+          className="absolute inset-0"
+          aria-hidden="true"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.34) 42%, rgba(10,10,10,0.06) 68%), linear-gradient(180deg, rgba(10,10,10,0.18) 0%, rgba(10,10,10,0) 32%, rgba(10,10,10,0.5) 100%)",
+          }}
+        />
+      </div>
+
+      {/* Dossier — floating glass panel, one continuous composition */}
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-6 pb-16 pt-28 lg:min-h-[92svh] lg:px-12 lg:pt-32">
+        <div className="w-full max-w-[26.5rem] border border-white/12 bg-black/55 p-7 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.85)] backdrop-blur-xl lg:p-9">
         <div>
           <p data-hero-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
             <span className="h-px w-7 bg-accent" aria-hidden="true" />
@@ -202,7 +227,7 @@ function AboutHero() {
           </p>
         </div>
 
-        <div data-hero-reveal>
+        <div data-hero-reveal className="mt-9">
           {proofStats.map((stat, i) => (
             <div
               key={stat.label}
@@ -226,37 +251,14 @@ function AboutHero() {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Photo plate */}
-      <div className="relative min-h-[44svh] overflow-hidden border-t border-white/10 lg:min-h-full lg:border-l lg:border-t-0">
-        <div ref={photoRef} className="absolute inset-0" style={{ willChange: "transform" }}>
-          <Image
-            src="/images/generated/about-planning-table.jpg"
-            alt="Residential construction planning table with drawings and materials"
-            fill
-            priority
-            fetchPriority="high"
-            sizes="(max-width: 1024px) 100vw, 54vw"
-            className="object-cover"
-            style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.94)" }}
-          />
         </div>
-        <div
-          className="absolute inset-0"
-          aria-hidden="true"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0) 26%), linear-gradient(180deg, rgba(10,10,10,0.32) 0%, rgba(10,10,10,0) 30%, rgba(10,10,10,0.55) 100%)",
-          }}
-        />
       </div>
 
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-[14%] z-20 select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.07]"
-        style={{ fontSize: "clamp(2.8rem, 7vw, 7rem)", letterSpacing: "0.08em", willChange: "transform" }}
+        className="pointer-events-none absolute left-6 top-0 z-[5] -translate-y-[0.1em] select-none whitespace-nowrap text-left font-editorial font-bold uppercase leading-none text-white/[0.075] lg:left-12"
+        style={{ fontSize: "clamp(4.5rem, 11vw, 11rem)", letterSpacing: "0.04em", willChange: "transform" }}
       >
         828 Construction
       </div>
@@ -450,16 +452,18 @@ function CraftSection() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const ctx = gsap.context(() => {
-      // Fix 14 discipline: initial states set here, cleared on mobile.
-      restRefs.current.forEach((rest) => {
-        if (rest) gsap.set(rest, { xPercent: -100, opacity: 0 });
-      });
+    // The CRAFT surface lives inside AboutFlow's sticky stack — once the
+    // surface pins, document-offset ScrollTrigger positions go stale (home
+    // process rows had the same failure, PATTERNS.md Fix 22). Word-completion
+    // therefore uses rect-based IntersectionObserver reveals (immune to
+    // pinning) that are DECISIVE (play once, always finish) — text can never
+    // be left missing. Words are visible by default with no JS; GSAP hides
+    // them only here, gated, and three failsafes force-reveal stuck rows.
+    let io: IntersectionObserver | null = null;
+    let sweepTimer: ReturnType<typeof setInterval> | null = null;
 
+    const ctx = gsap.context(() => {
       if (!AnimationController.shouldAnimate()) {
-        restRefs.current.forEach((rest) => {
-          if (rest) gsap.set(rest, { xPercent: 0, opacity: 1 });
-        });
         letterRefs.current.forEach((l) => l?.classList.add("text-accent"));
         return;
       }
@@ -476,47 +480,62 @@ function CraftSection() {
         );
       }
 
-      // Each word slides out of its own letter as the row enters — Joe's
-      // sketch made literal. The letter ignites maroon as the word escapes.
+      const revealed = new Set<number>();
+      const reveal = (index: number) => {
+        if (revealed.has(index)) return;
+        revealed.add(index);
+        const rest = restRefs.current[index];
+        const body = rowRefs.current[index]?.querySelector("[data-craft-body]");
+        const letter = letterRefs.current[index];
+        if (rest) {
+          gsap.to(rest, { xPercent: 0, opacity: 1, duration: 0.85, ease: "power3.out", overwrite: true });
+        }
+        if (body) {
+          gsap.to(body, { y: 0, opacity: 1, duration: 0.7, delay: 0.12, ease: "power3.out", overwrite: true });
+        }
+        letter?.classList.add("text-accent");
+      };
+
+      // Hide only now that a reveal path exists (words are visible in JSX).
       rowRefs.current.forEach((row, index) => {
         if (!row) return;
         const rest = restRefs.current[index];
-        const letter = letterRefs.current[index];
-
-        if (rest) {
-          gsap.fromTo(
-            rest,
-            { xPercent: -100, opacity: 0 },
-            {
-              xPercent: 0,
-              opacity: 1,
-              ease: "power2.out",
-              scrollTrigger: { trigger: row, start: "top 86%", end: "top 58%", scrub: 0.9 },
-            }
-          );
-        }
-
-        gsap.fromTo(
-          row.querySelector("[data-craft-body]"),
-          { y: 18, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: "power2.out",
-            scrollTrigger: { trigger: row, start: "top 82%", end: "top 54%", scrub: 1 },
-          }
-        );
-
-        ScrollTrigger.create({
-          trigger: row,
-          start: "top 70%",
-          onEnter: () => letter?.classList.add("text-accent"),
-          onLeaveBack: () => letter?.classList.remove("text-accent"),
-        });
+        const body = row.querySelector("[data-craft-body]");
+        if (rest) gsap.set(rest, { xPercent: -100, opacity: 0 });
+        if (body) gsap.set(body, { y: 18, opacity: 0 });
       });
+
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const index = rowRefs.current.indexOf(entry.target as HTMLDivElement);
+            io?.unobserve(entry.target);
+            if (index >= 0) reveal(index);
+          });
+        },
+        { rootMargin: "0px 0px -14% 0px", threshold: 0.05 }
+      );
+      rowRefs.current.forEach((row) => row && io?.observe(row));
+
+      // Failsafe sweep: any row already inside the viewport (mid-page refresh,
+      // fling-past, missed IO tick) gets force-revealed within a second.
+      sweepTimer = setInterval(() => {
+        rowRefs.current.forEach((row, index) => {
+          if (!row || revealed.has(index)) return;
+          const r = row.getBoundingClientRect();
+          if (r.top < window.innerHeight * 0.98 && r.bottom > 0) reveal(index);
+        });
+        if (revealed.size === rowRefs.current.length && sweepTimer) {
+          clearInterval(sweepTimer);
+          sweepTimer = null;
+        }
+      }, 900);
     }, sectionRef);
 
     return () => {
+      io?.disconnect();
+      if (sweepTimer) clearInterval(sweepTimer);
       try {
         ctx.revert();
       } catch {}
@@ -581,6 +600,7 @@ function CraftSection() {
                     ref={(el) => {
                       restRefs.current[index] = el;
                     }}
+                    data-gsap-reveal="true"
                     className="inline-block"
                     style={{ willChange: "transform" }}
                   >
@@ -588,7 +608,7 @@ function CraftSection() {
                   </span>
                 </span>
               </h3>
-              <p data-craft-body className="max-w-2xl text-[clamp(0.96rem,1.1vw,1.05rem)] leading-relaxed text-black/62">
+              <p data-craft-body data-gsap-reveal="true" className="max-w-2xl text-[clamp(0.96rem,1.1vw,1.05rem)] leading-relaxed text-black/62">
                 {item.body}
               </p>
             </div>
