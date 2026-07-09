@@ -23,7 +23,7 @@ export default function BrandMarqueeBottom({
 }: BrandMarqueeBottomProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const heightClass = panel
-    ? "h-[4.3rem]"
+    ? "h-12 lg:h-[4.3rem]"
     : compact
       ? "h-12"
       : "h-[clamp(4.4rem,9vw,8.4rem)]";
