@@ -183,7 +183,7 @@ function AboutHero() {
     <section
       ref={sectionRef}
       data-section=""
-      className="relative bg-[#0a0a0a] text-white lg:min-h-[92svh]"
+      className="relative min-h-[100svh] bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
       {/* Full-bleed photo — the hero IS the photograph (NS photography-first) */}
@@ -211,7 +211,7 @@ function AboutHero() {
       </div>
 
       {/* Dossier — floating glass panel, one continuous composition */}
-      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-6 pb-16 pt-28 lg:min-h-[92svh] lg:px-12 lg:pt-32">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-6 pb-16 pt-28 lg:px-12 lg:pt-32">
         <div className="w-full max-w-[26.5rem] border border-white/12 bg-black/55 p-7 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.85)] backdrop-blur-xl lg:p-9">
         <div>
           <p data-hero-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
