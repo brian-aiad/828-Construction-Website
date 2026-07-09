@@ -212,9 +212,13 @@ function useServicesMotion() {
       );
 
       // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
+      // Photographs breathe: parallax drift + a scale settle (1.07 → 1.0)
+      // across their whole viewport transit.
       parallaxImgs.forEach((el) => {
+        gsap.set(el, { scale: 1.07, transformOrigin: "center center" });
         gsap.to(el, {
           yPercent: -8,
+          scale: 1,
           ease: "none",
           scrollTrigger: {
             trigger: el.parentElement ?? el,
@@ -292,7 +296,7 @@ function ServicesIndex() {
           </h1>
 
           {/* The whited-out list — tight NS stack, no row borders */}
-          <div className="mt-14 lg:mt-20">
+          <div className="svc-shift mt-14 lg:mt-20">
             <div className="h-px w-full bg-black/12" aria-hidden="true" />
             <div className="py-4 lg:py-6">
               {SERVICE_ROWS.map((row, i) => {
@@ -370,8 +374,10 @@ function ServicesIndex() {
           </div>
         </div>
 
-        {/* Sticky photograph, bleeding to the right edge of the viewport */}
-        <div className="relative hidden lg:block" aria-hidden="true">
+        {/* Sticky photograph, bleeding to the right edge of the viewport.
+            Negative top margin cancels the grid's top padding so the
+            photograph rides flush under the header, NS-style. */}
+        <div className="relative hidden lg:-mt-40 lg:block" aria-hidden="true">
           <div className="sticky top-0">
             <div className="relative h-screen overflow-hidden">
               {SERVICE_ROWS.map((row, i) => {
@@ -521,7 +527,18 @@ function PrinciplesSection() {
             Ever present
           </h2>
 
-          <div className="mt-10 lg:mt-14">
+          <div className="relative mt-10 lg:mt-14">
+            {/* Reading-progress seam: grows down the panel as rows ignite */}
+            <div className="absolute -left-5 top-0 hidden h-full w-px bg-white/10 lg:block xl:-left-8" aria-hidden="true" />
+            <div
+              className="absolute -left-5 top-0 hidden w-px bg-[var(--color-accent)] lg:block xl:-left-8"
+              style={{
+                height: `${((activeIdx + 1) / PRINCIPLES.length) * 100}%`,
+                opacity: 0.85,
+                transition: "height 650ms cubic-bezier(0.16,1,0.3,1)",
+              }}
+              aria-hidden="true"
+            />
             {PRINCIPLES.map((p, i) => {
               const active = activeIdx === i;
               return (
