@@ -14,6 +14,12 @@ export default function Header() {
   const [hidden, setHidden] = useState(false);
   const [overLight, setOverLight] = useState(false);
   const [torTime, setTorTime] = useState("");
+  // Graded scroll factor 0→1 over the first ~360px, quantized to 1/20 steps so
+  // the header glass thickens continuously with scroll without re-rendering
+  // per frame. Reduced motion falls back to the old binary snap.
+  const [scrollAlpha, setScrollAlpha] = useState(0);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const reducedRef = useRef(false);
   const lastScrollY = useRef(0);
   const pathname = usePathname();
 
@@ -44,9 +50,23 @@ export default function Header() {
       setOverLight(isLight);
     };
 
+    reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     const handleScroll = () => {
       const currentY = window.scrollY;
       setScrolled(currentY > 32);
+      const raw = Math.min(currentY / 360, 1);
+      const stepped = reducedRef.current
+        ? currentY > 32
+          ? 1
+          : 0
+        : Math.round(raw * 20) / 20;
+      setScrollAlpha((prev) => (prev === stepped ? prev : stepped));
+      if (progressRef.current) {
+        const doc = document.documentElement;
+        const max = Math.max(doc.scrollHeight - window.innerHeight, 1);
+        progressRef.current.style.transform = `scaleX(${Math.min(currentY / max, 1).toFixed(4)})`;
+      }
       if (currentY > 300) {
         setHidden(currentY > lastScrollY.current);
       } else {
@@ -116,19 +136,27 @@ export default function Header() {
         initial={{ y: -72, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-        style={{ transform: hidden ? "translateY(-100%)" : "translateY(0)" }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          light
-            ? "bg-[#f7f7f3]/90 backdrop-blur-xl border-b border-black/10"
-            : scrolled
-            ? "bg-black/90 backdrop-blur-xl border-b border-white/10"
-            : isHome
-            ? "bg-black/[0.32] backdrop-blur-[6px]"
-            : "bg-black/90 backdrop-blur-xl border-b border-white/10"
-        }`}
+        style={{
+          transform: hidden ? "translateY(-100%)" : "translateY(0)",
+          backgroundColor: light
+            ? `rgba(247,247,243,${(0.55 + 0.4 * scrollAlpha).toFixed(3)})`
+            : `rgba(5,5,5,${(0.05 + 0.85 * scrollAlpha).toFixed(3)})`,
+          backdropFilter: `blur(${(4 + 14 * scrollAlpha).toFixed(1)}px)`,
+          WebkitBackdropFilter: `blur(${(4 + 14 * scrollAlpha).toFixed(1)}px)`,
+          borderBottom: `1px solid ${
+            light
+              ? `rgba(0,0,0,${(0.1 * scrollAlpha).toFixed(3)})`
+              : `rgba(255,255,255,${(0.1 * scrollAlpha).toFixed(3)})`
+          }`,
+        }}
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       >
         <div className="w-full px-3 sm:px-4 lg:px-8 2xl:px-10">
-          <div className="flex h-14 items-center justify-between lg:grid lg:h-16 lg:grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] lg:gap-10">
+          <div
+            className={`flex h-14 items-center justify-between transition-[height] duration-500 lg:grid lg:grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] lg:gap-10 ${
+              scrollAlpha > 0.5 ? "lg:h-14" : "lg:h-16"
+            }`}
+          >
             {/* Logo — text wordmark, uniform weight */}
             <Link
               href="/"
@@ -312,6 +340,16 @@ export default function Header() {
             </div>
           </div>
         </div>
+
+        {/* Maroon page-progress hairline — lives on the header's bottom edge
+            (replaces the detached #scroll-progress top bar) so it hides and
+            reveals together with the bar. Driven direct-to-style on scroll. */}
+        <div
+          ref={progressRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-left bg-[var(--color-accent)]"
+          style={{ transform: "scaleX(0)", willChange: "transform" }}
+        />
       </motion.header>
 
       {/* Mobile fullscreen menu */}

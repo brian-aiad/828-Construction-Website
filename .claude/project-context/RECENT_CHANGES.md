@@ -2,6 +2,40 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Seam cleanup, line-only sidebar, visible wordmark, living header
+
+- STACKED-SURFACE GAPS FIXED AT ROOT (Brian: sections peeking through gaps
+  that grow as you scroll): the AboutFlow cover-scale settle (scale 0.975)
+  inset covered surfaces ~18px per side, exposing the surface beneath —
+  invisible on home (all-cream surfaces) but glaring on About's dark/white
+  alternation. Replaced with a geometry-free depth cue: a per-surface black
+  veil that dims 0→0.28 as the next surface covers it. Surfaces now span full
+  viewport width at every frame; flow wrap painted #050505 so no contrasting
+  sliver can ever show. RULE: never transform stacked-surface geometry on
+  pages with mixed light/dark surfaces.
+- Frame-by-frame seam audit harness added
+  (.claude-work/research/about-v3/seam-audit/sweep.mjs): scrolls in 200px
+  steps at 1440x900 + 390x844, screenshots every step, and programmatically
+  asserts every visible surface spans full width and no flow band is
+  uncovered. Two consecutive sweeps clean at both viewports (57 frames each).
+- SIDEBAR: VerticalBrandMark wording deleted site-wide (Brian: "I like the
+  red line — delete the wording"). Null on / and /about (About's plumb line
+  IS the red line); other routes get a quiet centered maroon hairline + node.
+- HERO WORDMARK: no longer top-cropped — fully visible mid-top band, centered,
+  clamp(2.2rem,8vw,8rem) so it fits untouched at both viewports; drift range
+  tightened so it can never leave the viewport.
+- LIVING HEADER (Brian: "a lot more responsive… change colors, be more
+  transparent while scrolling"): graded glass — background alpha 0.05→0.90 and
+  blur 4→18px interpolate continuously over the first 360px of scroll
+  (quantized 1/20 steps; prefers-reduced-motion falls back to the old binary
+  snap); desktop bar condenses h-16→h-14 past half-scroll; maroon page-progress
+  hairline moved from the detached #scroll-progress top bar onto the header's
+  bottom edge (ScrollProgress unrendered from layout); zone-aware dark/cream
+  morph unchanged. Verified at 6 scroll depths on about/home/services/
+  portfolio (ink always matches background) + mobile menu clean at 390.
+- QA: tsc clean; functional-qa PASS both viewports; craft-torture 5/5 PASS;
+  seam sweep clean twice.
+
 ## 2026-07-09 — About hero V6.2 (photography-first) + CRAFT never-missing-text fix
 
 - Brian: hero "can look better somehow." Built and compared 3 real variants

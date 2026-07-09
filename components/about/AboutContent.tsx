@@ -132,9 +132,9 @@ function AboutHero() {
       if (wordmarkRef.current) {
         gsap.fromTo(
           wordmarkRef.current,
-          { xPercent: 1.5 },
+          { xPercent: 0.9 },
           {
-            xPercent: -3.5,
+            xPercent: -1.2,
             ease: "none",
             scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: 1.4 },
           }
@@ -257,8 +257,8 @@ function AboutHero() {
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute left-6 top-0 z-[5] -translate-y-[0.1em] select-none whitespace-nowrap text-left font-editorial font-bold uppercase leading-none text-white/[0.075] lg:left-12"
-        style={{ fontSize: "clamp(4.5rem, 11vw, 11rem)", letterSpacing: "0.04em", willChange: "transform" }}
+        className="pointer-events-none absolute inset-x-0 top-[4.5rem] z-[5] select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.075] lg:top-[5.25rem]"
+        style={{ fontSize: "clamp(2.2rem, 8vw, 8rem)", letterSpacing: "0.05em", willChange: "transform" }}
       >
         828 Construction
       </div>
@@ -271,20 +271,43 @@ function AboutHero() {
 // Swappable portrait slot — drop /images/about/joe-portrait.jpg in and it
 // renders on the next build/refresh; until then, a quiet pending plate holds
 // the composition (existence checked server-side, no failed request).
-function PortraitSlot({ hasPortrait }: { hasPortrait: boolean }) {
-  const missing = !hasPortrait;
+function PortraitSlot({
+  hasPortrait,
+  hasTemporaryPortrait,
+}: {
+  hasPortrait: boolean;
+  hasTemporaryPortrait: boolean;
+}) {
+  const portraitSrc = hasPortrait
+    ? "/images/about/joe-portrait.jpg"
+    : hasTemporaryPortrait
+      ? "/images/about/joe-portrait-temporary.png"
+      : null;
+  const isTemporary = !hasPortrait && hasTemporaryPortrait;
+  const missing = !portraitSrc;
 
   return (
     <div className="relative overflow-hidden border border-white/12 bg-[#0d0d0d]" style={{ aspectRatio: "3 / 4" }}>
-      {!missing && (
+      {portraitSrc && (
         <Image
-          src="/images/about/joe-portrait.jpg"
-          alt="Joe P, founder of 828 Construction"
+          src={portraitSrc}
+          alt={
+            isTemporary
+              ? "Temporary portrait placeholder for Joe P, founder of 828 Construction"
+              : "Joe P, founder of 828 Construction"
+          }
           fill
           sizes="(max-width: 1024px) 88vw, 30vw"
           className="object-cover"
           style={{ filter: "contrast(1.05) saturate(1.0) brightness(0.95)" }}
         />
+      )}
+      {isTemporary && (
+        <div className="absolute inset-x-0 top-4 mx-4 border border-white/18 bg-black/62 px-3 py-2 text-center backdrop-blur-sm">
+          <span className="font-labels text-[8px] uppercase tracking-[0.24em] text-white/78">
+            Temporary until portrait
+          </span>
+        </div>
       )}
       {missing && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
@@ -308,7 +331,13 @@ function PortraitSlot({ hasPortrait }: { hasPortrait: boolean }) {
 }
 
 // ── Builder profile — condensed: quote + portrait, standards pulled up tight ──
-function OriginSection({ hasPortrait }: { hasPortrait: boolean }) {
+function OriginSection({
+  hasPortrait,
+  hasTemporaryPortrait,
+}: {
+  hasPortrait: boolean;
+  hasTemporaryPortrait: boolean;
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const quoteLineRef = useRef<HTMLDivElement>(null);
@@ -429,7 +458,10 @@ function OriginSection({ hasPortrait }: { hasPortrait: boolean }) {
               className="mx-auto w-full max-w-sm lg:ml-auto lg:mr-0 lg:max-w-[22rem]"
               style={{ willChange: "clip-path, transform" }}
             >
-              <PortraitSlot hasPortrait={hasPortrait} />
+              <PortraitSlot
+                hasPortrait={hasPortrait}
+                hasTemporaryPortrait={hasTemporaryPortrait}
+              />
             </div>
           </div>
         </div>
@@ -825,11 +857,20 @@ function AboutCTA() {
   );
 }
 
-export default function AboutContent({ hasPortrait = false }: { hasPortrait?: boolean }) {
+export default function AboutContent({
+  hasPortrait = false,
+  hasTemporaryPortrait = false,
+}: {
+  hasPortrait?: boolean;
+  hasTemporaryPortrait?: boolean;
+}) {
   return (
     <AboutFlow>
       <AboutHero />
-      <OriginSection hasPortrait={hasPortrait} />
+      <OriginSection
+        hasPortrait={hasPortrait}
+        hasTemporaryPortrait={hasTemporaryPortrait}
+      />
       <CraftSection />
       <SouthBaySection />
       <AboutCTA />

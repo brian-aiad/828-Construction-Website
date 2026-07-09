@@ -12,8 +12,10 @@ gsap.registerPlugin(ScrollTrigger);
 //
 // 1. Stacked surfaces — each section becomes position:sticky with a measured
 //    negative top so a fully-read surface holds still while the next rides up
-//    over it. Covered surfaces settle back in scale for depth. The last child
-//    stays in normal flow so the footer junction is untouched.
+//    over it. The covered surface dims under a veil for depth — NEVER a scale
+//    settle: About alternates dark/white surfaces, and any transform inset
+//    opens visible edge gaps that expose the surface underneath (Brian's
+//    2026-07-09 gap report). Geometry must stay full-bleed at every frame.
 // 2. Plumb line — a continuous maroon thread drawn down the left margin with
 //    nodes that ignite per section. About runs it on dark surfaces, so the
 //    idle track and node chrome read in white-alpha instead of black-alpha.
@@ -74,15 +76,14 @@ export default function AboutFlow({ children }: { children: React.ReactNode }) {
       stacks.forEach((el, i) => {
         const next = stacks[i + 1];
         if (!next) return;
+        const veil = el.querySelector<HTMLElement>("[data-cover-veil]");
+        if (!veil) return;
         gsap.fromTo(
-          el,
-          { scale: 1 },
+          veil,
+          { opacity: 0 },
           {
-            scale: 0.975,
+            opacity: 0.28,
             ease: "none",
-            // top-anchored so the covered surface never opens a sliver at the
-            // viewport top during the cover transition (Brian's V5 artifact)
-            transformOrigin: "center top",
             scrollTrigger: {
               trigger: next,
               start: "top bottom",
@@ -118,7 +119,7 @@ export default function AboutFlow({ children }: { children: React.ReactNode }) {
   const items = React.Children.toArray(children);
 
   return (
-    <div ref={wrapRef} data-about-flow="" className="relative z-10">
+    <div ref={wrapRef} data-about-flow="" className="relative z-10 bg-[#050505]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
@@ -134,10 +135,17 @@ export default function AboutFlow({ children }: { children: React.ReactNode }) {
         <div
           key={i}
           data-stack-surface=""
-          className="bg-[#050505] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.85)]"
-          style={{ zIndex: i + 1, willChange: i < items.length - 1 ? "transform" : undefined }}
+          className="relative bg-[#050505] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.85)]"
+          style={{ zIndex: i + 1 }}
         >
           {child}
+          {i < items.length - 1 && (
+            <div
+              data-cover-veil=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-[60] bg-black opacity-0"
+            />
+          )}
         </div>
       ))}
     </div>

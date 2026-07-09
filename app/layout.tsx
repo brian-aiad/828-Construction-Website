@@ -4,7 +4,6 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FooterRevealWrapper from "@/components/layout/FooterRevealWrapper";
-import ScrollProgress from "@/components/layout/ScrollProgress";
 import GrainOverlay from "@/components/system/GrainOverlay";
 import RightScrollProgress from "@/components/system/RightScrollProgress";
 import VerticalBrandMark from "@/components/system/VerticalBrandMark";
@@ -91,7 +90,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <GrainOverlay />
-        <ScrollProgress />
+        {/* Page progress now lives on the Header's bottom edge (2026-07-09). */}
         <RightScrollProgress />
         <VerticalBrandMark />
         {/* Custom cursor — hidden on touch devices via CSS */}
