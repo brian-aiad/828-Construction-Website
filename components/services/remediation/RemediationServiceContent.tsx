@@ -29,7 +29,7 @@ function imgError(e: SyntheticEvent<HTMLImageElement>) {
 // (docs/828_REMEDIATION_JOE_FEEDBACK_2026-07-08.md, typo cleanups documented
 // there). Words are frozen.
 const HERO_PARAGRAPH =
-  "Above all else, your peace of mind is paramount. We understand the disruption and urgency that follows damage. From restoring environmental integrity to complete reconstruction, 828 Construction delivers a seamless, disciplined process from remediation through completion.";
+  "Above all else, your peace of mind is paramount. We understand the disruption and urgency that follows damage — from restoring environmental integrity to complete reconstruction. 828 Construction delivers a seamless, disciplined process from remediation through completion.";
 
 const FAQ_INTRO =
   "Mold remediation is necessary when moisture intrusion happens to a structure — whether from a leaky roof, cracked pipes, or old windows. Beyond visible damage, the hidden dangers in mold spores in between materials and long-term exposure may contribute to respiratory issues, allergies, and other health concerns.";
@@ -143,8 +143,13 @@ function useRemediationMotion() {
       const rises = gsap.utils.toArray<HTMLElement>(".rem-rise");
       const clips = gsap.utils.toArray<HTMLElement>(".rem-clip");
       const hairlines = gsap.utils.toArray<HTMLElement>(".rem-hairline");
-      const vlines = gsap.utils.toArray<HTMLElement>(".rem-vline");
+      const cards = gsap.utils.toArray<HTMLElement>(".rem-card");
       const parallaxImgs = gsap.utils.toArray<HTMLElement>(".rem-parallax");
+      const parallaxSoft = gsap.utils.toArray<HTMLElement>(".rem-parallax-soft");
+      const heroMedia = root.querySelector<HTMLElement>(".rem-hero-media");
+      const heroLines = gsap.utils.toArray<HTMLElement>(".rem-hero-line");
+      const rail = root.querySelector<HTMLElement>(".rem-rail");
+      const seam = root.querySelector<HTMLElement>(".rem-seam");
       const plateL = root.querySelector<HTMLElement>(".rem-plate-left");
       const plateR = root.querySelector<HTMLElement>(".rem-plate-right");
 
@@ -154,18 +159,33 @@ function useRemediationMotion() {
       gsap.set(rises, { opacity: 0, y: 26 });
       gsap.set(clips, { clipPath: "inset(0% 0% 100% 0%)" });
       gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
-      gsap.set(vlines, { scaleY: 0, transformOrigin: "top" });
-      if (plateL) gsap.set(plateL, { autoAlpha: 0, x: -36 });
-      if (plateR) gsap.set(plateR, { autoAlpha: 0, x: 36 });
+      if (rail) gsap.set(rail, { scaleY: 0, transformOrigin: "top" });
+      if (seam) gsap.set(seam, { scaleY: 0, transformOrigin: "top" });
 
       if (!AnimationController.shouldAnimate()) {
         gsap.set(rises, { opacity: 1, y: 0 });
         gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
         gsap.set(hairlines, { scaleX: 1 });
-        gsap.set(vlines, { scaleY: 1 });
-        if (plateL) gsap.set(plateL, { autoAlpha: 1, x: 0 });
-        if (plateR) gsap.set(plateR, { autoAlpha: 1, x: 0 });
+        if (rail) gsap.set(rail, { scaleY: 1 });
+        if (seam) gsap.set(seam, { scaleY: 1 });
         return;
+      }
+
+      // Hero entrance — transform-only on text (above-the-fold, LCP-safe:
+      // no opacity change) + media wipes in from the copy side.
+      if (heroMedia) {
+        gsap.fromTo(
+          heroMedia,
+          { clipPath: "inset(0% 0% 0% 22%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.15, ease: "power3.out", delay: 0.1 }
+        );
+      }
+      if (heroLines.length) {
+        gsap.fromTo(
+          heroLines,
+          { y: 30 },
+          { y: 0, duration: 0.95, stagger: 0.09, ease: "power3.out" }
+        );
       }
 
       // One-shot entrances key off real visibility (Fix 22), never scroll math.
@@ -196,36 +216,83 @@ function useRemediationMotion() {
           gsap.to(el, { scaleX: 1, duration: 0.9, ease: "power2.inOut" });
         })
       );
-      revealCleanups.push(
-        revealOnVisible(
-          vlines.map((el) => el.parentElement ?? el),
-          (wrapper) => {
-            const el =
-              (wrapper as HTMLElement).querySelector<HTMLElement>(".rem-vline") ??
-              (wrapper as HTMLElement);
-            gsap.to(el, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
-          }
-        )
-      );
 
-      // Page signature (PATTERNS.md): the two equipment plates converge from
-      // opposite sides while the maroon seam between them draws down.
-      if (plateL && plateR) {
-        revealCleanups.push(
-          revealOnVisible([plateL.parentElement ?? plateL], () => {
-            gsap.to(plateL, { autoAlpha: 1, x: 0, duration: 0.95, ease: "power3.out" });
-            gsap.to(plateR, {
-              autoAlpha: 1,
-              x: 0,
-              duration: 0.95,
-              ease: "power3.out",
-              delay: 0.08,
-            });
-          })
+      // Sustained scrub motion (Fix 15) — every scrubbed initial state stays
+      // readable if its trigger never fires (Fix 22).
+      // Transform-only scrubs: parent opacity dims would fail WCAG contrast at
+      // load time (axe audits the pre-scroll state).
+      cards.forEach((card) => {
+        gsap.fromTo(
+          card,
+          { y: 34 },
+          {
+            y: 0,
+            ease: "power2.out",
+            scrollTrigger: { trigger: card, start: "top 96%", end: "top 66%", scrub: 1.15 },
+          }
+        );
+      });
+
+      // Approach: the maroon plumb rail fills as the four steps pass the
+      // focus band.
+      if (rail && rail.parentElement) {
+        gsap.fromTo(
+          rail,
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: rail.parentElement,
+              start: "top 72%",
+              end: "bottom 58%",
+              scrub: 1.3,
+            },
+          }
         );
       }
 
-      // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
+      // CTA signature: plates settle in from opposite sides on scrub while
+      // the maroon seam draws down between them.
+      if (plateL && plateR && plateL.parentElement) {
+        const trigger = plateL.parentElement;
+        gsap.fromTo(
+          plateL,
+          { x: -44 },
+          {
+            x: 0,
+            ease: "power2.out",
+            scrollTrigger: { trigger, start: "top 94%", end: "top 52%", scrub: 1.2 },
+          }
+        );
+        gsap.fromTo(
+          plateR,
+          { x: 44 },
+          {
+            x: 0,
+            ease: "power2.out",
+            scrollTrigger: { trigger, start: "top 94%", end: "top 48%", scrub: 1.2 },
+          }
+        );
+      }
+      if (seam && seam.parentElement) {
+        gsap.fromTo(
+          seam,
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: seam.parentElement,
+              start: "top 90%",
+              end: "top 40%",
+              scrub: 1.2,
+            },
+          }
+        );
+      }
+
+      // Layered parallax — two depths for dimension.
       parallaxImgs.forEach((el) => {
         gsap.to(el, {
           yPercent: -8,
@@ -235,6 +302,18 @@ function useRemediationMotion() {
             start: "top bottom",
             end: "bottom top",
             scrub: 1.6,
+          },
+        });
+      });
+      parallaxSoft.forEach((el) => {
+        gsap.to(el, {
+          yPercent: -4,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el.parentElement ?? el,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.9,
           },
         });
       });
@@ -274,9 +353,8 @@ function RemediationHero() {
             Remediation / CA License #{SITE.license}
           </span>
 
-          <h1 className="mt-9 font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.4rem)]">
-            828 —
-            creating healthier environments, one home at a time.
+          <h1 className="rem-hero-line mt-9 font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.4rem)]">
+            828 — creating healthier environments, one home at a time.
           </h1>
 
           <div
@@ -285,11 +363,11 @@ function RemediationHero() {
             aria-hidden="true"
           />
 
-          <p className="mt-8 max-w-xl text-[15px] leading-8 text-white/62 sm:text-base">
+          <p className="rem-hero-line mt-8 max-w-xl text-[15px] leading-8 text-white/62 sm:text-base">
             {HERO_PARAGRAPH}
           </p>
 
-          <div className="mt-11 flex flex-wrap gap-4">
+          <div className="rem-hero-line mt-11 flex flex-wrap gap-4">
             <a
               href={SITE.phoneHref}
               className="btn-shine btn-lift bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
@@ -305,7 +383,7 @@ function RemediationHero() {
           </div>
         </div>
 
-        <div className="relative order-2 min-h-[46vh] overflow-hidden lg:min-h-screen">
+        <div className="rem-hero-media relative order-2 min-h-[46vh] overflow-hidden lg:min-h-screen">
           <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
               src="/images/projects/remediation-active.jpg"
@@ -339,7 +417,7 @@ function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) 
   const dark = index % 2 === 0;
   return (
     <article
-      className={`flex flex-col justify-between border p-6 sm:p-7 ${
+      className={`rem-card flex flex-col justify-between border p-6 sm:p-7 ${
         dark
           ? "border-transparent bg-[#111] text-white"
           : "border-black/12 bg-white text-[#111]"
@@ -400,7 +478,32 @@ function RemediationFaq() {
       className="relative bg-[#f7f7f3] text-[#111]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      {/* NS Perspectives echo: rolling strip of the three questions (decorative;
+          the real headings live in the cards below). */}
+      <div className="overflow-hidden border-b border-black/[0.06] py-6" aria-hidden="true">
+        <div
+          className="flex w-max items-center"
+          style={{ animation: "marqueeScroll 58s linear infinite" }}
+        >
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex items-center">
+              {FAQS.map((faq) => (
+                <span key={faq.q} className="flex items-center whitespace-nowrap">
+                  <span className="px-8 font-display font-light text-black/50 text-[clamp(1.6rem,2.6vw,2.6rem)]">
+                    {faq.q}
+                  </span>
+                  <span
+                    className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]"
+                    style={{ opacity: 0.55 }}
+                  />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-24">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)] lg:gap-16">
           <div>
             <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/60">
@@ -434,6 +537,7 @@ function RemediationFaq() {
 function RemediationApproach() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
   const activeIdx = useFocusIndex(rowRefs, 0.52);
+  const rebuildPhase = activeIdx >= 2;
 
   return (
     <section
@@ -452,7 +556,14 @@ function RemediationApproach() {
               The approach
             </h2>
 
-            <div className="mt-12 border-b border-white/10 lg:mt-16">
+            <div className="relative mt-12 border-b border-white/10 lg:mt-16">
+              {/* Maroon plumb rail fills with scroll (scrub) */}
+              <div
+                className="pointer-events-none absolute bottom-0 left-0 top-0 w-[2px] bg-white/[0.07]"
+                aria-hidden="true"
+              >
+                <div className="rem-rail h-full w-full bg-[var(--color-accent)]" style={{ opacity: 0.9 }} />
+              </div>
               {APPROACH.map(([num, title], i) => {
                 const active = activeIdx === i;
                 return (
@@ -461,7 +572,7 @@ function RemediationApproach() {
                     ref={(el) => {
                       rowRefs.current[i] = el;
                     }}
-                    className={`flex items-baseline gap-6 border-t py-7 transition-colors duration-500 sm:gap-9 lg:py-9 ${
+                    className={`flex items-baseline gap-6 border-t py-7 pl-7 transition-colors duration-500 sm:gap-9 sm:pl-9 lg:py-9 ${
                       active ? "border-[var(--color-accent)]/80" : "border-white/10"
                     }`}
                   >
@@ -488,24 +599,48 @@ function RemediationApproach() {
 
           <div className="relative hidden lg:block">
             <div className="sticky top-24 h-[calc(100vh-12rem)] min-h-[26rem] overflow-hidden">
-              <div className="rem-clip absolute inset-0">
-                <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
-                  <Image
-                    src="/images/projects/remediation-restored.jpg"
-                    alt="Interior space fully rebuilt after remediation"
-                    fill
-                    sizes="45vw"
-                    placeholder="blur"
-                    blurDataURL={BLUR_PLACEHOLDER}
-                    onError={imgError}
-                    className="object-cover"
-                    style={{ filter: "contrast(1.04) saturate(1.03)" }}
-                  />
+              <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
+                {/* Crossfading plate: inspection (steps 01–02) → rebuilt (03–04) */}
+                <div
+                  className="absolute inset-0 transition-opacity duration-700"
+                  style={{ opacity: rebuildPhase ? 0 : 1 }}
+                >
+                  <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                    <Image
+                      src="/images/projects/remediation-mold.jpg"
+                      alt="Moisture intrusion identified on an interior wall during inspection"
+                      fill
+                      sizes="45vw"
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                      style={{ filter: "contrast(1.03) saturate(1.02)" }}
+                    />
+                  </div>
+                </div>
+                <div
+                  className="absolute inset-0 transition-opacity duration-700"
+                  style={{ opacity: rebuildPhase ? 1 : 0 }}
+                >
+                  <div className="rem-parallax-soft absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                    <Image
+                      src="/images/projects/remediation-restored.jpg"
+                      alt="Interior space fully rebuilt after remediation"
+                      fill
+                      sizes="45vw"
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                      style={{ filter: "contrast(1.04) saturate(1.03)" }}
+                    />
+                  </div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6">
                   <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
-                    Build back / Reconstruction
+                    {rebuildPhase ? "Build back / Reconstruction" : "Visual inspection / Testing"}
                   </span>
                 </div>
               </div>
@@ -529,31 +664,35 @@ function RemediationMethod() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-20 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:py-28">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="relative min-h-[22rem] overflow-hidden">
-            <div className="rem-clip absolute inset-0">
-              <Image
-                src="/images/projects/remediation-damage.jpg"
-                alt="Opened wall condition before remediation repair"
-                fill
-                sizes="(max-width: 1024px) 100vw, 24vw"
-                placeholder="blur"
-                blurDataURL={BLUR_PLACEHOLDER}
-                onError={imgError}
-                className="object-cover"
-              />
+            <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
+              <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                <Image
+                  src="/images/projects/remediation-damage.jpg"
+                  alt="Opened wall condition before remediation repair"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 24vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
           <div className="relative min-h-[22rem] overflow-hidden sm:mt-10">
-            <div className="rem-clip absolute inset-0">
-              <Image
-                src="/images/projects/remediation-work.jpg"
-                alt="Remediation drying equipment in a clean work area"
-                fill
-                sizes="(max-width: 1024px) 100vw, 24vw"
-                placeholder="blur"
-                blurDataURL={BLUR_PLACEHOLDER}
-                onError={imgError}
-                className="object-cover"
-              />
+            <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
+              <div className="rem-parallax-soft absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                <Image
+                  src="/images/projects/remediation-work.jpg"
+                  alt="Remediation drying equipment in a clean work area"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 24vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -627,8 +766,8 @@ function RemediationCta() {
           </div>
 
           {/* Page signature (PATTERNS.md): equipment model showcase. Plates
-              converge from opposite sides; maroon seam draws between them.
-              Real photos of the Flair E8 + 277 MR pending from Joe. */}
+              settle in from opposite sides on scrub; maroon seam draws between
+              them. Real photos of the Flair E8 + 277 MR pending from Joe. */}
           <div className="relative">
             <div className="grid grid-cols-2 gap-3">
               <div className="rem-plate-left relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
@@ -679,7 +818,7 @@ function RemediationCta() {
               className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2"
               aria-hidden="true"
             >
-              <div className="rem-vline h-full w-full bg-[var(--color-accent)]" style={{ opacity: 0.75 }} />
+              <div className="rem-seam h-full w-full bg-[var(--color-accent)]" style={{ opacity: 0.75 }} />
             </div>
           </div>
         </div>

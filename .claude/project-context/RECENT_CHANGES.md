@@ -2,6 +2,35 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 (late night) — Remediation V3.5: full-coverage re-review + design upgrade
+
+- Brian's directive (same as ADU V3.1): re-review every second/frame of
+  IMG_1103/1111/1112/1113, then make the page look/flow/animate better with
+  Joe's verbiage intact.
+- Verification: all 67 frames reviewed (including every previously skipped
+  frame) + whisper-MEDIUM re-transcription of all four audios
+  (`img_*/transcript_medium.txt`) — zero wording deltas. One boundary
+  refinement: hero paragraph now keeps Joe's own punctuation ("…that follows
+  damage — from restoring environmental integrity to complete reconstruction.
+  828 Construction delivers…"); change doc §1 + Second-pass verification
+  section updated.
+- HERO: media panel wipes in from the copy side on load (clipPath), headline/
+  paragraph/CTAs rise transform-only (LCP-safe, no opacity on above-fold text).
+- FAQ: NS-Perspectives echo added — rolling marquee strip of the three
+  questions (black/50, maroon separator dots, aria-hidden) above the heading;
+  cards get transform-only scrub-staggered rises.
+- APPROACH: maroon plumb rail FILLS via scrub beside the 01–04 rows; sticky
+  photo now CROSSFADES by step (01–02 inspection/mold → 03–04 rebuilt room)
+  with caption swap — React-state, sticky-proof.
+- METHOD: photos on two parallax depths (-8 / -4) for dimension.
+- CTA: equipment plates settle from opposite sides via scrub (transform-only;
+  opacity dims removed — they failed WCAG at load state), maroon seam draws
+  via scrub.
+- QA: tsc clean; functional-qa PASS desktop+mobile (0 errors, verbatim probe
+  20/20, no overflow, no dup headings); preflight:full 16/16; Lighthouse prod
+  desktop Perf 99 / A11y 96 / BP 100 / SEO 100 with ZERO non-footer contrast
+  fails; mid-scrub state verified numerically (plate x=-17px at 72% viewport).
+
 ## 2026-07-08 (late night) — ADU V3.1: full-coverage re-review + design upgrade
 
 - Brian's directive: re-review EVERY second/frame, then make the page look/flow/

@@ -38,15 +38,16 @@ Directives:
    environments, one home at a time."** (dictated only, not in notes; "828" spoken
    as part of the line).
 2. **REPLACE hero paragraph** → **"Above all else, your peace of mind is
-   paramount. We understand the disruption and urgency that follows damage. From
-   restoring environmental integrity to complete reconstruction, 828 Construction
-   delivers a seamless, disciplined process from remediation through completion."**
+   paramount. We understand the disruption and urgency that follows damage —
+   from restoring environmental integrity to complete reconstruction. 828
+   Construction delivers a seamless, disciplined process from remediation
+   through completion."**
 
-Cleanups (documented): note runs "damage from restoring environmental integrity"
-together — his dictation pauses hard after "damage" (20.2s→23.5s gap), so the
-sentence splits "…that follows damage. From restoring … to complete
-reconstruction, 828 Construction delivers …" (the note's period after
-"reconstruction" moves to a comma); "Paramount" lowercased mid-sentence;
+Cleanups (documented): the note runs "damage from restoring environmental
+integrity" together, and BOTH the note and the whisper-medium re-transcription
+put the sentence break after "reconstruction" — so his period placement is
+kept, with an em dash after "damage" marking the pause his dictation makes
+there (small-model gap 20.2s→23.5s). "Paramount" lowercased mid-sentence;
 "seamless disciplined" → "seamless, disciplined"; dictation said "through
 remediation to completion" but the note reads "from remediation through
 completion" — notes are authoritative.
@@ -231,6 +232,20 @@ Directives:
   underlying issues" — never fully shown.
 
 Ask Joe whether these belong anywhere (likely extended "approach" copy).
+
+## Second-pass verification (2026-07-08, Brian's re-review directive)
+
+All 67 extracted frames reviewed (every frame of all four videos, including
+every previously skipped frame) and all four audios re-transcribed with
+whisper MEDIUM (`img_*/transcript_medium.txt`). Result: **zero wording deltas**
+against the applied copy. Two refinements came out of the pass:
+
+1. Hero paragraph sentence boundary restored to Joe's own punctuation (see §1
+   cleanups — em dash after "damage", period after "reconstruction").
+2. The NS Perspectives reference (IMG_1111 f_0003–f_0011) is sharpened: a huge
+   dim rolling headline strip above a card row. The V3.5 design adds that
+   rolling-strip echo (decorative marquee of the three questions) above the
+   FAQ cards.
 
 ## New /services/remediation page structure
 

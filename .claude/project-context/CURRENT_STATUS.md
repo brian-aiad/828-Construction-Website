@@ -2,6 +2,40 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Remediation V3.5 — Full frame re-review + elevation (2026-07-09 early)
+
+Second pass on Brian's order: all 67 frames of the 4 remediation videos
+re-reviewed one by one + whisper-MEDIUM re-transcription — zero wording
+deltas; hero paragraph boundary restored to Joe's own punctuation (em dash
+after "damage", period after "reconstruction" — change doc §1 updated).
+Elevation on the frozen verbiage: hero media wipe-in + transform-only line
+rises; NS-Perspectives rolling question strip above the FAQ cards
+(scrub-staggered); approach rows with scrub-filled maroon plumb rail +
+step-keyed sticky photo crossfade (inspection → rebuilt); dual-depth method
+parallax; CTA equipment plates settle on scrub with drawing maroon seam
+(Flair E8 / 277 MR photos still PENDING from Joe).
+QA: functional-qa PASS both viewports (0 errors), preflight:full 16/16,
+Lighthouse prod desktop Perf 99 / A11y 96 / BP 100 / SEO 100 — zero
+non-footer contrast fails (transform-only scrubs; parent-opacity dims fail
+axe at load state). Shipped to ns-preview.
+
+## Services Landing V3.1 — Full frame re-review + elevation (2026-07-09 early)
+
+Second pass on Brian's order: all 114 frames of the 4 services videos reviewed
+one by one → `.claude-work/research/services-v3/REQUIREMENTS_LEDGER.md` (every
+ask timestamped with frame evidence; 16/17 met, homeowner-admiring photo still
+pending from client — TODO in component). Confirmed on-camera detail: Joe taps
+"Riverside Passive House" on NS and the row inks + photo swaps — exactly the
+built focus/hover mechanic. Elevation: index photo flush under the header (NS
+geometry), position-only list drift entrance, scale-settle (1.07→1.0 scrub) on
+vision/band photographs, maroon reading-progress seam on the values panel.
+QA: preflight 16/16 ×2 (commit + push gate), functional-qa PASS both
+viewports, verbatim probe 21/21, smoke all routes, Lighthouse prod desktop
+Perf 99 / A11y 96 / LCP 0.9s. Shipped: commit 59e6f5b → ns-preview →
+https://828-ns-preview.vercel.app/services (deploy Ready, phrases verified
+live). Deploy note: exclude `.next-dev` in the robocopy mirror (245MB
+turbopack cache breaks Vercel's 100MB file limit).
+
 ## ADU Page V3.1 — Full re-review + design upgrade (2026-07-08 late night)
 
 Second pass on Brian's order: all 4 videos re-reviewed at 1 frame/sec (153
