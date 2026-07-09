@@ -79,27 +79,85 @@ const STAGES = [
   "Post Construction",
 ];
 
-// Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule),
-// rule: the ACTIVE row is the last row whose title bar has crossed the focus
-// line. Monotone in scroll position, so it cannot oscillate when the active
-// row's photograph stage expands/collapses and reflows the list (the reflow
-// moves crossed titles further above the line, never back below it). Near the
-// top of the page the first row is always active (Joe's list opens on ADU),
-// and it re-measures after fonts/images settle.
+// Index walk driver. Desktop (lg+): the index panel is CSS-sticky over a tall
+// runway and the active service is a pure function of scroll progress —
+// runway/3 of dedicated scroll per service. Deterministic math (no rect
+// feedback from the expanding stages), so the walk cannot skip, rush, or
+// flicker: bulletproof per Brian 2026-07-09. Below lg there is no pin (mobile
+// scroll philosophy) — the active row is the last title past the focus line
+// (monotone, reflow-immune), with a top-of-page guard so the list opens on ADU.
+function useTravelIndex(
+  wrapRef: React.RefObject<HTMLElement | null>,
+  rowRefs: React.MutableRefObject<Array<HTMLElement | null>>,
+  count: number
+) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const lgQuery = window.matchMedia("(min-width: 1024px)");
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      if (lgQuery.matches) {
+        const wrap = wrapRef.current;
+        if (!wrap) return;
+        const runway = wrap.offsetHeight - window.innerHeight;
+        if (runway <= 0) {
+          setActive(0);
+          return;
+        }
+        const progress = Math.min(
+          0.999,
+          Math.max(0, -wrap.getBoundingClientRect().top / runway)
+        );
+        const next = Math.min(count - 1, Math.floor(progress * count));
+        setActive((prev) => (prev === next ? prev : next));
+        return;
+      }
+      if (window.scrollY < 80) {
+        setActive(0);
+        return;
+      }
+      const focus = window.innerHeight * 0.38;
+      let best = 0;
+      rowRefs.current.forEach((el, i) => {
+        if (el && el.getBoundingClientRect().top <= focus) best = i;
+      });
+      setActive((prev) => (prev === best ? prev : best));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("load", onScroll, { passive: true });
+    lgQuery.addEventListener("change", onScroll);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(() => onScroll()).catch(() => {});
+    }
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", onScroll);
+      lgQuery.removeEventListener("change", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [wrapRef, rowRefs, count]);
+  return active;
+}
+
+// Focus-line selection for in-flow row lists (values panel): the active row is
+// the last row whose top has crossed the focus line — monotone and
+// reflow-immune (PATTERNS.md Fix 22 timing rule).
 function useFocusIndex(
   refs: React.MutableRefObject<Array<HTMLElement | null>>,
-  focusRatio = 0.38,
-  topGuardPx = 80
+  focusRatio = 0.55
 ) {
   const [active, setActive] = useState(0);
   useEffect(() => {
     let raf = 0;
     const measure = () => {
       raf = 0;
-      if (window.scrollY < topGuardPx) {
-        setActive(0);
-        return;
-      }
       const focus = window.innerHeight * focusRatio;
       let best = 0;
       refs.current.forEach((el, i) => {
@@ -113,17 +171,12 @@ function useFocusIndex(
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
-    window.addEventListener("load", onScroll, { passive: true });
-    if (typeof document !== "undefined" && "fonts" in document) {
-      document.fonts.ready.then(() => onScroll()).catch(() => {});
-    }
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      window.removeEventListener("load", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [refs, focusRatio, topGuardPx]);
+  }, [refs, focusRatio]);
   return active;
 }
 
@@ -264,133 +317,138 @@ function useServicesMotion() {
 }
 
 // ── Section 1 — the services index (page signature: illuminating rows with a
-// traveling picture). Joe (IMG_1075) via Brian: the list runs across the
-// screen "long ways" — no side plate. ONE picture at a time lives under /
-// overlapping the active word; scroll to the next service and the previous
-// picture is gone, replaced by that service's picture. Whole row is the link.
+// traveling picture). Joe (IMG_1075) via Brian: rows run across the screen
+// "long ways" — no side plate. ONE picture at a time lives under/overlapping
+// the active word and swaps as you scroll. Desktop pins the panel over a tall
+// runway so every service gets a deliberate stretch of scroll (bulletproof —
+// cannot be rushed past); mobile walks in natural flow. Whole row is the link.
 function ServicesIndex() {
+  const wrapRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const focusIdx = useFocusIndex(rowRefs, 0.38);
+  const focusIdx = useTravelIndex(wrapRef, rowRefs, SERVICE_ROWS.length);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const inkIdx = hoverIdx ?? focusIdx; // text illumination follows hover too
   const openIdx = focusIdx; // the picture follows SCROLL only (Joe: "as you scroll")
 
   return (
     <section
+      ref={wrapRef}
       data-section="services-index"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#141414]"
+      className="relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+210vh)]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 pb-16 pt-28 lg:px-12 lg:pb-24 lg:pt-36">
-        <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
-          Services / CA License #{SITE.license}
-        </span>
-        <h1 className="mt-6 max-w-3xl font-display font-bold leading-[1.05] tracking-tight text-[clamp(2rem,3.8vw,3.7rem)]">
-          Three ways to build with control.
-        </h1>
+      <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
+        <div className="mx-auto max-w-7xl px-6 pb-16 pt-28 lg:px-12 lg:pb-0 lg:pt-20">
+          <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
+            Services / CA License #{SITE.license}
+          </span>
+          <h1 className="mt-4 font-display font-bold leading-[1.05] tracking-tight text-[clamp(2rem,3.8vw,3.7rem)]">
+            Three ways to build with control.
+          </h1>
 
-        {/* Full-width list: dim rows illuminate; the photograph stage travels */}
-        <div className="svc-shift mt-12 lg:mt-16">
-          <div className="h-px w-full bg-black/12" aria-hidden="true" />
-          {SERVICE_ROWS.map((row, i) => {
-            const service = SERVICES.find((s) => s.slug === row.slug)!;
-            const ink = inkIdx === i;
-            const open = openIdx === i;
-            return (
-              <Link
-                key={row.slug}
-                href={`/services/${row.slug}`}
-                onMouseEnter={() => setHoverIdx(i)}
-                onMouseLeave={() => setHoverIdx(null)}
-                aria-label={`View ${service.title}`}
-                className="group block border-b border-black/12"
-              >
-                <div
-                  ref={(el) => {
-                    rowRefs.current[i] = el;
-                  }}
-                  className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-7"
+          {/* Full-width list: dim rows illuminate; the photograph stage travels */}
+          <div className="svc-shift mt-12 lg:mt-8">
+            <div className="h-px w-full bg-black/12" aria-hidden="true" />
+            {SERVICE_ROWS.map((row, i) => {
+              const service = SERVICES.find((s) => s.slug === row.slug)!;
+              const ink = inkIdx === i;
+              const open = openIdx === i;
+              return (
+                <Link
+                  key={row.slug}
+                  href={`/services/${row.slug}`}
+                  onMouseEnter={() => setHoverIdx(i)}
+                  onMouseLeave={() => setHoverIdx(null)}
+                  aria-label={`View ${service.title}`}
+                  className="group block border-b border-black/12"
                 >
-                  <span
-                    className={`svc-row-title font-display font-normal leading-[1.02] tracking-tight transition-colors duration-500 text-[clamp(2.3rem,5.6vw,5rem)] ${
-                      ink ? "text-[#141414]" : "text-black/[0.46]"
-                    }`}
+                  <div
+                    ref={(el) => {
+                      rowRefs.current[i] = el;
+                    }}
+                    className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-4"
                   >
-                    {service.title}
-                  </span>
-                  <span
-                    className={`svc-row-tag font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-500 ${
-                      ink ? "text-black/75" : "text-black/60"
-                    }`}
-                  >
-                    {String(i + 1).padStart(2, "0")} / {service.short}
                     <span
-                      className={`ml-3 inline-block transition-all duration-300 ${
-                        ink
-                          ? "translate-x-0 text-[var(--color-accent)]"
-                          : "-translate-x-1"
+                      className={`svc-row-title font-display font-normal leading-[1.02] tracking-tight transition-colors duration-500 text-[clamp(2.3rem,4.9vw,4.4rem)] ${
+                        ink ? "text-[#141414]" : "text-black/[0.46]"
                       }`}
-                      aria-hidden="true"
                     >
-                      →
+                      {service.title}
                     </span>
-                  </span>
-                </div>
-
-                {/* The traveling picture: only the active row's stage is open.
-                    Identical duration/easing on every stage keeps the list
-                    reflow net-zero while one collapses and the next expands. */}
-                <div
-                  className="grid"
-                  style={{
-                    gridTemplateRows: open ? "1fr" : "0fr",
-                    transition:
-                      "grid-template-rows 750ms cubic-bezier(0.16,1,0.3,1)",
-                  }}
-                  aria-hidden={!open}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <div className="relative -mt-2 mb-6 h-[42vh] overflow-hidden lg:mb-8 lg:h-[54vh]">
-                      <Image
-                        src={row.image}
-                        alt={`${service.title} by 828 Construction`}
-                        fill
-                        loading={i === 0 ? "eager" : "lazy"}
-                        sizes="(max-width: 1280px) 100vw, 1184px"
-                        placeholder="blur"
-                        blurDataURL={BLUR_PLACEHOLDER}
-                        onError={imgError}
-                        className="object-cover transition-transform duration-[1600ms] ease-out"
-                        style={{
-                          filter: "contrast(1.05) saturate(1.05)",
-                          transform: open ? "scale(1.03)" : "scale(1.08)",
-                        }}
-                      />
-                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-16 lg:px-7 lg:pb-5">
-                        <p className="max-w-md text-[13px] leading-5 text-white/85">
-                          {row.line}
-                        </p>
-                        <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
-                          View {service.title} →
-                        </span>
-                      </div>
-                      <div
-                        className="absolute left-0 top-0 h-[2px] bg-[var(--color-accent)]"
-                        style={{
-                          width: open ? "100%" : "0%",
-                          opacity: 0.8,
-                          transition:
-                            "width 900ms cubic-bezier(0.16,1,0.3,1) 150ms",
-                        }}
+                    <span
+                      className={`svc-row-tag font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-500 ${
+                        ink ? "text-black/75" : "text-black/60"
+                      }`}
+                    >
+                      {String(i + 1).padStart(2, "0")} / {service.short}
+                      <span
+                        className={`ml-3 inline-block transition-all duration-300 ${
+                          ink
+                            ? "translate-x-0 text-[var(--color-accent)]"
+                            : "-translate-x-1"
+                        }`}
                         aria-hidden="true"
-                      />
+                      >
+                        →
+                      </span>
+                    </span>
+                  </div>
+
+                  {/* The traveling picture: only the active row's stage is open.
+                      Identical duration/easing on every stage keeps the list
+                      reflow net-zero while one collapses and the next expands. */}
+                  <div
+                    className="grid"
+                    style={{
+                      gridTemplateRows: open ? "1fr" : "0fr",
+                      transition:
+                        "grid-template-rows 750ms cubic-bezier(0.16,1,0.3,1)",
+                    }}
+                    aria-hidden={!open}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <div className="relative -mt-2 mb-6 h-[42vh] overflow-hidden lg:mb-5 lg:h-[calc(100svh-34rem)] lg:min-h-[15rem]">
+                        <Image
+                          src={row.image}
+                          alt={`${service.title} by 828 Construction`}
+                          fill
+                          loading={i === 0 ? "eager" : "lazy"}
+                          sizes="(max-width: 1280px) 100vw, 1184px"
+                          placeholder="blur"
+                          blurDataURL={BLUR_PLACEHOLDER}
+                          onError={imgError}
+                          className="object-cover transition-transform duration-[1600ms] ease-out"
+                          style={{
+                            filter: "contrast(1.05) saturate(1.05)",
+                            transform: open ? "scale(1.03)" : "scale(1.08)",
+                          }}
+                        />
+                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-16 lg:px-7 lg:pb-5">
+                          <p className="max-w-md text-[13px] leading-5 text-white/85">
+                            {row.line}
+                          </p>
+                          <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
+                            View {service.title} →
+                          </span>
+                        </div>
+                        <div
+                          className="absolute left-0 top-0 h-[2px] bg-[var(--color-accent)]"
+                          style={{
+                            width: open ? "100%" : "0%",
+                            opacity: 0.8,
+                            transition:
+                              "width 900ms cubic-bezier(0.16,1,0.3,1) 150ms",
+                          }}
+                          aria-hidden="true"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
