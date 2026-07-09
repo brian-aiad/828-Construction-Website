@@ -42,10 +42,42 @@ const serviceJsonLd = {
   url: `${SITE.url}/services/remediation`,
 };
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What causes mold growth?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Mold needs moisture, oxygen, and organic materials to grow. Common causes: poor ventilation, high humidity, and water intrusion or leaks.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is mold remediation?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "It is a process of identifying, containing, removing, and preventing mold growth. It includes cleanup, air filtration, and addressing the moisture source.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can mold affect my health?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes — exposure may cause coughing, sneezing, headaches, skin irritation, asthma flare-ups, and fatigue, especially in sensitive individuals.",
+      },
+    },
+  ],
+};
+
 export default function RemediationPage() {
   return (
     <>
       <JsonLd data={serviceJsonLd} />
+      <JsonLd data={faqJsonLd} />
       <RemediationServiceContent />
     </>
   );

@@ -1,143 +1,703 @@
 "use client";
 
+import {
+  type SyntheticEvent,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
-import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
-import CraftInstrumentLayer from "@/components/system/CraftInstrumentLayer";
-import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
-import { useServicePageMotion } from "@/components/services/useServicePageMotion";
+import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 
-const DIAGNOSTICS = [
-  ["01", "Trace", "Moisture path, failure point, and affected assemblies are identified before repair scope expands."],
-  ["02", "Contain", "The work area is controlled so the fix stays clean, organized, and easier to verify."],
-  ["03", "Rebuild", "Failed material is removed and rebuilt with better detailing, not patched over."],
+gsap.registerPlugin(ScrollTrigger);
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
+
+function imgError(e: SyntheticEvent<HTMLImageElement>) {
+  e.currentTarget.style.opacity = "0";
+}
+
+// Verbatim from Joe's remediation video batch
+// (docs/828_REMEDIATION_JOE_FEEDBACK_2026-07-08.md, typo cleanups documented
+// there). Words are frozen.
+const HERO_PARAGRAPH =
+  "Above all else, your peace of mind is paramount. We understand the disruption and urgency that follows damage. From restoring environmental integrity to complete reconstruction, 828 Construction delivers a seamless, disciplined process from remediation through completion.";
+
+const FAQ_INTRO =
+  "Mold remediation is necessary when moisture intrusion happens to a structure — whether from a leaky roof, cracked pipes, or old windows. Beyond visible damage, the hidden dangers in mold spores in between materials and long-term exposure may contribute to respiratory issues, allergies, and other health concerns.";
+
+// Answers mirror the FAQ JSON-LD in app/services/remediation/page.tsx exactly.
+const FAQS = [
+  {
+    q: "What causes mold growth?",
+    a: "Mold needs moisture, oxygen, and organic materials to grow. Common causes: poor ventilation, high humidity, and water intrusion or leaks.",
+  },
+  {
+    q: "What is mold remediation?",
+    a: "It is a process of identifying, containing, removing, and preventing mold growth. It includes cleanup, air filtration, and addressing the moisture source.",
+  },
+  {
+    q: "Can mold affect my health?",
+    a: "Yes — exposure may cause coughing, sneezing, headaches, skin irritation, asthma flare-ups, and fatigue, especially in sensitive individuals.",
+  },
 ];
 
-export default function RemediationServiceContent() {
-  const rootRef = useServicePageMotion();
+// Verbatim from Joe's phone notes ("Section 3 process — Remediation: The
+// approach / Build philosophy").
+const APPROACH = [
+  ["01", "Initial call"],
+  ["02", "Visual inspection / Testing"],
+  ["03", "Remediation / Scope of work"],
+  ["04", "Build back / Reconstruction"],
+] as const;
+
+// Verbatim from Joe's phone notes (Section 4, start pointer "The company
+// integrated…" → end pointer "…exceeds industry standards").
+const METHOD_LEAD =
+  "828's integrated remediation and restoration approach ensures a seamless transition, allowing clients to swiftly reclaim their space and return to daily life with minimal disruptions.";
+const METHOD_BODY = [
+  "With decades of expertise, 828 brings a refined understanding of mold and its underlying causes — beyond visible factors such as water intrusion and construction defects — employing a comprehensive diagnostic approach to concealed conditions.",
+  "This informs an advanced remediation methodology that exceeds industry standards.",
+];
+
+// Joe's Section 5 note: "Picture of the flair E8 and 277 MR" — real photos
+// pending; plates hold the layout (page signature, PATTERNS.md).
+const EQUIPMENT = [
+  { model: "Flair E8", role: "Air filtration" },
+  { model: "277 MR", role: "Moisture control" },
+];
+
+// Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule).
+function useFocusIndex(
+  refs: React.MutableRefObject<Array<HTMLElement | null>>,
+  focusRatio = 0.52
+) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const focus = window.innerHeight * focusRatio;
+      let best = 0;
+      let bestDist = Infinity;
+      let contained = false;
+      refs.current.forEach((el, i) => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        if (!contained && r.top <= focus && r.bottom >= focus) {
+          best = i;
+          contained = true;
+          return;
+        }
+        if (contained) return;
+        const dist = Math.abs(r.top + r.height / 2 - focus);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      setActive((prev) => (prev === best ? prev : best));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [refs, focusRatio]);
+  return active;
+}
+
+function useRemediationMotion() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const ctxRef = useRef<gsap.Context | null>(null);
+
+  useLayoutEffect(
+    () => () => {
+      try {
+        ctxRef.current?.revert();
+      } catch {}
+    },
+    []
+  );
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const revealCleanups: Array<() => void> = [];
+
+    const ctx = gsap.context(() => {
+      const rises = gsap.utils.toArray<HTMLElement>(".rem-rise");
+      const clips = gsap.utils.toArray<HTMLElement>(".rem-clip");
+      const hairlines = gsap.utils.toArray<HTMLElement>(".rem-hairline");
+      const vlines = gsap.utils.toArray<HTMLElement>(".rem-vline");
+      const parallaxImgs = gsap.utils.toArray<HTMLElement>(".rem-parallax");
+      const plateL = root.querySelector<HTMLElement>(".rem-plate-left");
+      const plateR = root.querySelector<HTMLElement>(".rem-plate-right");
+
+      // Initial states live HERE, not in JSX (Fix 14). Rises use opacity, NOT
+      // autoAlpha: visibility:hidden drops below-fold headings out of the
+      // accessibility tree and breaks axe heading-order (h1 → h3).
+      gsap.set(rises, { opacity: 0, y: 26 });
+      gsap.set(clips, { clipPath: "inset(0% 0% 100% 0%)" });
+      gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
+      gsap.set(vlines, { scaleY: 0, transformOrigin: "top" });
+      if (plateL) gsap.set(plateL, { autoAlpha: 0, x: -36 });
+      if (plateR) gsap.set(plateR, { autoAlpha: 0, x: 36 });
+
+      if (!AnimationController.shouldAnimate()) {
+        gsap.set(rises, { opacity: 1, y: 0 });
+        gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
+        gsap.set(hairlines, { scaleX: 1 });
+        gsap.set(vlines, { scaleY: 1 });
+        if (plateL) gsap.set(plateL, { autoAlpha: 1, x: 0 });
+        if (plateR) gsap.set(plateR, { autoAlpha: 1, x: 0 });
+        return;
+      }
+
+      // One-shot entrances key off real visibility (Fix 22), never scroll math.
+      revealCleanups.push(
+        revealOnVisible(rises, (el) => {
+          gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+        })
+      );
+      // Fully-clipped nodes have an empty intersection rect (Fix 23) — observe
+      // the unclipped parent, reveal the child.
+      revealCleanups.push(
+        revealOnVisible(
+          clips.map((el) => el.parentElement ?? el),
+          (wrapper) => {
+            const el =
+              (wrapper as HTMLElement).querySelector<HTMLElement>(".rem-clip") ??
+              (wrapper as HTMLElement);
+            gsap.to(el, {
+              clipPath: "inset(0% 0% 0% 0%)",
+              duration: 1.1,
+              ease: "power3.inOut",
+            });
+          }
+        )
+      );
+      revealCleanups.push(
+        revealOnVisible(hairlines, (el) => {
+          gsap.to(el, { scaleX: 1, duration: 0.9, ease: "power2.inOut" });
+        })
+      );
+      revealCleanups.push(
+        revealOnVisible(
+          vlines.map((el) => el.parentElement ?? el),
+          (wrapper) => {
+            const el =
+              (wrapper as HTMLElement).querySelector<HTMLElement>(".rem-vline") ??
+              (wrapper as HTMLElement);
+            gsap.to(el, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
+          }
+        )
+      );
+
+      // Page signature (PATTERNS.md): the two equipment plates converge from
+      // opposite sides while the maroon seam between them draws down.
+      if (plateL && plateR) {
+        revealCleanups.push(
+          revealOnVisible([plateL.parentElement ?? plateL], () => {
+            gsap.to(plateL, { autoAlpha: 1, x: 0, duration: 0.95, ease: "power3.out" });
+            gsap.to(plateR, {
+              autoAlpha: 1,
+              x: 0,
+              duration: 0.95,
+              ease: "power3.out",
+              delay: 0.08,
+            });
+          })
+        );
+      }
+
+      // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
+      parallaxImgs.forEach((el) => {
+        gsap.to(el, {
+          yPercent: -8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el.parentElement ?? el,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.6,
+          },
+        });
+      });
+    }, root);
+
+    ctxRef.current = ctx;
+    return () => {
+      revealCleanups.forEach((dispose) => dispose());
+      ctxRef.current = null;
+      try {
+        ctx.revert();
+      } catch {}
+    };
+  }, []);
+
+  return rootRef;
+}
+
+// ── Section 1 — hero: healthier environments ────────────────────────────────
+function RemediationHero() {
+  return (
+    <section
+      data-section="rem-hero"
+      data-header-dark=""
+      className="relative bg-black text-white"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.45fr)_minmax(0,0.55fr)]">
+        <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:px-14 lg:py-28">
+          <Link
+            href="/services"
+            className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/64 transition-colors hover:text-white"
+          >
+            Back to services
+          </Link>
+          <span className="mt-9 block font-labels text-[10px] uppercase tracking-[0.24em] text-white/64">
+            Remediation / CA License #{SITE.license}
+          </span>
+
+          <h1 className="mt-9 font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.4rem)]">
+            828 —
+            creating healthier environments, one home at a time.
+          </h1>
+
+          <div
+            className="rem-hairline mt-8 h-px w-24 bg-[var(--color-accent)]"
+            style={{ opacity: 0.7 }}
+            aria-hidden="true"
+          />
+
+          <p className="mt-8 max-w-xl text-[15px] leading-8 text-white/62 sm:text-base">
+            {HERO_PARAGRAPH}
+          </p>
+
+          <div className="mt-11 flex flex-wrap gap-4">
+            <a
+              href={SITE.phoneHref}
+              className="btn-shine btn-lift bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+            >
+              Call {SITE.phone}
+            </a>
+            <Link
+              href="/contact"
+              className="border border-white/22 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:border-white"
+            >
+              Start restoration
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative order-2 min-h-[46vh] overflow-hidden lg:min-h-screen">
+          <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+            <Image
+              src="/images/projects/remediation-active.jpg"
+              alt="Controlled remediation work area with exposed framing and drying equipment"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+              onError={imgError}
+              className="object-cover"
+              style={{ filter: "contrast(1.04) saturate(1.05)" }}
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 lg:bg-gradient-to-l lg:from-transparent lg:to-black/60" />
+          <div className="absolute bottom-7 right-7 hidden lg:block">
+            <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/55">
+              Controlled work area / South Bay
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 2 — FAQ (NS Perspectives grammar) ───────────────────────────────
+function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const dark = index % 2 === 0;
+  return (
+    <article
+      className={`flex flex-col justify-between border p-6 sm:p-7 ${
+        dark
+          ? "border-transparent bg-[#111] text-white"
+          : "border-black/12 bg-white text-[#111]"
+      }`}
+    >
+      <div>
+        <span
+          className={`font-numbers text-xs font-bold ${
+            dark ? "text-white/72" : "text-[var(--color-accent)]"
+          }`}
+          aria-hidden="true"
+        >
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <h3 className="mt-4 font-display text-lg leading-snug sm:text-xl">{faq.q}</h3>
+      </div>
+      <div className="mt-6">
+        <div
+          id={panelId}
+          role="region"
+          className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <p className={`pb-5 text-sm leading-7 ${dark ? "text-white/62" : "text-black/60"}`}>
+              {faq.a}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls={panelId}
+          className={`flex min-h-11 items-center gap-2 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors ${
+            dark ? "text-white/65 hover:text-white" : "text-black/55 hover:text-black"
+          }`}
+        >
+          {open ? "Close" : "Answer"}
+          <span
+            aria-hidden="true"
+            className="inline-block text-sm transition-transform duration-300"
+            style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
+          >
+            +
+          </span>
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function RemediationFaq() {
+  return (
+    <section
+      data-section="rem-faq"
+      data-header-light=""
+      className="relative bg-[#f7f7f3] text-[#111]"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)] lg:gap-16">
+          <div>
+            <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/60">
+              Identifying the reason for service
+            </span>
+            <h2 className="rem-rise mt-5 font-display font-light leading-[1.14] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+              When mold remediation is necessary
+            </h2>
+            <div
+              className="rem-hairline mt-8 h-px w-24 bg-[var(--color-accent)]"
+              style={{ opacity: 0.6 }}
+              aria-hidden="true"
+            />
+          </div>
+          <p className="rem-rise max-w-xl text-[15px] leading-8 text-black/62 lg:self-end">
+            {FAQ_INTRO}
+          </p>
+        </div>
+
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:mt-16">
+          {FAQS.map((faq, i) => (
+            <FaqCard key={faq.q} faq={faq} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 3 — the approach / build philosophy ─────────────────────────────
+function RemediationApproach() {
+  const rowRefs = useRef<Array<HTMLElement | null>>([]);
+  const activeIdx = useFocusIndex(rowRefs, 0.52);
 
   return (
-    <div ref={rootRef} className="bg-black text-white">
-      <section className="relative min-h-screen overflow-hidden">
-        <Image
-          src="/images/projects/remediation-active.jpg"
-          alt="Clean remediation work area with exposed framing and drying equipment"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-          style={{ filter: "contrast(1.04) saturate(1.02) brightness(0.94)" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/62 to-black/12" />
-        <div className="absolute inset-y-0 left-0 w-px bg-white/10" />
-        <div className="detail-scan absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-        <DraftingMotionLayer intensity="quiet" variant="intro" className="hidden md:block" />
-        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-6 py-28 lg:px-12">
-          <div className="max-w-4xl">
-            <Link href="/services" className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/44 hover:text-white">
-              Back to services
-            </Link>
-            <div className="detail-line mt-12 h-px max-w-20 origin-left bg-[var(--color-accent)]" />
-            <span className="mt-7 block font-labels text-[10px] uppercase tracking-[0.24em] text-white/50">
-              Remediation
+    <section
+      data-section="rem-approach"
+      data-header-dark=""
+      className="relative bg-black text-white"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)] lg:gap-20">
+          <div>
+            <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/64">
+              Build philosophy
             </span>
-            <h1 className="mt-7 font-editorial text-[clamp(4rem,10vw,10rem)] leading-[0.84]">
-              Fix the cause, not the stain.
-            </h1>
-            <p className="mt-8 max-w-xl text-base leading-8 text-white/62">
-              Remediation should feel measured, not chaotic. 828 opens, documents, controls, and rebuilds with the discipline of a builder who understands what failed.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <a href={SITE.phoneHref} className="bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black hover:bg-[var(--color-accent)] hover:text-white">
-                Call {SITE.phone}
-              </a>
-              <Link href="/contact" className="border border-white/18 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white hover:border-white">
-                Start diagnosis
-              </Link>
+            <h2 className="rem-rise mt-5 font-display font-light leading-[1.08] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+              The approach
+            </h2>
+
+            <div className="mt-12 border-b border-white/10 lg:mt-16">
+              {APPROACH.map(([num, title], i) => {
+                const active = activeIdx === i;
+                return (
+                  <div
+                    key={num}
+                    ref={(el) => {
+                      rowRefs.current[i] = el;
+                    }}
+                    className={`flex items-baseline gap-6 border-t py-7 transition-colors duration-500 sm:gap-9 lg:py-9 ${
+                      active ? "border-[var(--color-accent)]/80" : "border-white/10"
+                    }`}
+                  >
+                    <span
+                      className={`font-numbers text-2xl font-bold leading-none transition-colors duration-500 sm:text-3xl ${
+                        active ? "text-white" : "text-white/40"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {num}
+                    </span>
+                    <h3
+                      className={`font-display leading-tight transition-colors duration-500 text-[clamp(1.25rem,2.2vw,1.9rem)] ${
+                        active ? "text-white" : "text-white/55"
+                      }`}
+                    >
+                      {title}
+                    </h3>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="relative hidden lg:block">
+            <div className="sticky top-24 h-[calc(100vh-12rem)] min-h-[26rem] overflow-hidden">
+              <div className="rem-clip absolute inset-0">
+                <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
+                  <Image
+                    src="/images/projects/remediation-restored.jpg"
+                    alt="Interior space fully rebuilt after remediation"
+                    fill
+                    sizes="45vw"
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    onError={imgError}
+                    className="object-cover"
+                    style={{ filter: "contrast(1.04) saturate(1.03)" }}
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6">
+                  <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
+                    Build back / Reconstruction
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className="relative overflow-hidden py-20 lg:py-28">
-        <CraftInstrumentLayer tone="light" density="quiet" />
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16 lg:px-12">
-          <div className="detail-reveal">
-            <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
-              Diagnostic method
-            </span>
-            <h2 className="mt-5 font-editorial text-[clamp(2.8rem,6vw,6rem)] leading-[0.9]">
-              A cleaner repair starts with restraint.
-            </h2>
-            <p className="mt-7 max-w-md text-base leading-8 text-white/58">
-              Good remediation does not overreact. It narrows the cause, protects the home, then rebuilds the assembly with better field decisions.
-            </p>
-          </div>
-          <div className="detail-stagger grid gap-4">
-            {DIAGNOSTICS.map(([num, title, body]) => (
-              <article key={num} className="grid gap-5 border-t border-white/10 py-7 sm:grid-cols-[5rem_1fr]">
-                <span className="font-numbers text-4xl font-bold text-[var(--color-accent)]">{num}</span>
-                <div>
-                  <h3 className="font-editorial text-4xl leading-none">{title}</h3>
-                  <p className="mt-4 max-w-xl text-sm leading-7 text-white/56">{body}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-[#f7f4f0] py-20 text-black lg:py-28">
-        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.12]" />
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-12">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="detail-image relative min-h-[24rem] overflow-hidden">
+// ── Section 4 — integrated method (Joe's Section 4 verbiage) ────────────────
+function RemediationMethod() {
+  return (
+    <section
+      data-section="rem-method"
+      data-header-light=""
+      className="relative bg-[#f7f4f0] text-black"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-20 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:py-28">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="relative min-h-[22rem] overflow-hidden">
+            <div className="rem-clip absolute inset-0">
               <Image
                 src="/images/projects/remediation-damage.jpg"
                 alt="Opened wall condition before remediation repair"
                 fill
-                sizes="(max-width: 1024px) 100vw, 26vw"
+                sizes="(max-width: 1024px) 100vw, 24vw"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
+                onError={imgError}
                 className="object-cover"
               />
             </div>
-            <div className="detail-image relative min-h-[24rem] overflow-hidden">
+          </div>
+          <div className="relative min-h-[22rem] overflow-hidden sm:mt-10">
+            <div className="rem-clip absolute inset-0">
               <Image
                 src="/images/projects/remediation-work.jpg"
                 alt="Remediation drying equipment in a clean work area"
                 fill
-                sizes="(max-width: 1024px) 100vw, 26vw"
+                sizes="(max-width: 1024px) 100vw, 24vw"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
+                onError={imgError}
                 className="object-cover"
               />
             </div>
           </div>
-          <div className="detail-reveal flex flex-col justify-center">
-            <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/45">
-              What customers need to see
-            </span>
-            <h2 className="mt-5 font-editorial text-[clamp(2.6rem,5.6vw,5.6rem)] leading-[0.9]">
-              Proof that the repair is controlled.
-            </h2>
-            <p className="mt-7 text-base leading-8 text-black/62">
-              Remediation customers are usually stressed. The page should communicate calm, documentation, clean work areas, and a correct rebuild path.
-            </p>
-          </div>
         </div>
-      </section>
 
-      <section className="relative overflow-hidden border-t border-white/10 py-20 lg:py-28">
-        <DraftingMotionLayer intensity="quiet" className="hidden md:block" />
-        <div className="detail-reveal relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center">
-            <h2 className="max-w-3xl font-editorial text-[clamp(2.8rem,6vw,6rem)] leading-[0.9]">
-              If something keeps coming back, bring us in before another patch.
-            </h2>
-            <Link href="/contact" className="bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black hover:bg-[var(--color-accent)] hover:text-white">
-              Discuss remediation
-            </Link>
+        <div className="flex flex-col justify-center">
+          <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/60">
+            Integrated remediation &amp; restoration
+          </span>
+          <p className="rem-rise mt-6 font-display font-light leading-[1.3] text-[clamp(1.35rem,2.4vw,2.2rem)]">
+            {METHOD_LEAD}
+          </p>
+          <div
+            className="rem-hairline mt-8 h-px w-24 bg-[var(--color-accent)]"
+            style={{ opacity: 0.6 }}
+            aria-hidden="true"
+          />
+          {METHOD_BODY.map((para) => (
+            <p key={para.slice(0, 24)} className="rem-rise mt-6 max-w-xl text-[15px] leading-8 text-black/62">
+              {para}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 5 — where recovery begins + equipment showcase (signature) ──────
+function RemediationCta() {
+  return (
+    <section
+      data-section="rem-cta"
+      data-header-dark=""
+      className="relative border-t border-white/10 bg-[#0a0a0a] text-white"
+      style={{ overflowX: "clip" }}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+        <div className="grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-20">
+          <div className="flex flex-col justify-between gap-10">
+            <div>
+              {/* Joe: "Start restoration small letters" */}
+              <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/64">
+                Start restoration
+              </span>
+              <h2 className="rem-rise mt-5 font-display font-light leading-[1.1] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+                Where recovery begins
+              </h2>
+              {/* Joe: "Begin the path to renewal bold letter" */}
+              <p className="rem-rise mt-7 font-display text-xl font-semibold leading-snug text-white/92 lg:text-2xl">
+                Begin the path to renewal
+              </p>
+              {/* Joe: "we will use this paragraph right here as well in small print" */}
+              <p className="rem-rise mt-6 max-w-md text-sm leading-7 text-white/55">
+                {METHOD_LEAD}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <a
+                href={SITE.phoneHref}
+                className="btn-shine btn-lift bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+              >
+                Call {SITE.phone}
+              </a>
+              <Link
+                href="/contact"
+                className="border border-white/22 px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:border-white"
+              >
+                Discuss remediation
+              </Link>
+            </div>
+          </div>
+
+          {/* Page signature (PATTERNS.md): equipment model showcase. Plates
+              converge from opposite sides; maroon seam draws between them.
+              Real photos of the Flair E8 + 277 MR pending from Joe. */}
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rem-plate-left relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
+                <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
+                  Equipment / {EQUIPMENT[0].role}
+                </span>
+                <div>
+                  <div
+                    className="mb-5 flex h-24 items-center justify-center border border-dashed border-white/12 sm:h-32"
+                    aria-hidden="true"
+                  >
+                    <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
+                      Photo pending
+                    </span>
+                  </div>
+                  <span className="inline-block bg-[var(--color-accent)]/90 px-2 py-1 font-labels text-[9px] uppercase tracking-[0.18em] text-white">
+                    On every job
+                  </span>
+                  <p className="mt-3 font-numbers text-2xl font-bold sm:text-3xl">
+                    {EQUIPMENT[0].model}
+                  </p>
+                </div>
+              </div>
+              <div className="rem-plate-right relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
+                <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
+                  Equipment / {EQUIPMENT[1].role}
+                </span>
+                <div>
+                  <div
+                    className="mb-5 flex h-24 items-center justify-center border border-dashed border-white/12 sm:h-32"
+                    aria-hidden="true"
+                  >
+                    <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
+                      Photo pending
+                    </span>
+                  </div>
+                  <span className="inline-block bg-[var(--color-accent)]/90 px-2 py-1 font-labels text-[9px] uppercase tracking-[0.18em] text-white">
+                    On every job
+                  </span>
+                  <p className="mt-3 font-numbers text-2xl font-bold sm:text-3xl">
+                    {EQUIPMENT[1].model}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* Maroon seam between the plates */}
+            <div
+              className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2"
+              aria-hidden="true"
+            >
+              <div className="rem-vline h-full w-full bg-[var(--color-accent)]" style={{ opacity: 0.75 }} />
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
+
+export default function RemediationServiceContent() {
+  const rootRef = useRemediationMotion();
+
+  return (
+    <div ref={rootRef} className="bg-black text-white">
+      <RemediationHero />
+      <RemediationFaq />
+      <RemediationApproach />
+      <RemediationMethod />
+      <RemediationCta />
     </div>
   );
 }
