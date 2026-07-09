@@ -597,19 +597,20 @@ function ProcessSection() {
       {/* The strip that goes across the screen — overflows and slides on scrub */}
       <div className="relative mt-12 lg:mt-16">
         <div className="svc-hairline absolute left-0 top-0 h-px w-full bg-black/15" aria-hidden="true" />
-        <div className="overflow-hidden">
-          <ol className="svc-strip-inner flex w-max items-baseline gap-0 px-6 pb-10 pt-6 lg:px-12 lg:pb-14 lg:pt-7">
+        {/* Desktop: the overflowing strip slides across the screen on scrub */}
+        <div className="hidden overflow-hidden lg:block">
+          <ol className="svc-strip-inner flex w-max items-baseline gap-0 px-12 pb-14 pt-7">
             {STAGES.map((stage, i) => (
               <li key={stage} className="flex items-baseline whitespace-nowrap">
                 <span className="font-numbers text-[11px] text-black/60" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="ml-2.5 font-labels text-[11px] uppercase tracking-[0.16em] text-black/80 lg:text-[12px]">
+                <span className="ml-2.5 font-labels text-[12px] uppercase tracking-[0.16em] text-black/80">
                   {stage}
                 </span>
                 {i < STAGES.length - 1 && (
                   <span
-                    className="mx-6 font-labels text-[12px] text-[var(--color-accent)] lg:mx-10"
+                    className="mx-10 font-labels text-[12px] text-[var(--color-accent)]"
                     aria-hidden="true"
                   >
                     +
@@ -619,6 +620,19 @@ function ProcessSection() {
             ))}
           </ol>
         </div>
+        {/* Mobile: no scrub to drive the slide — all six stages stack in a grid */}
+        <ol className="grid grid-cols-2 gap-x-4 gap-y-8 px-6 pb-10 pt-6 lg:hidden">
+          {STAGES.map((stage, i) => (
+            <li key={stage}>
+              <span className="font-numbers text-[11px] text-[var(--color-accent)]" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <p className="mt-2 font-labels text-[10px] uppercase leading-5 tracking-[0.15em] text-black/80">
+                {stage}
+              </p>
+            </li>
+          ))}
+        </ol>
       </div>
 
       {/* Full-bleed media band with the start CTA */}
