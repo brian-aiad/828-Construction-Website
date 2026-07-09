@@ -2,6 +2,24 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Home stacked-surface seams: scale settle → opacity veil
+
+- HOME EditorialFlow had the same root bug AboutFlow already fixed: covered
+  surfaces settled with scale 0.975 (origin center 80%), shrinking them inward
+  from the viewport edges — cream gaps beside the marquee band, white band
+  above incoming dark surfaces, dark slivers at junctions, broken plumb line /
+  floating nodes (Brian's 4-screenshot report). Ported AboutFlow's veil
+  pattern into components/home/EditorialFlow.tsx: per-surface [data-cover-veil]
+  black overlay tweens opacity 0→0.22 on cover; geometry stays full-bleed at
+  every frame. Mobile (shouldAnimate=false) unaffected.
+- The thin maroon line under the header in the same screenshots is NOT a seam:
+  it is the new intentional page-progress hairline on the header's bottom edge
+  (living-header build). Verified header borders stay neutral in all zones.
+- Sweeps: desktop 1440x900 at 150px steps (33 frames) + mobile 390x844 at
+  350px steps (20 frames), two consecutive clean passes each; frames in
+  .claude-work/research/home-fixes/seams/. QA: tsc clean, functional-qa PASS
+  desktop + mobile, no overflow, all home content verified present.
+
 ## 2026-07-09 — Seam cleanup, line-only sidebar, visible wordmark, living header
 
 - STACKED-SURFACE GAPS FIXED AT ROOT (Brian: sections peeking through gaps

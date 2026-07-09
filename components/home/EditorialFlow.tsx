@@ -76,19 +76,23 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
     }
 
     const ctx = gsap.context(() => {
-      // Covered surfaces settle back while the next rides over them. Keep the
-      // surface itself opaque; fading the whole section makes unrelated layers
-      // bleed through during the overlap.
+      // Covered surfaces settle into depth under a veil as the next rides over
+      // them — NEVER a scale settle. Any transform inset shrinks the surface
+      // away from the viewport edges and opens visible cream/dark gaps at the
+      // junction (Brian's seam report; already solved this way in AboutFlow).
+      // The veil dims the still-visible sliver only; geometry stays full-bleed
+      // at every frame.
       stacks.forEach((el, i) => {
         const next = stacks[i + 1];
         if (!next) return;
+        const veil = el.querySelector<HTMLElement>("[data-cover-veil]");
+        if (!veil) return;
         gsap.fromTo(
-          el,
-          { scale: 1 },
+          veil,
+          { opacity: 0 },
           {
-            scale: 0.975,
+            opacity: 0.22,
             ease: "none",
-            transformOrigin: "center 80%",
             scrollTrigger: {
               trigger: next,
               start: "top bottom",
@@ -146,10 +150,17 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
           key={i}
           data-stack-surface=""
           data-header-light=""
-          className="bg-[#f7f7f3] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.55)]"
-          style={{ zIndex: i + 1, willChange: i < items.length - 1 ? "transform" : undefined }}
+          className="relative bg-[#f7f7f3] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.55)]"
+          style={{ zIndex: i + 1 }}
         >
           {child}
+          {i < items.length - 1 && (
+            <div
+              data-cover-veil=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-[60] bg-black opacity-0"
+            />
+          )}
         </div>
       ))}
     </div>
