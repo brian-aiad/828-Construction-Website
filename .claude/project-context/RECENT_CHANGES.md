@@ -2,6 +2,35 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Consulting V3: Joe's 4-video verbiage batch + V4 grammar rebuild
+
+- Videos IMG_1117/1120/1121/1122 (Gaming_Files) transcribed (whisper medium,
+  1 fps frames), every frame reviewed, phone notes read at full resolution.
+  Ledger: docs/828_CONSULTING_JOE_FEEDBACK_2026-07-09.md (verbatim quotes +
+  cleanup notes). Verbiage now FROZEN.
+- HERO: "Building solutions beyond the blueprint." cream asymmetric split
+  (copy left / consulting-table photo right, parallax), dictated paragraph,
+  LCP-safe plain-paint H1.
+- SOLUTIONS: "Delivering considerate solutions." ink section — dictated body
+  + Benefits ledger 01–05 (focus-band ignition, maroon progress rail).
+- QUESTIONS: "Questions and answers" card grid in the ADU/Remediation
+  checkerboard grammar; Joe's intro paragraph as the section headline; his 3
+  questions as ALWAYS-VISIBLE self-selection prompts (no answers dictated —
+  no accordions; asymmetric col spans = page signature, PATTERNS.md updated).
+- CTA: "Engineered solutions tailored to your project" clean statement band —
+  DraftingMotionLayer doodles + side pill DELETED per Joe ("get rid of this
+  guy and this stuff on the side"); flows into the black footer.
+- Old V2 sections deleted: decision matrix, field-based advisory chips,
+  "A short call…" CTA.
+- Motion: con-* system (revealOnVisible entrances per Fix 22/23, gsap.set
+  initial states per Fix 14, parallax scrubs per Fix 15, full mobile branch).
+- QA: tsc clean; verbiage probe 16/16 + 5 old phrases gone; functional-qa
+  PASS desktop+mobile; site-smoke 7/7; visual audit 4 sections × 5 PASS
+  (.claude-work/research/consulting-v3/).
+- COORDINATION: contact page + site-wide all-black footer (videos
+  IMG_1123/1125/1127) are owned by the parallel terminal-B session per the
+  ownership note in docs/828_CONTACT_JOE_FEEDBACK_2026-07-09.md.
+
 ## 2026-07-08 (late night) — Remediation V3.5: full-coverage re-review + design upgrade
 
 - Brian's directive (same as ADU V3.1): re-review every second/frame of

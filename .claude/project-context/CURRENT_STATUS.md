@@ -2,6 +2,23 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Consulting V3 — Joe's video verbiage batch (2026-07-09)
+
+`/services/consulting` rebuilt from Joe's 4 feedback videos (IMG_1117/1120/
+1121/1122, OneDrive Gaming_Files); ledger docs/828_CONSULTING_JOE_FEEDBACK_
+2026-07-09.md, verbiage FROZEN. Structure: "Building solutions beyond the
+blueprint." cream asymmetric hero (LCP-safe) → "Delivering considerate
+solutions." ink section + Benefits 01–05 ledger (focus-band ignition, maroon
+progress rail) → "Questions and answers" checkerboard card grid with Joe's 3
+questions as always-visible self-selection prompts (page signature; no answers
+dictated → no accordions) → "Engineered solutions tailored to your project"
+clean statement CTA (doodles + side pill deleted per Joe) flowing into the
+black footer. Old decision-matrix/advisory/short-call sections deleted.
+QA: tsc clean, verbiage probe 16/16 + old copy gone, functional-qa PASS both
+viewports, site-smoke 7/7, visual audit 4×5 PASS.
+NOTE: contact page + site-wide all-black footer (IMG_1123/1125/1127) owned by
+the parallel terminal-B session (ownership note in the contact ledger).
+
 ## Remediation V3.5 — Full frame re-review + elevation (2026-07-09 early)
 
 Second pass on Brian's order: all 67 frames of the 4 remediation videos
