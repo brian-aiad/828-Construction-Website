@@ -181,11 +181,15 @@ scrolls into view on camera — closed out by his verbal "the footer stays."
 
 ## New /services page structure (as shipped)
 
-1. **Whited-out services index** (IMG_1075) — "Three ways to build with control."
-   retained as H1 on the cream surface; ADU / Remediation / Consulting as a tight
-   borderless NS-style list, rows dim (`black/46`) until the focus band or hover
-   illuminates them; sticky right photograph bleeds to the viewport edge and
-   crossfades per active service with a numbered caption + ledger line.
+1. **Whited-out services index** (IMG_1075; interpretation corrected by Brian
+   2026-07-09) — "Three ways to build with control." retained as H1 on the cream
+   surface; ADU / Remediation / Consulting run ACROSS THE SCREEN as full-width
+   rows ("long ways" — NO side plate). ONE photograph at a time lives under /
+   overlapping the active word: the active row's stage expands below its title
+   (net-zero list reflow), and scrolling to the next service collapses it —
+   "the ADU picture is gone" — and opens that service's picture. Whole row
+   links to the service page. List always opens on ADU (top-of-page guard;
+   selection = last title past the focus line, monotone → no flicker).
 2. **"Where your vision meets uncompromising quality."** (IMG_1077) — black
    split, copy left with maroon hairline + seam, photograph full-bleed right.
    Instrument doodles removed. Image is a stand-in pending Joe's
