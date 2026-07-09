@@ -803,6 +803,33 @@ visible when on screen — hide the *child*, observe the *container*. First hit:
 
 ---
 
+### Fix 24 — Reveal failsafe force-shows intentionally-hidden UI (stuck toast)
+
+**Symptom:** The "Copied to clipboard" pill (PhoneCopyToast) appears ~2.5s after
+page load with no user interaction and never goes away — visible floating over
+content in Joe's own feedback videos (IMG_1127) and in every Playwright capture.
+
+**Root cause:** The LenisProvider reveal failsafe (Fix 18) has a "broader catch"
+that observes ANY element with inline `opacity: 0` and force-reveals it after a
+2.5s grace window in-viewport. A toast/overlay that manages its own visibility
+via inline `opacity: 0` (fixed-position, always "in viewport") is
+indistinguishable from a stuck GSAP reveal target, so the failsafe paints it on
+screen permanently.
+
+**Fix:** self-managed hidden UI opts out with `data-failsafe-exempt` (attribute,
+no value); the failsafe's broader catch skips those elements:
+
+```ts
+if (el.hasAttribute("data-failsafe-exempt")) return;
+```
+
+**Rule:** any component that intentionally holds `opacity: 0` inline as a rest
+state (toasts, dropdown panels, dialogs) MUST carry `data-failsafe-exempt`.
+Files: `components/providers/LenisProvider.tsx`, `components/ui/PhoneCopyToast.tsx`
+(2026-07-09 contact rebuild).
+
+---
+
 ---
 
 ### Pattern: Asterisk Dropdown Reveal (V2)
@@ -1009,4 +1036,4 @@ Each page has one animation moment that does not appear on any other page. These
 | Services/ADU (`/services/adu`) | **ADU watermark vertical drift** — giant "ADU" text (clamp 14rem→36rem, opacity 0.04) positioned absolute behind the acronym section, drifts yPercent: -8 via scrub ScrollTrigger tied to the section's full scroll range. Creates depth as the user reads through A/D/U definitions. Unique to this page — no other page uses a 3-letter-watermark-with-drift. |
 | Services/Remediation (`/services/remediation`) | **Equipment model showcase** — two side-by-side dark-plate cards with model labels (Flair E8, 277 MR) using `font-numbers` with maroon accent tags. Photo placeholders hold the layout until Joe sends real equipment photos. No other page has an equipment-as-content-block pattern. |
 | Services/Consulting (`/services/consulting`) | **Always-visible self-selection prompts in the FAQ card grid** (V3, Joe's 2026-07-09 batch) — the three "Questions and answers" cards pose Joe's questions TO the visitor and stay permanently open: no expanders, no answers, a "Worth a conversation" tag where ADU/Remediation cards have their +/× toggle. Card 01 spans two columns, card 03 spans three — the asymmetric span rhythm is unique to this page. Permanent editorial visibility remains the signature. |
-| Contact (`/contact`) | **Form interaction quality as signature** (not a cinematic motion beat) — maroon focus rings on all form inputs (`var(--color-accent)` on focus, 240ms transition), labels positioned above fields (never floating), "What to Include" friction-reduction block, "What Happens After" process preview, response-time expectation stated explicitly. The 2025 establishment year counter (scrubs 0→2025) is the only place on the site this date appears as a scrub counter. |
+| Contact (`/contact`) | **Row-embedded photo ignition** (V3, Joe's 2026-07-09 batch) — the full-bleed service-path rows carry their photograph INSIDE the row: a right-edge plate that wipes open (`clipPath` inset left→right) the moment the live-rect focus band ignites that row; on mobile the photo expands as a strip beneath the active title (height 0→10rem). Unlike the services index (sticky side-panel crossfade), the picture lives in the row and travels with it. Form interaction quality retained: maroon focus rings, labels above fields, honest 24-hour expectation line. |

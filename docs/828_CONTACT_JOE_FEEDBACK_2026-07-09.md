@@ -127,14 +127,14 @@ Whisper note: "A2A construction" = mishearing of "828 Construction" (0:46).
 
 | # | Ask | Source | Status |
 |---|---|---|---|
-| K1 | NS-format hero: photo band, left "Building lasting partnerships." | 1123 0:18 + notes | pending |
-| K2 | Hero right: "Our journey begins with active listening…" | 1123 0:28 + notes | pending |
-| K3 | Hero supporting line "Forging exceptional partnership…" | 1123 notes | pending |
-| K4 | S2 all-black "Get in touch" band, NS contact format, fat, all contact info | 1123 0:01 + notes | pending |
-| K5 | Details heading → "Your insights help us provide solutions…" | 1125 0:00 | pending |
-| K6 | Eyebrow rephrase (What to include → Critical elements…) | 1123 notes | pending |
-| K7 | 01–04 detail items unchanged | 1125 0:12 | pending |
-| K8 | Service paths: 4 full-width long rows (3 services + shrunk South Bay) | 1127 0:00–0:39 | pending |
-| K9 | Illuminate-on-scroll + picture (services-index grammar) | 1127 0:13 | pending |
-| K10 | Paragraph → "Whether improving your residence…" | 1127 0:41 | pending |
-| K11 | SITE-WIDE footer all black, zero separation | 1127 0:54 | pending |
+| K1 | NS-format hero: photo band, left "Building lasting partnerships." | 1123 0:18 + notes | **applied 2026-07-09 (contact V3)** |
+| K2 | Hero right: "Our journey begins with active listening…" | 1123 0:28 + notes | **applied 2026-07-09 (contact V3)** |
+| K3 | Hero supporting line "Forging exceptional partnership…" | 1123 notes | **applied 2026-07-09 (contact V3)** |
+| K4 | S2 all-black "Get in touch" band, NS contact format, fat, all contact info | 1123 0:01 + notes | **applied 2026-07-09 (contact V3)** |
+| K5 | Details heading → "Your insights help us provide solutions…" | 1125 0:00 | **applied 2026-07-09 (contact V3)** |
+| K6 | Eyebrow rephrase (What to include → Critical elements…) | 1123 notes | **applied 2026-07-09 (contact V3)** |
+| K7 | 01–04 detail items unchanged | 1125 0:12 | **applied 2026-07-09 (contact V3)** |
+| K8 | Service paths: 4 full-width long rows (3 services + shrunk South Bay) | 1127 0:00–0:39 | **applied 2026-07-09 (contact V3)** |
+| K9 | Illuminate-on-scroll + picture (services-index grammar) | 1127 0:13 | **applied 2026-07-09 (contact V3)** |
+| K10 | Paragraph → "Whether improving your residence…" | 1127 0:41 | **applied 2026-07-09 (contact V3)** |
+| K11 | SITE-WIDE footer all black, zero separation | 1127 0:54 | **applied 2026-07-09 (contact V3)** |
