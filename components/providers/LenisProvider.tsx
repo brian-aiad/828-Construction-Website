@@ -76,6 +76,9 @@ function attachRevealFailsafe() {
     if (!s) return;
     // Skip aria-hidden decorative elements (ghost numbers, watermarks)
     if (el.getAttribute("aria-hidden") === "true") return;
+    // Skip self-managed hidden UI (toasts, overlays) — force-revealing these
+    // paints stuck chrome over the page (see PhoneCopyToast, 2026-07-09).
+    if (el.hasAttribute("data-failsafe-exempt")) return;
     const hasHiddenClip = s.clipPath && (
       s.clipPath.includes("inset(100%") ||
       s.clipPath.includes("inset(0% 100%") ||

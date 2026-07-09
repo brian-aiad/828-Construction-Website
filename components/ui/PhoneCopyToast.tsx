@@ -39,6 +39,7 @@ export default function PhoneCopyToast() {
     <div
       aria-live="polite"
       aria-atomic="true"
+      data-failsafe-exempt=""
       style={{
         position: "fixed",
         bottom: "2rem",
