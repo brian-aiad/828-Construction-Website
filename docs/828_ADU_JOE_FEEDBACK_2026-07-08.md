@@ -192,3 +192,16 @@ Directives:
 
 Sections NOT mentioned by Joe: none — all four current sections received
 direction. SEO metadata/JSON-LD untouched.
+
+## Second-pass verification (same day, full-coverage review)
+
+Every video re-reviewed at 1 frame/second (`<name>/frames1s/`, 153 frames
+total) and re-transcribed with the whisper **medium** model
+(`transcript_medium.txt`) — zero wording deltas against the applied copy;
+"A2A construction" resolves cleanly to "828 Construction" in the medium pass.
+No additional directives found in any tail or gap second. One reference
+detail sharpened: in IMG_1092 at 20–24s ("the questions inside these guys")
+the stylus tracks the NS Perspectives row where question cards ALTERNATE
+WITH PHOTO CELLS — the FAQ section therefore interleaves ADU photo cells
+(adu-interior-living, garage-conversion) in a checkerboard with the four
+question cards, matching the pointed-at rhythm exactly.

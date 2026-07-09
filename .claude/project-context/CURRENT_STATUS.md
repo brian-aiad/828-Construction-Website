@@ -2,6 +2,16 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## ADU Page V3.1 — Full re-review + design upgrade (2026-07-08 late night)
+
+Second pass on Brian's order: all 4 videos re-reviewed at 1 frame/sec (153
+frames) + whisper-medium re-transcription — zero verbiage deltas, change doc
+verified. Design upgraded: letter-cascade vertical hero + scroll cue, NS
+checkerboard FAQ with interleaved ADU photo cells (right-anchored row 2),
+acronym letter rail + hairline draws, invitation flow tightened with staggered
+question cascade. Lighthouse prod: Perf 100 / A11y 96. functional-qa PASS both
+viewports.
+
 ## Services Landing V3 — Joe's Video Verbiage Batch (2026-07-08 night)
 
 `/services` rebuilt from Joe's 4 feedback videos (IMG_1075/1077/1080/1082,

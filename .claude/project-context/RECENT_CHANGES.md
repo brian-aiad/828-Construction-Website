@@ -2,6 +2,31 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-08 (late night) — ADU V3.1: full-coverage re-review + design upgrade
+
+- Brian's directive: re-review EVERY second/frame, then make the page look/flow/
+  animate better with all of Joe's verbiage intact (frozen).
+- Verification: all 4 videos re-extracted at 1fps (153 frames, all reviewed) +
+  re-transcribed with whisper MEDIUM (`transcript_medium.txt`) — ZERO wording
+  deltas vs the applied copy; change doc gained a "Second-pass verification"
+  section. Sharpened cue: the NS Perspectives reference Joe points at
+  interleaves PHOTO CELLS between question cards.
+- HERO: "Built with intent" now enters letter-by-letter down the maroon plumb
+  line (CSS keyframes, LCP-safe, reduced-motion guarded); SCROLL cue with
+  looping drop-line added bottom-right.
+- FAQ: rebuilt as a true NS checkerboard — 4 question cards interleaved with 2
+  ADU photo cells (adu-interior-living, garage-conversion), clip-reveals with
+  per-cell stagger; row 2 right-anchored (lg:col-start-3) for asymmetric
+  balance; expander + now boxed.
+- ACRONYM: fixed-width letter rail (A/D/U words align), per-row animated
+  hairline draws, row entrance rises; watermark drift unchanged.
+- INVITATION: left column re-organized to natural flow (dead middle removed),
+  maroon hairline draws above "Prepared to proceed with your vision?",
+  qualifying-question rows + hairlines cascade with stagger.
+- data-stagger cascade added to the motion hook (reveal delay per element).
+- A11y: labels bumped to contrast-safe (white/58+); Lighthouse prod desktop
+  Perf 100 / A11y 96; functional-qa PASS desktop+mobile; no overflow.
+
 ## 2026-07-08 (night) — Remediation V3: Joe's video-feedback rebuild (4-video batch)
 
 - Intake: 4 videos (IMG_1103/1111/1112/1113, from OneDrive\Pictures) transcribed +

@@ -27,6 +27,7 @@ function imgError(e: SyntheticEvent<HTMLImageElement>) {
 
 // Verbatim from Joe's ADU video batch (docs/828_ADU_JOE_FEEDBACK_2026-07-08.md,
 // typo cleanups documented there). Words are frozen.
+const HERO_PHRASE = "Built with intent";
 const HERO_PARAGRAPH =
   "Whether looking to refine a private retreat, ideal for house guests, accommodating family, or simply expanding the living space while elevating the property's value overall — 828 Construction builds with the same seriousness as a primary home.";
 
@@ -47,6 +48,19 @@ const FAQS = [
   {
     q: "What types of ADUs can be built on my property?",
     a: "Depending on your lot and zoning, you may qualify for a detached ADU, an attached ADU, a garage conversion, or a Junior ADU (JADU).",
+  },
+];
+
+// NS Perspectives grammar (Joe's on-screen reference): question cards
+// interleaved with photo cells in a checkerboard.
+const FAQ_PHOTOS = [
+  {
+    src: "/images/projects/adu-interior-living.jpg",
+    alt: "Finished ADU interior living space by 828 Construction",
+  },
+  {
+    src: "/images/projects/garage-conversion.jpg",
+    alt: "Garage conversion ADU by 828 Construction",
   },
 ];
 
@@ -165,10 +179,12 @@ function useAduMotion() {
         return;
       }
 
-      // One-shot entrances key off real visibility (Fix 22), never scroll math.
+      // One-shot entrances key off real visibility (Fix 22), never scroll
+      // math. data-stagger delays cascade siblings that enter together.
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
-          gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+          const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
+          gsap.to(el, { opacity: 1, y: 0, duration: 0.85, delay, ease: "power3.out" });
         })
       );
       // Fully-clipped nodes have an empty intersection rect (Fix 23) — observe
@@ -180,9 +196,11 @@ function useAduMotion() {
             const el =
               (wrapper as HTMLElement).querySelector<HTMLElement>(".adu-clip") ??
               (wrapper as HTMLElement);
+            const delay = parseFloat(el.dataset.stagger ?? "0");
             gsap.to(el, {
               clipPath: "inset(0% 0% 0% 0%)",
               duration: 1.1,
+              delay,
               ease: "power3.inOut",
             });
           }
@@ -190,7 +208,8 @@ function useAduMotion() {
       );
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
-          gsap.to(el, { scaleX: 1, duration: 0.9, ease: "power2.inOut" });
+          const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
+          gsap.to(el, { scaleX: 1, duration: 0.9, delay, ease: "power2.inOut" });
         })
       );
       revealCleanups.push(
@@ -256,6 +275,23 @@ function AduHero() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
+      {/* CSS keyframe entry (LCP-safe): letters cascade down the plumb line. */}
+      <style>{`
+        @keyframes aduLetterIn {
+          from { opacity: 0; transform: translateY(-0.35em); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes aduCueDrop {
+          0%   { transform: scaleY(0); transform-origin: top; }
+          45%  { transform: scaleY(1); transform-origin: top; }
+          55%  { transform: scaleY(1); transform-origin: bottom; }
+          100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .adu-letter { animation: none !important; opacity: 1 !important; transform: none !important; }
+          .adu-cue-line { animation: none !important; }
+        }
+      `}</style>
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
         <div className="relative order-2 min-h-[46vh] overflow-hidden lg:order-1 lg:min-h-screen">
           <div className="adu-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
@@ -297,7 +333,17 @@ function AduHero() {
               className="font-display font-bold leading-none tracking-tight text-[clamp(2.6rem,4.5vw,4.4rem)]"
               style={{ writingMode: "vertical-rl" }}
             >
-              Built with intent
+              {HERO_PHRASE.split("").map((ch, i) => (
+                <span
+                  key={i}
+                  className="adu-letter inline-block"
+                  style={{
+                    animation: `aduLetterIn 0.6s cubic-bezier(0.16,1,0.3,1) ${0.15 + i * 0.045}s both`,
+                  }}
+                >
+                  {ch === " " ? " " : ch}
+                </span>
+              ))}
             </h1>
             <div className="relative w-[2px] shrink-0 self-stretch bg-white/12" aria-hidden="true">
               <div className="adu-vline absolute inset-0 bg-[var(--color-accent-light)]" style={{ opacity: 0.9 }} />
@@ -307,7 +353,7 @@ function AduHero() {
             </p>
           </div>
 
-          <div className="mt-11 flex flex-wrap gap-4">
+          <div className="mt-11 flex flex-wrap items-center gap-4">
             <a
               href={SITE.phoneHref}
               className="btn-shine btn-lift bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
@@ -320,6 +366,17 @@ function AduHero() {
             >
               Start ADU
             </Link>
+            <div className="ml-auto hidden items-center gap-3 lg:flex" aria-hidden="true">
+              <span className="font-labels text-[9px] uppercase tracking-[0.24em] text-white/60">
+                Scroll
+              </span>
+              <span className="relative block h-10 w-px overflow-hidden bg-white/15">
+                <span
+                  className="adu-cue-line absolute inset-0 bg-white/70"
+                  style={{ animation: "aduCueDrop 2.2s cubic-bezier(0.65,0,0.35,1) 1.4s infinite" }}
+                />
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -327,18 +384,28 @@ function AduHero() {
   );
 }
 
-// ── Section 2 — FAQ cards (NS Perspectives grammar) ─────────────────────────
-function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) {
+// ── Section 2 — FAQ checkerboard (NS Perspectives grammar) ──────────────────
+function FaqCard({
+  faq,
+  index,
+  dark,
+  stagger,
+  className = "",
+}: {
+  faq: (typeof FAQS)[number];
+  index: number;
+  dark: boolean;
+  stagger: number;
+  className?: string;
+}) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const dark = index % 2 === 0;
   return (
     <article
-      className={`flex flex-col justify-between border p-6 sm:p-7 ${
-        dark
-          ? "border-transparent bg-[#111] text-white"
-          : "border-black/12 bg-white text-[#111]"
-      }`}
+      data-stagger={stagger}
+      className={`adu-rise flex min-h-[16rem] flex-col justify-between border p-6 sm:p-7 lg:min-h-[19rem] ${
+        dark ? "border-transparent bg-[#111] text-white" : "border-black/12 bg-white text-[#111]"
+      } ${className}`}
     >
       <div>
         <span
@@ -369,14 +436,16 @@ function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) 
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={panelId}
-          className={`flex min-h-11 items-center gap-2 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors ${
+          className={`group/faq flex min-h-11 items-center gap-2 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors ${
             dark ? "text-white/65 hover:text-white" : "text-black/55 hover:text-black"
           }`}
         >
           {open ? "Close" : "Answer"}
           <span
             aria-hidden="true"
-            className="inline-block text-sm transition-transform duration-300"
+            className={`inline-flex h-6 w-6 items-center justify-center border text-sm transition-transform duration-300 ${
+              dark ? "border-white/25" : "border-black/20"
+            }`}
             style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
           >
             +
@@ -384,6 +453,35 @@ function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) 
         </button>
       </div>
     </article>
+  );
+}
+
+function FaqPhotoCell({
+  photo,
+  stagger,
+  className = "",
+}: {
+  photo: (typeof FAQ_PHOTOS)[number];
+  stagger: number;
+  className?: string;
+}) {
+  return (
+    <div className={`relative min-h-[14rem] overflow-hidden lg:min-h-[19rem] ${className}`}>
+      <div className="adu-clip absolute inset-0" data-gsap-reveal="true" data-stagger={stagger}>
+        <Image
+          src={photo.src}
+          alt={photo.alt}
+          fill
+          loading="lazy"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          placeholder="blur"
+          blurDataURL={BLUR_PLACEHOLDER}
+          onError={imgError}
+          className="object-cover"
+          style={{ filter: "contrast(1.05) saturate(1.05)" }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -396,10 +494,13 @@ function AduFaq() {
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
-        <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/45">
+        <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/55">
           FAQ / Frequently asked questions
         </span>
-        <h2 className="adu-rise mt-5 max-w-4xl font-display font-light leading-[1.14] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+        <h2
+          className="adu-rise mt-5 max-w-4xl font-display font-light leading-[1.14] text-[clamp(1.8rem,3.2vw,3.4rem)]"
+          data-stagger="0.08"
+        >
           Whether your vision is fully defined or still evolving, 828
           Construction is here to help.
         </h2>
@@ -408,10 +509,15 @@ function AduFaq() {
           style={{ opacity: 0.6 }}
           aria-hidden="true"
         />
+        {/* Checkerboard: question cards interleaved with photo cells, exactly
+            the alternating rhythm of the reference Joe pointed at. */}
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
-          {FAQS.map((faq, i) => (
-            <FaqCard key={faq.q} faq={faq} index={i} />
-          ))}
+          <FaqCard faq={FAQS[0]} index={0} dark stagger={0} />
+          <FaqPhotoCell photo={FAQ_PHOTOS[0]} stagger={0.1} className="hidden sm:block" />
+          <FaqCard faq={FAQS[1]} index={1} dark={false} stagger={0.16} />
+          <FaqCard faq={FAQS[2]} index={2} dark stagger={0.24} />
+          <FaqCard faq={FAQS[3]} index={3} dark={false} stagger={0.32} className="lg:col-start-3" />
+          <FaqPhotoCell photo={FAQ_PHOTOS[1]} stagger={0.4} className="hidden lg:block" />
         </div>
       </div>
     </section>
@@ -439,51 +545,59 @@ function AduAcronym() {
         ADU
       </div>
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
-        <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
+        <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
           What we drive for
         </span>
-        <h2 className="adu-rise mt-5 font-display font-light leading-[1.08] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+        <h2 className="adu-rise mt-5 font-display font-light leading-[1.08] text-[clamp(1.8rem,3.2vw,3.4rem)]" data-stagger="0.08">
           What ADU means to 828.
         </h2>
 
-        <div className="mt-12 border-b border-white/10 lg:mt-16">
+        <div className="mt-12 lg:mt-16">
           {ACRONYM.map((item, i) => {
             const active = activeIdx === i;
             return (
-              <div
-                key={item.letter}
-                ref={(el) => {
-                  rowRefs.current[i] = el;
-                }}
-                className="grid grid-cols-[auto_1fr] items-start gap-x-6 gap-y-4 border-t border-white/10 py-8 sm:gap-x-10 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:gap-x-16 lg:py-11"
-              >
-                <div className="flex items-baseline gap-5 sm:gap-7">
-                  <span
-                    className={`font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(3.4rem,6.5vw,6rem)] ${
-                      active ? "text-[var(--color-accent-light)]" : "text-white/[0.22]"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {item.letter}
-                  </span>
-                  <h3
-                    className={`font-display leading-none transition-colors duration-500 text-[clamp(1.4rem,2.4vw,2.1rem)] ${
-                      active ? "text-white" : "text-white/55"
-                    }`}
-                  >
-                    {item.word}
-                  </h3>
-                </div>
-                <p
-                  className={`col-span-2 max-w-xl text-sm leading-7 transition-colors duration-500 lg:col-span-1 lg:text-[15px] lg:leading-8 ${
-                    active ? "text-white/70" : "text-white/52"
-                  }`}
+              <div key={item.letter} className="relative">
+                <div
+                  className="adu-hairline h-px w-full bg-white/12"
+                  data-stagger={String(i * 0.12)}
+                  aria-hidden="true"
+                />
+                <div
+                  ref={(el) => {
+                    rowRefs.current[i] = el;
+                  }}
+                  className="adu-rise grid grid-cols-[auto_1fr] items-start gap-x-6 gap-y-4 py-8 sm:gap-x-10 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:gap-x-16 lg:py-11"
+                  data-stagger={String(i * 0.1)}
                 >
-                  {item.body}
-                </p>
+                  <div className="flex items-baseline gap-5 sm:gap-7">
+                    <span
+                      className={`w-[0.75em] font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(3.4rem,6.5vw,6rem)] ${
+                        active ? "text-[var(--color-accent-light)]" : "text-white/[0.22]"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {item.letter}
+                    </span>
+                    <h3
+                      className={`font-display leading-none transition-colors duration-500 text-[clamp(1.4rem,2.4vw,2.1rem)] ${
+                        active ? "text-white" : "text-white/55"
+                      }`}
+                    >
+                      {item.word}
+                    </h3>
+                  </div>
+                  <p
+                    className={`col-span-2 max-w-xl text-sm leading-7 transition-colors duration-500 lg:col-span-1 lg:text-[15px] lg:leading-8 ${
+                      active ? "text-white/70" : "text-white/52"
+                    }`}
+                  >
+                    {item.body}
+                  </p>
+                </div>
               </div>
             );
           })}
+          <div className="adu-hairline h-px w-full bg-white/12" data-stagger="0.36" aria-hidden="true" />
         </div>
       </div>
     </section>
@@ -501,56 +615,62 @@ function AduInvitation() {
     >
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-20">
-          <div className="flex flex-col justify-between gap-10">
-            <div>
-              <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/42">
-                Start here
-              </span>
-              <h2 className="adu-rise mt-5 font-display font-light leading-[1.1] text-[clamp(1.8rem,3.2vw,3.4rem)]">
-                An invitation to work together
-              </h2>
-              <p className="adu-rise mt-7 max-w-md text-sm leading-7 text-white/55">
-                If this resonates with your expectations, we welcome the
-                opportunity to explore your project.
-              </p>
-            </div>
-            <div>
-              <p className="adu-rise font-display text-lg leading-snug text-white/88 lg:text-xl">
-                Prepared to proceed with your vision?
-              </p>
-              <div className="mt-7 flex flex-wrap gap-4">
-                <a
-                  href={SITE.phoneHref}
-                  className="btn-shine btn-lift bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
-                >
-                  Call {SITE.phone}
-                </a>
-                <Link
-                  href="/contact"
-                  className="border border-white/22 px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:border-white"
-                >
-                  Talk through an ADU
-                </Link>
-              </div>
+          <div>
+            <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
+              Start here
+            </span>
+            <h2 className="adu-rise mt-5 font-display font-light leading-[1.1] text-[clamp(1.8rem,3.2vw,3.4rem)]" data-stagger="0.08">
+              An invitation to work together
+            </h2>
+            <p className="adu-rise mt-7 max-w-md text-sm leading-7 text-white/55" data-stagger="0.16">
+              If this resonates with your expectations, we welcome the
+              opportunity to explore your project.
+            </p>
+            <div
+              className="adu-hairline mt-10 h-px w-24 bg-[var(--color-accent)]"
+              style={{ opacity: 0.7 }}
+              aria-hidden="true"
+            />
+            <p className="adu-rise mt-8 font-display text-lg leading-snug text-white/88 lg:text-xl" data-stagger="0.2">
+              Prepared to proceed with your vision?
+            </p>
+            <div className="adu-rise mt-7 flex flex-wrap gap-4" data-stagger="0.26">
+              <a
+                href={SITE.phoneHref}
+                className="btn-shine btn-lift bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+              >
+                Call {SITE.phone}
+              </a>
+              <Link
+                href="/contact"
+                className="border border-white/22 px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:border-white"
+              >
+                Talk through an ADU
+              </Link>
             </div>
           </div>
 
           {/* Joe: the qualifying questions "in a finer print … finely written, nothing crazy" */}
-          <div className="border-b border-white/10">
+          <div className="lg:pt-2">
             {QUALIFIERS.map((q, i) => (
-              <div
-                key={q}
-                className="adu-rise grid grid-cols-[auto_1fr] items-baseline gap-5 border-t border-white/10 py-6 sm:gap-7 lg:py-7"
-              >
-                <span
-                  className="font-numbers text-xs font-bold text-white/72"
+              <div key={q} className="relative">
+                <div
+                  className="adu-hairline h-px w-full bg-white/10"
+                  data-stagger={String(i * 0.1)}
                   aria-hidden="true"
+                />
+                <div
+                  className="adu-rise grid grid-cols-[auto_1fr] items-baseline gap-5 py-6 sm:gap-7 lg:py-7"
+                  data-stagger={String(0.06 + i * 0.1)}
                 >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <p className="text-sm leading-7 text-white/65 lg:text-[15px]">{q}</p>
+                  <span className="font-numbers text-xs font-bold text-white/72" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="text-sm leading-7 text-white/65 lg:text-[15px]">{q}</p>
+                </div>
               </div>
             ))}
+            <div className="adu-hairline h-px w-full bg-white/10" data-stagger="0.46" aria-hidden="true" />
           </div>
         </div>
       </div>
