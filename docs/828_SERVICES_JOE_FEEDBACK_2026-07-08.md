@@ -179,14 +179,23 @@ Applied where that copy resurfaces in the new sections:
 His note also has "Section 03" / "Section 04" markers; "Section 04" content never
 scrolls into view on camera — closed out by his verbal "the footer stays."
 
-## New /services page structure
+## New /services page structure (as shipped)
 
-1. **White services list hero** — "Three ways to build with control." retained as
-   page label/H1 on white; ADU / Remediation / Consulting as large rows that
-   illuminate on scroll with per-service photo reveal (IMG_1075).
-2. **"Where your vision meets uncompromising quality."** — statement + homeowner
-   image, instrument doodles removed (IMG_1077).
-3. **Values split-screen** — 01–04 principles, titles/numbers one side, phrases
-   opposite, close-up photo (IMG_1080).
-4. **"Guided by our foundational principles…"** — 6-stage strip across the screen,
-   split-screen media, CTA swaps from notes, then the unchanged footer (IMG_1082).
+1. **Whited-out services index** (IMG_1075) — "Three ways to build with control."
+   retained as H1 on the cream surface; ADU / Remediation / Consulting as a tight
+   borderless NS-style list, rows dim (`black/46`) until the focus band or hover
+   illuminates them; sticky right photograph bleeds to the viewport edge and
+   crossfades per active service with a numbered caption + ledger line.
+2. **"Where your vision meets uncompromising quality."** (IMG_1077) — black
+   split, copy left with maroon hairline + seam, photograph full-bleed right.
+   Instrument doodles removed. Image is a stand-in pending Joe's
+   homeowner-looking-back photo (TODO flagged in the component).
+3. **"Through all projects / Ever present" values split** (IMG_1080) — literal to
+   the NS "Build with purpose" reference: close-up photograph left (full-bleed),
+   ink panel right with 01–04 principles; numbers/titles one side, phrases the
+   opposite side, rows ignite in the focus band.
+4. **"Guided by our foundational principles…" process** (IMG_1082) — light NS
+   Process composition: label/sentence split, then the 6-stage hairline strip
+   that SLIDES ACROSS THE SCREEN on scrub (mobile: 2×3 grid — no scrub below
+   lg), then a full-bleed media band carrying "Committed to bringing your
+   vision to life." + PHASE ONE / call CTAs. Footer unchanged.
