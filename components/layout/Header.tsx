@@ -269,7 +269,7 @@ export default function Header() {
               {torTime && (
                 <span
                   className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-500 ${
-                    light ? "text-black/40" : "text-white/30"
+                    light ? "text-black/60" : "text-white/30"
                   }`}
                 >
                   Torrance · {torTime}

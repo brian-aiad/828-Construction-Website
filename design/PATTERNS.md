@@ -768,6 +768,41 @@ focus line or lengthen the stuck window without re-running probe scenario F.
 
 ---
 
+### Fix 23 — IntersectionObserver never fires on fully-clipped elements
+
+**Symptom:** An element hidden with `clipPath: "inset(0% 0% 100% 0%)"` (the standard
+clip-reveal initial state) never reveals when using `revealOnVisible` /
+IntersectionObserver — even with the element scrolled fully into the viewport.
+The LenisProvider reveal failsafe (Fix 18) does not rescue it either.
+
+**Root cause:** IntersectionObserver computes the intersection of the target's
+*clipped* rect with the root. An element whose own `clip-path` collapses it to
+zero visible area has an empty intersection rect, so `isIntersecting` stays
+`false` forever and no threshold is ever crossed. (Opacity/visibility do NOT
+affect IO — only clipping and `display: none` do.) The same blind spot applies
+to the Fix 18 failsafe, which observes the clipped element directly.
+
+**Fix:** Never observe the clipped node itself. Observe its unclipped parent
+(or section wrapper) and reveal the child:
+
+```ts
+revealCleanups.push(
+  revealOnVisible(
+    clips.map((el) => el.parentElement ?? el),
+    (wrapper) => {
+      const el = wrapper.querySelector<HTMLElement>(".svc-clip") ?? wrapper;
+      gsap.to(el, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "power3.inOut" });
+    }
+  )
+);
+```
+
+**Rule:** for one-shot reveals, IO targets must be elements that are geometrically
+visible when on screen — hide the *child*, observe the *container*. First hit:
+`components/services/ServicesContent.tsx` (2026-07-08 services rebuild).
+
+---
+
 ---
 
 ### Pattern: Asterisk Dropdown Reveal (V2)
@@ -969,9 +1004,9 @@ Each page has one animation moment that does not appear on any other page. These
 |------|------------------------|
 | Home (`/`) | **HomeInterstitial dual-layer ghost counter** — ghost watermark counter scrubs 0→150 behind SplitType headline chars on a full-bleed editorial section. Two simultaneous scrub-tied layers (large semi-transparent number in background + headline chars revealing at different rate) create a depth effect unique to the home page. No other page has this dual-layer typographic scrub. **Also:** **SplashScreen cinematic intro** — full-viewport black overlay with "828" (IBM Plex Mono, clamp 5rem→13rem) + copper underline scaleX draw (3px, 600ms, power2.inOut) + "CONSTRUCTION" (Space Grotesk, 0.48em tracking) — chars stagger IN 40ms/32ms per char (power3.out), hold 880ms, stagger OUT 25ms per char (power2.in), total 2.9s. sessionStorage gate: once per session. |
 | About (`/about`) | **V6 — CRAFT letter-completion rows** — Joe's sketch made literal: the five acronym words COMPLETE out of their own capital letters ("C" + "uriosity." slides from behind the letter via overflow-clipped xPercent scrub, letter ignites maroon as the word escapes; descender-safe wrapper pads 0.14em). Letters stack down the left reading C/R/A/F/T; a whisper watermark (0.03) drifts bottom-right. Page carried by `AboutFlow.tsx` stacked surfaces with top-anchored cover-scale (no top-sliver artifact). No other page completes words out of letters. | |
-| Services (`/services`) | **Three-vector mosaic entry** — the asymmetric 3-tile gateway grid reveals with three simultaneous but independent clip-path directions on scroll: ADU wipes horizontally (left→right, `inset(0% 100% 0% 0%)` → `inset(0%)`), Remediation wipes vertically (top→bottom), Consulting wipes from bottom-to-top. Three axes converge simultaneously — no other page has this multi-axis divergent clip entry. |
+| Services (`/services`) | **Illuminating service index** (Joe's video ask, 2026-06 batch) — NS Selected-Works grammar on a whited-out hero: ADU / Remediation / Consulting as full-width list rows, dim (`text-black/[0.24]`) until the live-rect focus band reaches them; the active row ignites to ink with a maroon rule drawing under it while a sticky right photo panel crossfades to that service's photograph + caption. Selection is plain React state (sticky-proof, mobile-identical). No other page illuminates a list against a crossfading sticky plate. |
 | Portfolio (`/portfolio`) | **Horizontal pin-scroll cinema strip + featured full-screen moment** — three photos scroll horizontally (GSAP pin + `containerAnimation`) with scale 1.15→1.0→0.85 + blur 6→0→4 peaking at center. Followed by a full-viewport featured section with scale-settling entry + char-by-char headline reveal. No other page has horizontal pin-scroll with per-photo containerAnimation. |
 | Services/ADU (`/services/adu`) | **ADU watermark vertical drift** — giant "ADU" text (clamp 14rem→36rem, opacity 0.04) positioned absolute behind the acronym section, drifts yPercent: -8 via scrub ScrollTrigger tied to the section's full scroll range. Creates depth as the user reads through A/D/U definitions. Unique to this page — no other page uses a 3-letter-watermark-with-drift. |
-| Services/Remediation (`/services/remediation`) | **Equipment model showcase** — two side-by-side dark-plate cards with model labels (Flair E8, F277 MR) using `font-numbers` with maroon accent tags. Photo placeholders hold the layout until Joe sends real equipment photos. No other page has an equipment-as-content-block pattern. |
+| Services/Remediation (`/services/remediation`) | **Equipment model showcase** — two side-by-side dark-plate cards with model labels (Flair E8, 277 MR) using `font-numbers` with maroon accent tags. Photo placeholders hold the layout until Joe sends real equipment photos. No other page has an equipment-as-content-block pattern. |
 | Services/Consulting (`/services/consulting`) | **Three large-format visible Q&A prompts** — three questions rendered always-visible as editorial prompts (NOT collapsible). Giant maroon numeral (clamp 2rem→3.5rem) left, full-sentence question in `font-display font-normal` at clamp(1.1rem→1.8rem) beside it. Prompts make the visitor self-select into a fit. No accordion — permanent editorial visibility is the signature. |
 | Contact (`/contact`) | **Form interaction quality as signature** (not a cinematic motion beat) — maroon focus rings on all form inputs (`var(--color-accent)` on focus, 240ms transition), labels positioned above fields (never floating), "What to Include" friction-reduction block, "What Happens After" process preview, response-time expectation stated explicitly. The 2025 establishment year counter (scrubs 0→2025) is the only place on the site this date appears as a scrub counter. |

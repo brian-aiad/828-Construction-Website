@@ -2,6 +2,26 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Services Landing V3 — Joe's Video Verbiage Batch (2026-07-08 night)
+
+`/services` rebuilt from Joe's 4 feedback videos (IMG_1075/1077/1080/1082,
+OneDrive); change doc `docs/828_SERVICES_JOE_FEEDBACK_2026-07-08.md`, verbiage
+now FROZEN. Structure: whited-out NS Selected-Works index (rows illuminate in
+the focus band, sticky photo crossfades + caption — page signature) →
+"Where your vision meets uncompromising quality." full-bleed photo split
+(PLACEHOLDER pending Joe's homeowner-admiring photo, TODO in component) →
+"Ever present" photo/ink split with 01–04 principles (numbers/titles vs
+phrases, focus ignition) → "Guided by our foundational principles…" + 6-stage
+strip that slides across the screen on scrub + full-bleed CTA band ("Committed
+to bringing your vision to life." / PHASE ONE). Instrument doodles deleted per
+Joe; footer untouched per Joe.
+QA: tsc clean; functional-qa PASS desktop+mobile; verbatim-verbiage probe
+21/21; site-smoke all routes OK; preflight:full 16/16; Lighthouse prod desktop
+`/services`: Perf 99 / A11y 96 / LCP 0.8s (a11y pass required un-hiding the
+H2s — axe skips visibility-hidden headings, breaking heading order — and
+lifting all dim-state colors to WCAG floors). New PATTERNS.md Fix 23:
+IntersectionObserver never fires on fully-clipped elements.
+
 ## Remediation Page V3 — Joe's Video Verbiage Batch (2026-07-08 night)
 
 `/services/remediation` rebuilt from Joe's 4 feedback videos (IMG_1103/1111/
