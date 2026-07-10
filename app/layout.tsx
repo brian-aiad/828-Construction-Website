@@ -5,7 +5,6 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FooterRevealWrapper from "@/components/layout/FooterRevealWrapper";
 import GrainOverlay from "@/components/system/GrainOverlay";
-import RightScrollProgress from "@/components/system/RightScrollProgress";
 import VerticalBrandMark from "@/components/system/VerticalBrandMark";
 import LenisProvider from "@/components/providers/LenisProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
@@ -90,8 +89,9 @@ export default function RootLayout({
           Skip to main content
         </a>
         <GrainOverlay />
-        {/* Page progress now lives on the Header's bottom edge (2026-07-09). */}
-        <RightScrollProgress />
+        {/* Page progress lives on the Header's bottom edge (2026-07-09);
+            no separate right-edge bar — the styled scrollbar is the only
+            element on that edge. */}
         <VerticalBrandMark />
         {/* Custom cursor — hidden on touch devices via CSS */}
         <CustomCursor />

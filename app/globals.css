@@ -88,8 +88,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Slim neutral thumb, invisible track — reads quietly on both the cream
+     and black surfaces. Maroon is reserved for hover so the edge chrome
+     doesn't compete with the plumb rail / header progress hairline. */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-accent) rgba(0, 0, 0, 0.1);
+  scrollbar-color: rgba(122, 116, 110, 0.55) transparent;
   overflow-x: clip;
   text-rendering: optimizeLegibility;
 }
@@ -718,21 +721,32 @@ html.lenis body {
   color: #ffffff;
 }
 
-/* ── Custom scrollbar (Webkit) ───────────────────────────────────────────── */
+/* ── Custom scrollbar (Webkit) ───────────────────────────────────────────
+   One quiet pill on the right edge. Transparent border + padding-box clip
+   floats a 4px rounded thumb inside a 10px gutter; the track is invisible
+   so the scrollbar never draws a second "bar" against page backgrounds.
+   Maroon appears only on hover/drag — brand accent without competing with
+   the plumb rail or the header progress hairline. */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-accent);
-  border-radius: 0;
-  border: 2px solid #000;
+  background: rgba(122, 116, 110, 0.55);
+  border: 3px solid transparent;
+  border-radius: 9999px;
   background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-light);
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: var(--color-accent);
+  border: 3px solid transparent;
+  border-radius: 9999px;
   background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }

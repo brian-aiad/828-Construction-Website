@@ -2,6 +2,21 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 (night) — Right edge cleaned: duplicate progress bar deleted, scrollbar restyled
+
+- Brian: right side of every page showed the scrollbar PLUS a second thinner
+  red line filling as you scroll — delete it and make the scrollbar look
+  professional. That bar was components/system/RightScrollProgress.tsx
+  (fixed right-0 z-[9999]) — redundant since the page-progress hairline moved
+  onto the header's bottom edge. Component deleted, unrendered from
+  app/layout.tsx. Confirmed 0 occurrences in rendered HTML.
+- Scrollbar restyle (globals.css): was a chunky square maroon thumb on a gray
+  track (read as a second red bar). Now a slim 4px rounded neutral pill
+  (rgba(122,116,110,.55)) floating in a 10px gutter, invisible track, maroon
+  only on hover/drag; Firefox scrollbar-color matched. Quiet on both cream
+  and black surfaces; the edge chrome no longer competes with the plumb rail
+  or header hairline.
+
 ## 2026-07-09 (night) — Rail rollout complete: igniting diamond rail on every page
 
 - Brian: "now do this for every page on the website without changing content."
