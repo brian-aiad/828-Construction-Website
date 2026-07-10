@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS, Project, ProjectCategory, SITE } from "@/lib/constants";
 import Lightbox from "@/components/gallery/Lightbox";
+import ResidenceGalleries from "@/components/portfolio/ResidenceGalleries";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { lqip } from "@/lib/image-placeholders";
@@ -541,6 +542,16 @@ export default function PortfolioContent() {
     });
   }, [indexProjects]);
 
+  useEffect(() => {
+    if (window.location.hash !== "#project-index") return;
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("project-index")?.scrollIntoView({ block: "start" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   const filteredProjects = useMemo(() => {
     return activeFilter === "All"
       ? wallProjects
@@ -556,7 +567,10 @@ export default function PortfolioContent() {
     <div ref={rootRef} className="bg-[#f5f0e9] text-black">
       <PortfolioHero projects={heroProjects} categories={categories} onOpen={setLightboxProject} />
 
-      <section className="relative bg-black px-6 pb-14 pt-24 text-white lg:px-12 lg:pb-20 lg:pt-28">
+      <section
+        id="project-index"
+        className="relative scroll-mt-24 bg-black px-6 pb-14 pt-24 text-white lg:px-12 lg:pb-20 lg:pt-28"
+      >
         <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
         <div className="absolute inset-y-0 left-0 hidden w-px bg-white/12 lg:block" />
         <div className="absolute bottom-10 right-10 hidden h-32 w-32 border border-white/10 lg:block" />
@@ -736,6 +750,8 @@ export default function PortfolioContent() {
           </div>
         </div>
       </section>
+
+      <ResidenceGalleries />
 
       <section className="relative overflow-hidden border-t border-black/10 px-6 py-12 lg:px-12">
         <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />

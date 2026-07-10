@@ -2,6 +2,33 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-10 — El Sereno card + real-photo residence galleries + deep links
+
+- Brian added the "El Sereno Residence" photo folder (dictation garbled it as
+  El Cerrito/Cerrano): home middle card "Cerritos Detail" replaced with
+  "El Sereno Residence" — photo 01-2194.jpg (round wood mirror / vessel sink /
+  geometric black-star tile, the project signature), meta "Bath Remodel /
+  El Sereno, CA".
+- El Sereno pipeline: 50 raw → 42 optimized (8 near-dupes culled), sharp
+  EXIF-rotate/strip → max 1920px → mozjpeg q78 + adaptive tighten; 11MB total,
+  zero files over 400KB, at public/images/projects/el-sereno-residence/
+  (matches the cerritos/tustin convention — NOT a new portfolio/ tree). Raw
+  root folders stay untracked + excluded from deploys.
+- NEW components/portfolio/ResidenceGalleries.tsx (+ residenceGalleries.data
+  .ts): three anchored gallery sections (#cerritos-residence /
+  #el-sereno-residence / #tustin-residence), 123 lazy 4/5 cells (zero CLS),
+  editorial cream design, accessible lightbox (arrows/Esc/backdrop, scroll
+  lock). Wired into PortfolioContent with a 2-line touch.
+- Home cards deep-link /portfolio#<id>; mount handler instant-jumps to a 96px
+  offset and re-asserts briefly to survive Lenis' mount reset, aborting on a
+  real scroll gesture. Verified landing top=96px for all three ids, both
+  viewports, plus click-through from each card.
+- JOE TO CONFIRM: El Sereno scope label — card says "Bath Remodel", gallery
+  says "Bath Remodel & Outdoor Living" (the set is a star-tile bath + a
+  chevron-deck outdoor living build with slat fence + planter benches).
+- QA: tsc clean; functional-qa PASS both viewports on / ; equivalent
+  portfolio QA PASS both viewports (123 images, 0 broken, no overflow).
+
 ## 2026-07-10 — ADU V3.3: FAQ + acronym revamp (Brian round 3, home-grammar words)
 
 - Brian: both middle sections could look/be organized a lot better; take

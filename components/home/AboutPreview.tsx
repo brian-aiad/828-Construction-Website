@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { EXPERIENCE_SINCE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,16 +17,25 @@ gsap.registerPlugin(ScrollTrigger);
 
 const DETAIL_IMAGES = [
   {
-    src: "/images/projects/cerritos-residence/13-2110.jpg",
-    alt: "Dark vertical tile feature wall with recessed shower niche, Cerritos residence",
+    src: "/images/projects/cerritos-residence/home-preview-vanity.jpg",
+    alt: "Finished dual vanity from the Cerritos Residence bath remodel",
+    project: "Cerritos Residence",
+    meta: "Bath Remodel / Cerritos, CA",
+    href: "/portfolio#cerritos-residence",
   },
   {
-    src: "/images/projects/outdoor-patio-pergola.jpg",
-    alt: "Custom pergola and pool deck outdoor living build in South Bay",
+    src: "/images/projects/el-sereno-residence/01-2194.jpg",
+    alt: "Round wood-framed mirror over a vessel sink on geometric star tile, El Sereno Residence bath remodel",
+    project: "El Sereno Residence",
+    meta: "Bath Remodel / El Sereno, CA",
+    href: "/portfolio#el-sereno-residence",
   },
   {
-    src: "/images/projects/tustin-residence/13-1947.jpg",
-    alt: "Blue herringbone tile niche detail, Tustin residence bath remodel",
+    src: "/images/projects/tustin-residence/home-preview-tub-detail.jpg",
+    alt: "Warm tub and towel detail from the Tustin Residence bath refresh",
+    project: "Tustin Residence",
+    meta: "Bath Refresh / Tustin, CA",
+    href: "/portfolio#tustin-residence",
   },
 ];
 
@@ -36,6 +46,10 @@ export default function AboutPreview() {
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
+
+    // One-shot reveals use IntersectionObserver — ScrollTrigger positional
+    // once-triggers go stale after route transitions (PATTERNS.md Fix 22).
+    const revealCleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
       const headlineLines = gsap.utils.toArray<HTMLElement>(".about-headline-line");
@@ -53,28 +67,28 @@ export default function AboutPreview() {
         return;
       }
 
-      gsap.to(headlineLines, {
-        yPercent: 0,
-        duration: 0.95,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: headlineRef.current ?? section,
-          start: "top 85%",
-          once: true,
-        },
-      });
+      revealCleanups.push(
+        revealOnVisible([headlineRef.current ?? section], () => {
+          gsap.to(headlineLines, {
+            yPercent: 0,
+            duration: 0.95,
+            stagger: 0.1,
+            ease: "power3.out",
+          });
+        })
+      );
 
-      copyEls.forEach((el, i) => {
-        gsap.to(el, {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          delay: i * 0.07,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 86%", once: true },
-        });
-      });
+      revealCleanups.push(
+        revealOnVisible(copyEls, (el, i) => {
+          gsap.to(el, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: i * 0.07,
+            ease: "power3.out",
+          });
+        })
+      );
 
       frames.forEach((frame, i) => {
         gsap.to(frame, {
@@ -109,6 +123,7 @@ export default function AboutPreview() {
     }, sectionRef);
 
     return () => {
+      revealCleanups.forEach((dispose) => dispose());
       try {
         ctx.revert();
       } catch {}
@@ -168,9 +183,14 @@ export default function AboutPreview() {
         {/* Detail photography row */}
         <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-3 lg:mt-20 lg:gap-8">
           {DETAIL_IMAGES.map((img) => (
-            <div key={img.src}>
+            <Link
+              key={img.src}
+              href={img.href}
+              className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f7f7f3]"
+              aria-label={`View ${img.project} in the portfolio`}
+            >
               <div
-                className="about-frame group relative aspect-[4/5] overflow-hidden bg-[#e8e8e3]"
+                className="about-frame relative aspect-[4/5] overflow-hidden bg-[#e8e8e3]"
                 data-gsap-reveal="true"
               >
                 <div className="about-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
@@ -180,6 +200,7 @@ export default function AboutPreview() {
                     fill
                     loading="lazy"
                     sizes="(max-width: 640px) 100vw, 33vw"
+                    quality={92}
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                     style={{ filter: "contrast(1.04) saturate(1.06)" }}
                   />
@@ -189,7 +210,20 @@ export default function AboutPreview() {
                 aria-hidden="true"
                 className="mt-3 h-px w-10 bg-[var(--color-accent)] opacity-70"
               />
-            </div>
+              <div className="mt-4 flex items-start justify-between gap-5">
+                <div>
+                  <p className="font-editorial text-[clamp(1.35rem,1.7vw,1.9rem)] leading-none text-black">
+                    {img.project}
+                  </p>
+                  <p className="mt-2 font-labels text-[8px] uppercase leading-4 tracking-[0.18em] text-black/38">
+                    {img.meta}
+                  </p>
+                </div>
+                <span className="mt-1 whitespace-nowrap font-labels text-[8px] uppercase tracking-[0.18em] text-black/42 transition-colors group-hover:text-black">
+                  View in portfolio -&gt;
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
