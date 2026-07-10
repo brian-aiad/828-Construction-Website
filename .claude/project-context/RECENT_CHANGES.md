@@ -2,6 +2,28 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-10 — ADU V3.3: FAQ + acronym revamp (Brian round 3, home-grammar words)
+
+- Brian: both middle sections could look/be organized a lot better; take
+  inspiration from home/About motion ("the words popping up as you scroll");
+  add photos where necessary (new client images incoming — slots swap-ready).
+  Videos IMG_1092/1094 re-checked against the change doc — verbiage untouched.
+- FAQ reorganized: tall clip-reveal photograph (adu-interior-living, parallax)
+  beside a tidy 2×2 question-card checkerboard (dark/light/light/dark) — no
+  more ragged second row; the dictated statement now uses the HOME WORD-FILL
+  grammar (SplitType words ink 0.45→1 on scrub; initial at the axe large-text
+  floor, unlike home's 0.28).
+- ACRONYM reorganized: rows left (letter rail + word + maroon tick), each
+  definition WORD-FILLS on scroll (0.55→1, small-text axe floor); sticky
+  right photo panel crossfades per igniting letter (A exterior / D detail /
+  U framing — live-rect keyed, sticky-proof) with letter/word caption;
+  watermark drift moved behind the rows (left).
+- QA: tsc clean; 2 consecutive frame sweeps clean at both viewports (r3+r4);
+  FAQ-expanded junction probe clean; functional-qa PASS desktop+mobile;
+  Lighthouse prod desktop Perf 99 / A11y 96 with ZERO non-global contrast
+  nodes. Note: mid-run 500s on :4000 were a parallel build wiping .next —
+  wait for manifest stability before auditing in shared-tree sessions.
+
 ## 2026-07-10 — Remediation: method-section owner revision + approach fit
 
 - Brian (voice + screenshot, re-reading IMG_1112): method section lead

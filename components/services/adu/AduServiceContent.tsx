@@ -12,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
@@ -136,6 +137,52 @@ function useFocusIndex(
     };
   }, [refs, focusRatio]);
   return active;
+}
+
+// Home-page word-fill grammar (HomeVisionSequence brand statement): SplitType
+// words ink from a readable partial opacity to full on scrub. Four-guard
+// cleanup per PATTERNS.md Fix 1; initial opacity is WCAG-floor-safe so the
+// load state passes axe (the 0.28 home value fails contrast on small text).
+function useWordFill(
+  ref: React.RefObject<HTMLElement | null>,
+  fromOpacity: number
+) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let split: SplitType | null = null;
+    let mounted = true;
+    const frame = requestAnimationFrame(() => {
+      if (!mounted || !el.isConnected) return;
+      if (!AnimationController.shouldAnimate()) return;
+      split = new SplitType(el, { types: "words" });
+      gsap.fromTo(
+        split.words ?? [],
+        { opacity: fromOpacity },
+        {
+          opacity: 1,
+          stagger: 0.04,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 88%",
+            end: "top 52%",
+            scrub: 0.9,
+          },
+        }
+      );
+    });
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(frame);
+      if (split && el.isConnected) {
+        try {
+          split.revert();
+        } catch {}
+      }
+      split = null;
+    };
+  }, [ref, fromOpacity]);
 }
 
 function useAduMotion() {
@@ -457,36 +504,11 @@ function FaqCard({
   );
 }
 
-function FaqPhotoCell({
-  photo,
-  stagger,
-  className = "",
-}: {
-  photo: (typeof FAQ_PHOTOS)[number];
-  stagger: number;
-  className?: string;
-}) {
-  return (
-    <div className={`relative min-h-[14rem] overflow-hidden lg:min-h-[19rem] ${className}`}>
-      <div className="adu-clip absolute inset-0" data-gsap-reveal="true" data-stagger={stagger}>
-        <Image
-          src={photo.src}
-          alt={photo.alt}
-          fill
-          loading="lazy"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          placeholder="blur"
-          blurDataURL={BLUR_PLACEHOLDER}
-          onError={imgError}
-          className="object-cover"
-          style={{ filter: "contrast(1.05) saturate(1.05)" }}
-        />
-      </div>
-    </div>
-  );
-}
-
 function AduFaq() {
+  const statementRef = useRef<HTMLHeadingElement>(null);
+  // Large text on #f7f7f3 — 0.45 black keeps the load state ≥3:1 (axe floor).
+  useWordFill(statementRef, 0.45);
+
   return (
     <section
       data-section="adu-faq"
@@ -494,13 +516,14 @@ function AduFaq() {
       className="relative bg-[#f7f7f3] text-[#111]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
         <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/55">
           FAQ / Frequently asked questions
         </span>
+        {/* Home word-fill grammar: the dictated statement inks in as you scroll */}
         <h2
-          className="adu-rise mt-5 max-w-4xl font-display font-light leading-[1.14] text-[clamp(1.8rem,3.2vw,3.4rem)]"
-          data-stagger="0.08"
+          ref={statementRef}
+          className="mt-5 max-w-4xl font-display font-light leading-[1.14] text-[clamp(1.8rem,3.2vw,3.4rem)]"
         >
           Whether your vision is fully defined or still evolving, 828
           Construction is here to help.
@@ -510,15 +533,34 @@ function AduFaq() {
           style={{ opacity: 0.6 }}
           aria-hidden="true"
         />
-        {/* Checkerboard: question cards interleaved with photo cells, exactly
-            the alternating rhythm of the reference Joe pointed at. */}
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
-          <FaqCard faq={FAQS[0]} index={0} dark stagger={0} />
-          <FaqPhotoCell photo={FAQ_PHOTOS[0]} stagger={0.1} className="hidden sm:block" />
-          <FaqCard faq={FAQS[1]} index={1} dark={false} stagger={0.16} />
-          <FaqCard faq={FAQS[2]} index={2} dark stagger={0.24} />
-          <FaqCard faq={FAQS[3]} index={3} dark={false} stagger={0.32} className="lg:col-start-3" />
-          <FaqPhotoCell photo={FAQ_PHOTOS[1]} stagger={0.4} className="hidden lg:block" />
+        {/* NS Perspectives rhythm, organized: tall photograph one side, the
+            "smaller little sections" in a tidy checkerboard beside it.
+            Photo slots are swap-ready for the new client images. */}
+        <div className="mt-12 grid grid-cols-1 gap-4 lg:mt-14 lg:grid-cols-12">
+          <div className="relative order-2 min-h-[16rem] lg:order-1 lg:col-span-5 lg:min-h-0">
+            <div className="adu-clip absolute inset-0" data-gsap-reveal="true">
+              <div className="adu-parallax absolute inset-x-0" style={{ top: "-6%", height: "112%" }}>
+                <Image
+                  src={FAQ_PHOTOS[0].src}
+                  alt={FAQ_PHOTOS[0].alt}
+                  fill
+                  loading="lazy"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
+                  className="object-cover"
+                  style={{ filter: "contrast(1.05) saturate(1.05)" }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="order-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-2 lg:col-span-7">
+            <FaqCard faq={FAQS[0]} index={0} dark stagger={0} />
+            <FaqCard faq={FAQS[1]} index={1} dark={false} stagger={0.08} />
+            <FaqCard faq={FAQS[2]} index={2} dark={false} stagger={0.16} />
+            <FaqCard faq={FAQS[3]} index={3} dark stagger={0.24} />
+          </div>
         </div>
       </div>
     </section>
@@ -526,6 +568,85 @@ function AduFaq() {
 }
 
 // ── Section 3 — what ADU means to 828 (acronym values + watermark drift) ────
+const ACRONYM_PHOTOS = [
+  {
+    src: "/images/projects/adu-exterior.jpg",
+    alt: "ADU exterior aligned with the client's vision",
+  },
+  {
+    src: "/images/projects/niche-detail.jpg",
+    alt: "Dedicated craftsmanship detail by 828 Construction",
+  },
+  {
+    src: "/images/projects/adu-framing.jpg",
+    alt: "ADU construction journey in progress",
+  },
+];
+
+function AcronymRow({
+  item,
+  index,
+  active,
+  rowRefs,
+}: {
+  item: (typeof ACRONYM)[number];
+  index: number;
+  active: boolean;
+  rowRefs: React.MutableRefObject<Array<HTMLElement | null>>;
+}) {
+  const bodyRef = useRef<HTMLParagraphElement>(null);
+  // Small text on black — 0.55 white keeps the load state ≥4.5:1 (axe floor).
+  useWordFill(bodyRef, 0.55);
+
+  return (
+    <div className="relative">
+      <div
+        className="adu-hairline h-px w-full bg-white/12"
+        data-stagger={String(index * 0.12)}
+        aria-hidden="true"
+      />
+      <div
+        ref={(el) => {
+          rowRefs.current[index] = el;
+        }}
+        className="adu-rise py-8 lg:py-10"
+        data-stagger={String(index * 0.1)}
+      >
+        <div className="flex items-baseline gap-5 sm:gap-7">
+          <span
+            className={`w-[0.75em] font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(3.4rem,6vw,5.4rem)] ${
+              active ? "text-[var(--color-accent-light)]" : "text-white/[0.22]"
+            }`}
+            aria-hidden="true"
+          >
+            {item.letter}
+          </span>
+          <h3
+            className={`font-display leading-none transition-colors duration-500 text-[clamp(1.4rem,2.2vw,2rem)] ${
+              active ? "text-white" : "text-white/55"
+            }`}
+          >
+            {item.word}
+          </h3>
+          <span
+            className={`mb-1 ml-auto hidden h-px w-10 self-center transition-colors duration-500 sm:block ${
+              active ? "bg-[var(--color-accent)]" : "bg-white/15"
+            }`}
+            aria-hidden="true"
+          />
+        </div>
+        {/* Home word-fill grammar: the definition inks in as you scroll */}
+        <p
+          ref={bodyRef}
+          className="mt-5 max-w-xl pl-[calc(0.75em+1.25rem)] text-sm leading-7 text-white/90 sm:pl-0 sm:ml-[4.6rem] lg:text-[15px] lg:leading-8"
+        >
+          {item.body}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AduAcronym() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
   const activeIdx = useFocusIndex(rowRefs, 0.52);
@@ -539,13 +660,13 @@ function AduAcronym() {
     >
       {/* Page signature (PATTERNS.md): giant ADU watermark, whisper-quiet, drifting */}
       <div
-        className="adu-watermark pointer-events-none absolute -right-6 top-1/2 select-none font-display font-bold leading-none tracking-tight text-white lg:right-6"
-        style={{ fontSize: "clamp(11rem,26vw,22rem)", opacity: 0.04 }}
+        className="adu-watermark pointer-events-none absolute -left-6 top-1/2 select-none font-display font-bold leading-none tracking-tight text-white lg:left-6"
+        style={{ fontSize: "clamp(11rem,24vw,20rem)", opacity: 0.04 }}
         aria-hidden="true"
       >
         ADU
       </div>
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
         <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
           What we drive for
         </span>
@@ -553,52 +674,53 @@ function AduAcronym() {
           What ADU means to 828.
         </h2>
 
-        <div className="mt-12 lg:mt-16">
-          {ACRONYM.map((item, i) => {
-            const active = activeIdx === i;
-            return (
-              <div key={item.letter} className="relative">
-                <div
-                  className="adu-hairline h-px w-full bg-white/12"
-                  data-stagger={String(i * 0.12)}
-                  aria-hidden="true"
-                />
-                <div
-                  ref={(el) => {
-                    rowRefs.current[i] = el;
-                  }}
-                  className="adu-rise grid grid-cols-[auto_1fr] items-start gap-x-6 gap-y-4 py-8 sm:gap-x-10 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:gap-x-16 lg:py-11"
-                  data-stagger={String(i * 0.1)}
-                >
-                  <div className="flex items-baseline gap-5 sm:gap-7">
-                    <span
-                      className={`w-[0.75em] font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(3.4rem,6.5vw,6rem)] ${
-                        active ? "text-[var(--color-accent-light)]" : "text-white/[0.22]"
-                      }`}
-                      aria-hidden="true"
-                    >
-                      {item.letter}
-                    </span>
-                    <h3
-                      className={`font-display leading-none transition-colors duration-500 text-[clamp(1.4rem,2.4vw,2.1rem)] ${
-                        active ? "text-white" : "text-white/55"
-                      }`}
-                    >
-                      {item.word}
-                    </h3>
-                  </div>
-                  <p
-                    className={`col-span-2 max-w-xl text-sm leading-7 transition-colors duration-500 lg:col-span-1 lg:text-[15px] lg:leading-8 ${
-                      active ? "text-white/70" : "text-white/52"
-                    }`}
+        <div className="mt-12 grid grid-cols-1 gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-14">
+          <div className="lg:col-span-7">
+            {ACRONYM.map((item, i) => (
+              <AcronymRow
+                key={item.letter}
+                item={item}
+                index={i}
+                active={activeIdx === i}
+                rowRefs={rowRefs}
+              />
+            ))}
+            <div className="adu-hairline h-px w-full bg-white/12" data-stagger="0.36" aria-hidden="true" />
+          </div>
+
+          {/* The picture keyed to the igniting letter — sticky, crossfading.
+              Slots are swap-ready for the new client images. */}
+          <div className="relative hidden lg:col-span-5 lg:block" aria-hidden="true">
+            <div className="sticky top-24">
+              <div className="adu-clip relative h-[calc(100vh-12rem)] min-h-[22rem] overflow-hidden" data-gsap-reveal="true">
+                {ACRONYM_PHOTOS.map((photo, i) => (
+                  <div
+                    key={photo.src}
+                    className="absolute inset-0 transition-opacity duration-700"
+                    style={{ opacity: activeIdx === i ? 1 : 0 }}
                   >
-                    {item.body}
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 1024px) 0px, 40vw"
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                      style={{ filter: "contrast(1.05) saturate(1.05)" }}
+                    />
+                  </div>
+                ))}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-5 pb-4 pt-14">
+                  <p className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/85">
+                    {ACRONYM[activeIdx].letter} / {ACRONYM[activeIdx].word}
                   </p>
                 </div>
               </div>
-            );
-          })}
-          <div className="adu-hairline h-px w-full bg-white/12" data-stagger="0.36" aria-hidden="true" />
+            </div>
+          </div>
         </div>
       </div>
     </section>
