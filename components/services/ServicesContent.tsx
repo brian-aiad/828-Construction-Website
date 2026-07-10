@@ -76,20 +76,20 @@ const PRINCIPLES = [
 // something that looks nice").
 const PRINCIPLE_PHOTOS = [
   {
-    src: "/images/projects/shower-black-fixtures.jpg",
-    alt: "Matte black shower fixtures against white tile — 828 finish detail",
+    src: "/images/generated/services-principle-craftsmanship-v2.jpg",
+    alt: "Finished shower detail with precise tile, black fixtures, and aligned finish work",
   },
   {
-    src: "/images/projects/consulting-blueprints.jpg",
-    alt: "Floor plan and drawings on the table — 828 client planning",
+    src: "/images/generated/services-principle-communication-v2.jpg",
+    alt: "Contractor and homeowner reviewing plans, material samples, and project details together",
   },
   {
-    src: "/images/projects/foundation-concrete.jpg",
-    alt: "Poured foundation with rebar — 828 structural work",
+    src: "/images/generated/services-principle-structure-v2.jpg",
+    alt: "Residential framing hardware and structural members checked for alignment",
   },
   {
-    src: "/images/projects/adu-interior-living.jpg",
-    alt: "Finished ADU interior with dark cabinetry — 828 completed space",
+    src: "/images/generated/services-principle-client-v2.jpg",
+    alt: "Final walkthrough at a completed residential project with contractor and homeowner",
   },
 ];
 
@@ -490,7 +490,10 @@ function VisionStatement() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+      {/* Same 0.9fr/1.1fr split as the values section below — the center seam
+          must land on the identical X so the line reads continuous while the
+          surfaces stack (Brian 2026-07-10: "perfect line down the middle"). */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <div
           className="relative flex items-center px-6 py-16 lg:py-24 lg:pr-16"
           style={{ paddingLeft: undefined }}
@@ -562,26 +565,21 @@ function PrinciplesSection() {
             crossfading with the row that is currently ignited */}
         <div className="svc-clip relative aspect-[4/3] overflow-hidden lg:aspect-auto lg:h-auto lg:min-h-full" data-gsap-reveal="true">
           <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
-            {PRINCIPLE_PHOTOS.map((photo, i) => (
-              <div
-                key={photo.src}
-                className="absolute inset-0 transition-opacity duration-[450ms] ease-out"
-                style={{ opacity: activeIdx === i ? 1 : 0 }}
-              >
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  loading={i === 0 ? "eager" : "lazy"}
-                  sizes="(max-width: 1024px) 100vw, 46vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover"
-                  style={{ filter: "contrast(1.05) saturate(1.05)" }}
-                />
-              </div>
-            ))}
+            <Image
+              key={PRINCIPLE_PHOTOS[activeIdx]?.src ?? PRINCIPLE_PHOTOS[0].src}
+              src={PRINCIPLE_PHOTOS[activeIdx]?.src ?? PRINCIPLE_PHOTOS[0].src}
+              alt={PRINCIPLE_PHOTOS[activeIdx]?.alt ?? PRINCIPLE_PHOTOS[0].alt}
+              fill
+              loading={activeIdx === 0 ? "eager" : "lazy"}
+              sizes="(max-width: 1024px) 100vw, 46vw"
+              quality={92}
+              unoptimized
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDER}
+              onError={imgError}
+              className="object-cover"
+              style={{ filter: "contrast(1.05) saturate(1.05)" }}
+            />
           </div>
           <div className="absolute inset-x-0 bottom-0 hidden items-end justify-between bg-gradient-to-t from-black/55 to-transparent px-6 pb-5 pt-14 lg:flex">
             <p className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/75">
