@@ -34,6 +34,13 @@ a standard section-by-section template.
 7. **Mobile is a first-class deliverable.** Design the 390px experience, not
    just check it: shorter sections, readable sizes, native-scroll reveals, no
    horizontal drift, tap targets ≥44px.
+   **Audit widths (updated 2026-07-09):** every visual/text-fit audit runs at
+   390 / 768 / 1024 / 1280 / 1440 / **1657** / **1920** — the 1440–1920 band
+   caught a real mid-word-break bug that 1440-only captures missed. Harness:
+   `.claude-work/research/site-textfit/audit.mjs` must report 0 issues twice
+   consecutively. Nothing may ever clip, wrap mid-word, or overflow at any of
+   these widths — resize (clamps, minmax columns, nowrap) without changing
+   words or design.
 8. **Looks expensive** = restraint: generous whitespace, hairlines, glass
    depth, photography breathing room, 80/10/10 palette discipline.
 

@@ -2,6 +2,24 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 (night) — "Communication." mid-word break fixed + site-wide text-fit audit
+
+- Brian's screenshot at ~1657px window: About standards title "Communication."
+  broke as "Communicatio / n." — fixed 12.5rem title column vs ~210px word at
+  the 1.7rem clamp cap (Fix 21 class). Fixed: column 12.5rem→14.5rem +
+  whitespace-nowrap on the single-word titles. Verified one-line at 1657.
+- NEW site-wide harness `.claude-work/research/site-textfit/audit.mjs`: 8
+  routes × 7 widths (390/768/1024/1280/1440/1657/1920), canvas-measures every
+  heading's longest word vs container, flags nowrap/box/viewport overflow
+  (marquees + aria-hidden exempt). Detector validated against a planted defect
+  (150px box → flagged). Result: TOTAL ISSUES 0, twice consecutively — no
+  other instance of the bug class exists anywhere on the site at any audited
+  width.
+- Lesson recorded: the 1440–1920 band (e.g. 1657) was untested before and is
+  now mandatory in every audit — PATTERNS.md Fix 21 addendum +
+  828_DESIGN_DIRECTION_V4.md audit-width rule.
+- QA: craft-torture 5/5 PASS, functional-qa PASS desktop+mobile, tsc clean.
+
 ## 2026-07-09 (night) — Right edge cleaned: duplicate progress bar deleted, scrollbar restyled
 
 - Brian: right side of every page showed the scrollbar PLUS a second thinner

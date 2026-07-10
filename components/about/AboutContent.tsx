@@ -437,12 +437,12 @@ function OriginSection({
                   ref={(el) => {
                     rowRefs.current[index] = el;
                   }}
-                  className="grid items-baseline gap-1.5 border-b border-white/10 py-6 sm:grid-cols-[3.2rem_12.5rem_1fr] sm:gap-5 lg:py-7"
+                  className="grid items-baseline gap-1.5 border-b border-white/10 py-6 sm:grid-cols-[3.2rem_14.5rem_1fr] sm:gap-5 lg:py-7"
                 >
                   <span className="font-numbers text-[12px]" style={{ color: "var(--color-accent-light)" }}>
                     {item.number}
                   </span>
-                  <h3 className="font-editorial text-[clamp(1.35rem,1.8vw,1.7rem)] font-semibold leading-none">
+                  <h3 className="whitespace-nowrap font-editorial text-[clamp(1.35rem,1.8vw,1.7rem)] font-semibold leading-none">
                     {item.title}
                   </h3>
                   <p className="max-w-xl text-sm leading-relaxed text-white/56">{item.body}</p>

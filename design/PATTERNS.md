@@ -702,6 +702,21 @@ This pattern is already used correctly in `ServicesPreview.tsx`. Apply it to any
 
 **Files changed:** `app/globals.css`, all 9 component files using SplitType.
 
+**Fix 21 addendum (2026-07-09) — fixed-width title columns + the 1440–1920 band:**
+A second instance shipped: About standards rows used a fixed `12.5rem` title
+column while the title font clamped up to 1.7rem — "Communication." measures
+~210px at cap, wider than the 200px column, forcing the last-resort mid-word
+break ("Communicatio / n."). It only reproduced at ~1657px window width — a
+band between our standard 1440 and 1920 captures, so no screenshot ever caught
+it. Rules: (1) single-word headings in fixed grid columns get
+`whitespace-nowrap` AND a column wide enough for the longest word at the clamp
+cap; (2) every visual audit must include 1657px (or another 1440–1920 band
+width); (3) run `.claude-work/research/site-textfit/audit.mjs` (8 routes × 7
+widths: 390/768/1024/1280/1440/1657/1920 — canvas-measures every heading's
+longest word vs its container, flags nowrap overflow, box overflow, viewport
+overflow; marquees/aria-hidden exempt) — must report TOTAL ISSUES: 0 twice
+consecutively before shipping typography or layout changes.
+
 **Affected files:** `components/about/AboutContent.tsx`, `components/contact/ContactContent.tsx`, `components/gallery/ProjectsGallery.tsx`, `components/home/HeroSections.tsx`, `components/home/HomeCTA.tsx`, `components/home/HomeInterstitial.tsx`, `components/process/ProcessContent.tsx`, `components/services/ServiceDetailContent.tsx`, `components/services/ServicesContent.tsx`
 
 ---
