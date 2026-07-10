@@ -14,6 +14,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICES, SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
+import ServicesFlow from "@/components/services/ServicesFlow";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,17 +34,17 @@ function imgError(e: SyntheticEvent<HTMLImageElement>) {
 const SERVICE_ROWS = [
   {
     slug: "adu",
-    image: "/images/projects/adu-exterior-new.jpg",
+    image: "/images/generated/services-row-adu-v2.jpg",
     line: "New living space, permitted and built to hold value.",
   },
   {
     slug: "remediation",
-    image: "/images/projects/remediation-active.jpg",
+    image: "/images/generated/services-row-remediation-v2.jpg",
     line: "Find the cause, open only what matters, rebuild correctly.",
   },
   {
     slug: "consulting",
-    image: "/images/projects/consulting-plans.jpg",
+    image: "/images/generated/services-row-consulting-v2.jpg",
     line: "Decide before you spend. Scope, risk, cost, and next moves.",
   },
 ];
@@ -66,6 +67,29 @@ const PRINCIPLES = [
   {
     title: "Client centered experience",
     body: "We shape every project around your vision, delivering a seamless and highly personalized building experience.",
+  },
+];
+
+// Joe (IMG_1080, 45–56s): the values plate shows "some of the CLOSE-UPS that
+// have been shot … by the photographer" — plural. One close-up per principle,
+// crossfading as its row ignites (Brian 2026-07-09: "different photos,
+// something that looks nice").
+const PRINCIPLE_PHOTOS = [
+  {
+    src: "/images/projects/shower-black-fixtures.jpg",
+    alt: "Matte black shower fixtures against white tile — 828 finish detail",
+  },
+  {
+    src: "/images/projects/consulting-blueprints.jpg",
+    alt: "Floor plan and drawings on the table — 828 client planning",
+  },
+  {
+    src: "/images/projects/foundation-concrete.jpg",
+    alt: "Poured foundation with rebar — 828 structural work",
+  },
+  {
+    src: "/images/projects/adu-interior-living.jpg",
+    alt: "Finished ADU interior with dark cabinetry — 828 completed space",
   },
 ];
 
@@ -414,7 +438,9 @@ function ServicesIndex() {
                           alt={`${service.title} by 828 Construction`}
                           fill
                           loading={i === 0 ? "eager" : "lazy"}
-                          sizes="(max-width: 1280px) 100vw, 1184px"
+                          sizes="(max-width: 1536px) 100vw, 1280px"
+                          quality={92}
+                          unoptimized
                           placeholder="blur"
                           blurDataURL={BLUR_PLACEHOLDER}
                           onError={imgError}
@@ -496,11 +522,13 @@ function VisionStatement() {
         >
           <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/projects/outdoor-living-editorial.jpg"
-              alt="Finished South Bay outdoor living space by 828 Construction"
+              src="/images/generated/services-vision-homeowner-adu-v2.jpg"
+              alt="Homeowner admiring a completed ADU-style residential project"
               fill
               loading="lazy"
-              sizes="(max-width: 1024px) 100vw, 54vw"
+              sizes="(max-width: 1024px) 100vw, 60vw"
+              quality={92}
+              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -530,25 +558,37 @@ function PrinciplesSection() {
       style={{ overflowX: "clip" }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        {/* Close-up plate — photographer close-ups, per Joe */}
+        {/* Close-up plate — photographer close-ups, per Joe: one per principle,
+            crossfading with the row that is currently ignited */}
         <div className="svc-clip relative aspect-[4/3] overflow-hidden lg:aspect-auto lg:h-auto lg:min-h-full" data-gsap-reveal="true">
           <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
-            <Image
-              src="/images/projects/bathroom-herringbone.jpg"
-              alt="Herringbone tile craftsmanship close-up by 828 Construction"
-              fill
-              loading="lazy"
-              sizes="(max-width: 1024px) 100vw, 46vw"
-              placeholder="blur"
-              blurDataURL={BLUR_PLACEHOLDER}
-              onError={imgError}
-              className="object-cover"
-              style={{ filter: "contrast(1.05) saturate(1.05)" }}
-            />
+            {PRINCIPLE_PHOTOS.map((photo, i) => (
+              <div
+                key={photo.src}
+                className="absolute inset-0 transition-opacity duration-[450ms] ease-out"
+                style={{ opacity: activeIdx === i ? 1 : 0 }}
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  loading={i === 0 ? "eager" : "lazy"}
+                  sizes="(max-width: 1024px) 100vw, 46vw"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
+                  className="object-cover"
+                  style={{ filter: "contrast(1.05) saturate(1.05)" }}
+                />
+              </div>
+            ))}
           </div>
-          <div className="absolute inset-x-0 bottom-0 hidden bg-gradient-to-t from-black/55 to-transparent px-6 pb-5 pt-14 lg:block">
+          <div className="absolute inset-x-0 bottom-0 hidden items-end justify-between bg-gradient-to-t from-black/55 to-transparent px-6 pb-5 pt-14 lg:flex">
             <p className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/75">
               Detail work / South Bay
+            </p>
+            <p className="font-numbers text-xs text-white/70" aria-hidden="true">
+              {String(activeIdx + 1).padStart(2, "0")} / 04
             </p>
           </div>
         </div>
@@ -742,10 +782,12 @@ export default function ServicesContent() {
 
   return (
     <div ref={rootRef} className="bg-black">
-      <ServicesIndex />
-      <VisionStatement />
-      <PrinciplesSection />
-      <ProcessSection />
+      <ServicesFlow>
+        <ServicesIndex />
+        <VisionStatement />
+        <PrinciplesSection />
+        <ProcessSection />
+      </ServicesFlow>
     </div>
   );
 }
