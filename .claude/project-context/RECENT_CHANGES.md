@@ -2,6 +2,26 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 (evening) — Contact + Consulting wrapped in the About scroll system (terminal B)
+
+- Brian's fan-out ask: same stacked-surface scrolling as About, zero changes to
+  wording/pictures/section designs. Portfolio left alone (actively claimed by
+  another terminal, uncommitted edits in tree).
+- CONTACT: ContactFlow.tsx (faithful AduFlow copy — measured sticky tops,
+  gap-free opacity veil, plumb line + diamond nodes; ResizeObserver because the
+  mobile row-photo strips resize their surface). Staleness audit: ct-line
+  hairlines converted scrub → IO decisive one-shots; hero Ken Burns scrub
+  removed (pins under cover); plate parallax kept (last/relative surface only).
+- CONSULTING: ConsultingFlow.tsx (canonical AboutFlow copy + light-surface
+  track shadow; no RO — no post-mount height changers). Page reveals were
+  already IO-decisive; nothing to convert.
+- Probe bug fixed while here: functional-qa's nav round-trip did
+  URL.replace('/services','/about') → /about/consulting 404 on nested service
+  URLs; now resolves new URL('/about', URL).
+- QA per page: seam sweeps 2x consecutive clean at 1440x900 + 390x844;
+  functional-qa PASS both viewports; verbiage probes PASS (no words changed);
+  tsc clean.
+
 ## 2026-07-09 — Unified plumb-line rail: one diamond vocabulary site-wide
 
 - Brian loves the left rail + section diamonds; asked for alignment/consistency
