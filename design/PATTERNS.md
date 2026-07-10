@@ -888,6 +888,48 @@ fully visible in every scenario.
 
 ---
 
+### Fix 26 — Junction settle: never rest half-covered (and Lenis eats raw scrollTo glides)
+
+**Symptom:** The stacked-surface covers are clean in motion, but when the
+reader STOPS scrolling mid-junction the page rests half-covered — the previous
+surface peeking above the incoming one (Brian's "hero sliver above SINCE 2004",
+2026-07-10). Reads sloppy at any stop inside a cover transition.
+
+**Fix — scroll-end settle (`components/home/useJunctionSettle.ts`, wired in
+EditorialFlow):** after a genuine scroll-end (~180ms quiet), if any
+`[data-stack-surface]` has viewport-top ∈ (MARGIN, vh−MARGIN) — i.e. the page
+rests mid-cover — glide (~520ms easeOutCubic) to the nearest clean boundary.
+
+**Two hard-won rules:**
+1. **The glide MUST go through `lenis.scrollTo`** (global handle
+   `window.__lenis828`, exposed by LenisProvider). Raw `window.scrollTo` —
+   even per-frame rAF — gets reconciled away by Lenis' raf loop: torture run
+   showed 18/40 stops still half-covered. Same applies to ANY programmatic
+   smooth scroll on desktop.
+2. **Direction-aware, never percent-based:** settle DOWN-stops by completing
+   the cover, UP-stops by backing off. A 50%-progress rule traps gentle
+   scrollers — each small forward step under 50% gets undone and the reader
+   can never cross the junction.
+
+**Guards (all required):** fire only after real scroll-end; cancel instantly
+on wheel/touch/key/pointer; one settle per stop (settling flag); lands OUTSIDE
+the band so it can't self-retrigger; desktop-only + reduced-motion no-op
+(mobile stacks flush, no Lenis); never touches positions inside a section —
+junction bands only.
+
+**Verified:** stop-torture harness
+(`.claude-work/research/home-fixes/torture-settle.mjs` + `settle-up.mjs`) —
+varied wheel stops across the full page, both directions, two consecutive
+passes each: 0 half-covered rests, 0 errors, full traversal (no treadmill).
+Harness note: wait ≥ Lenis momentum (1.35s) + idle (180ms) + glide (520ms)
+before reading the rest state.
+
+**Files changed:** `components/home/useJunctionSettle.ts` (new),
+`components/home/EditorialFlow.tsx`, `components/providers/LenisProvider.tsx`
+(2026-07-10). Portable: any *Flow page can reuse the hook as-is.
+
+---
+
 ---
 
 ### Pattern: Asterisk Dropdown Reveal (V2)

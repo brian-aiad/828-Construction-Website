@@ -192,6 +192,10 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     });
 
     lenisRef.current = lenis;
+    // Global handle: Lenis owns desktop scroll, so anything that needs a
+    // programmatic glide (junction settle, anchor jumps) must go THROUGH it —
+    // raw window.scrollTo animations get reconciled away by Lenis' raf.
+    (window as unknown as { __lenis828?: Lenis }).__lenis828 = lenis;
     lenis.on("scroll", ScrollTrigger.update);
 
     const tick = (time: number) => lenis.raf(time * 1000);
@@ -233,6 +237,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       document.removeEventListener("visibilitychange", onVisibility);
       failsafeObserverRef.current?.disconnect();
       lenis.destroy();
+      delete (window as unknown as { __lenis828?: Lenis }).__lenis828;
       lenisRef.current = null;
       gsap.ticker.remove(tick);
     };

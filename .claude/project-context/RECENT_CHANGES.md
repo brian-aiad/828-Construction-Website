@@ -2,6 +2,28 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-10 — Home junction settle: never rest half-covered (PATTERNS Fix 26)
+
+- Brian: sections "not really snapping… the previous section kinda peeking…
+  looks sloppy." Covers were clean in motion but the page could REST
+  half-covered when the reader stopped mid-junction.
+- NEW components/home/useJunctionSettle.ts wired into EditorialFlow: after a
+  genuine ~180ms scroll-end, if any stack surface rests mid-cover, glide
+  ~520ms easeOutCubic to the nearest clean boundary. Direction-aware (down →
+  complete the cover, up → back off) — a 50% rule traps gentle scrollers.
+  Glide goes through lenis.scrollTo via new window.__lenis828 handle
+  (LenisProvider); raw window.scrollTo glides get reconciled away by Lenis
+  (torture run proved it: 18/40 stops stayed half-covered).
+- Guards: cancel on any input, one settle per stop, lands outside the band
+  (no self-retrigger), desktop-only, reduced-motion no-op, junction bands
+  only — reading positions never snapped. Loved animations untouched (word
+  pops, services-preview parallax + coloring, fireplace inset→full-bleed).
+- Verified: torture-settle.mjs + settle-up.mjs — varied stops, both
+  directions, two consecutive clean passes each (0 half-covered rests,
+  0 errors, full traversal). tsc clean; functional-qa PASS desktop+mobile.
+- Recorded as PATTERNS.md Fix 26 — portable to every *Flow page (the fan-out
+  prompt tells terminals to reuse the hook).
+
 ## 2026-07-10 — El Sereno card + real-photo residence galleries + deep links
 
 - Brian added the "El Sereno Residence" photo folder (dictation garbled it as
