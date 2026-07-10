@@ -15,6 +15,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
+import RemediationFlow from "@/components/services/remediation/RemediationFlow";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -148,7 +149,6 @@ function useRemediationMotion() {
       const parallaxSoft = gsap.utils.toArray<HTMLElement>(".rem-parallax-soft");
       const heroMedia = root.querySelector<HTMLElement>(".rem-hero-media");
       const heroLines = gsap.utils.toArray<HTMLElement>(".rem-hero-line");
-      const rail = root.querySelector<HTMLElement>(".rem-rail");
       const seam = root.querySelector<HTMLElement>(".rem-seam");
       const plateL = root.querySelector<HTMLElement>(".rem-plate-left");
       const plateR = root.querySelector<HTMLElement>(".rem-plate-right");
@@ -157,16 +157,22 @@ function useRemediationMotion() {
       // autoAlpha: visibility:hidden drops below-fold headings out of the
       // accessibility tree and breaks axe heading-order (h1 → h3).
       gsap.set(rises, { opacity: 0, y: 26 });
-      gsap.set(clips, { clipPath: "inset(0% 0% 100% 0%)" });
+      // Photos settle in (opacity+scale) — ANY clip direction shows a
+      // stray sliver when a sweep frame catches the first tween moments.
+      gsap.set(clips, { opacity: 0, scale: 1.04, transformOrigin: "center" });
       gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
-      if (rail) gsap.set(rail, { scaleY: 0, transformOrigin: "top" });
+      gsap.set(cards, { y: 34, opacity: 0 });
+      if (plateL) gsap.set(plateL, { x: -44, opacity: 0 });
+      if (plateR) gsap.set(plateR, { x: 44, opacity: 0 });
       if (seam) gsap.set(seam, { scaleY: 0, transformOrigin: "top" });
 
       if (!AnimationController.shouldAnimate()) {
         gsap.set(rises, { opacity: 1, y: 0 });
-        gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
+        gsap.set(clips, { opacity: 1, scale: 1 });
         gsap.set(hairlines, { scaleX: 1 });
-        if (rail) gsap.set(rail, { scaleY: 1 });
+        gsap.set(cards, { y: 0, opacity: 1 });
+        if (plateL) gsap.set(plateL, { x: 0, opacity: 1 });
+        if (plateR) gsap.set(plateR, { x: 0, opacity: 1 });
         if (seam) gsap.set(seam, { scaleY: 1 });
         return;
       }
@@ -204,9 +210,10 @@ function useRemediationMotion() {
               (wrapper as HTMLElement).querySelector<HTMLElement>(".rem-clip") ??
               (wrapper as HTMLElement);
             gsap.to(el, {
-              clipPath: "inset(0% 0% 0% 0%)",
-              duration: 1.1,
-              ease: "power3.inOut",
+              opacity: 1,
+              scale: 1,
+              duration: 0.85,
+              ease: "power2.out",
             });
           }
         )
@@ -219,76 +226,41 @@ function useRemediationMotion() {
 
       // Sustained scrub motion (Fix 15) — every scrubbed initial state stays
       // readable if its trigger never fires (Fix 22).
-      // Transform-only scrubs: parent opacity dims would fail WCAG contrast at
-      // load time (axe audits the pre-scroll state).
-      cards.forEach((card) => {
-        gsap.fromTo(
-          card,
-          { y: 34 },
-          {
+      // Stacked-surface rule (About grammar): reveals INSIDE a sticky
+      // surface must be decisive once-reveals keyed to real visibility —
+      // scroll-math scrubs park once the surface pins (PATTERNS Fix 22).
+      revealCleanups.push(
+        revealOnVisible(cards, (el) => {
+          const siblings = Array.from(el.parentElement?.children ?? []);
+          const idx = Math.max(0, siblings.indexOf(el));
+          gsap.to(el, {
             y: 0,
-            ease: "power2.out",
-            scrollTrigger: { trigger: card, start: "top 96%", end: "top 66%", scrub: 1.15 },
-          }
-        );
-      });
-
-      // Approach: the maroon plumb rail fills as the four steps pass the
-      // focus band.
-      if (rail && rail.parentElement) {
-        gsap.fromTo(
-          rail,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: rail.parentElement,
-              start: "top 72%",
-              end: "bottom 58%",
-              scrub: 1.3,
-            },
-          }
-        );
-      }
-
-      // CTA signature: plates settle in from opposite sides on scrub while
-      // the maroon seam draws down between them.
+            opacity: 1,
+            duration: 0.85,
+            delay: 0.09 * idx,
+            ease: "power3.out",
+          });
+        })
+      );
       if (plateL && plateR && plateL.parentElement) {
-        const trigger = plateL.parentElement;
-        gsap.fromTo(
-          plateL,
-          { x: -44 },
-          {
-            x: 0,
-            ease: "power2.out",
-            scrollTrigger: { trigger, start: "top 94%", end: "top 52%", scrub: 1.2 },
-          }
-        );
-        gsap.fromTo(
-          plateR,
-          { x: 44 },
-          {
-            x: 0,
-            ease: "power2.out",
-            scrollTrigger: { trigger, start: "top 94%", end: "top 48%", scrub: 1.2 },
-          }
+        revealCleanups.push(
+          revealOnVisible([plateL.parentElement], () => {
+            gsap.to(plateL, { x: 0, opacity: 1, duration: 0.95, ease: "power3.out" });
+            gsap.to(plateR, {
+              x: 0,
+              opacity: 1,
+              duration: 0.95,
+              delay: 0.08,
+              ease: "power3.out",
+            });
+          })
         );
       }
       if (seam && seam.parentElement) {
-        gsap.fromTo(
-          seam,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: seam.parentElement,
-              start: "top 90%",
-              end: "top 40%",
-              scrub: 1.2,
-            },
-          }
+        revealCleanups.push(
+          revealOnVisible([seam.parentElement.parentElement ?? seam.parentElement], () => {
+            gsap.to(seam, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
+          })
         );
       }
 
@@ -417,6 +389,7 @@ function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) 
   const dark = index % 2 === 0;
   return (
     <article
+      data-gsap-reveal="true"
       className={`rem-card flex flex-col justify-between border p-6 sm:p-7 ${
         dark
           ? "border-transparent bg-[#111] text-white"
@@ -557,12 +530,20 @@ function RemediationApproach() {
             </h2>
 
             <div className="relative mt-12 border-b border-white/10 lg:mt-16">
-              {/* Maroon plumb rail fills with scroll (scrub) */}
+              {/* Maroon plumb rail fills as steps ignite — live-rect state,
+                  sticky-proof (scroll-math scrubs park inside stuck surfaces) */}
               <div
                 className="pointer-events-none absolute bottom-0 left-0 top-0 w-[2px] bg-white/[0.07]"
                 aria-hidden="true"
               >
-                <div className="rem-rail h-full w-full bg-[var(--color-accent)]" style={{ opacity: 0.9 }} />
+                <div
+                  className="h-full w-full bg-[var(--color-accent)] transition-transform duration-700 ease-out"
+                  style={{
+                    opacity: 0.9,
+                    transform: `scaleY(${(activeIdx + 1) / APPROACH.length})`,
+                    transformOrigin: "top",
+                  }}
+                />
               </div>
               {APPROACH.map(([num, title], i) => {
                 const active = activeIdx === i;
@@ -770,7 +751,7 @@ function RemediationCta() {
               them. Real photos of the Flair E8 + 277 MR pending from Joe. */}
           <div className="relative">
             <div className="grid grid-cols-2 gap-3">
-              <div className="rem-plate-left relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
+              <div data-gsap-reveal="true" className="rem-plate-left relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
                 <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
                   Equipment / {EQUIPMENT[0].role}
                 </span>
@@ -791,7 +772,7 @@ function RemediationCta() {
                   </p>
                 </div>
               </div>
-              <div className="rem-plate-right relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
+              <div data-gsap-reveal="true" className="rem-plate-right relative flex min-h-[19rem] flex-col justify-between border border-white/10 bg-[#111] p-6 sm:min-h-[22rem] sm:p-7">
                 <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
                   Equipment / {EQUIPMENT[1].role}
                 </span>
@@ -832,11 +813,13 @@ export default function RemediationServiceContent() {
 
   return (
     <div ref={rootRef} className="bg-black text-white">
-      <RemediationHero />
-      <RemediationFaq />
-      <RemediationApproach />
-      <RemediationMethod />
-      <RemediationCta />
+      <RemediationFlow>
+        <RemediationHero />
+        <RemediationFaq />
+        <RemediationApproach />
+        <RemediationMethod />
+        <RemediationCta />
+      </RemediationFlow>
     </div>
   );
 }

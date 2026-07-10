@@ -2,6 +2,28 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Remediation V3.6: About scroll system applied (fan-out directive)
+
+- Brian's template: carry the page's existing sections with the About
+  stacked-surface grammar — NO changes to wording/pictures/layouts.
+- New `components/services/remediation/RemediationFlow.tsx` — faithful copy of
+  AboutFlow (post-723c508 gap-free mechanics: measured sticky tops, opacity
+  veils, plumb line + nodes) + a debounced ResizeObserver so the FAQ answer
+  expanders (surface height changes) can't stale the measured tops.
+- Sticky-staleness audit (the #1 regression class): FAQ cards, equipment
+  plates and maroon seam converted from scroll-math scrubs to decisive
+  IO once-reveals (data-gsap-reveal added); approach rail now fills from
+  live-rect focus state (scaleY (active+1)/4, CSS transition); photo clip
+  wipes replaced with fade+scale settles — ANY clip direction reads as a
+  stray sliver when a sweep frame catches the first tween moments. Parallax
+  drift kept (continuous depth, matches home grammar).
+- Frame-by-frame sweeps (sweep.mjs, 380/420px steps, every frame read): s1
+  found sliver-class artifacts → fixed → s3 AND s4 fully clean at 1440×900 +
+  390×844 (25 frames/sweep). All-answers-expanded junction probe also clean;
+  no overflow; 0 console errors.
+- QA: tsc clean; functional-qa PASS desktop+mobile (verbatim probe 20/20 —
+  every piece of original content present; FAQ expanders OK; header morphs).
+
 ## 2026-07-09 — Services: stacked-surface scroll + values close-up rotation + mobile footer
 
 - SERVICES FLOW: /services now rides the About/home cover-scroll grammar via
