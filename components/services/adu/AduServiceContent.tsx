@@ -15,6 +15,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
+import AduFlow from "@/components/services/adu/AduFlow";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -683,10 +684,12 @@ export default function AduServiceContent() {
 
   return (
     <div ref={rootRef} className="bg-black text-white">
-      <AduHero />
-      <AduFaq />
-      <AduAcronym />
-      <AduInvitation />
+      <AduFlow>
+        <AduHero />
+        <AduFaq />
+        <AduAcronym />
+        <AduInvitation />
+      </AduFlow>
     </div>
   );
 }

@@ -2,6 +2,26 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 (early) — ADU V3.2: About stacked-surface scroll system applied
+
+- Brian's fan-out directive: give /services/adu the About-page scroll feel —
+  content untouched (words/pictures/layouts frozen), sections wrapped in the
+  canonical stacked-surface grammar.
+- `components/services/adu/AduFlow.tsx` — faithful copy of AboutFlow (measured
+  sticky tops, gap-free opacity veil, maroon plumb line + igniting nodes) with
+  one ADU-required addition: a debounced ResizeObserver re-applies stack tops
+  and refreshes trigger positions when FAQ expanders resize their surface
+  (AboutFlow only re-measures on window resize).
+- Reveal audit: page already used IO-based revealOnVisible (Fix 22-safe inside
+  sticky surfaces) + live-rect focus ignition — no scroll-math once-reveals to
+  convert.
+- QA: 2 consecutive frame-by-frame sweeps CLEAN at 1440×900 (10 steps) and
+  390×844 (14 steps) — no gaps, no slivers, no past-section bleed at any
+  junction; FAQ-expanded junction probe clean (surface grows 230px, covers
+  still seamless); left-edge probe confirms plumb line terminates at flow
+  bottom (no footer overlap); functional-qa PASS both viewports (all verbatim
+  copy present, no invisible images); tsc clean.
+
 ## 2026-07-09 — Home stacked-surface seams: scale settle → opacity veil
 
 - HOME EditorialFlow had the same root bug AboutFlow already fixed: covered
