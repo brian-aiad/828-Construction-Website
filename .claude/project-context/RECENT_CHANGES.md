@@ -2,6 +2,31 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Unified plumb-line rail: one diamond vocabulary site-wide
+
+- Brian loves the left rail + section diamonds; asked for alignment/consistency
+  polish. Audit found 3 divergent node implementations (home light-fill/black
+  border — near-invisible on light surfaces; about/adu dark-fill/white border;
+  VerticalBrandMark static dark), top-anchored nodes hanging half below their
+  seam, a 1.6px x-offset at the lg breakpoint, and DOUBLE RAILS on
+  /services/adu and /services/remediation (each page's animated flow rail +
+  VBM's static line both rendering).
+- NEW components/system/FlowNode.tsx — single source of truth (FLOW_NODE_CLASS
+  + FlowNode): 8px rotated-square diamond, collinear with the w-px track at
+  left-[1.4rem] xl:left-6, -translate-y-1/2 centered ON the junction seam
+  (worst delta 0.5px), pre-ignition maroon ring + faint center (legible on
+  light AND dark), ignited solid maroon (.flow-node-lit), identical
+  ScrollTrigger ignition (top+offset 72%, lit trail, unlit on leave-back).
+  EditorialFlow / AboutFlow / AduFlow / RemediationFlow import it (local
+  copies deleted); VerticalBrandMark wears the same diamond and now yields on
+  /services/adu AND /services/remediation.
+- Sweeps with left-edge crops + programmatic geometry: distinct rail/node
+  x-centers = [24.5] on every page, all flow nodes ignite (home 3/3, about
+  5/5, adu 4/4, remediation 5/5), double rails eliminated, two consecutive
+  clean passes per page. Mobile: rail correctly hidden below lg. QA: tsc
+  clean, functional-qa PASS desktop+mobile on home/about/adu + consulting
+  desktop (VBM path). Frames: .claude-work/research/home-fixes/rail/.
+
 ## 2026-07-09 — Remediation V3.6: About scroll system applied (fan-out directive)
 
 - Brian's template: carry the page's existing sections with the About

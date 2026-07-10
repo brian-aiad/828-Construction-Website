@@ -1,26 +1,35 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { FLOW_NODE_CLASS } from "@/components/system/FlowNode";
 
 // Line-only edge chrome (Brian, 2026-07-09: "I like the red line — delete the
 // wording"). The rotated brand/license text is gone site-wide.
-// - Home: removed entirely per client review (round 1).
-// - About: AboutFlow draws its own animated maroon plumb line at the same
-//   edge; rendering a second static line would double it, so yield.
-// - All other routes: a quiet centered maroon hairline keeps the edge
-//   treatment consistent with the About plumb line.
+// Flow-less routes get a single quiet maroon hairline + one diamond that share
+// the EXACT rail vocabulary of the animated flows (x-geometry, line opacity,
+// diamond style) so the edge reads identically page to page.
+// YIELD on every route that draws its OWN animated flow rail, or a second line
+// doubles the chrome: / (EditorialFlow), /about (AboutFlow), /services/adu
+// (AduFlow), /services/remediation (RemediationFlow). /services keeps this
+// mark — ServicesFlow intentionally omits its line and relies on this rail.
 export default function VerticalBrandMark() {
   const pathname = usePathname();
-  if (pathname === "/" || pathname === "/about") return null;
+  if (
+    pathname === "/" ||
+    pathname === "/about" ||
+    pathname === "/services/adu" ||
+    pathname === "/services/remediation"
+  )
+    return null;
 
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed left-6 top-1/2 z-40 hidden -translate-y-1/2 lg:block"
+      className="pointer-events-none fixed left-[1.4rem] top-1/2 z-40 hidden -translate-y-1/2 lg:block xl:left-6"
     >
       <div className="relative h-[34vh] w-px bg-white/[0.07]">
-        <div className="absolute inset-0 bg-[var(--color-accent)]/60" />
-        <div className="absolute -left-[3.5px] top-1/2 h-2 w-2 -translate-y-1/2 rotate-45 border border-white/25 bg-[#0b0b0b]" />
+        <div className="absolute inset-0 bg-[var(--color-accent)]/70" />
+        <div className={`${FLOW_NODE_CLASS} top-1/2`} />
       </div>
     </div>
   );

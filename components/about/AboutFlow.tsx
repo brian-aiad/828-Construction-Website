@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
+import FlowNode from "@/components/system/FlowNode";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -149,39 +150,5 @@ export default function AboutFlow({ children }: { children: React.ReactNode }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function FlowNode({
-  top,
-  wrapRef,
-}: {
-  top: number;
-  wrapRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const dotRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const dot = dotRef.current;
-    const wrap = wrapRef.current;
-    if (!dot || !wrap) return;
-    if (!AnimationController.shouldAnimate()) return;
-
-    const st = ScrollTrigger.create({
-      trigger: wrap,
-      start: `top+=${top} 72%`,
-      onEnter: () => dot.classList.add("flow-node-lit"),
-      onLeaveBack: () => dot.classList.remove("flow-node-lit"),
-    });
-
-    return () => st.kill();
-  }, [top, wrapRef]);
-
-  return (
-    <div
-      ref={dotRef}
-      className="flow-node absolute -left-[3.5px] h-2 w-2 rotate-45 border border-white/25 bg-[#0b0b0b] transition-colors duration-500"
-      style={{ top }}
-    />
   );
 }

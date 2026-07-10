@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
+import FlowNode from "@/components/system/FlowNode";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -139,7 +140,7 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
         className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
       >
         <div className="absolute inset-0 bg-black/[0.07]" />
-        <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/65" />
+        <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/70" />
         {nodes.map((top, i) => (
           <FlowNode key={i} top={top} wrapRef={wrapRef} />
         ))}
@@ -164,39 +165,5 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
         </div>
       ))}
     </div>
-  );
-}
-
-function FlowNode({
-  top,
-  wrapRef,
-}: {
-  top: number;
-  wrapRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const dotRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const dot = dotRef.current;
-    const wrap = wrapRef.current;
-    if (!dot || !wrap) return;
-    if (!AnimationController.shouldAnimate()) return;
-
-    const st = ScrollTrigger.create({
-      trigger: wrap,
-      start: `top+=${top} 72%`,
-      onEnter: () => dot.classList.add("flow-node-lit"),
-      onLeaveBack: () => dot.classList.remove("flow-node-lit"),
-    });
-
-    return () => st.kill();
-  }, [top, wrapRef]);
-
-  return (
-    <div
-      ref={dotRef}
-      className="flow-node absolute -left-[3.5px] h-2 w-2 rotate-45 border border-black/25 bg-[#f7f7f3] transition-colors duration-500"
-      style={{ top }}
-    />
   );
 }
