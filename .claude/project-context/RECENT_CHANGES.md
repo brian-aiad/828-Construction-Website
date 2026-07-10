@@ -2,6 +2,30 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 (night) — Rail rollout complete: igniting diamond rail on every page
+
+- Brian: "now do this for every page on the website without changing content."
+- /services was the last flow page without its own igniting rail: ServicesFlow
+  now draws the full rail (RemediationFlow port — measured [data-section] node
+  offsets, scaleY line draw, shared FlowNode diamonds, debounced RO so the
+  index's internal 210vh pin spacer can't stale the offsets). No wrapper or
+  content changes needed — anchors already existed.
+- VerticalBrandMark yield list extended to /services, /services/consulting,
+  /contact — killed the fresh double rails on consulting + contact (their new
+  flows and VBM's static line were both rendering).
+- Site state: flow pages (/, /about, /services, /services/adu,
+  /services/remediation, /services/consulting, /contact) draw the animated
+  multi-node igniting rail; VBM supplies the single static diamond on
+  flow-less pages (/portfolio until its in-flight flow lands) and yields
+  wherever a flow owns the rail.
+- NOTE for portfolio terminal: when PortfolioFlow lands, import shared
+  FlowNode, add /portfolio to the VBM yield list, and align/remove the
+  in-flight left-edge hairline at x0.5 (site rail is x24.5).
+- Sweeps: /services, /services/consulting, /contact all [24.5] node+rail
+  x-centers, single rail each, all nodes ignite, two consecutive clean
+  desktop passes, mobile rail correctly hidden, 0 console errors. QA: tsc
+  clean; functional-qa PASS desktop+mobile on all three routes.
+
 ## 2026-07-09 (evening) — Contact + Consulting wrapped in the About scroll system (terminal B)
 
 - Brian's fan-out ask: same stacked-surface scrolling as About, zero changes to

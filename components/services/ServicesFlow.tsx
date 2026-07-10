@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
+import FlowNode from "@/components/system/FlowNode";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // Services port of the About/home stacked-surface grammar (Brian's order,
 // 2026-07-09: same cover-scroll on every page — wording/sections untouched).
-// Faithful to components/about/AboutFlow.tsx, which is the debugged canonical:
+// Faithful to components/about/AboutFlow.tsx, the debugged canonical:
 //
 // 1. Each section becomes position:sticky with a measured negative top — a
 //    fully-read surface holds still while the next rides up and COVERS it
@@ -20,13 +21,14 @@ gsap.registerPlugin(ScrollTrigger);
 //    it. Geometry stays full-bleed at every frame: covered surfaces dim under
 //    an opacity veil, NEVER a scale settle (transform insets open edge gaps —
 //    Brian's 2026-07-09 gap report on About).
-// 2. No plumb line here: the site-wide line-only sidebar rail (2026-07-09)
-//    already draws the left-margin thread on every page — a second line would
-//    double the chrome. Surfaces + veils only.
+// 2. Plumb line + igniting nodes down the left margin — the same rail every
+//    other flow draws (Brian, 2026-07-09 "every page"). Node offsets are the
+//    section document tops; the index's tall pinned runway shifts those tops
+//    after ScrollTrigger builds its spacer, so measure() re-runs on refresh
+//    (onRefresh) and on a debounced ResizeObserver, exactly like the others.
 //
-// Every surface must carry an opaque background of its own (all four services
-// sections do); the wrapper's black backstop only guards against subpixel
-// seams at cover junctions.
+// Every surface carries an opaque background of its own (all four services
+// sections do); the wrapper's black backstop only guards subpixel seams.
 
 export default function ServicesFlow({
   children,
@@ -34,10 +36,13 @@ export default function ServicesFlow({
   children: React.ReactNode;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const [nodes, setNodes] = useState<number[]>([]);
 
   useEffect(() => {
     const wrap = wrapRef.current;
-    if (!wrap) return;
+    const line = lineRef.current;
+    if (!wrap || !line) return;
 
     const stacks = Array.from(
       wrap.querySelectorAll<HTMLElement>("[data-stack-surface]")
@@ -57,11 +62,48 @@ export default function ServicesFlow({
     };
     applyStackTops();
 
-    const onResize = () => applyStackTops();
+    const measure = () => {
+      const wrapTop = wrap.getBoundingClientRect().top + window.scrollY;
+      const anchors = Array.from(
+        wrap.querySelectorAll<HTMLElement>("[data-section]")
+      );
+      setNodes(
+        anchors.map((el) => {
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          return top - wrapTop;
+        })
+      );
+    };
+    measure();
+
+    const onResize = () => {
+      applyStackTops();
+      measure();
+    };
     window.addEventListener("resize", onResize, { passive: true });
 
+    // The index surface's internal 210vh pin builds a spacer after mount,
+    // shifting the sections below it; a debounced ResizeObserver re-applies the
+    // sticky tops and re-measures the node offsets so the rail stays true.
+    let roTimer: ReturnType<typeof setTimeout> | undefined;
+    const ro = new ResizeObserver(() => {
+      clearTimeout(roTimer);
+      roTimer = setTimeout(() => {
+        applyStackTops();
+        measure();
+        try {
+          ScrollTrigger.refresh();
+        } catch {}
+      }, 180);
+    });
+    stacks.forEach((el) => ro.observe(el));
+
     if (!AnimationController.shouldAnimate()) {
-      return () => window.removeEventListener("resize", onResize);
+      return () => {
+        window.removeEventListener("resize", onResize);
+        clearTimeout(roTimer);
+        ro.disconnect();
+      };
     }
 
     const ctx = gsap.context(() => {
@@ -85,10 +127,25 @@ export default function ServicesFlow({
           }
         );
       });
+
+      gsap.set(line, { scaleY: 0, transformOrigin: "top" });
+      gsap.to(line, {
+        scaleY: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: wrap,
+          start: "top 72%",
+          end: "bottom bottom",
+          scrub: 0.8,
+          onRefresh: measure,
+        },
+      });
     }, wrapRef);
 
     return () => {
       window.removeEventListener("resize", onResize);
+      clearTimeout(roTimer);
+      ro.disconnect();
       try {
         ctx.revert();
       } catch {}
@@ -99,6 +156,17 @@ export default function ServicesFlow({
 
   return (
     <div ref={wrapRef} data-services-flow="" className="relative z-10 bg-black">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
+      >
+        <div className="absolute inset-0 bg-white/[0.07]" />
+        <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/70" />
+        {nodes.map((top, i) => (
+          <FlowNode key={i} top={top} wrapRef={wrapRef} />
+        ))}
+      </div>
+
       {items.map((child, i) => (
         <div
           key={i}
