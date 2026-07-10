@@ -14,6 +14,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
+import ConsultingFlow from "@/components/services/consulting/ConsultingFlow";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -561,10 +562,12 @@ export default function ConsultingServiceContent() {
 
   return (
     <div ref={rootRef} className="bg-black">
-      <ConsultingHero />
-      <SolutionsSection />
-      <QuestionsSection />
-      <ConsultingCta />
+      <ConsultingFlow>
+        <ConsultingHero />
+        <SolutionsSection />
+        <QuestionsSection />
+        <ConsultingCta />
+      </ConsultingFlow>
     </div>
   );
 }
