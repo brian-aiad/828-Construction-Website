@@ -519,7 +519,7 @@ function RemediationApproach() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)] lg:gap-20">
           <div>
             <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/64">
@@ -529,7 +529,7 @@ function RemediationApproach() {
               The approach
             </h2>
 
-            <div className="relative mt-12 border-b border-white/10 lg:mt-16">
+            <div className="relative mt-10 border-b border-white/10 lg:mt-12">
               {/* Maroon plumb rail fills as steps ignite — live-rect state,
                   sticky-proof (scroll-math scrubs park inside stuck surfaces) */}
               <div
@@ -553,7 +553,7 @@ function RemediationApproach() {
                     ref={(el) => {
                       rowRefs.current[i] = el;
                     }}
-                    className={`flex items-baseline gap-6 border-t py-7 pl-7 transition-colors duration-500 sm:gap-9 sm:pl-9 lg:py-9 ${
+                    className={`flex items-baseline gap-6 border-t py-6 pl-7 transition-colors duration-500 sm:gap-9 sm:pl-9 lg:py-8 ${
                       active ? "border-[var(--color-accent)]/80" : "border-white/10"
                     }`}
                   >
@@ -579,7 +579,7 @@ function RemediationApproach() {
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="sticky top-24 h-[calc(100vh-12rem)] min-h-[26rem] overflow-hidden">
+            <div className="sticky top-24 h-[min(calc(100vh-14rem),34rem)] min-h-[24rem] overflow-hidden">
               <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
                 {/* Crossfading plate: inspection (steps 01–02) → rebuilt (03–04) */}
                 <div
@@ -633,7 +633,21 @@ function RemediationApproach() {
   );
 }
 
-// ── Section 4 — integrated method (Joe's Section 4 verbiage) ────────────────
+// ── Section 4 — integrated method (Joe's Section 4 verbiage; lead statement
+// moved out per Brian 2026-07-10 — it lives in the CTA small print per Joe's
+// IMG_1113 "as well") ────────────────────────────────────────────────────────
+const METHOD_PHOTOS = [
+  // Swappable slots — Brian is generating a multi-photo set to drop in here.
+  {
+    src: "/images/projects/remediation-damage.jpg",
+    alt: "Opened wall condition before remediation repair",
+  },
+  {
+    src: "/images/projects/remediation-work.jpg",
+    alt: "Remediation drying equipment in a clean work area",
+  },
+];
+
 function RemediationMethod() {
   return (
     <section
@@ -642,59 +656,49 @@ function RemediationMethod() {
       className="relative bg-[#f7f4f0] text-black"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-20 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:py-28">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="relative min-h-[22rem] overflow-hidden">
-            <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
-              <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
-                <Image
-                  src="/images/projects/remediation-damage.jpg"
-                  alt="Opened wall condition before remediation repair"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 24vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover"
-                />
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:py-20">
+        <div className="grid grid-cols-2 gap-3">
+          {METHOD_PHOTOS.map((photo, i) => (
+            <div
+              key={photo.src}
+              className="relative min-h-[20rem] overflow-hidden sm:min-h-[24rem]"
+            >
+              <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
+                <div
+                  className={`${i % 2 === 0 ? "rem-parallax" : "rem-parallax-soft"} absolute inset-x-0`}
+                  style={{ top: "-7.5%", height: "115%" }}
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 24vw"
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    onError={imgError}
+                    className="object-cover"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="relative min-h-[22rem] overflow-hidden sm:mt-10">
-            <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
-              <div className="rem-parallax-soft absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
-                <Image
-                  src="/images/projects/remediation-work.jpg"
-                  alt="Remediation drying equipment in a clean work area"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 24vw"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="flex flex-col justify-center">
           <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/60">
             Integrated remediation &amp; restoration
           </span>
-          <p className="rem-rise mt-6 font-display font-light leading-[1.3] text-[clamp(1.35rem,2.4vw,2.2rem)]">
-            {METHOD_LEAD}
+          <p className="rem-rise mt-6 font-display font-light leading-[1.35] text-[clamp(1.3rem,2.2vw,2rem)]">
+            {METHOD_BODY[0]}
           </p>
           <div
             className="rem-hairline mt-8 h-px w-24 bg-[var(--color-accent)]"
             style={{ opacity: 0.6 }}
             aria-hidden="true"
           />
-          {METHOD_BODY.map((para) => (
-            <p key={para.slice(0, 24)} className="rem-rise mt-6 max-w-xl text-[15px] leading-8 text-black/62">
-              {para}
-            </p>
-          ))}
+          <p className="rem-rise mt-6 max-w-xl text-[15px] leading-8 text-black/62">
+            {METHOD_BODY[1]}
+          </p>
         </div>
       </div>
     </section>

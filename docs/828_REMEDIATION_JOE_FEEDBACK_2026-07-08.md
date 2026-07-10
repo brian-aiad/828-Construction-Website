@@ -221,6 +221,17 @@ Directives:
    (dark frame, unusable from video). PENDING real photo from Joe; until then
    the existing drying-equipment image stands in.
 
+## Owner revision — Brian, 2026-07-10 (IMG_1112 re-read)
+
+Brian re-read IMG_1112 against the live section: the method section now leads
+with **"With decades of expertise, 828 brings a refined understanding…"** and
+the big **"828's integrated remediation and restoration approach…"** statement
+is REMOVED from this section — it remains on the page once, as the CTA small
+print (Joe's IMG_1113 "as well" placement). Photo column reformatted into a
+swappable grid (`METHOD_PHOTOS`) — Brian is generating a multi-photo AI set to
+drop into these slots. Approach section tightened to fit the viewport (sticky
+photo capped, paddings reduced) per Brian's same-day note.
+
 ## Note content seen but NOT assigned on camera (do not apply)
 
 - "This expertise had led to an advanced remediation process, not only meeting,

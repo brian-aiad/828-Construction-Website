@@ -2,6 +2,23 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-10 — Remediation: method-section owner revision + approach fit
+
+- Brian (voice + screenshot, re-reading IMG_1112): method section lead
+  statement ("828's integrated remediation and restoration approach…")
+  REMOVED from the section — it stays on the page once, in the CTA small
+  print (Joe's IMG_1113 "as well"). "With decades of expertise…" promoted to
+  the section statement; "This informs…" under the hairline. Photo column
+  rebuilt as a swappable METHOD_PHOTOS grid (equal-height 2-up) ready for the
+  AI photo set Brian is generating.
+- Approach section "way too long" fixed: sticky photo capped at
+  min(100vh-14rem, 34rem), section paddings py-16/20, tighter rows — desktop
+  932→706px, method 806→619px (mobile method 1460→873px).
+- QA: tsc clean; functional-qa PASS both viewports (header-morph probe updated
+  for the living header — compares bg AND ink, it no longer snaps
+  backgroundColor); junction sweep s5 clean; change doc updated with the
+  owner-revision section.
+
 ## 2026-07-09 (night) — "Communication." mid-word break fixed + site-wide text-fit audit
 
 - Brian's screenshot at ~1657px window: About standards title "Communication."
