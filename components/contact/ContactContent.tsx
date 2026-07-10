@@ -12,6 +12,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ContactForm from "@/components/contact/ContactForm";
+import ContactFlow from "@/components/contact/ContactFlow";
 import { revealOnVisible } from "@/utils/revealOnVisible";
 import { SERVICE_AREAS, SERVICES, SITE } from "@/lib/constants";
 
@@ -134,7 +135,9 @@ function useContactMotion() {
 
     const ctx = gsap.context(() => {
       // One-shot rises — IO-driven on every viewport (Fixes 15/22). Initial
-      // states set here, never in JSX (Fix 14).
+      // states set here, never in JSX (Fix 14). Inside ContactFlow's sticky
+      // stacked surfaces, scroll-math triggers go stale (Fix 25) — every
+      // reveal below keys off actual visibility, never scroll position.
       const rises = gsap.utils.toArray<HTMLElement>(".ct-rise");
       if (!reduced) {
         rises.forEach((el) => gsap.set(el, { autoAlpha: 0, y: 26 }));
@@ -150,40 +153,22 @@ function useContactMotion() {
         );
       }
 
-      // Hairline draws — scrubbed, readable initial state (Fix 22 rule).
-      gsap.utils.toArray<HTMLElement>(".ct-line").forEach((el) => {
-        if (reduced) return;
-        gsap.fromTo(
-          el,
-          { scaleX: 0.18 },
-          {
-            scaleX: 1,
-            ease: "none",
-            scrollTrigger: { trigger: el, start: "top 92%", end: "top 55%", scrub: 1.1 },
-          }
+      // Hairline draws — decisive IO one-shots (scrub triggers would park
+      // mid-draw once their surface pins; Fix 25).
+      const lines = gsap.utils.toArray<HTMLElement>(".ct-line");
+      if (!reduced) {
+        lines.forEach((el) => gsap.set(el, { scaleX: 0.18 }));
+        revealCleanups.push(
+          revealOnVisible(lines, (el) => {
+            gsap.to(el, { scaleX: 1, duration: 1.05, ease: "power3.inOut" });
+          })
         );
-      });
+      }
 
       if (desktop && !reduced) {
-        // Hero photo settles from a quiet Ken Burns as the band scrolls away.
-        const heroImg = root.querySelector<HTMLElement>(".ct-hero-img");
-        if (heroImg) {
-          gsap.fromTo(
-            heroImg,
-            { scale: 1.07 },
-            {
-              scale: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: heroImg.closest("section"),
-                start: "top top",
-                end: "bottom top",
-                scrub: 1.4,
-              },
-            }
-          );
-        }
-        // Row photo plates drift on a slower depth than the page.
+        // Row photo plates drift on a slower depth than the page. The paths
+        // section is the flow's LAST surface (position relative, never pinned),
+        // so these scrub triggers stay truthful.
         gsap.utils.toArray<HTMLElement>(".ct-plate img").forEach((img) => {
           gsap.to(img, {
             yPercent: -7,
@@ -574,10 +559,12 @@ export default function ContactContent() {
 
   return (
     <div ref={rootRef} className="bg-[#f7f7f3]">
-      <ContactHero />
-      <GetInTouch />
-      <InsightsPrep />
-      <ServicePathRows />
+      <ContactFlow>
+        <ContactHero />
+        <GetInTouch />
+        <InsightsPrep />
+        <ServicePathRows />
+      </ContactFlow>
     </div>
   );
 }
