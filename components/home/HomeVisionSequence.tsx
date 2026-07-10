@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
 import { PROCESS_STEPS_V2, SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,11 +26,11 @@ const marquee = [
 ];
 
 const processImages = [
-  "/images/process/planning.jpg",
-  "/images/process/scope-document.jpg",
-  "/images/process/detail.jpg",
-  "/images/process/execution.jpg",
-  "/images/process/completion.jpg",
+  "/images/generated/home-process-initial-contact-v2.jpg",
+  "/images/generated/home-process-site-visit-v2.jpg",
+  "/images/generated/home-process-permit-approval-v2.jpg",
+  "/images/generated/home-process-construction-v2.jpg",
+  "/images/generated/home-process-post-construction-v2.jpg",
 ];
 
 export default function HomeVisionSequence() {
@@ -68,6 +69,11 @@ export default function HomeVisionSequence() {
       );
     });
 
+    // One-shot reveals ride IntersectionObserver, not ScrollTrigger positions —
+    // positional once-triggers go stale inside the sticky stack and after
+    // client-side route transitions (PATTERNS.md Fix 22).
+    const revealCleanups: Array<() => void> = [];
+
     const ctx = gsap.context(() => {
       const headlineLines = gsap.utils.toArray<HTMLElement>(".vision-headline-line");
       const introEls = gsap.utils.toArray<HTMLElement>(".vision-intro-el");
@@ -92,28 +98,28 @@ export default function HomeVisionSequence() {
         return;
       }
 
-      gsap.to(headlineLines, {
-        yPercent: 0,
-        duration: 0.95,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: headlineRef.current ?? section,
-          start: "top 85%",
-          once: true,
-        },
-      });
+      revealCleanups.push(
+        revealOnVisible([headlineRef.current ?? section], () => {
+          gsap.to(headlineLines, {
+            yPercent: 0,
+            duration: 0.95,
+            stagger: 0.1,
+            ease: "power3.out",
+          });
+        })
+      );
 
-      introEls.forEach((el, i) => {
-        gsap.to(el, {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          delay: i * 0.06,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 86%", once: true },
-        });
-      });
+      revealCleanups.push(
+        revealOnVisible(introEls, (el, i) => {
+          gsap.to(el, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: i * 0.06,
+            ease: "power3.out",
+          });
+        })
+      );
 
       // Landscape photograph — grows from an inset frame to full bleed
       if (photoRef.current) {
@@ -145,31 +151,29 @@ export default function HomeVisionSequence() {
         );
       }
 
-      processHead.forEach((el, i) => {
-        gsap.to(el, {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          delay: i * 0.07,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 84%", once: true },
-        });
-      });
+      revealCleanups.push(
+        revealOnVisible(processHead, (el, i) => {
+          gsap.to(el, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: i * 0.07,
+            ease: "power3.out",
+          });
+        })
+      );
 
       // Process rows — decisive reveal per row
-      processRows.forEach((row) => {
-        gsap.to(row, {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: row,
-            start: "top 88%",
-            once: true,
-          },
-        });
-      });
+      revealCleanups.push(
+        revealOnVisible(processRows, (row) => {
+          gsap.to(row, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: "power3.out",
+          });
+        })
+      );
 
       // Step-by-step: exactly ONE row is lit at a time. The panel lives
       // inside a sticky-stacked surface, so document-offset bands go stale
@@ -185,7 +189,10 @@ export default function HomeVisionSequence() {
         let lastListTop = Infinity;
         let stuckStartY: number | null = null;
         const updateActive = () => {
-          const focusY = window.innerHeight * 0.55;
+          // 0.66 (not 0.55): rows must all light BEFORE the next surface
+          // covers the shortened panel — the last row now activates during
+          // natural scroll, right around the moment the surface pins.
+          const focusY = window.innerHeight * 0.66;
           const listRect = stepList.getBoundingClientRect();
           let idx: number;
           if (listRect.top > focusY) {
@@ -205,9 +212,12 @@ export default function HomeVisionSequence() {
           lastListTop = listRect.top;
           if (!moving && idx >= 0) {
             if (stuckStartY === null) stuckStartY = window.scrollY;
+            // 0.35 viewports, not 0.8: the cover eats the bottom rows first,
+            // so any remaining steps must finish in the first third of the
+            // cover distance while they are still on screen.
             const p = Math.min(
               1,
-              Math.max(0, (window.scrollY - stuckStartY) / (window.innerHeight * 0.8))
+              Math.max(0, (window.scrollY - stuckStartY) / (window.innerHeight * 0.35))
             );
             idx = Math.min(
               processRows.length - 1,
@@ -252,39 +262,35 @@ export default function HomeVisionSequence() {
       }
 
       // Hairline under each row draws as it reveals
-      gsap.utils.toArray<HTMLElement>(".process-rule").forEach((rule) => {
-        gsap.fromTo(
-          rule,
-          { scaleX: 0 },
-          {
+      const rules = gsap.utils.toArray<HTMLElement>(".process-rule");
+      gsap.set(rules, { scaleX: 0, transformOrigin: "left" });
+      revealCleanups.push(
+        revealOnVisible(rules, (rule) => {
+          gsap.to(rule, {
             scaleX: 1,
             duration: 0.9,
             ease: "power2.inOut",
-            transformOrigin: "left",
-            scrollTrigger: {
-              trigger: rule,
-              start: "top 88%",
-              once: true,
-            },
-          }
-        );
-      });
+          });
+        })
+      );
 
-      closingEls.forEach((el, i) => {
-        gsap.to(el, {
-          y: 0,
-          opacity: 1,
-          duration: 0.75,
-          delay: i * 0.08,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 88%", once: true },
-        });
-      });
+      revealCleanups.push(
+        revealOnVisible(closingEls, (el, i) => {
+          gsap.to(el, {
+            y: 0,
+            opacity: 1,
+            duration: 0.75,
+            delay: i * 0.08,
+            ease: "power3.out",
+          });
+        })
+      );
     }, sectionRef);
 
     return () => {
       mounted = false;
       cancelAnimationFrame(frame);
+      revealCleanups.forEach((dispose) => dispose());
       if (split && statementEl?.isConnected) {
         try {
           split.revert();
@@ -405,7 +411,7 @@ export default function HomeVisionSequence() {
 
       {/* Process — full-bleed black panel, maroon ignition, progress rail */}
       <div data-header-dark="" className="bg-[#0a0a0a] text-white">
-        <div className="mx-auto min-h-[122svh] max-w-[1680px] px-6 pt-24 pb-44 lg:min-h-[165svh] lg:px-12 lg:pt-32 lg:pb-[52vh]">
+        <div className="mx-auto max-w-[1680px] px-6 pt-14 pb-16 lg:px-12 lg:pt-16 lg:pb-20">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
               <p className="process-head-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-8">
@@ -418,11 +424,11 @@ export default function HomeVisionSequence() {
               <h3 className="process-head-el max-w-[12ch] font-editorial text-[clamp(2.2rem,3.8vw,3.7rem)] font-normal leading-[1.06] tracking-[-0.01em] text-white">
                 Build philosophy, made visible.
               </h3>
-              <p className="process-head-el mt-8 max-w-sm text-[15px] leading-7 text-white/60">
+              <p className="process-head-el mt-6 max-w-sm text-[15px] leading-7 text-white/60">
                 Clear communication, clean sequencing, and a finish that holds
                 up after the crew leaves.
               </p>
-              <div className="process-head-el mt-9">
+              <div className="process-head-el mt-7">
                 <Link
                   href="/contact"
                   className="inline-flex w-fit items-center gap-3 bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
@@ -447,23 +453,25 @@ export default function HomeVisionSequence() {
                 <ol className="border-t border-white/12">
                   {PROCESS_STEPS_V2.map((step, i) => (
                     <li key={step.number} className="relative">
-                      <div className="process-row grid grid-cols-[2.75rem_5rem_minmax(0,1fr)] items-center gap-4 py-7 sm:grid-cols-[3.5rem_6.5rem_minmax(0,1fr)_auto] lg:py-10">
-                        <span className="process-num font-numbers text-[11px] text-white/25 transition-colors duration-400">
+                      <div className="process-row grid grid-cols-[2rem_8rem_minmax(0,1fr)] items-center gap-4 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)_auto] lg:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] lg:gap-5 lg:py-5">
+                        <span className="process-num font-numbers text-[11px] text-white/50 transition-colors duration-400">
                           {step.number}
                         </span>
-                        <div className="process-thumb relative h-16 overflow-hidden bg-white/5 sm:h-20">
+                        <div className="process-thumb relative h-20 overflow-hidden bg-white/5 lg:h-[5.5rem]">
                           <Image
                             src={processImages[i] ?? "/images/process/detail.jpg"}
                             alt=""
                             fill
-                            sizes="(max-width: 640px) 80px, 104px"
-                            className="object-cover opacity-45 grayscale transition-all duration-500"
+                            sizes="(max-width: 640px) 128px, (max-width: 1024px) 152px, 184px"
+                            quality={92}
+                            className="object-cover opacity-90 transition-all duration-500"
+                            style={{ filter: "contrast(1.06) saturate(1.08)" }}
                           />
                         </div>
-                        <h4 className="process-title font-editorial text-[clamp(1.15rem,2vw,1.9rem)] font-normal leading-tight text-white/35 transition-all duration-400">
+                        <h4 className="process-title font-editorial text-[clamp(1.25rem,2.15vw,2.1rem)] font-normal leading-tight text-white/70 transition-all duration-400">
                           {step.title}
                         </h4>
-                        <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/25 transition-colors duration-400 sm:block">
+                        <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 sm:block">
                           {step.subtitle}
                         </span>
                       </div>
@@ -476,7 +484,7 @@ export default function HomeVisionSequence() {
           </div>
 
           {/* Section footnote */}
-          <p className="vision-closing-el mt-16 border-t border-white/10 pt-6 font-labels text-[9px] uppercase tracking-[0.22em] text-white/35 lg:mt-24">
+          <p className="vision-closing-el mt-8 border-t border-white/10 pt-4 font-labels text-[9px] uppercase tracking-[0.22em] text-white/35 lg:mt-10">
             {SITE.address.city}, CA / South Bay / CA #{SITE.license}
           </p>
         </div>
