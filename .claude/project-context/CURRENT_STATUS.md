@@ -2,6 +2,24 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Services Index V3.2 — Traveling picture + bulletproof pinned walk (2026-07-09)
+
+Brian's IMG_1075 clarifications executed: NO side plate — ADU / Remediation /
+Consulting run full-width "long ways"; ONE photograph at a time expands
+under/overlapping the active word (CSS grid-rows 0fr→1fr stages, identical
+easing = net-zero reflow) and swaps as you scroll; whole row links to its
+page. Scroll made BULLETPROOF per Brian: desktop pins the panel (CSS sticky,
+fits 100svh at 800–1080 heights) over a 210vh runway — active service is a
+pure function of scroll progress (~70vh of dedicated scroll each; cannot
+rush, skip, or flicker; releases after consulting). Mobile: no pin, natural
+in-flow walk (last-title-past-focus rule, top guard pins ADU at load — the
+"starts at consulting" bug is dead). Signature updated in PATTERNS.md.
+QA: pin-probe walk 0→1→2 + clean release at two viewport heights;
+functional-qa PASS both viewports; verbatim probe 21/21; preflight 16/16
+(push gate); shipped 3d15bdb → https://828-ns-preview.vercel.app/services.
+NOTE: parallel-agent gates again active tonight — pushed only after :4001
+freed (monitor pattern).
+
 ## Contact V3 + all-black footer — Joe's video batch (2026-07-09, terminal B)
 
 `/contact` rebuilt from IMG_1123/1125/1127 (ledger docs/828_CONTACT_JOE_

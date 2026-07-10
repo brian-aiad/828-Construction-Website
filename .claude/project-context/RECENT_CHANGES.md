@@ -2,6 +2,27 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-09 — Services: stacked-surface scroll + values close-up rotation + mobile footer
+
+- SERVICES FLOW: /services now rides the About/home cover-scroll grammar via
+  `components/services/ServicesFlow.tsx` (faithful AboutFlow port: measured
+  sticky tops, opacity veils — never scale — opaque z-stacked wrappers; no
+  second plumb line, the site-wide rail already draws it). The index's
+  internal 210vh pin composes: taller-than-viewport surfaces pin at their
+  bottom edge, so the traveling-picture walk completes before Vision covers
+  it. TWO consecutive frame-by-frame sweeps clean at 1440×900 + 390×844
+  (`.claude-work/research/services-v3/sweep/`).
+- VALUES PLATE (IMG_1080 re-verified frame-by-frame): Joe says "close-upS" —
+  four photographs now rotate with the igniting principle (black fixtures /
+  floor plans / foundation rebar / finished interior), 450ms crossfade,
+  0X/04 counter. Verbiage untouched — verbatim probe 21/21. Index rows also
+  carry the image agent's regenerated photos (services-row-*-v2.jpg).
+- FOOTER MOBILE (Brian's screenshots): phone-first sub-lg composition — same
+  information, ~45% shorter (1076px @390); two-column nav, slim Book-a-Call
+  band, tappable phone/email, slim marquee. Desktop pixel-identical.
+- QA: tsc clean; functional-qa PASS desktop+mobile; settled-opacity probe;
+  push gate 16/16; deployed → https://828-ns-preview.vercel.app/services.
+
 ## 2026-07-09 (early) — ADU V3.2: About stacked-surface scroll system applied
 
 - Brian's fan-out directive: give /services/adu the About-page scroll feel —
