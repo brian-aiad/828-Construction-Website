@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
+import { useJunctionSettle } from "@/components/system/useJunctionSettle";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,6 +39,10 @@ export default function ServicesFlow({
   const wrapRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<number[]>([]);
+
+  // Junction snap-settle (Brian 2026-07-10): stops mid-cover glide to the
+  // nearest canonical rest. Shared hook — all guards live inside it.
+  useJunctionSettle(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;

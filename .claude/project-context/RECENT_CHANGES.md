@@ -2,6 +2,34 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-10 — Approach walk runway + settle canonicalized site-wide
+
+- Brian: the approach walk got cut off — "gets to Permit & Approval and the
+  next section already pops up… can't see the Post-Construction highlight."
+  Root cause: the walk was paced by the section's physical height; the
+  compaction shrank its scroll budget so the cover arrived at step 03.
+- HomeVisionSequence: process panel now CSS-sticky over a .process-travel
+  runway (100svh+190vh, desktop only); active row is a PURE function of
+  runway progress (runway/5 each — services pattern, 3d15bdb) and the
+  EditorialFlow surface can only pin at progress 1, so 01→05 ALL get their
+  lit moment before any cover. Progress rail driven from the same progress.
+  Mobile keeps compact natural flow + focus-line selection. Verified: 2×
+  walk-verify passes — all 5 rows lit while fully visible, 0 errors.
+- useJunctionSettle CANONICALIZED at components/system/useJunctionSettle.ts
+  (home path is a re-export shim): merged the two diverged forks — live-rect
+  band detection + direction-aware targeting + Lenis-driven glide (mine) with
+  arm-on-user-input-only (anchor/deep-links never hijacked), velocity-based
+  idle for Lenis' momentum tail, adaptive glide duration (fan-out fork).
+  Fixed a latent latch bug: gating settle entry on the per-glide `cancelled`
+  flag permanently disabled settling after the first input-cancelled glide.
+  PATTERNS Fix 26 updated with all three lessons.
+- Settle now wired in EVERY flow: Editorial, About, Services, Adu,
+  Consulting, Contact (Remediation pending its terminal's in-flight rework).
+- Verified: home torture down/up 34/34 + 31/31 clean; about 10/10; services
+  25/25 ×2 (one earlier "fail" was a measurement race — glide completes
+  ~0.5s after the harness window at the post-pin junction); walk-verify 2×;
+  tsc clean; functional-qa PASS desktop+mobile.
+
 ## 2026-07-10 — Home junction settle: never rest half-covered (PATTERNS Fix 26)
 
 - Brian: sections "not really snapping… the previous section kinda peeking…

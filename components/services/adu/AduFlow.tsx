@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
+import { useJunctionSettle } from "@/components/home/useJunctionSettle";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,6 +23,11 @@ export default function AduFlow({ children }: { children: React.ReactNode }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<number[]>([]);
+
+  // Fix 26 — never rest half-covered: settle to the nearest clean boundary
+  // after a genuine scroll-end inside a cover transition. All guards internal
+  // (direction-aware, Lenis-driven glide, cancel-on-input, desktop-only).
+  useJunctionSettle(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;

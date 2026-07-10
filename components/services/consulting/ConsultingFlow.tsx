@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
+import { useJunctionSettle } from "@/components/home/useJunctionSettle";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,6 +21,9 @@ export default function ConsultingFlow({ children }: { children: React.ReactNode
   const wrapRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<number[]>([]);
+
+  // Scroll-end settle: never rest half-covered at a junction (Fix 26, additive).
+  useJunctionSettle(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;

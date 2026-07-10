@@ -1,0 +1,231 @@
+"use client";
+
+import { useEffect, type RefObject } from "react";
+
+// Junction snap-settle for stacked-surface flows (Brian, 2026-07-10; PATTERNS
+// Fix 26). The cover transitions look clean in motion, but a scroll that STOPS
+// mid-junction rests with the previous surface half-covered. When scrolling
+// goes genuinely idle inside a cover transition, glide the short remaining
+// distance so the page always comes to rest fully composed.
+//
+// CANONICAL copy — every flow imports THIS file (components/home/
+// useJunctionSettle re-exports it). Two implementations briefly diverged on
+// 2026-07-10; the differences below are all hard-won, do not fork again:
+//
+// Band detection is LIVE-RECT, not doc-offset zones: "mid-junction" == some
+// surface's viewport-top ∈ (MARGIN, vh−MARGIN). Sticky-proof, and — unlike a
+// zone spanning rests[0]..rests[last] — it never fires while the reader is
+// INSIDE a tall surface (internal pinned runways like the home approach walk
+// or the services index sit between boundaries, where no surface edge crosses
+// the viewport). Overlapping bands from shorter-than-viewport sections are
+// handled by bounded re-measure correction rounds after each glide.
+//
+// Targeting is DIRECTION-AWARE: stopping while scrolling DOWN completes the
+// cover (scroll +top); UP backs off (scroll −(vh−top)). Nearest-rest or
+// percent rules trap gentle scrollers — small forward steps get undone and the
+// junction can never be crossed.
+//
+// The glide goes THROUGH lenis.scrollTo (window.__lenis828, exposed by
+// LenisProvider): raw window.scrollTo glides get reconciled away by Lenis'
+// raf loop (torture run: 18/40 stops still rested half-covered). The rAF path
+// is only a no-Lenis fallback.
+//
+// Guards (all required — this hook is shared, keep them intact):
+// - Desktop-only (min-width: 1024px, checked live) + reduced-motion no-op.
+// - Arms ONLY on genuine user input (wheel / touch / pointer / scroll keys):
+//   anchor jumps, deep links, and other programmatic scrolls never settle.
+// - Scroll-end detection is VELOCITY-based: Lenis' long easing tail keeps
+//   emitting scroll events after the wheel stops, so idle = the page moved
+//   <1px across an IDLE_MS window, re-checked while momentum continues.
+// - One settle per user gesture (armed clears at glide start); bounded
+//   follow-up correction rounds only re-measure overlap bands, never chase.
+// - Any input during the glide cancels it instantly.
+// - MIN_DIST skips micro-settles (also makes every landing terminal).
+
+const MARGIN = 32; // px from a clean edge that still counts as "resting clean"
+const IDLE_MS = 140; // stillness window that marks a genuine scroll-end
+const MAX_ROUNDS = 3; // one gesture = one settle + bounded overlap corrections
+const MIN_DIST = 4; // px — skip micro-glides
+const SCROLL_KEYS = new Set([
+  " ",
+  "PageDown",
+  "PageUp",
+  "ArrowDown",
+  "ArrowUp",
+  "Home",
+  "End",
+]);
+
+type LenisHandle = {
+  scrollTo: (
+    y: number,
+    opts: {
+      duration: number;
+      easing: (t: number) => number;
+      onComplete?: () => void;
+    }
+  ) => void;
+};
+
+export function useJunctionSettle(
+  wrapRef: RefObject<HTMLElement | null>,
+  surfaceSelector = "[data-stack-surface]"
+) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const lgQuery = window.matchMedia("(min-width: 1024px)");
+
+    let armed = false; // true only after genuine user input
+    let settling = false;
+    let cancelled = false;
+    let settleRounds = 0;
+    let glideRaf = 0;
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    let lastY = window.scrollY;
+    let direction: 1 | -1 | 0 = 0;
+
+    const activeJunctionTop = (): number | null => {
+      const wrap = wrapRef.current;
+      if (!wrap) return null;
+      const vh = window.innerHeight;
+      // Deepest intruder (largest top): with overlapping bands more than one
+      // surface can rest mid-band; resolving the deepest first converges.
+      let worst: number | null = null;
+      for (const el of wrap.querySelectorAll<HTMLElement>(surfaceSelector)) {
+        const top = el.getBoundingClientRect().top;
+        if (top > MARGIN && top < vh - MARGIN) {
+          if (worst === null || top > worst) worst = top;
+        }
+      }
+      return worst;
+    };
+
+    const cancelGlide = () => {
+      cancelled = true;
+      if (glideRaf) cancelAnimationFrame(glideRaf);
+      glideRaf = 0;
+      settling = false;
+    };
+
+    const glideTo = (target: number) => {
+      settling = true;
+      cancelled = false;
+      armed = false; // one settle per user gesture; re-arm on next input
+      const dist = Math.abs(target - window.scrollY);
+      const durationMs = Math.min(620, Math.max(260, dist * 0.9));
+      const lenis = (window as unknown as { __lenis828?: LenisHandle })
+        .__lenis828;
+      if (lenis) {
+        lenis.scrollTo(target, {
+          duration: durationMs / 1000,
+          easing: (t) => 1 - Math.pow(1 - t, 3), // easeOutCubic
+          onComplete: () => {
+            settling = false;
+            if (!cancelled) settleStep(); // overlap-band correction (bounded)
+          },
+        });
+        return;
+      }
+      // Fallback (no Lenis): manual rAF glide.
+      const from = window.scrollY;
+      const delta = target - from;
+      const start = performance.now();
+      const step = (now: number) => {
+        if (cancelled) {
+          settling = false;
+          return;
+        }
+        const t = Math.min(1, (now - start) / durationMs);
+        const eased = 1 - Math.pow(1 - t, 3);
+        window.scrollTo(0, Math.round(from + delta * eased));
+        if (t < 1) {
+          glideRaf = requestAnimationFrame(step);
+        } else {
+          settling = false;
+          glideRaf = 0;
+          if (!cancelled) settleStep();
+        }
+      };
+      glideRaf = requestAnimationFrame(step);
+    };
+
+    // One gesture may need bounded FOLLOW-UP glides: with overlapping bands
+    // (section shorter than the viewport), completing one cover can leave the
+    // next surface resting mid-band. Sticky pinning makes the geometry
+    // non-linear, so re-MEASURE after each glide and correct — at most
+    // MAX_ROUNDS times, still cancelled instantly by any input.
+    const settleStep = () => {
+      // Guard on settling only — `cancelled` is a per-glide latch (checked in
+      // the glide's own frames / onComplete chain). Gating entry on it here
+      // would permanently disable settling after the first cancelled glide.
+      if (settling) return;
+      if (direction === 0 || settleRounds <= 0) return;
+      const top = activeJunctionTop();
+      if (top === null) return;
+      settleRounds--;
+      const vh = window.innerHeight;
+      const target =
+        direction === 1
+          ? window.scrollY + top // scrolling down → complete the cover
+          : window.scrollY - (vh - top); // scrolling up → back off to uncovered
+      if (Math.abs(target - window.scrollY) < MIN_DIST) return;
+      glideTo(Math.max(0, target));
+    };
+
+    const onIdle = () => {
+      if (!armed || settling || !lgQuery.matches) return;
+      settleRounds = MAX_ROUNDS;
+      settleStep();
+    };
+
+    // Velocity-based idle: Lenis' momentum tail keeps emitting scroll events;
+    // idle == the page held still for IDLE_MS. Keep watching while it moves.
+    let idleAnchorY = -1;
+    const scheduleIdleCheck = () => {
+      clearTimeout(idleTimer);
+      idleAnchorY = window.scrollY;
+      idleTimer = setTimeout(() => {
+        if (settling) return;
+        if (Math.abs(window.scrollY - idleAnchorY) < 1) onIdle();
+        else scheduleIdleCheck(); // still moving under momentum
+      }, IDLE_MS);
+    };
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) > 1 && !settling) {
+        direction = y > lastY ? 1 : -1;
+      }
+      lastY = y;
+      if (settling) return; // our own glide must not re-trigger idle checks
+      scheduleIdleCheck();
+    };
+
+    const arm = () => {
+      if (settling) cancelGlide(); // input during a glide aborts it instantly
+      armed = true;
+    };
+    const onKeydown = (e: KeyboardEvent) => {
+      if (SCROLL_KEYS.has(e.key)) arm();
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("wheel", arm, { passive: true });
+    window.addEventListener("touchstart", arm, { passive: true });
+    window.addEventListener("touchmove", arm, { passive: true });
+    window.addEventListener("pointerdown", arm, { passive: true });
+    window.addEventListener("keydown", onKeydown, { passive: true });
+
+    return () => {
+      cancelGlide();
+      clearTimeout(idleTimer);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("wheel", arm);
+      window.removeEventListener("touchstart", arm);
+      window.removeEventListener("touchmove", arm);
+      window.removeEventListener("pointerdown", arm);
+      window.removeEventListener("keydown", onKeydown);
+    };
+  }, [wrapRef, surfaceSelector]);
+}

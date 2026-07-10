@@ -924,9 +924,27 @@ passes each: 0 half-covered rests, 0 errors, full traversal (no treadmill).
 Harness note: wait ≥ Lenis momentum (1.35s) + idle (180ms) + glide (520ms)
 before reading the rest state.
 
-**Files changed:** `components/home/useJunctionSettle.ts` (new),
-`components/home/EditorialFlow.tsx`, `components/providers/LenisProvider.tsx`
-(2026-07-10). Portable: any *Flow page can reuse the hook as-is.
+**Files changed:** `components/system/useJunctionSettle.ts` (CANONICAL —
+every flow imports this; `components/home/useJunctionSettle.ts` is a
+re-export shim), `components/home/EditorialFlow.tsx`,
+`components/providers/LenisProvider.tsx` (2026-07-10). Wired into every
+stacked-surface flow (Editorial/About/Services/Adu/Consulting/Contact).
+
+**Three additional lessons (2026-07-10 consolidation — two forks briefly
+diverged; do not fork this hook again):**
+1. Band detection must be LIVE-RECT ("some surface top ∈ (MARGIN, vh−MARGIN)"),
+   never a doc-offset zone spanning first→last boundary: a zone fires while
+   the reader is INSIDE a tall mid-flow surface — it would snap out of
+   internal pinned runways (home approach walk, services index).
+2. Arm ONLY on genuine user input (wheel/touch/pointer/scroll keys) — never
+   from bare scroll events, or anchor jumps and deep links get hijacked.
+   Idle detection must be velocity-based (moved <1px per 140ms window):
+   Lenis' easing tail emits scroll events for over a second after the wheel
+   stops.
+3. The `cancelled` flag is a PER-GLIDE latch — never gate settle ENTRY on it.
+   Gating entry permanently disabled all settling after the first
+   input-cancelled glide (found via services torture: one collision, then
+   every later junction rested dirty).
 
 ---
 

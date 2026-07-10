@@ -80,12 +80,15 @@ export default function HomeVisionSequence() {
       const processRows = gsap.utils.toArray<HTMLElement>(".process-row");
       const processHead = gsap.utils.toArray<HTMLElement>(".process-head-el");
       const closingEls = gsap.utils.toArray<HTMLElement>(".vision-closing-el");
+      const travelEl = section.querySelector<HTMLElement>(".process-travel");
+      const railFillEl = section.querySelector<HTMLElement>(".process-rail-fill");
 
       gsap.set(headlineLines, { yPercent: 110 });
       gsap.set(introEls, { y: 22, opacity: 0 });
       gsap.set(processRows, { y: 26, opacity: 0 });
       gsap.set(processHead, { y: 20, opacity: 0 });
       gsap.set(closingEls, { y: 18, opacity: 0 });
+      if (railFillEl) gsap.set(railFillEl, { scaleY: 0, transformOrigin: "top" });
       if (photoRef.current) gsap.set(photoRef.current, { clipPath: "inset(10% 9% 10% 9%)" });
 
       if (!AnimationController.shouldAnimate()) {
@@ -94,6 +97,7 @@ export default function HomeVisionSequence() {
           y: 0,
           opacity: 1,
         });
+        if (railFillEl) gsap.set(railFillEl, { scaleY: 1, transformOrigin: "top" });
         if (photoRef.current) gsap.set(photoRef.current, { clipPath: "inset(0%)" });
         return;
       }
@@ -175,90 +179,84 @@ export default function HomeVisionSequence() {
         })
       );
 
-      // Step-by-step: exactly ONE row is lit at a time. The panel lives
-      // inside a sticky-stacked surface, so document-offset bands go stale
-      // once the surface pins — select the active row from the rows' actual
-      // on-screen rects instead (sticky-proof).
+      // Step-by-step highlight walk (exactly ONE row lit at a time) + progress
+      // rail. Desktop (lg+): the process panel is CSS-sticky over a tall runway
+      // (.process-travel) and the active row is a PURE FUNCTION of scroll
+      // progress — runway/5 of dedicated scroll each. The travel wrapper itself
+      // is never sticky, so its rect tracks scroll linearly until the whole
+      // EditorialFlow surface pins, which happens exactly at progress 1; the
+      // walk therefore always completes (05 gets its lit moment and stays lit)
+      // BEFORE the next surface can cover the panel. Deterministic math, no rect
+      // feedback: cannot be rushed, skipped, or frozen half-lit (services
+      // pattern, commit 3d15bdb; PATTERNS Fix 25 class). Below lg there is no
+      // pin — the active row is the last title past the focus line (monotone,
+      // reflow-immune), preserving the mobile natural-flow reveals.
       const stepList = section.querySelector<HTMLElement>(".process-list");
       if (stepList && processRows.length) {
+        const count = processRows.length;
+        const lgQuery = window.matchMedia("(min-width: 1024px)");
         const setActive = (idx: number) => {
           processRows.forEach((row, i) =>
             row.classList.toggle("process-row-active", i === idx)
           );
         };
-        let lastListTop = Infinity;
-        let stuckStartY: number | null = null;
-        const updateActive = () => {
-          // 0.66 (not 0.55): rows must all light BEFORE the next surface
-          // covers the shortened panel — the last row now activates during
-          // natural scroll, right around the moment the surface pins.
-          const focusY = window.innerHeight * 0.66;
-          const listRect = stepList.getBoundingClientRect();
-          let idx: number;
-          if (listRect.top > focusY) {
-            idx = -1;
-          } else if (listRect.bottom < focusY) {
-            idx = processRows.length - 1;
-          } else {
-            idx = 0;
-            processRows.forEach((row, i) => {
-              if (row.getBoundingClientRect().top <= focusY) idx = i;
-            });
+        const setRail = (p: number) => {
+          if (railFillEl) {
+            railFillEl.style.transformOrigin = "top";
+            railFillEl.style.transform = `scaleY(${Math.min(1, Math.max(0, p))})`;
           }
-          // Once the surface pins beneath the next one, rects freeze while
-          // scrolling continues — keep the walk advancing through the
-          // remaining steps over the cover distance.
-          const moving = Math.abs(listRect.top - lastListTop) > 0.5;
-          lastListTop = listRect.top;
-          if (!moving && idx >= 0) {
-            if (stuckStartY === null) stuckStartY = window.scrollY;
-            // 0.35 viewports, not 0.8: the cover eats the bottom rows first,
-            // so any remaining steps must finish in the first third of the
-            // cover distance while they are still on screen.
-            const p = Math.min(
-              1,
-              Math.max(0, (window.scrollY - stuckStartY) / (window.innerHeight * 0.35))
-            );
-            idx = Math.min(
-              processRows.length - 1,
-              idx + Math.round(p * (processRows.length - 1 - idx))
-            );
-          } else if (moving) {
-            stuckStartY = null;
+        };
+        const updateActive = () => {
+          let idx: number;
+          let railP: number;
+          if (lgQuery.matches && travelEl) {
+            const runway = travelEl.offsetHeight - window.innerHeight;
+            if (runway <= 0) {
+              idx = 0;
+              railP = 0;
+            } else {
+              const progress = Math.min(
+                0.9999,
+                Math.max(0, -travelEl.getBoundingClientRect().top / runway)
+              );
+              idx = Math.min(count - 1, Math.floor(progress * count));
+              railP = progress;
+            }
+          } else {
+            // Mobile / no-pin: last row whose top has crossed the focus line.
+            const focusY = window.innerHeight * 0.62;
+            const listRect = stepList.getBoundingClientRect();
+            if (listRect.top > focusY) {
+              idx = -1;
+            } else if (listRect.bottom < focusY) {
+              idx = count - 1;
+            } else {
+              idx = 0;
+              processRows.forEach((row, i) => {
+                if (row.getBoundingClientRect().top <= focusY) idx = i;
+              });
+            }
+            railP = idx < 0 ? 0 : (idx + 1) / count;
           }
           setActive(idx);
+          setRail(railP);
         };
         ScrollTrigger.create({
-          trigger: stepList,
+          trigger: travelEl ?? stepList,
           start: "top bottom",
           end: "bottom top",
           onUpdate: updateActive,
           onRefresh: updateActive,
           onEnter: updateActive,
-          onLeaveBack: () => setActive(-1),
+          onLeave: updateActive,
+          onEnterBack: updateActive,
+          onLeaveBack: updateActive,
         });
-        updateActive();
-      }
-
-      // Progress rail — maroon fill draws down alongside the rows
-      const railFill = section.querySelector<HTMLElement>(".process-rail-fill");
-      const railList = section.querySelector<HTMLElement>(".process-list");
-      if (railFill && railList) {
-        gsap.fromTo(
-          railFill,
-          { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: "none",
-            transformOrigin: "top",
-            scrollTrigger: {
-              trigger: railList,
-              start: "top 78%",
-              end: "bottom 52%",
-              scrub: 0.9,
-            },
-          }
+        lgQuery.addEventListener("change", updateActive);
+        revealCleanups.push(() =>
+          lgQuery.removeEventListener("change", updateActive)
         );
+        updateActive();
       }
 
       // Hairline under each row draws as it reveals
@@ -409,9 +407,17 @@ export default function HomeVisionSequence() {
         </div>
       </div>
 
-      {/* Process — full-bleed black panel, maroon ignition, progress rail */}
-      <div data-header-dark="" className="bg-[#0a0a0a] text-white">
-        <div className="mx-auto max-w-[1680px] px-6 pt-14 pb-16 lg:px-12 lg:pt-16 lg:pb-20">
+      {/* Process — full-bleed black panel, maroon ignition, progress rail.
+          Desktop (lg+): the panel is CSS-sticky over a tall runway so the
+          5-row highlight walk owns dedicated scroll and every step gets its lit
+          moment before the next surface can cover it (services pattern, commit
+          3d15bdb). Mobile keeps the compact panel in natural flow. */}
+      <div
+        data-header-dark=""
+        className="process-travel relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+190vh)]"
+      >
+        <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col lg:justify-center lg:overflow-hidden">
+        <div className="mx-auto w-full max-w-[1680px] px-6 pt-14 pb-16 lg:px-12 lg:py-0">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
               <p className="process-head-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-8">
@@ -487,6 +493,7 @@ export default function HomeVisionSequence() {
           <p className="vision-closing-el mt-8 border-t border-white/10 pt-4 font-labels text-[9px] uppercase tracking-[0.22em] text-white/35 lg:mt-10">
             {SITE.address.city}, CA / South Bay / CA #{SITE.license}
           </p>
+        </div>
         </div>
       </div>
     </section>
