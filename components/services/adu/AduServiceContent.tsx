@@ -57,8 +57,8 @@ const FAQS = [
 // interleaved with photo cells in a checkerboard.
 const FAQ_PHOTOS = [
   {
-    src: "/images/projects/adu-interior-living.jpg",
-    alt: "Finished ADU interior living space by 828 Construction",
+    src: "/images/generated/adu-faq-interior-v2.jpg",
+    alt: "Finished compact ADU interior with warm kitchen and living area",
   },
   {
     src: "/images/projects/garage-conversion.jpg",
@@ -93,36 +93,85 @@ const QUALIFIERS = [
   "Do you value clear communication and a highly considerate building experience?",
 ];
 
-// Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule).
-function useFocusIndex(
+// Live-rect acronym ignition (sticky-proof — PATTERNS.md Fix 22 timing rule).
+// Returns a `primary` index (drives the sticky photo crossfade + caption) and
+// an `active` mask (drives per-row maroon ignition).
+//
+// The stacked surface PINS and every row freezes in place while the next
+// surface wipes up over them BOTTOM-FIRST, so the last row (U) is covered
+// before a moving focus line could ever select it — a single focus line can't
+// walk frozen rows, and U never ignites in view (measured:
+// .claude-work/research/adu-final/rows-geom.mjs). Both faces of the fix:
+//
+//   • `active` (per-row maroon ignition): each row LATCHES lit once its center
+//     rises into the lower reading band (< 0.85·vh), which EVERY row crosses
+//     while still uncovered — so every A/D/U ignites in view before the cover
+//     reaches it, on desktop AND mobile.
+//   • `primary` (desktop sticky-photo crossfade + caption): still the live
+//     focus-band index, so the keyed photograph travels A→D→U with the scroll.
+//     Mobile has no sticky photo, so `primary` is just the last latched row.
+function useAcronymActive(
   refs: React.MutableRefObject<Array<HTMLElement | null>>,
-  focusRatio = 0.52
+  focusRatio = 0.52,
+  band = 0.85
 ) {
-  const [active, setActive] = useState(0);
+  const [state, setState] = useState<{ primary: number; active: boolean[] }>({
+    primary: 0,
+    active: [true, false, false],
+  });
   useEffect(() => {
     let raf = 0;
+    const latched = refs.current.map(() => false);
+    const sameMask = (a: boolean[], b: boolean[]) =>
+      a.length === b.length && a.every((v, i) => v === b[i]);
     const measure = () => {
       raf = 0;
-      const focus = window.innerHeight * focusRatio;
-      let best = 0;
-      let bestDist = Infinity;
-      let contained = false;
+      const vh = window.innerHeight;
+      const desktop = window.innerWidth >= 1024;
+
+      // Ignition mask — latch rows as they enter the reading band (both VPs).
+      const bandPx = vh * band;
       refs.current.forEach((el, i) => {
-        if (!el) return;
+        if (!el || latched[i]) return;
         const r = el.getBoundingClientRect();
-        if (!contained && r.top <= focus && r.bottom >= focus) {
-          best = i;
-          contained = true;
-          return;
-        }
-        if (contained) return;
-        const dist = Math.abs(r.top + r.height / 2 - focus);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
+        if (r.bottom > 0 && r.top + r.height / 2 < bandPx) latched[i] = true;
       });
-      setActive((prev) => (prev === best ? prev : best));
+      const active = latched.slice();
+
+      // Primary — desktop: live focus-band index (drives the traveling photo);
+      // mobile: last latched row (no photo, keeps caption in step).
+      let primary: number;
+      if (desktop) {
+        const focus = vh * focusRatio;
+        let best = 0;
+        let bestDist = Infinity;
+        let contained = false;
+        refs.current.forEach((el, i) => {
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          if (!contained && r.top <= focus && r.bottom >= focus) {
+            best = i;
+            contained = true;
+            return;
+          }
+          if (contained) return;
+          const dist = Math.abs(r.top + r.height / 2 - focus);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+          }
+        });
+        primary = best;
+      } else {
+        primary = active.lastIndexOf(true);
+        if (primary < 0) primary = 0;
+      }
+
+      setState((prev) =>
+        prev.primary === primary && sameMask(prev.active, active)
+          ? prev
+          : { primary, active }
+      );
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(measure);
@@ -135,8 +184,8 @@ function useFocusIndex(
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [refs, focusRatio]);
-  return active;
+  }, [refs, focusRatio, band]);
+  return state;
 }
 
 // Home-page word-fill grammar (HomeVisionSequence brand statement): SplitType
@@ -344,11 +393,13 @@ function AduHero() {
         <div className="relative order-2 min-h-[46vh] overflow-hidden lg:order-1 lg:min-h-screen">
           <div className="adu-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/projects/adu-exterior-new.jpg"
-              alt="Modern detached ADU exterior for 828 Construction"
+              src="/images/generated/adu-hero-exterior-v2.jpg"
+              alt="Modern detached ADU exterior with warm wood, black-framed doors, and drought-tolerant landscaping"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
+              quality={92}
+              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -546,6 +597,8 @@ function AduFaq() {
                   fill
                   loading="lazy"
                   sizes="(max-width: 1024px) 100vw, 40vw"
+                  quality={92}
+                  unoptimized
                   placeholder="blur"
                   blurDataURL={BLUR_PLACEHOLDER}
                   onError={imgError}
@@ -570,16 +623,16 @@ function AduFaq() {
 // ── Section 3 — what ADU means to 828 (acronym values + watermark drift) ────
 const ACRONYM_PHOTOS = [
   {
-    src: "/images/projects/adu-exterior.jpg",
-    alt: "ADU exterior aligned with the client's vision",
+    src: "/images/generated/adu-acronym-aligned-v2.jpg",
+    alt: "Contractor and homeowner reviewing a completed ADU exterior together",
   },
   {
-    src: "/images/projects/niche-detail.jpg",
-    alt: "Dedicated craftsmanship detail by 828 Construction",
+    src: "/images/generated/adu-acronym-dedicated-v2.jpg",
+    alt: "ADU interior finish detail checked carefully with a level",
   },
   {
-    src: "/images/projects/adu-framing.jpg",
-    alt: "ADU construction journey in progress",
+    src: "/images/generated/adu-acronym-understanding-v2.jpg",
+    alt: "Contractor guiding a homeowner through organized ADU framing in progress",
   },
 ];
 
@@ -587,12 +640,12 @@ function AcronymRow({
   item,
   index,
   active,
-  rowRefs,
+  setRowRef,
 }: {
   item: (typeof ACRONYM)[number];
   index: number;
   active: boolean;
-  rowRefs: React.MutableRefObject<Array<HTMLElement | null>>;
+  setRowRef: (index: number, el: HTMLElement | null) => void;
 }) {
   const bodyRef = useRef<HTMLParagraphElement>(null);
   // Small text on black — 0.55 white keeps the load state ≥4.5:1 (axe floor).
@@ -607,7 +660,7 @@ function AcronymRow({
       />
       <div
         ref={(el) => {
-          rowRefs.current[index] = el;
+          setRowRef(index, el);
         }}
         className="adu-rise py-8 lg:py-10"
         data-stagger={String(index * 0.1)}
@@ -649,7 +702,10 @@ function AcronymRow({
 
 function AduAcronym() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const activeIdx = useFocusIndex(rowRefs, 0.52);
+  const { primary: activeIdx, active: activeMask } = useAcronymActive(rowRefs, 0.52);
+  const setRowRef = (index: number, el: HTMLElement | null) => {
+    rowRefs.current[index] = el;
+  };
 
   return (
     <section
@@ -681,8 +737,8 @@ function AduAcronym() {
                 key={item.letter}
                 item={item}
                 index={i}
-                active={activeIdx === i}
-                rowRefs={rowRefs}
+                active={activeMask[i] ?? false}
+                setRowRef={setRowRef}
               />
             ))}
             <div className="adu-hairline h-px w-full bg-white/12" data-stagger="0.36" aria-hidden="true" />
@@ -705,6 +761,8 @@ function AduAcronym() {
                       fill
                       loading="lazy"
                       sizes="(max-width: 1024px) 0px, 40vw"
+                      quality={92}
+                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
