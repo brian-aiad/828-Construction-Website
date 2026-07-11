@@ -561,25 +561,34 @@ function PrinciplesSection() {
       style={{ overflowX: "clip" }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        {/* Close-up plate — photographer close-ups, per Joe: one per principle,
-            crossfading with the row that is currently ignited */}
+        {/* Close-up plate — photographer close-ups, per Joe: one per principle.
+            All four stack as persistent opacity layers and crossfade as their
+            row ignites — decoded up front so a swap never flashes the blur
+            placeholder (keyed remount did), and only the active photo is opaque
+            at rest (never two photos mid-blend once settled). */}
         <div className="svc-clip relative aspect-[4/3] overflow-hidden lg:aspect-auto lg:h-auto lg:min-h-full" data-gsap-reveal="true">
           <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
-            <Image
-              key={PRINCIPLE_PHOTOS[activeIdx]?.src ?? PRINCIPLE_PHOTOS[0].src}
-              src={PRINCIPLE_PHOTOS[activeIdx]?.src ?? PRINCIPLE_PHOTOS[0].src}
-              alt={PRINCIPLE_PHOTOS[activeIdx]?.alt ?? PRINCIPLE_PHOTOS[0].alt}
-              fill
-              loading={activeIdx === 0 ? "eager" : "lazy"}
-              sizes="(max-width: 1024px) 100vw, 46vw"
-              quality={92}
-              unoptimized
-              placeholder="blur"
-              blurDataURL={BLUR_PLACEHOLDER}
-              onError={imgError}
-              className="object-cover"
-              style={{ filter: "contrast(1.05) saturate(1.05)" }}
-            />
+            {PRINCIPLE_PHOTOS.map((photo, i) => (
+              <Image
+                key={photo.src}
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                loading={i === 0 ? "eager" : "lazy"}
+                sizes="(max-width: 1024px) 100vw, 46vw"
+                quality={92}
+                unoptimized
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
+                onError={imgError}
+                aria-hidden={activeIdx !== i}
+                className="object-cover transition-opacity duration-[550ms] ease-out"
+                style={{
+                  filter: "contrast(1.05) saturate(1.05)",
+                  opacity: activeIdx === i ? 1 : 0,
+                }}
+              />
+            ))}
           </div>
           <div className="absolute inset-x-0 bottom-0 hidden items-end justify-between bg-gradient-to-t from-black/55 to-transparent px-6 pb-5 pt-14 lg:flex">
             <p className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/75">
