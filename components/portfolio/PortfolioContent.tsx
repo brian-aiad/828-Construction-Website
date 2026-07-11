@@ -8,8 +8,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS, Project, ProjectCategory, SITE } from "@/lib/constants";
 import Lightbox from "@/components/gallery/Lightbox";
 import ResidenceGalleries from "@/components/portfolio/ResidenceGalleries";
+import PortfolioFlow from "@/components/portfolio/PortfolioFlow";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 import { lqip } from "@/lib/image-placeholders";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -146,27 +148,32 @@ function usePortfolioMotion() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) return;
 
+    const revealCleanups: Array<() => void> = [];
+
     const ctx = gsap.context(() => {
       const reveals = gsap.utils.toArray<HTMLElement>(".portfolio-reveal");
       const tiles = gsap.utils.toArray<HTMLElement>(".portfolio-tile");
       const lines = gsap.utils.toArray<HTMLElement>(".draw-line");
       const contactFrames = gsap.utils.toArray<HTMLElement>(".archive-frame");
 
+      // Fix 25 — these headings now live inside PortfolioFlow's sticky stacked
+      // surfaces. A scrub-parked ScrollTrigger goes stale once a surface pins
+      // (its doc offset freezes) and the autoAlpha:0 heading can rest invisible.
+      // Reveal off actual on-screen visibility with a decisive once-tween so it
+      // always completes; data-gsap-reveal lets the LenisProvider failsafe
+      // rescue anything still stuck.
       reveals.forEach((el) => {
-        gsap.fromTo(
-          el,
-          { autoAlpha: 0, y: 26 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 88%",
-              end: "top 58%",
-              scrub: 1.35,
-            },
-          }
+        gsap.set(el, { autoAlpha: 0, y: 26 });
+        revealCleanups.push(
+          revealOnVisible([el], () => {
+            gsap.to(el, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.9,
+              ease: "power3.out",
+              overwrite: true,
+            });
+          })
         );
       });
 
@@ -242,6 +249,7 @@ function usePortfolioMotion() {
     ctxRef.current = ctx;
     return () => {
       ctxRef.current = null;
+      revealCleanups.forEach((dispose) => dispose());
       try {
         ctx.revert();
       } catch {}
@@ -321,6 +329,7 @@ function ProjectWallTile({
     <button
       type="button"
       onClick={() => onOpen(project)}
+      data-gsap-reveal="true"
       className={`portfolio-tile group relative min-h-[18rem] overflow-hidden bg-black text-left ${spanClass}`}
     >
       {hasRealPhoto(project) ? (
@@ -460,7 +469,7 @@ function PortfolioHero({
   const heroSizes: Array<"wide" | "tall" | "small"> = ["tall", "small", "small", "wide", "wide"];
 
   return (
-    <section className="relative overflow-hidden bg-black px-4 pb-4 pt-24 text-white sm:px-6 lg:px-8 lg:pt-28">
+    <section data-section="portfolio-hero" className="relative overflow-hidden bg-black px-4 pb-4 pt-24 text-white sm:px-6 lg:px-8 lg:pt-28">
       <DraftingMotionLayer intensity="quiet" variant="intro" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_14%,rgba(99,26,22,0.14),transparent_28%)]" aria-hidden="true" />
       <div className="relative z-10 mx-auto max-w-[92rem]">
@@ -565,18 +574,19 @@ export default function PortfolioContent() {
 
   return (
     <div ref={rootRef} className="bg-[#f5f0e9] text-black">
+      <PortfolioFlow>
       <PortfolioHero projects={heroProjects} categories={categories} onOpen={setLightboxProject} />
 
       <section
         id="project-index"
+        data-section="portfolio-index"
         className="relative scroll-mt-24 bg-black px-6 pb-14 pt-24 text-white lg:px-12 lg:pb-20 lg:pt-28"
       >
         <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
-        <div className="absolute inset-y-0 left-0 hidden w-px bg-white/12 lg:block" />
         <div className="absolute bottom-10 right-10 hidden h-32 w-32 border border-white/10 lg:block" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.94fr] lg:items-start">
           <div>
-            <div className="portfolio-reveal mb-7 max-w-2xl">
+            <div className="portfolio-reveal mb-7 max-w-2xl" data-gsap-reveal="true">
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/38">
                 Case index
               </span>
@@ -703,10 +713,10 @@ export default function PortfolioContent() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden px-6 pb-18 pt-28 lg:px-12 lg:pb-24 lg:pt-32">
+      <section data-section="portfolio-wall" className="relative overflow-hidden bg-[#f5f0e9] px-6 pb-18 pt-28 lg:px-12 lg:pb-24 lg:pt-32">
         <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.1]" />
         <div className="relative z-10 mx-auto max-w-7xl">
-          <div className="portfolio-reveal mb-10 grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+          <div className="portfolio-reveal mb-10 grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end" data-gsap-reveal="true">
             <div>
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
                 Work wall
@@ -753,10 +763,10 @@ export default function PortfolioContent() {
 
       <ResidenceGalleries />
 
-      <section className="relative overflow-hidden border-t border-black/10 px-6 py-12 lg:px-12">
+      <section data-section="portfolio-cta" className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 py-12 lg:px-12">
         <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="portfolio-reveal">
+          <div className="portfolio-reveal" data-gsap-reveal="true">
             <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
               Ready to compare notes
             </span>
@@ -764,7 +774,7 @@ export default function PortfolioContent() {
               Ready to price the next scope?
             </h2>
           </div>
-          <div className="portfolio-reveal flex flex-wrap gap-3 lg:justify-end">
+          <div className="portfolio-reveal flex flex-wrap gap-3 lg:justify-end" data-gsap-reveal="true">
             <a
               href={SITE.phoneHref}
               className="bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
@@ -780,6 +790,7 @@ export default function PortfolioContent() {
           </div>
         </div>
       </section>
+      </PortfolioFlow>
 
       <Lightbox project={lightboxProject} onClose={() => setLightboxProject(null)} />
     </div>

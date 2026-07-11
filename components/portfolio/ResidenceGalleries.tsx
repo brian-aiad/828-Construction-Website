@@ -83,6 +83,7 @@ export default function ResidenceGalleries() {
 
   return (
     <section
+      data-section="portfolio-residences"
       aria-label="Featured residences"
       className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 pt-24 pb-16 lg:px-12 lg:pt-32 lg:pb-24"
     >

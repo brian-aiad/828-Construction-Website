@@ -9,11 +9,9 @@ import { FLOW_NODE_CLASS } from "@/components/system/FlowNode";
 // the EXACT rail vocabulary of the animated flows (x-geometry, line opacity,
 // diamond style) so the edge reads identically page to page.
 // YIELD on every route that draws its OWN animated flow rail, or a second line
-// doubles the chrome: / (EditorialFlow), /about (AboutFlow), /services
-// (ServicesFlow), /services/adu (AduFlow), /services/remediation
-// (RemediationFlow), /services/consulting (ConsultingFlow), /contact
-// (ContactFlow). Flow-less routes (/portfolio until its flow lands) keep this
-// static mark so the edge chrome never disappears entirely.
+// doubles the chrome. As of 2026-07-10 EVERY page has a flow (PortfolioFlow
+// was the last) — this static mark remains only as a fallback for any future
+// flow-less route so the edge chrome never disappears entirely.
 export default function VerticalBrandMark() {
   const pathname = usePathname();
   if (
@@ -23,6 +21,7 @@ export default function VerticalBrandMark() {
     pathname === "/services/adu" ||
     pathname === "/services/remediation" ||
     pathname === "/services/consulting" ||
+    pathname === "/portfolio" ||
     pathname === "/contact"
   )
     return null;
