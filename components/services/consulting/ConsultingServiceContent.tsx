@@ -60,26 +60,35 @@ const CTA_HEADLINE = "Engineered solutions tailored to your project";
 
 const FAQ_PHOTOS = [
   {
-    src: "/images/projects/consulting-inspection.jpg",
-    alt: "828 Construction consulting inspection at a South Bay property",
+    src: "/images/generated/consulting-question-inspection-v2.png",
+    alt: "Construction consultant inspecting an opened residential wall condition",
   },
   {
-    src: "/images/projects/consulting-blueprints.jpg",
-    alt: "Construction blueprints reviewed during an 828 consulting session",
+    src: "/images/generated/consulting-question-plans-budget-v2.png",
+    alt: "Construction plans, budget documents, and material samples reviewed during consulting",
   },
 ];
 
 // Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule).
+// `coverSelector` names the next stacked surface: this ledger lives in a pinned
+// stacked surface, so once it pins the rows FREEZE and the focus line can never
+// reach the last row before the covering surface rides over it (measured: the
+// last benefit sits ~0.67vh and only the focus band ~0.55vh ever selects, so
+// "Peace of mind" would never ignite). When the covering surface has risen into
+// its final approach on the last row, we light that row in its brief visible
+// window — every benefit ignites in view (Fix 22 / Fix 25 class, cover-driven).
 function useFocusIndex(
   refs: React.MutableRefObject<Array<HTMLElement | null>>,
-  focusRatio = 0.55
+  focusRatio = 0.55,
+  coverSelector?: string
 ) {
   const [active, setActive] = useState(0);
   useEffect(() => {
     let raf = 0;
     const measure = () => {
       raf = 0;
-      const focus = window.innerHeight * focusRatio;
+      const vh = window.innerHeight;
+      const focus = vh * focusRatio;
       let best = 0;
       let bestDist = Infinity;
       let contained = false;
@@ -98,6 +107,20 @@ function useFocusIndex(
           best = i;
         }
       });
+      // Tail completion for the pinned-and-covered phase: as the covering
+      // surface's top approaches the last row (both in vh units, viewport-
+      // relative so it self-adapts), snap active to the last row while it is
+      // still visible. Monotonic — reverses cleanly as the cover recedes.
+      const lastIdx = refs.current.length - 1;
+      const lastEl = refs.current[lastIdx];
+      const cover = coverSelector
+        ? document.querySelector(coverSelector)
+        : null;
+      if (lastEl && cover) {
+        const lastTop = lastEl.getBoundingClientRect().top / vh;
+        const coverTop = cover.getBoundingClientRect().top / vh;
+        if (coverTop < lastTop + 0.18) best = lastIdx;
+      }
       setActive((prev) => (prev === best ? prev : best));
     };
     const onScroll = () => {
@@ -111,7 +134,7 @@ function useFocusIndex(
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [refs, focusRatio]);
+  }, [refs, focusRatio, coverSelector]);
   return active;
 }
 
@@ -264,11 +287,13 @@ function ConsultingHero() {
         <div className="relative min-h-[48vh] overflow-hidden lg:min-h-screen">
           <div className="con-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/generated/services-consulting-table-v2.png"
+              src="/images/generated/consulting-hero-advisory-table-v2.png"
               alt="Consulting session over construction plans and material samples"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 52vw"
+              quality={92}
+              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -294,7 +319,11 @@ function ConsultingHero() {
 // ── Section 2 — considerate solutions + the benefits ledger ─────────────────
 function SolutionsSection() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const activeIdx = useFocusIndex(rowRefs, 0.55);
+  const activeIdx = useFocusIndex(
+    rowRefs,
+    0.55,
+    '[data-section="consulting-questions"]'
+  );
 
   return (
     <section
@@ -470,6 +499,8 @@ function QuestionsSection() {
                 fill
                 loading="lazy"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                quality={92}
+                unoptimized
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
                 onError={imgError}
@@ -487,6 +518,8 @@ function QuestionsSection() {
                 fill
                 loading="lazy"
                 sizes="(max-width: 1024px) 0px, 25vw"
+                quality={92}
+                unoptimized
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
                 onError={imgError}
