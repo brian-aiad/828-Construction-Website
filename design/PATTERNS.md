@@ -945,6 +945,51 @@ diverged; do not fork this hook again):**
    Gating entry permanently disabled all settling after the first
    input-cancelled glide (found via services torture: one collision, then
    every later junction rested dirty).
+4. SHORT SECTIONS (2026-07-10, remediation): a junction's upper clean rest is
+   min(vh, previous surface's live rect bottom), NOT vh. A sub-viewport
+   section sitting FLUSH below its fully-visible predecessor is composed —
+   treating it as dirty either cascades the reader down the whole stack
+   (remediation: 3 consecutive short sections) or lands dirty when rounds
+   run out. With prev-bottom-aware rests every stop is terminal in one
+   glide. Torture harness clean-checks must mirror this definition
+   (`.claude-work/research/home-fixes/settle-services-v2.mjs` pattern) or
+   they false-flag legitimate flush rests.
+
+---
+
+### Fix 27 — The last walk item never gets its lit moment (audit EVERY focus-band walk)
+
+**Symptom:** In a focus-band walk (numbered rows / acronym letters / process
+steps that ignite as you scroll), the FINAL item never ignites while visible —
+or only ignites after the next surface has already covered the section. Found
+FOUR independent times on 2026-07-10, one per page, all shipped undetected:
+- Home approach: 04–05 never lit (cover arrived at step 03).
+- Consulting benefits: row 05 "Peace of mind" never lit.
+- ADU acronym: "Understanding" never lit while visible.
+- Remediation approach: step 04 "Build back" never lit (rail capped at 75%).
+
+**Root cause (shared):** the section is (or becomes) SHORTER than the
+viewport; once it pins inside the stacked flow, its rows freeze at fixed
+viewport positions. Rows frozen BELOW the focus line can never be reached by
+natural scrolling before the next surface covers the section. Walk pacing
+tied to section height breaks the moment a section is compacted.
+
+**Fixes that worked (pick per geometry):**
+1. Dedicated scroll runway (home; services 3d15bdb): panel CSS-sticky over a
+   tall travel wrapper; active item = pure function of runway progress —
+   cover can only begin at progress 1. Best when the walk IS the section.
+2. Cover-aware tail snap (consulting): `useFocusIndex(refs, line,
+   coverSelector)` — as the covering surface's top approaches the last row,
+   snap active to the last row during its visible window.
+3. Per-row latching ignition (adu): each row latches lit when crossed;
+   letters accumulate (matches the rail's lit-trail vocabulary).
+4. Focus-line raise (remediation): if the frozen rows sit just below the
+   line, raising it (0.52→0.6) may be enough — cheapest, check dwell time.
+
+**Rule:** whenever a section with a walk is added, compacted, or wrapped in a
+flow, VERIFY the last item ignites while fully visible (walk-verify.mjs
+pattern: step the page, record active index + row visibility + cover state;
+all indices must be lit-while-visible). Both viewports.
 
 ---
 

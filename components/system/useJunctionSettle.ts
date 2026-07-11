@@ -85,19 +85,36 @@ export function useJunctionSettle(
     let lastY = window.scrollY;
     let direction: 1 | -1 | 0 = 0;
 
-    const activeJunctionTop = (): number | null => {
+    // A junction is DIRTY only while the incoming surface is actually cutting
+    // into the surface above it. The upper clean rest for surface i is
+    // min(vh, bottom of surface i−1): for viewport-scale sections that's vh
+    // (fully off-screen below), but for SUB-VIEWPORT sections the natural
+    // composed state is the incoming surface sitting FLUSH below the fully
+    // visible short section — top == prevBottom < vh. Treating that as clean
+    // is what keeps stacks of short sections (remediation: faq 728 / approach
+    // 706 / method 619) terminal in ONE glide instead of cascading the whole
+    // stack or landing dirty (2026-07-10, remediation torture).
+    const activeJunction = (): { top: number; restUp: number } | null => {
       const wrap = wrapRef.current;
       if (!wrap) return null;
       const vh = window.innerHeight;
+      const surfaces = Array.from(
+        wrap.querySelectorAll<HTMLElement>(surfaceSelector)
+      );
       // Deepest intruder (largest top): with overlapping bands more than one
       // surface can rest mid-band; resolving the deepest first converges.
-      let worst: number | null = null;
-      for (const el of wrap.querySelectorAll<HTMLElement>(surfaceSelector)) {
+      let worst: { top: number; restUp: number } | null = null;
+      surfaces.forEach((el, i) => {
         const top = el.getBoundingClientRect().top;
-        if (top > MARGIN && top < vh - MARGIN) {
-          if (worst === null || top > worst) worst = top;
+        const prev = surfaces[i - 1];
+        const prevBottom = prev
+          ? prev.getBoundingClientRect().bottom
+          : vh;
+        const restUp = Math.min(vh, prevBottom);
+        if (top > MARGIN && top < restUp - MARGIN) {
+          if (worst === null || top > worst.top) worst = { top, restUp };
         }
-      }
+      });
       return worst;
     };
 
@@ -161,14 +178,13 @@ export function useJunctionSettle(
       // would permanently disable settling after the first cancelled glide.
       if (settling) return;
       if (direction === 0 || settleRounds <= 0) return;
-      const top = activeJunctionTop();
-      if (top === null) return;
+      const junction = activeJunction();
+      if (junction === null) return;
       settleRounds--;
-      const vh = window.innerHeight;
       const target =
         direction === 1
-          ? window.scrollY + top // scrolling down → complete the cover
-          : window.scrollY - (vh - top); // scrolling up → back off to uncovered
+          ? window.scrollY + junction.top // down → complete the cover
+          : window.scrollY - (junction.restUp - junction.top); // up → flush/uncovered
       if (Math.abs(target - window.scrollY) < MIN_DIST) return;
       glideTo(Math.max(0, target));
     };

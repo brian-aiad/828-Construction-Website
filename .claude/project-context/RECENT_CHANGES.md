@@ -2,6 +2,42 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-11 — FINAL POLISH PASS: every page to the home standard (Brian's "one last hurrah")
+
+- Seven parallel agents, one per page + cross-cutting sweeps. Checklist per
+  page: settle torture (down+up, prev-bottom-aware clean-check, 2 clean
+  passes), frame-by-frame seam sweeps (2x clean, both viewports), blur audit
+  (8 rests/viewport — no fractional transforms / filters / stale will-change
+  on text), smoothness (CLS + frame timing), walks (last item must ignite in
+  view), tsc + functional-qa both viewports.
+- Commits: about 0fb0ee8, services 58f8eb7, contact cce5625, consulting
+  852257e, adu 49a1393, remediation 23dc975, portfolio 615eb83 (+ this one:
+  shared hook + docs). Home verified clean, no fix needed.
+- REAL DEFECTS FOUND+FIXED (one per page): About — permanent will-change kept
+  CRAFT text on a raster layer (now scoped to the reveal tween). Services —
+  principle close-up keyed-Image remount flashed the blur placeholder (now
+  persistent crossfade layers). Contact — reveal failsafe force-opened
+  INACTIVE photo plates after 2.5s dwell, two photos lit (data-failsafe-
+  exempt, Fix 24 class). Consulting — benefits row 05 could NEVER ignite.
+  ADU — 'Understanding' row never ignited. Remediation — approach step 04
+  never ignited + settle wired (last flow without it). Portfolio — NEW
+  PortfolioFlow (was the only flow-less page): rail + veils + settle, stray
+  x0.5 hairline deleted, black-on-black wrap regression fixed, Fix 25 reveal
+  hardening; VBM yields on /portfolio.
+- SHARED HOOK (useJunctionSettle): junction clean-rest is now prev-bottom-
+  aware — flush-below a fully-visible short section is composed (fixes
+  remediation's 3-short-section stack: one glide, no cascades). PATTERNS
+  Fix 26 updated (4th lesson) + NEW Fix 27: "last walk item never ignites"
+  — 4 independent instances found tonight; audit every focus-band walk.
+- CROSS-CUTTING (all green, report-only): nav matrix 11 legs x 2 viewports
+  (client-side clicks, back-buttons, mid-scroll nav — 0 stuck reveals, 0
+  errors); splash gate (plays once, no replay, no scroll-lock leftover);
+  footer junctions full-bleed on all 8 routes x 2 viewports; 3 residence
+  deep links land at 96px via cards AND direct URLs; header ink correct at
+  every settled position. Site-wide settle verified: home 34/34+31/31,
+  about 11/11, services 27/27, remediation 11/11+8/8+11/11 FAQ-open, adu
+  11/11+8/8+13/13, contact 15/15+11/11, portfolio 63/63+57/57.
+
 ## 2026-07-10 — Approach walk runway + settle canonicalized site-wide
 
 - Brian: the approach walk got cut off — "gets to Permit & Approval and the
