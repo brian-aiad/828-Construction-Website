@@ -456,7 +456,12 @@ function ServicePathRows() {
                   className="ct-plate relative hidden h-24 overflow-hidden sm:block lg:h-28"
                   aria-hidden="true"
                 >
+                  {/* Self-managed rest state: inactive plate holds opacity:0 +
+                      clip inset by design. Opt out of LenisProvider's reveal
+                      failsafe or it force-reveals the inactive plate after ~2.5s
+                      in-viewport, lighting two photos at once (PATTERNS Fix 24). */}
                   <div
+                    data-failsafe-exempt
                     className="absolute inset-0 transition-all duration-700 ease-out"
                     style={{
                       clipPath: active
