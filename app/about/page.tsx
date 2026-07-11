@@ -15,8 +15,15 @@ export default function AboutPage() {
   // Joe's headshot slot: drop the file in and the portrait renders on the
   // next build/refresh — until then the pending plate holds the composition
   // without firing a failed image request.
-  const hasPortrait = existsSync(
-    join(process.cwd(), "public", "images", "about", "joe-portrait.jpg")
+  const aboutImageDir = join(process.cwd(), "public", "images", "about");
+  const hasPortrait = existsSync(join(aboutImageDir, "joe-portrait.jpg"));
+  const hasTemporaryPortrait = existsSync(
+    join(aboutImageDir, "joe-portrait-temporary.png")
   );
-  return <AboutContent hasPortrait={hasPortrait} />;
+  return (
+    <AboutContent
+      hasPortrait={hasPortrait}
+      hasTemporaryPortrait={hasTemporaryPortrait}
+    />
+  );
 }

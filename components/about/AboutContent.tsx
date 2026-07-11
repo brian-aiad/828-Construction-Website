@@ -190,12 +190,14 @@ function AboutHero() {
       <div className="absolute inset-0 overflow-hidden">
         <div ref={photoRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/generated/about-planning-table.jpg"
+            src="/images/generated/about-hero-quality-luxury-v2.jpg"
             alt="Residential construction planning table with drawings and materials"
             fill
             priority
             fetchPriority="high"
             sizes="100vw"
+            quality={92}
+            unoptimized
             className="object-cover"
             style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.94)" }}
           />
@@ -520,7 +522,18 @@ function CraftSection() {
         const body = rowRefs.current[index]?.querySelector("[data-craft-body]");
         const letter = letterRefs.current[index];
         if (rest) {
-          gsap.to(rest, { xPercent: 0, opacity: 1, duration: 0.85, ease: "power3.out", overwrite: true });
+          gsap.set(rest, { willChange: "transform" });
+          gsap.to(rest, {
+            xPercent: 0,
+            opacity: 1,
+            duration: 0.85,
+            ease: "power3.out",
+            overwrite: true,
+            // Clear the raster-layer hint once the slide finishes — a permanent
+            // will-change on reading text keeps it on its own compositor layer
+            // and can soften the glyph edges at rest (blur-audit, 2026-07-10).
+            onComplete: () => gsap.set(rest, { willChange: "auto" }),
+          });
         }
         if (body) {
           gsap.to(body, { y: 0, opacity: 1, duration: 0.7, delay: 0.12, ease: "power3.out", overwrite: true });
@@ -634,7 +647,6 @@ function CraftSection() {
                     }}
                     data-gsap-reveal="true"
                     className="inline-block"
-                    style={{ willChange: "transform" }}
                   >
                     {item.rest}
                   </span>
@@ -808,10 +820,12 @@ function AboutCTA() {
       <div className="relative min-h-[40svh] overflow-hidden lg:min-h-[68svh]">
         <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/generated/home-about-workbench.jpg"
+            src="/images/generated/about-cta-first-conversation-v2.jpg"
             alt=""
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
+            quality={92}
+            unoptimized
             className="object-cover"
             style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.92)" }}
           />
