@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
+import { useJunctionSettle } from "@/components/system/useJunctionSettle";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +19,13 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
   const wrapRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<number[]>([]);
+
+  // Fix 26 — never rest half-covered: settle to the nearest clean boundary
+  // after a genuine scroll-end inside a cover transition. All guards internal
+  // (direction-aware, Lenis-driven glide, cancel-on-input, desktop-only). This
+  // flow's FAQ answers resize surfaces after mount; the hook re-measures on
+  // live rects each idle so the settle target stays correct.
+  useJunctionSettle(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;

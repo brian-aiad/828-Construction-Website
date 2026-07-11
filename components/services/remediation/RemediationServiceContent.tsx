@@ -60,6 +60,29 @@ const APPROACH = [
   ["04", "Build back / Reconstruction"],
 ] as const;
 
+const APPROACH_PHOTOS = [
+  {
+    src: "/images/generated/remediation-step-initial-call-v2.png",
+    alt: "Initial remediation call setup with project notes, plans, and phone",
+    label: "Initial call",
+  },
+  {
+    src: "/images/generated/remediation-step-visual-testing-v2.png",
+    alt: "Moisture testing at an opened residential wall during remediation inspection",
+    label: "Visual inspection / Testing",
+  },
+  {
+    src: "/images/generated/remediation-step-scope-work-v2.png",
+    alt: "Remediation scope of work documents, floor plans, and marked project photos",
+    label: "Remediation / Scope of work",
+  },
+  {
+    src: "/images/generated/remediation-step-reconstruction-v2.png",
+    alt: "Clean residential rebuild with new drywall after remediation",
+    label: "Build back / Reconstruction",
+  },
+] as const;
+
 // Verbatim from Joe's phone notes (Section 4, start pointer "The company
 // integrated…" → end pointer "…exceeds industry standards").
 const METHOD_LEAD =
@@ -72,8 +95,18 @@ const METHOD_BODY = [
 // Joe's Section 5 note: "Picture of the flair E8 and 277 MR" — real photos
 // pending; plates hold the layout (page signature, PATTERNS.md).
 const EQUIPMENT = [
-  { model: "Flair E8", role: "Air filtration" },
-  { model: "277 MR", role: "Moisture control" },
+  {
+    model: "Flair E8",
+    role: "Air filtration",
+    src: "/images/generated/remediation-equipment-air-filtration-v2.png",
+    alt: "Portable air filtration equipment in a clean remediation workspace",
+  },
+  {
+    model: "277 MR",
+    role: "Moisture control",
+    src: "/images/generated/remediation-equipment-moisture-control-v2.png",
+    alt: "Professional moisture control equipment in a contained remediation workspace",
+  },
 ];
 
 // Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule).
@@ -358,11 +391,13 @@ function RemediationHero() {
         <div className="rem-hero-media relative order-2 min-h-[46vh] overflow-hidden lg:min-h-screen">
           <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/projects/remediation-active.jpg"
+              src="/images/generated/remediation-hero-controlled-work-v2.png"
               alt="Controlled remediation work area with exposed framing and drying equipment"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
+              quality={92}
+              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -509,8 +544,14 @@ function RemediationFaq() {
 // ── Section 3 — the approach / build philosophy ─────────────────────────────
 function RemediationApproach() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const activeIdx = useFocusIndex(rowRefs, 0.52);
-  const rebuildPhase = activeIdx >= 2;
+  // Focus line at 0.60 (was 0.52): the section pins at top:0 with all four rows
+  // static and shorter than the viewport, so a 0.52 line rested nearest row 03
+  // and step 04 ("Build back / Reconstruction") never ignited — the maroon
+  // progress rail capped at 75% and the reconstruction crossfade never showed.
+  // 0.60 lets the final row win the focus at pin while 01–03 still play in the
+  // entry sweep, so every step gets its moment and the rail completes.
+  const activeIdx = useFocusIndex(rowRefs, 0.6);
+  const activePhoto = APPROACH_PHOTOS[activeIdx] ?? APPROACH_PHOTOS[0];
 
   return (
     <section
@@ -553,7 +594,7 @@ function RemediationApproach() {
                     ref={(el) => {
                       rowRefs.current[i] = el;
                     }}
-                    className={`flex items-baseline gap-6 border-t py-6 pl-7 transition-colors duration-500 sm:gap-9 sm:pl-9 lg:py-8 ${
+                    className={`flex items-baseline gap-5 border-t py-6 pl-7 transition-colors duration-500 sm:gap-9 sm:pl-9 lg:py-8 ${
                       active ? "border-[var(--color-accent)]/80" : "border-white/10"
                     }`}
                   >
@@ -566,7 +607,7 @@ function RemediationApproach() {
                       {num}
                     </span>
                     <h3
-                      className={`font-display leading-tight transition-colors duration-500 text-[clamp(1.25rem,2.2vw,1.9rem)] ${
+                      className={`min-w-0 break-words font-display text-[1.18rem] leading-tight transition-colors duration-500 sm:text-[clamp(1.25rem,2.2vw,1.9rem)] ${
                         active ? "text-white" : "text-white/55"
                       }`}
                     >
@@ -576,6 +617,29 @@ function RemediationApproach() {
                 );
               })}
             </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:hidden">
+              {APPROACH_PHOTOS.map((photo) => (
+                <div key={photo.src} className="relative min-h-[15rem] overflow-hidden bg-white/5">
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    quality={92}
+                    unoptimized
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    onError={imgError}
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[9px] uppercase tracking-[0.2em] text-white/70">
+                    {photo.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="relative hidden lg:block">
@@ -584,14 +648,16 @@ function RemediationApproach() {
                 {/* Crossfading plate: inspection (steps 01–02) → rebuilt (03–04) */}
                 <div
                   className="absolute inset-0 transition-opacity duration-700"
-                  style={{ opacity: rebuildPhase ? 0 : 1 }}
+                  style={{ opacity: 1 }}
                 >
                   <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
                     <Image
-                      src="/images/projects/remediation-mold.jpg"
-                      alt="Moisture intrusion identified on an interior wall during inspection"
+                      src={activePhoto.src}
+                      alt={activePhoto.alt}
                       fill
                       sizes="45vw"
+                      quality={92}
+                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -602,14 +668,16 @@ function RemediationApproach() {
                 </div>
                 <div
                   className="absolute inset-0 transition-opacity duration-700"
-                  style={{ opacity: rebuildPhase ? 1 : 0 }}
+                  style={{ opacity: 0 }}
                 >
                   <div className="rem-parallax-soft absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
                     <Image
-                      src="/images/projects/remediation-restored.jpg"
-                      alt="Interior space fully rebuilt after remediation"
+                      src={activePhoto.src}
+                      alt={activePhoto.alt}
                       fill
                       sizes="45vw"
+                      quality={92}
+                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -621,7 +689,7 @@ function RemediationApproach() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6">
                   <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
-                    {rebuildPhase ? "Build back / Reconstruction" : "Visual inspection / Testing"}
+                    {activePhoto.label}
                   </span>
                 </div>
               </div>
@@ -639,11 +707,11 @@ function RemediationApproach() {
 const METHOD_PHOTOS = [
   // Swappable slots — Brian is generating a multi-photo set to drop in here.
   {
-    src: "/images/projects/remediation-damage.jpg",
+    src: "/images/generated/remediation-method-diagnostic-v2.png",
     alt: "Opened wall condition before remediation repair",
   },
   {
-    src: "/images/projects/remediation-work.jpg",
+    src: "/images/generated/remediation-method-restoration-v2.png",
     alt: "Remediation drying equipment in a clean work area",
   },
 ];
@@ -673,6 +741,8 @@ function RemediationMethod() {
                     alt={photo.alt}
                     fill
                     sizes="(max-width: 1024px) 50vw, 24vw"
+                    quality={92}
+                    unoptimized
                     placeholder="blur"
                     blurDataURL={BLUR_PLACEHOLDER}
                     onError={imgError}
@@ -760,13 +830,19 @@ function RemediationCta() {
                   Equipment / {EQUIPMENT[0].role}
                 </span>
                 <div>
-                  <div
-                    className="mb-5 flex h-24 items-center justify-center border border-dashed border-white/12 sm:h-32"
-                    aria-hidden="true"
-                  >
-                    <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
-                      Photo pending
-                    </span>
+                  <div className="relative mb-5 h-24 overflow-hidden border border-white/12 sm:h-32">
+                    <Image
+                      src={EQUIPMENT[0].src}
+                      alt={EQUIPMENT[0].alt}
+                      fill
+                      sizes="(max-width: 1024px) 50vw, 16vw"
+                      quality={92}
+                      unoptimized
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                    />
                   </div>
                   <span className="inline-block bg-[var(--color-accent)]/90 px-2 py-1 font-labels text-[9px] uppercase tracking-[0.18em] text-white">
                     On every job
@@ -781,13 +857,19 @@ function RemediationCta() {
                   Equipment / {EQUIPMENT[1].role}
                 </span>
                 <div>
-                  <div
-                    className="mb-5 flex h-24 items-center justify-center border border-dashed border-white/12 sm:h-32"
-                    aria-hidden="true"
-                  >
-                    <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/60">
-                      Photo pending
-                    </span>
+                  <div className="relative mb-5 h-24 overflow-hidden border border-white/12 sm:h-32">
+                    <Image
+                      src={EQUIPMENT[1].src}
+                      alt={EQUIPMENT[1].alt}
+                      fill
+                      sizes="(max-width: 1024px) 50vw, 16vw"
+                      quality={92}
+                      unoptimized
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                    />
                   </div>
                   <span className="inline-block bg-[var(--color-accent)]/90 px-2 py-1 font-labels text-[9px] uppercase tracking-[0.18em] text-white">
                     On every job
