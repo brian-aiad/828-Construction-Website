@@ -170,40 +170,6 @@ function useTravelIndex(
   return active;
 }
 
-// Focus-line selection for in-flow row lists (values panel): the active row is
-// the last row whose top has crossed the focus line — monotone and
-// reflow-immune (PATTERNS.md Fix 22 timing rule).
-function useFocusIndex(
-  refs: React.MutableRefObject<Array<HTMLElement | null>>,
-  focusRatio = 0.55
-) {
-  const [active, setActive] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const measure = () => {
-      raf = 0;
-      const focus = window.innerHeight * focusRatio;
-      let best = 0;
-      refs.current.forEach((el, i) => {
-        if (el && el.getBoundingClientRect().top <= focus) best = i;
-      });
-      setActive((prev) => (prev === best ? prev : best));
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [refs, focusRatio]);
-  return active;
-}
-
 function useServicesMotion() {
   const rootRef = useRef<HTMLDivElement>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
@@ -552,18 +518,26 @@ function VisionStatement() {
 // Literal to the split-screen Joe pointed at (NS "Build with purpose"):
 // photograph one side, dark panel with numbered principles the other,
 // numbers/titles one side of the panel, phrases the opposite side.
+// Desktop pins the split over a 240vh runway — each principle owns ~60vh of
+// dedicated scroll, same bulletproof mechanic as the index (Brian 2026-07-12:
+// the free-flowing rows blew through 01→04 in one gesture and the settle
+// glide finished the job). Inside a pinned runway the junction settle stays
+// quiet by design. Mobile keeps the natural in-flow walk.
 function PrinciplesSection() {
+  const wrapRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const activeIdx = useFocusIndex(rowRefs, 0.55);
+  const activeIdx = useTravelIndex(wrapRef, rowRefs, PRINCIPLES.length);
 
   return (
     <section
+      ref={wrapRef}
       data-section="services-principles"
       data-header-dark=""
-      className="relative bg-[#0a0a0a] text-white"
+      className="relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+240vh)]"
       style={{ overflowX: "clip" }}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
+      <div className="grid grid-cols-1 lg:h-full lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         {/* Close-up plate — photographer close-ups, per Joe: one per principle.
             All four stack as persistent opacity layers and crossfade as their
             row ignites — decoded up front so a swap never flashes the blur
@@ -603,8 +577,8 @@ function PrinciplesSection() {
           </div>
         </div>
 
-        {/* Ink panel */}
-        <div className="px-6 py-16 lg:px-16 lg:py-24 xl:px-20">
+        {/* Ink panel — vertically centered inside the pinned viewport */}
+        <div className="px-6 py-16 lg:flex lg:h-full lg:flex-col lg:justify-center lg:px-16 lg:py-0 xl:px-20">
           <span className="svc-rise block font-labels text-[10px] uppercase tracking-[0.24em] text-white/60">
             Through all projects
           </span>
@@ -612,7 +586,7 @@ function PrinciplesSection() {
             Ever present
           </h2>
 
-          <div className="relative mt-10 lg:mt-14">
+          <div className="relative mt-10">
             {/* Reading-progress seam: grows down the panel as rows ignite */}
             <div className="absolute -left-5 top-0 hidden h-full w-px bg-white/10 lg:block xl:-left-8" aria-hidden="true" />
             <div
@@ -664,6 +638,7 @@ function PrinciplesSection() {
             <div className="h-px w-full bg-white/[0.08]" aria-hidden="true" />
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
