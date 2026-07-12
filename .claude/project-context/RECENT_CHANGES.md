@@ -2,6 +2,29 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-12 — ADU V3.4: junction settle + compact acronym (Brian)
+
+- SETTLE: AduFlow wired to the canonical junction-settle hook
+  (components/system/useJunctionSettle via the home re-export). Verified the
+  canonical short-surface band bound (prevBottom) covers the newly compact
+  acronym — a stop in the ~100px pre-cover window below a sub-viewport
+  section must NOT carry the reader a section forward.
+- COMPACT ACRONYM (Brian screenshot: "too long, takes up the whole page",
+  verbiage untouched): section 1088px → 768px desktop (fits one viewport;
+  mobile 973 → 701). Row padding halved, letters clamp(2.4,3.8vw,3.4rem),
+  words clamp(1.2,1.7vw,1.6rem), definitions inline-tight, photo panel now
+  absolute-fills the rows column (no more viewport-tall sticky), watermark
+  clamp(9,17vw,14rem).
+- TORTURE (wheel-driven — the settle correctly ignores programmatic jumps,
+  which is the anchor/deep-link guarantee; immediate-jump harnesses can't
+  trigger it): 2× consecutive desktop runs clean under the real contract
+  (junction complete ≤32px OR not-begun ≥ prevVisibleBottom−32); fling,
+  mid-junction reversal, and scrollIntoView anchor all clean. Mobile: hook
+  intentionally inactive (canonical desktop-only guard) — N/A by design.
+- ANIMATION PRESERVATION: before/after frames at fixed offsets — hero + FAQ
+  pixel-identical (0.0% delta); only the ordered compaction differs below.
+- QA: tsc clean; functional-qa PASS desktop+mobile; no overflow.
+
 ## 2026-07-11 — FINAL POLISH PASS: every page to the home standard (Brian's "one last hurrah")
 
 - Seven parallel agents, one per page + cross-cutting sweeps. Checklist per

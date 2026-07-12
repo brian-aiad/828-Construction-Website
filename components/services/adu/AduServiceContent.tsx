@@ -662,12 +662,12 @@ function AcronymRow({
         ref={(el) => {
           setRowRef(index, el);
         }}
-        className="adu-rise py-8 lg:py-10"
+        className="adu-rise py-5 lg:py-6"
         data-stagger={String(index * 0.1)}
       >
-        <div className="flex items-baseline gap-5 sm:gap-7">
+        <div className="flex items-baseline gap-4 sm:gap-5">
           <span
-            className={`w-[0.75em] font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(3.4rem,6vw,5.4rem)] ${
+            className={`w-[0.75em] font-display font-bold leading-none tracking-tight transition-colors duration-500 text-[clamp(2.4rem,3.8vw,3.4rem)] ${
               active ? "text-[var(--color-accent-light)]" : "text-white/[0.22]"
             }`}
             aria-hidden="true"
@@ -675,7 +675,7 @@ function AcronymRow({
             {item.letter}
           </span>
           <h3
-            className={`font-display leading-none transition-colors duration-500 text-[clamp(1.4rem,2.2vw,2rem)] ${
+            className={`font-display leading-none transition-colors duration-500 text-[clamp(1.2rem,1.7vw,1.6rem)] ${
               active ? "text-white" : "text-white/55"
             }`}
           >
@@ -691,7 +691,7 @@ function AcronymRow({
         {/* Home word-fill grammar: the definition inks in as you scroll */}
         <p
           ref={bodyRef}
-          className="mt-5 max-w-xl pl-[calc(0.75em+1.25rem)] text-sm leading-7 text-white/90 sm:pl-0 sm:ml-[4.6rem] lg:text-[15px] lg:leading-8"
+          className="mt-3 max-w-xl text-sm leading-6 text-white/90 sm:ml-[3.4rem] lg:text-[15px] lg:leading-7"
         >
           {item.body}
         </p>
@@ -717,12 +717,12 @@ function AduAcronym() {
       {/* Page signature (PATTERNS.md): giant ADU watermark, whisper-quiet, drifting */}
       <div
         className="adu-watermark pointer-events-none absolute -left-6 top-1/2 select-none font-display font-bold leading-none tracking-tight text-white lg:left-6"
-        style={{ fontSize: "clamp(11rem,24vw,20rem)", opacity: 0.04 }}
+        style={{ fontSize: "clamp(9rem,17vw,14rem)", opacity: 0.04 }}
         aria-hidden="true"
       >
         ADU
       </div>
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-28">
         <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
           What we drive for
         </span>
@@ -730,7 +730,7 @@ function AduAcronym() {
           What ADU means to 828.
         </h2>
 
-        <div className="mt-12 grid grid-cols-1 gap-10 lg:mt-14 lg:grid-cols-12 lg:gap-14">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:mt-10 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-7">
             {ACRONYM.map((item, i) => (
               <AcronymRow
@@ -746,9 +746,11 @@ function AduAcronym() {
 
           {/* The picture keyed to the igniting letter — sticky, crossfading.
               Slots are swap-ready for the new client images. */}
+          {/* Panel height mirrors the compact rows column exactly (absolute
+              fill) — the section now rests inside a single viewport. */}
           <div className="relative hidden lg:col-span-5 lg:block" aria-hidden="true">
-            <div className="sticky top-24">
-              <div className="adu-clip relative h-[calc(100vh-12rem)] min-h-[22rem] overflow-hidden" data-gsap-reveal="true">
+            <div className="absolute inset-0">
+              <div className="adu-clip relative h-full min-h-[20rem] overflow-hidden" data-gsap-reveal="true">
                 {ACRONYM_PHOTOS.map((photo, i) => (
                   <div
                     key={photo.src}
