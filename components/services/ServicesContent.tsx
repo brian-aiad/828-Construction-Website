@@ -350,9 +350,12 @@ function ServicesIndex() {
   const wrapRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
   const focusIdx = useTravelIndex(wrapRef, rowRefs, SERVICE_ROWS.length);
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  const inkIdx = hoverIdx ?? focusIdx; // text illumination follows hover too
-  const openIdx = focusIdx; // the picture follows SCROLL only (Joe: "as you scroll")
+  // Ink and picture BOTH follow scroll — never hover. A hover override kept
+  // whichever row the idle cursor sat on bolded while the pinned panel walked
+  // to the next service underneath it (Brian's 2026-07-12 screenshots: "ADU
+  // still bolded showing a remediation photo"). Hover keeps only the arrow
+  // affordance, via CSS group-hover.
+  const activeIdx = focusIdx;
 
   return (
     <section
@@ -376,14 +379,11 @@ function ServicesIndex() {
             <div className="h-px w-full bg-black/12" aria-hidden="true" />
             {SERVICE_ROWS.map((row, i) => {
               const service = SERVICES.find((s) => s.slug === row.slug)!;
-              const ink = inkIdx === i;
-              const open = openIdx === i;
+              const open = activeIdx === i;
               return (
                 <Link
                   key={row.slug}
                   href={`/services/${row.slug}`}
-                  onMouseEnter={() => setHoverIdx(i)}
-                  onMouseLeave={() => setHoverIdx(null)}
                   aria-label={`View ${service.title}`}
                   className="group block border-b border-black/12"
                 >
@@ -394,21 +394,21 @@ function ServicesIndex() {
                     className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-4"
                   >
                     <span
-                      className={`svc-row-title font-display font-normal leading-[1.02] tracking-tight transition-colors duration-500 text-[clamp(2.3rem,4.9vw,4.4rem)] ${
-                        ink ? "text-[#141414]" : "text-black/[0.46]"
+                      className={`svc-row-title font-display font-normal leading-[1.02] tracking-tight transition-colors duration-300 text-[clamp(2.3rem,4.9vw,4.4rem)] ${
+                        open ? "text-[#141414]" : "text-black/[0.46]"
                       }`}
                     >
                       {service.title}
                     </span>
                     <span
-                      className={`svc-row-tag font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-500 ${
-                        ink ? "text-black/75" : "text-black/60"
+                      className={`svc-row-tag font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
+                        open ? "text-black/75" : "text-black/60"
                       }`}
                     >
                       {String(i + 1).padStart(2, "0")} / {service.short}
                       <span
-                        className={`ml-3 inline-block transition-all duration-300 ${
-                          ink
+                        className={`ml-3 inline-block transition-all duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
+                          open
                             ? "translate-x-0 text-[var(--color-accent)]"
                             : "-translate-x-1"
                         }`}
@@ -420,14 +420,17 @@ function ServicesIndex() {
                   </div>
 
                   {/* The traveling picture: only the active row's stage is open.
-                      Identical duration/easing on every stage keeps the list
-                      reflow net-zero while one collapses and the next expands. */}
+                      950ms with a soft bezier so the handoff reads as a move,
+                      not a cut (Brian 2026-07-12). Desktop (pinned panel,
+                      overflow-hidden) sequences the opening stage 110ms behind
+                      the closing one; mobile keeps identical timing so the
+                      in-flow list reflow stays net-zero. */}
                   <div
-                    className="grid"
+                    className={`grid ${open ? "lg:[transition-delay:110ms]" : "[transition-delay:0ms]"}`}
                     style={{
                       gridTemplateRows: open ? "1fr" : "0fr",
                       transition:
-                        "grid-template-rows 750ms cubic-bezier(0.16,1,0.3,1)",
+                        "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
                     }}
                     aria-hidden={!open}
                   >
