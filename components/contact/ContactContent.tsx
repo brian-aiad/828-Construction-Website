@@ -60,10 +60,26 @@ const inquiryRows = [
   },
 ];
 
+// Same rows/pictures/captions as the services index — Joe singled that
+// treatment out in his video ("how we're doing on that one service page…
+// they illuminate and a picture illuminates with it"). Captions are approved
+// live copy from ServicesContent.
 const SERVICE_PATH_ROWS = [
-  { slug: "adu", image: "/images/projects/adu-exterior-new.jpg" },
-  { slug: "remediation", image: "/images/projects/remediation-active.jpg" },
-  { slug: "consulting", image: "/images/projects/consulting-plans.jpg" },
+  {
+    slug: "adu",
+    image: "/images/generated/services-row-adu-v2.jpg",
+    line: "New living space, permitted and built to hold value.",
+  },
+  {
+    slug: "remediation",
+    image: "/images/generated/services-row-remediation-v2.jpg",
+    line: "Find the cause, open only what matters, rebuild correctly.",
+  },
+  {
+    slug: "consulting",
+    image: "/images/generated/services-row-consulting-v2.jpg",
+    line: "Decide before you spend. Scope, risk, cost, and next moves.",
+  },
 ];
 
 // Live-rect focus selection (services-index mechanic, PATTERNS.md Fix 22 timing
@@ -130,7 +146,6 @@ function useContactMotion() {
     const root = rootRef.current;
     if (!root) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const desktop = window.innerWidth >= 1024;
     const revealCleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
@@ -165,23 +180,6 @@ function useContactMotion() {
         );
       }
 
-      if (desktop && !reduced) {
-        // Row photo plates drift on a slower depth than the page. The paths
-        // section is the flow's LAST surface (position relative, never pinned),
-        // so these scrub triggers stay truthful.
-        gsap.utils.toArray<HTMLElement>(".ct-plate img").forEach((img) => {
-          gsap.to(img, {
-            yPercent: -7,
-            ease: "none",
-            scrollTrigger: {
-              trigger: img.closest(".ct-plate"),
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1.6,
-            },
-          });
-        });
-      }
     }, rootRef);
 
     ctxRef.current = ctx;
@@ -203,7 +201,7 @@ function ContactHero() {
     <section
       data-section="contact-hero"
       data-header-dark=""
-      className="relative flex min-h-[88svh] flex-col justify-between overflow-hidden bg-black text-white"
+      className="relative flex min-h-[54svh] flex-col justify-between overflow-hidden bg-black text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="absolute inset-0">
@@ -227,22 +225,22 @@ function ContactHero() {
       </div>
 
       {/* Off to the side (Joe, IMG_1123): the listening line rides the upper right. */}
-      <div className="relative z-10 flex justify-end px-6 pt-28 lg:px-12 lg:pt-36">
+      <div className="relative z-10 flex justify-end px-6 pt-24 lg:px-12 lg:pt-28">
         <p className="ct-rise max-w-xs text-right text-sm leading-7 text-white/82 sm:max-w-sm lg:text-[15px] lg:leading-8">
           Our journey begins with active listening, where each conversation
           begins the foundation of shaping your vision.
         </p>
       </div>
 
-      <div className="relative z-10 px-6 pb-14 lg:px-12 lg:pb-20">
+      <div className="relative z-10 px-6 pb-9 lg:px-12 lg:pb-11">
         <span className="font-labels text-[10px] uppercase tracking-[0.26em] text-white/62">
           Contact / 828 Construction
         </span>
-        <h1 className="mt-5 max-w-3xl font-display font-normal leading-[1.04] tracking-[-0.01em] text-[clamp(2.2rem,4.5vw,4.6rem)]">
+        <h1 className="mt-4 max-w-3xl font-display font-normal leading-[1.04] tracking-[-0.01em] text-[clamp(2rem,3.8vw,3.8rem)]">
           Building lasting partnerships.
         </h1>
-        <div className="ct-line mt-7 h-px w-full max-w-40 origin-left bg-[var(--color-accent)]" />
-        <p className="mt-6 max-w-md text-sm leading-7 text-white/72">
+        <div className="ct-line mt-5 h-px w-full max-w-36 origin-left bg-[var(--color-accent)]" />
+        <p className="mt-4 max-w-md text-sm leading-7 text-white/72">
           Forging exceptional partnership defined by artistry and enduring
           values
         </p>
@@ -347,39 +345,71 @@ function GetInTouch() {
 }
 
 // ── Section 03 — critical elements (heading per IMG_1125, items frozen) ──────
+// V4 composition: asymmetric editorial split (Design Direction V4) — statement
+// block left, the four essentials as an igniting ledger right (same values-
+// ledger grammar as the consulting/remediation benefit rows).
 function InsightsPrep() {
+  const itemRefs = useRef<Array<HTMLElement | null>>([]);
+  const activeIdx = useFocusIndex(itemRefs, 0.58);
+
   return (
     <section
       data-section="contact-prep"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-10 pt-28 text-[#141414] lg:px-12 lg:pb-12"
+      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-16 pt-28 text-[#141414] lg:px-12 lg:pb-20"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl">
-        <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
-          Critical elements to include in your communication
-        </span>
-        <h2 className="ct-rise mt-5 max-w-3xl font-display font-normal leading-[1.12] tracking-[-0.01em] text-[clamp(1.6rem,2.9vw,2.9rem)]">
-          Your insights help us provide solutions that are thoughtfully
-          tailored to your needs
-        </h2>
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
+        <div>
+          <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
+            Critical elements to include in your communication
+          </span>
+          <h2 className="ct-rise mt-5 max-w-xl font-display font-normal leading-[1.14] tracking-[-0.01em] text-[clamp(1.6rem,2.7vw,2.7rem)]">
+            Your insights help us provide solutions that are thoughtfully
+            tailored to your needs
+          </h2>
+          <div className="ct-line mt-8 h-px w-full max-w-36 origin-left bg-[var(--color-accent)]" />
+        </div>
 
-        <div className="ct-line mt-10 h-px w-full origin-left bg-black/12" />
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4">
-          {prepItems.map((item, index) => (
-            <div
-              key={item}
-              className="ct-rise border-b border-black/10 py-7 sm:border-b-0 sm:border-r sm:pr-6 sm:last:border-r-0 lg:py-9"
-            >
-              <span className="font-numbers text-xl font-bold text-[var(--color-accent)]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <p className="mt-4 max-w-[16rem] text-sm leading-6 text-black/72 sm:pl-0">
-                {item}
-              </p>
-            </div>
-          ))}
+        <div className="lg:pt-1">
+          {prepItems.map((item, index) => {
+            const active = activeIdx === index;
+            return (
+              <div
+                key={item}
+                ref={(el) => {
+                  itemRefs.current[index] = el;
+                }}
+                className="ct-rise border-b border-black/10 py-6 first:border-t lg:py-7"
+              >
+                <div className="flex items-baseline gap-6 lg:gap-8">
+                  <span
+                    className={`font-numbers text-lg font-bold transition-colors duration-500 ${
+                      active ? "text-[var(--color-accent)]" : "text-black/[0.38]"
+                    }`}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`font-display font-normal leading-snug tracking-[-0.01em] text-[clamp(1.2rem,2.1vw,1.8rem)] transition-colors duration-500 ${
+                        active ? "text-[#141414]" : "text-black/[0.46]"
+                      }`}
+                    >
+                      {item}
+                    </p>
+                    <span
+                      className={`mt-3 block h-px origin-left bg-[var(--color-accent)]/80 transition-transform duration-700 ease-out ${
+                        active ? "scale-x-100" : "scale-x-0"
+                      }`}
+                      style={{ width: "min(10rem, 45%)" }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -388,12 +418,16 @@ function InsightsPrep() {
 
 // ── Section 04 — service paths as full-bleed rows + shrunk South Bay row ─────
 // Joe (IMG_1127): rows spread all the way across, illuminate on scroll with a
-// picture illuminating alongside; the service-area box comes underneath, shrunk.
+// picture illuminating alongside — "how we're doing on that one service page."
+// V4: the services-index stage grammar verbatim — dim rows ink in the focus
+// band and the ACTIVE row opens a full-width picture stage beneath its title
+// (same 950ms soft-bezier stage, caption, maroon progress line). No pinned
+// runway — that stays the services page's signature; contact walks in natural
+// flow on every viewport. Ink and picture follow scroll only (no hover
+// override — the services 2026-07-12 lesson).
 function ServicePathRows() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const focusIdx = useFocusIndex(rowRefs, 0.55);
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-  const activeIdx = hoverIdx ?? focusIdx;
+  const activeIdx = useFocusIndex(rowRefs, 0.5);
 
   return (
     <section
@@ -410,100 +444,96 @@ function ServicePathRows() {
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mx-auto mt-6 max-w-7xl px-6 lg:px-12">
+        <div className="h-px w-full bg-black/12" aria-hidden="true" />
         {SERVICE_PATH_ROWS.map((row, i) => {
           const service = SERVICES.find((s) => s.slug === row.slug)!;
-          const active = activeIdx === i;
+          const open = activeIdx === i;
           return (
             <Link
               key={row.slug}
               href={`/services/${row.slug}`}
-              ref={(el) => {
-                rowRefs.current[i] = el;
-              }}
-              onMouseEnter={() => setHoverIdx(i)}
-              onMouseLeave={() => setHoverIdx(null)}
-              className="group block border-t border-black/10 last:border-b"
-              aria-current={active ? "true" : undefined}
+              aria-label={`View ${service.title}`}
+              className="group block border-b border-black/12"
             >
-              <div className="mx-auto grid max-w-7xl items-center gap-x-10 gap-y-4 px-6 py-7 sm:grid-cols-[minmax(0,1fr)_9.5rem_auto] lg:px-12 lg:py-8">
-                <div>
-                  <h3
-                    className={`font-display font-normal leading-none tracking-[-0.01em] text-[clamp(1.7rem,3.4vw,3.1rem)] transition-colors duration-500 ${
-                      active ? "text-[#141414]" : "text-black/[0.46]"
-                    }`}
-                  >
-                    {service.title}
-                  </h3>
-                  <p
-                    className={`mt-3 max-w-xl text-sm leading-6 transition-colors duration-500 ${
-                      active ? "text-black/62" : "text-black/[0.46]"
-                    }`}
-                  >
-                    {service.short}
-                  </p>
-                  <span
-                    className={`mt-4 block h-px origin-left bg-[var(--color-accent)] transition-transform duration-700 ease-out ${
-                      active ? "scale-x-100" : "scale-x-0"
-                    }`}
-                    style={{ width: "min(18rem, 60%)" }}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                {/* The picture that illuminates with its row (desktop plate). */}
-                <div
-                  className="ct-plate relative hidden h-24 overflow-hidden sm:block lg:h-28"
-                  aria-hidden="true"
+              <div
+                ref={(el) => {
+                  rowRefs.current[i] = el;
+                }}
+                className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-6"
+              >
+                <span
+                  className={`font-display font-normal leading-[1.02] tracking-tight transition-colors duration-300 text-[clamp(2rem,4.2vw,3.8rem)] ${
+                    open ? "text-[#141414]" : "text-black/[0.46]"
+                  }`}
                 >
-                  {/* Self-managed rest state: inactive plate holds opacity:0 +
-                      clip inset by design. Opt out of LenisProvider's reveal
-                      failsafe or it force-reveals the inactive plate after ~2.5s
-                      in-viewport, lighting two photos at once (PATTERNS Fix 24). */}
-                  <div
-                    data-failsafe-exempt
-                    className="absolute inset-0 transition-all duration-700 ease-out"
-                    style={{
-                      clipPath: active
-                        ? "inset(0% 0% 0% 0%)"
-                        : "inset(0% 100% 0% 0%)",
-                      opacity: active ? 1 : 0,
-                    }}
+                  {service.title}
+                </span>
+                <span
+                  className={`font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
+                    open ? "text-black/75" : "text-black/60"
+                  }`}
+                >
+                  {String(i + 1).padStart(2, "0")} / {service.short}
+                  <span
+                    className={`ml-3 inline-block transition-all duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
+                      open
+                        ? "translate-x-0 text-[var(--color-accent)]"
+                        : "-translate-x-1"
+                    }`}
+                    aria-hidden="true"
                   >
+                    →
+                  </span>
+                </span>
+              </div>
+
+              {/* The illuminating picture stage — services grammar, natural flow. */}
+              <div
+                className="grid"
+                style={{
+                  gridTemplateRows: open ? "1fr" : "0fr",
+                  transition:
+                    "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
+                }}
+                aria-hidden={!open}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <div className="relative -mt-1 mb-6 h-[36vh] overflow-hidden lg:mb-7 lg:h-[42vh]">
                     <Image
                       src={row.image}
-                      alt=""
+                      alt={`${service.title} by 828 Construction`}
                       fill
-                      sizes="152px"
+                      loading="lazy"
+                      sizes="(max-width: 1536px) 100vw, 1280px"
+                      quality={90}
                       onError={imgError}
-                      className="object-cover"
+                      className="object-cover transition-transform duration-[1600ms] ease-out"
+                      style={{
+                        filter: "contrast(1.05) saturate(1.05)",
+                        transform: open ? "scale(1.03)" : "scale(1.08)",
+                      }}
+                    />
+                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-16 lg:px-7 lg:pb-5">
+                      <p className="max-w-md text-[13px] leading-5 text-white/85">
+                        {row.line}
+                      </p>
+                      <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
+                        View {service.title} →
+                      </span>
+                    </div>
+                    <div
+                      className="absolute left-0 top-0 h-[2px] bg-[var(--color-accent)]"
+                      style={{
+                        width: open ? "100%" : "0%",
+                        opacity: 0.8,
+                        transition:
+                          "width 900ms cubic-bezier(0.16,1,0.3,1) 150ms",
+                      }}
+                      aria-hidden="true"
                     />
                   </div>
                 </div>
-
-                {/* Mobile: the active row's photo expands beneath its title. */}
-                <div
-                  className="relative overflow-hidden transition-[height] duration-700 ease-out sm:hidden"
-                  style={{ height: active ? "10rem" : "0rem" }}
-                  aria-hidden="true"
-                >
-                  <Image
-                    src={row.image}
-                    alt=""
-                    fill
-                    sizes="100vw"
-                    onError={imgError}
-                    className="object-cover"
-                  />
-                </div>
-
-                <span
-                  className={`hidden font-labels text-[9px] uppercase tracking-[0.18em] transition-colors duration-500 sm:block ${
-                    active ? "text-[var(--color-accent)]" : "text-black/[0.46]"
-                  }`}
-                >
-                  Review →
-                </span>
               </div>
             </Link>
           );
@@ -514,9 +544,9 @@ function ServicePathRows() {
           ref={(el) => {
             rowRefs.current[SERVICE_PATH_ROWS.length] = el;
           }}
-          className="border-b border-t border-black/10 bg-white/55"
+          className="mt-14 border border-black/10 bg-white/55 lg:mt-16"
         >
-          <div className="mx-auto grid max-w-7xl gap-x-10 gap-y-6 px-6 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-12">
+          <div className="grid gap-x-10 gap-y-6 px-6 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-10">
             <div>
               <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/54">
                 Service area

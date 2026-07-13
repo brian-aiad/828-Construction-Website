@@ -118,6 +118,29 @@ Whisper note: "A2A construction" = mishearing of "828 Construction" (0:46).
 
 ---
 
+## V4 design-fidelity pass (2026-07-13, Brian re-sent the same 3 videos)
+
+Brian: the hero shouldn't take the whole page (Joe likes NS showing the form
+below the fold), and the last two sections need to look professional / match
+the home-about flow. Words unchanged — composition pass only:
+
+- HERO: 88svh -> 54svh photo band (NS proportion, f_0014-0016 of IMG_1123 =
+  20260621_231635); the black "Get in touch" band + form now enter the first
+  viewport on load, both breakpoints.
+- CRITICAL ELEMENTS: flat 4-column strip -> asymmetric editorial split —
+  statement block left (eyebrow + heading + maroon hairline), the 01–04
+  essentials right as an igniting ledger (focus-band ink + maroon rule, same
+  values-ledger grammar as consulting/remediation).
+- FOCUSED SERVICE PATHS: small side plates -> the services-index stage grammar
+  Joe praised in IMG_1127/233531 ("how we're doing on that one service page"):
+  full-width dim rows, the ACTIVE row opens a full-width picture stage
+  (950ms soft bezier, caption + maroon progress line, scroll-driven only —
+  no hover override). No pinned runway (that remains the services signature);
+  natural flow both viewports. Pictures/captions = the approved services rows.
+- South Bay block: kept beneath as the shrunk fourth box (Joe's ask), framed.
+- QA: functional-qa PASS d+m; verbiage 15/15; seam sweep 2x clean; settle
+  torture down+up 2x clean; reveal-probe PASS.
+
 ## Requirements ledger
 
 > OWNERSHIP (2026-07-09 01:05, terminal B): /contact + the site-wide footer fix are

@@ -2,6 +2,25 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Contact V4: design-fidelity pass on Joe's re-sent videos (terminal B)
+
+- Brian re-sent the same 3 contact videos (20260621_23xxxx_iOS.MOV = IMG_1123/
+  1125/1127, byte-identical) asking the page to match what Joe SHOWED: hero
+  not full-page (form visible below the fold like the NS reference) and the
+  last two sections brought up to home/about professionalism. Words frozen.
+- Hero 88svh -> 54svh (NS proportion); Get-in-touch band + form now visible
+  on load at both breakpoints.
+- Critical elements: flat 4-col strip -> asymmetric split, 01-04 as an
+  igniting ledger (focus-band ink + maroon rule).
+- Focused service paths: side plates -> services-index stage grammar (dim
+  full-width rows; active row opens a full-width picture stage, 950ms bezier,
+  caption + maroon progress line; scroll-driven only). Same approved pictures/
+  captions as the services rows. No pinned runway. South Bay stays as the
+  shrunk fourth box.
+- QA: tsc clean; contact functional-qa PASS d+m (0 errors, dup [], toast 0);
+  verbiage 15/15; seam sweeps 2x clean; settle torture down+up 2x clean;
+  reveal-probe PASS both viewports.
+
 ## 2026-07-13 — Header-clearance standard at snapped rests, site-wide
 
 - Brian: snapping is loved, but sections rested with their first content
