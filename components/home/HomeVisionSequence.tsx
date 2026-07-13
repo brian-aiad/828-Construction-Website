@@ -307,16 +307,14 @@ export default function HomeVisionSequence() {
       data-section="vision"
       className="relative bg-[#f7f7f3] text-[#111]"
     >
-      {/* Intro + marquee fill EXACTLY one viewport on desktop so the white
-          marquee strip sits flush at the viewport bottom when this section
-          snaps — no sliver of the black runway peeking beneath it (Brian,
-          2026-07-13). */}
-      <div className="lg:flex lg:h-svh lg:flex-col">
-      {/* Intro — asymmetric editorial split */}
+      {/* Intro — asymmetric editorial split. FULL SCREEN on desktop (Brian,
+          2026-07-13 round 2): the statement owns the whole viewport at its
+          snapped rest; the white marquee strip lives at the top of the NEXT
+          section (the approach panel) instead of under this one. */}
       <div
         ref={photoRef}
         data-header-dark=""
-        className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:min-h-0 lg:flex-1"
+        className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:h-svh lg:min-h-0"
         data-gsap-reveal="true"
       >
         <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
@@ -392,40 +390,43 @@ export default function HomeVisionSequence() {
           as the reader scrolls through it */}
       </div>
 
-      {/* Marquee — refined mono strip, hairline-bounded; flush at the
-          viewport bottom at the snapped rest (bottom of the h-svh column) */}
-      <div className="border-y border-black/10 bg-[#f7f7f3] py-5" aria-hidden="true">
-        <div
-          className="flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-black/45"
-          style={{ animation: "marqueeScroll 40s linear infinite" }}
-        >
-          {[...marquee, ...marquee, ...marquee, ...marquee].map((item, i) => (
-            <span key={`${item}-${i}`} className="flex items-center gap-10">
-              <span style={i % 5 === 2 ? { color: "var(--color-accent)" } : undefined}>
-                {item}
-              </span>
-              <span
-                className="h-1.5 w-1.5 rotate-45"
-                style={{ background: "var(--color-accent)", opacity: 0.55 }}
-              />
-            </span>
-          ))}
-        </div>
-      </div>
-      </div>
-
       {/* Process — full-bleed black panel, maroon ignition, progress rail.
-          Desktop (lg+): the panel is CSS-sticky over a tall runway so the
-          5-row highlight walk owns dedicated scroll and every step gets its lit
-          moment before the next surface can cover it (services pattern, commit
-          3d15bdb). Mobile keeps the compact panel in natural flow. */}
+          Desktop (lg+): the panel is CSS-sticky over a runway so the 5-row
+          highlight walk owns dedicated scroll and every step gets its lit
+          moment before the next surface can cover it (services pattern,
+          3d15bdb). Runway trimmed 190vh → 120vh (Brian, 2026-07-13: the walk
+          took too long — a nudge barely advanced it). The white marquee strip
+          rides at the TOP of this pinned panel (moved out from under the
+          statement, Brian round 2). Mobile keeps the compact natural flow. */}
       <div
         data-header-dark=""
         data-snap-edge=""
-        className="process-travel relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+190vh)]"
+        className="process-travel relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+120vh)]"
       >
-        <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col lg:justify-center lg:overflow-hidden">
-        <div className="mx-auto w-full max-w-[1680px] px-6 pt-14 pb-16 lg:px-12 lg:py-0">
+        {/* pt-14 clears the fixed header (condensed h-14) so the marquee strip
+            is actually VISIBLE at the panel top instead of pinned behind the
+            bar (Brian, 2026-07-13). */}
+        <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col lg:overflow-hidden lg:pt-[3.5rem]">
+        {/* Marquee — refined mono strip, hairline-bounded, pinned with the panel */}
+        <div className="border-y border-black/10 bg-[#f7f7f3] py-5" aria-hidden="true">
+          <div
+            className="flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-black/45"
+            style={{ animation: "marqueeScroll 40s linear infinite" }}
+          >
+            {[...marquee, ...marquee, ...marquee, ...marquee].map((item, i) => (
+              <span key={`${item}-${i}`} className="flex items-center gap-10">
+                <span style={i % 5 === 2 ? { color: "var(--color-accent)" } : undefined}>
+                  {item}
+                </span>
+                <span
+                  className="h-1.5 w-1.5 rotate-45"
+                  style={{ background: "var(--color-accent)", opacity: 0.55 }}
+                />
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="mx-auto flex w-full max-w-[1680px] flex-col px-6 pt-14 pb-16 lg:flex-1 lg:justify-center lg:px-12 lg:py-0">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
               <p className="process-head-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-8">

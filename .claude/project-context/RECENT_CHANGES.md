@@ -2,6 +2,26 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Approach walk faster + full-screen statement + marquee moved into the approach
+
+- Brian round 5: walk "takes too long" → runway trimmed 190vh → 120vh
+  (~37% fewer scroll-notches per step; 5 steps still each get a lit moment —
+  walk-verify 5/5 x3).
+- Statement ("Our first step is listening / Refining industry standards.") is
+  now a clean FULL-SCREEN section (lg:h-svh) — the white rolling marquee
+  moved OUT from under it and now rides at the TOP of the approach panel,
+  pinned with it for the whole walk. Panel gets lg:pt-[3.5rem] so the strip
+  sits VISIBLY below the fixed header instead of pinned behind the bar
+  (caught by rest-state probe; note: lg:pt-14 didn't generate in this
+  Tailwind build — arbitrary value used).
+- With the statement a true full-viewport screen, the statement→approach
+  snap-edge dropped its 45%-commitment special case and behaves exactly like
+  every surface junction (full band, direction-aware): down-stop anywhere in
+  the transition completes into the approach, up-stop restores the statement
+  fully composed. Scenario matrix verified all four gestures land flush.
+- Regression: settle tortures 26/26 down + 20/20 up clean, functional-qa PASS
+  both viewports, tsc clean.
+
 ## 2026-07-13 — Remediation: arrive-first step walk + site-wide occlusion audit
 
 - Brian (video + screenshots): (1) FAQ rolling-questions strip parked half-cut

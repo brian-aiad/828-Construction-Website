@@ -124,17 +124,13 @@ export function useJunctionSettle(
           : vh;
         const restUp = Math.min(vh, prevBottom);
         // data-snap-edge = INTERNAL boundary (e.g. home's statement →
-        // approach runway inside one surface). The content above it is at
-        // most one viewport tall, so a full-width band would span its ENTIRE
-        // reading zone — any stop while reading would settle somewhere
-        // (forward skips the section, backward feels like being yanked back;
-        // Brian rejected both, 2026-07-13). Snap-edges therefore engage only
-        // once the reader has COMMITTED past ~45% of the transition; stops
-        // shallower than that rest naturally, exactly like the pre-snap-edge
-        // behavior. Targeting stays direction-aware like the whole site.
+        // approach runway inside one surface). Since the section above the
+        // edge is a clean FULL-VIEWPORT screen (statement owns the whole
+        // viewport at its snapped rest — Brian, 2026-07-13 round 4), the edge
+        // behaves exactly like a surface junction: full band, direction-aware.
+        // The only edge-specific rule left is the back-off clamp below.
         const isEdge = el.hasAttribute("data-snap-edge");
-        const bandTop = isEdge ? restUp * 0.45 : restUp - margin;
-        if (top > margin && top < bandTop) {
+        if (top > margin && top < restUp - margin) {
           if (worst === null || top > worst.top) {
             // Backing off a snap-edge must not scroll above its CONTAINING
             // surface's own snap (backMinY) or the previous surface peeks
