@@ -94,7 +94,14 @@ export function useJunctionSettle(
     // is what keeps stacks of short sections (remediation: faq 728 / approach
     // 706 / method 619) terminal in ONE glide instead of cascading the whole
     // stack or landing dirty (2026-07-10, remediation torture).
-    const activeJunction = (): { top: number; restUp: number } | null => {
+    const activeJunction = (
+      margin: number
+    ): {
+      top: number;
+      restUp: number;
+      nearest: boolean;
+      backMinY: number;
+    } | null => {
       const wrap = wrapRef.current;
       if (!wrap) return null;
       const vh = window.innerHeight;
@@ -103,7 +110,12 @@ export function useJunctionSettle(
       );
       // Deepest intruder (largest top): with overlapping bands more than one
       // surface can rest mid-band; resolving the deepest first converges.
-      let worst: { top: number; restUp: number } | null = null;
+      let worst: {
+        top: number;
+        restUp: number;
+        nearest: boolean;
+        backMinY: number;
+      } | null = null;
       surfaces.forEach((el, i) => {
         const top = el.getBoundingClientRect().top;
         const prev = surfaces[i - 1];
@@ -111,8 +123,31 @@ export function useJunctionSettle(
           ? prev.getBoundingClientRect().bottom
           : vh;
         const restUp = Math.min(vh, prevBottom);
-        if (top > MARGIN && top < restUp - MARGIN) {
-          if (worst === null || top > worst.top) worst = { top, restUp };
+        // data-snap-edge = INTERNAL boundary (e.g. home's statement →
+        // approach runway inside one surface). The content above it is at
+        // most one viewport tall, so a full-width band would span its ENTIRE
+        // reading zone — any stop while reading would settle somewhere
+        // (forward skips the section, backward feels like being yanked back;
+        // Brian rejected both, 2026-07-13). Snap-edges therefore engage only
+        // once the reader has COMMITTED past ~45% of the transition; stops
+        // shallower than that rest naturally, exactly like the pre-snap-edge
+        // behavior. Targeting stays direction-aware like the whole site.
+        const isEdge = el.hasAttribute("data-snap-edge");
+        const bandTop = isEdge ? restUp * 0.45 : restUp - margin;
+        if (top > margin && top < bandTop) {
+          if (worst === null || top > worst.top) {
+            // Backing off a snap-edge must not scroll above its CONTAINING
+            // surface's own snap (backMinY) or the previous surface peeks
+            // above the restored section.
+            let backMinY = 0;
+            if (isEdge) {
+              const host = el.closest<HTMLElement>("[data-stack-surface]");
+              if (host && host !== el) {
+                backMinY = window.scrollY + host.getBoundingClientRect().top;
+              }
+            }
+            worst = { top, restUp, nearest: isEdge, backMinY };
+          }
         }
       });
       return worst;
@@ -139,7 +174,17 @@ export function useJunctionSettle(
           easing: (t) => 1 - Math.pow(1 - t, 3), // easeOutCubic
           onComplete: () => {
             settling = false;
-            if (!cancelled) settleStep(); // overlap-band correction (bounded)
+            if (cancelled) return;
+            // Lenis' internal epsilon can strand very short glides a few px
+            // shy of the target (repeatably — corrections re-glide and strand
+            // at the same offset). At rest a direct scrollTo sticks (Lenis
+            // adopts external scrolls when idle), so square up the residual
+            // before re-measuring.
+            const residual = target - window.scrollY;
+            if (Math.abs(residual) > MIN_DIST && Math.abs(residual) <= 48) {
+              window.scrollTo(0, target);
+            }
+            settleStep(true); // correction pass (tight margin)
           },
         });
         return;
@@ -161,7 +206,7 @@ export function useJunctionSettle(
         } else {
           settling = false;
           glideRaf = 0;
-          if (!cancelled) settleStep();
+          if (!cancelled) settleStep(true);
         }
       };
       glideRaf = requestAnimationFrame(step);
@@ -172,19 +217,26 @@ export function useJunctionSettle(
     // next surface resting mid-band. Sticky pinning makes the geometry
     // non-linear, so re-MEASURE after each glide and correct — at most
     // MAX_ROUNDS times, still cancelled instantly by any input.
-    const settleStep = () => {
+    const settleStep = (isCorrection = false) => {
       // Guard on settling only — `cancelled` is a per-glide latch (checked in
       // the glide's own frames / onComplete chain). Gating entry on it here
       // would permanently disable settling after the first cancelled glide.
       if (settling) return;
       if (direction === 0 || settleRounds <= 0) return;
-      const junction = activeJunction();
+      // Correction passes re-measure with a TIGHT margin so glide undershoot
+      // (Lenis can land a hair short) gets finished to pixel-flush instead of
+      // resting a sliver inside MARGIN. Entry keeps the loose MARGIN so we
+      // never engage on positions the reader would call composed.
+      const junction = activeJunction(isCorrection ? MIN_DIST : MARGIN);
       if (junction === null) return;
       settleRounds--;
-      const target =
-        direction === 1
-          ? window.scrollY + junction.top // down → complete the cover
-          : window.scrollY - (junction.restUp - junction.top); // up → flush/uncovered
+      const goForward = direction === 1; // honor the gesture, site-wide
+      let target = goForward
+        ? window.scrollY + junction.top // complete to the boundary
+        : window.scrollY - (junction.restUp - junction.top); // restore above
+      if (!goForward && junction.nearest) {
+        target = Math.max(target, junction.backMinY); // never above host snap
+      }
       if (Math.abs(target - window.scrollY) < MIN_DIST) return;
       glideTo(Math.max(0, target));
     };

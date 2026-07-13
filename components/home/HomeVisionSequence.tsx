@@ -307,11 +307,16 @@ export default function HomeVisionSequence() {
       data-section="vision"
       className="relative bg-[#f7f7f3] text-[#111]"
     >
+      {/* Intro + marquee fill EXACTLY one viewport on desktop so the white
+          marquee strip sits flush at the viewport bottom when this section
+          snaps — no sliver of the black runway peeking beneath it (Brian,
+          2026-07-13). */}
+      <div className="lg:flex lg:h-svh lg:flex-col">
       {/* Intro — asymmetric editorial split */}
       <div
         ref={photoRef}
         data-header-dark=""
-        className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:min-h-[92vh]"
+        className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:min-h-0 lg:flex-1"
         data-gsap-reveal="true"
       >
         <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
@@ -330,7 +335,7 @@ export default function HomeVisionSequence() {
           aria-hidden="true"
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 pb-16 pt-24 sm:min-h-[48rem] lg:min-h-[92vh] lg:px-12 lg:pb-20 lg:pt-20">
+        <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 pb-16 pt-24 sm:min-h-[48rem] lg:h-full lg:min-h-0 lg:px-12 lg:pb-20 lg:pt-20">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12">
           <div className="lg:col-span-7">
             <p className="vision-intro-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-white/64 lg:mb-8">
@@ -387,8 +392,9 @@ export default function HomeVisionSequence() {
           as the reader scrolls through it */}
       </div>
 
-      {/* Marquee — refined mono strip, hairline-bounded */}
-      <div className="border-y border-black/10 py-5" aria-hidden="true">
+      {/* Marquee — refined mono strip, hairline-bounded; flush at the
+          viewport bottom at the snapped rest (bottom of the h-svh column) */}
+      <div className="border-y border-black/10 bg-[#f7f7f3] py-5" aria-hidden="true">
         <div
           className="flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-black/45"
           style={{ animation: "marqueeScroll 40s linear infinite" }}
@@ -406,6 +412,7 @@ export default function HomeVisionSequence() {
           ))}
         </div>
       </div>
+      </div>
 
       {/* Process — full-bleed black panel, maroon ignition, progress rail.
           Desktop (lg+): the panel is CSS-sticky over a tall runway so the
@@ -414,6 +421,7 @@ export default function HomeVisionSequence() {
           3d15bdb). Mobile keeps the compact panel in natural flow. */}
       <div
         data-header-dark=""
+        data-snap-edge=""
         className="process-travel relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+190vh)]"
       >
         <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col lg:justify-center lg:overflow-hidden">

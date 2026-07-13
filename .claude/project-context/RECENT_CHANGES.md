@@ -2,6 +2,33 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Home statement→approach snap-edge + flush marquee (3 Brian rounds)
+
+- Round 1: the statement→approach transition never snapped ("nothing happens
+  when I peek") — it's an INTERNAL boundary inside the vision surface, not a
+  flow junction, so the settle never saw it. Added data-snap-edge support to
+  useJunctionSettle (EditorialFlow passes "[data-stack-surface],
+  [data-snap-edge]"; the approach runway wrapper carries the attr).
+- Round 2 ("fireplace gets skipped"): a full-width edge band spanned the
+  statement's entire reading zone — any down-stop completed forward. Round 3
+  ("now it yanks BACK on half scrolls"): nearest-edge targeting rejected too.
+  FINAL SHAPE: snap-edges engage only once the reader commits past ~45% of
+  the transition; stops shallower rest naturally; targeting stays
+  direction-aware site-wide. Back-offs clamp to the containing surface's own
+  snap (backMinY) so the previous surface can't peek above the restored
+  statement. Bonus hook hardening: correction passes re-measure with a tight
+  4px margin, and Lenis short-glide epsilon undershoot gets squared up with
+  a direct scrollTo at rest.
+- FLUSH MARQUEE (Brian): statement block + marquee now fill exactly one
+  viewport on desktop (lg:h-svh flex column, photo flex-1, marquee at the
+  bottom) — at the snapped rest the white marquee sits flush at the viewport
+  bottom, no black runway bar peeking. Verified marqueeBottom == vh, headline
+  80px clear above it, reveal completes to identity transform.
+- Scenarios verified: small flick → natural rest (no yank either way);
+  committed scroll → snaps into the approach; up out of the approach →
+  statement restored composed. Walk 5/5 lit-in-view; settle tortures 34/34
+  down + 26/26 up; functional-qa PASS both viewports; tsc clean.
+
 ## 2026-07-13 — Contact V4: design-fidelity pass on Joe's re-sent videos (terminal B)
 
 - Brian re-sent the same 3 contact videos (20260621_23xxxx_iOS.MOV = IMG_1123/

@@ -28,7 +28,12 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
   const [nodes, setNodes] = useState<number[]>([]);
 
   // Scroll-end settle: never rest half-covered at a junction (additive only).
-  useJunctionSettle(wrapRef);
+  // data-snap-edge lets an INTERNAL boundary participate: the approach runway
+  // lives inside the vision surface, so its statement→approach transition is
+  // not a surface junction and never snapped like the rest (Brian,
+  // 2026-07-13). The hook treats snap-edges exactly like surface tops —
+  // resting mid-peek completes to the runway (down) or backs off (up).
+  useJunctionSettle(wrapRef, "[data-stack-surface], [data-snap-edge]");
 
   useEffect(() => {
     const wrap = wrapRef.current;
