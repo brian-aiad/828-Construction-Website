@@ -197,7 +197,6 @@ function useServicesMotion() {
       const hairlines = gsap.utils.toArray<HTMLElement>(".svc-hairline");
       const seams = gsap.utils.toArray<HTMLElement>(".svc-seam");
       const parallaxImgs = gsap.utils.toArray<HTMLElement>(".svc-parallax");
-      const stripInner = root.querySelector<HTMLElement>(".svc-strip-inner");
 
       // Initial states live HERE, not in JSX (Fix 14).
       gsap.set(rises, { autoAlpha: 0, y: 26 });
@@ -272,25 +271,9 @@ function useServicesMotion() {
         });
       });
 
-      // Joe (IMG_1082): the stage strip "goes across the screen" — the
-      // overflowing single-line strip slides left on scrub, walking 01 → 06
-      // through the viewport. Initial x=0 keeps the first stages readable.
-      if (stripInner) {
-        const strip = stripInner.parentElement as HTMLElement;
-        const travel = () =>
-          Math.min(0, strip.clientWidth - stripInner.scrollWidth);
-        gsap.to(stripInner, {
-          x: travel,
-          ease: "none",
-          scrollTrigger: {
-            trigger: strip,
-            start: "top 88%",
-            end: "top 18%",
-            scrub: 1.1,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
+      // Stage band is STATIC (Brian 2026-07-13: the sliding strip hid steps —
+      // "I want to see all the steps, maybe no animation"). All six stages lay
+      // out in one composed band; no scrub, no travel.
     }, root);
 
     ctxRef.current = ctx;
@@ -332,7 +315,7 @@ function ServicesIndex() {
       style={{ overflowX: "clip" }}
     >
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pb-16 pt-28 lg:px-12 lg:pb-0 lg:pt-20">
+        <div className="mx-auto max-w-7xl px-6 pb-16 pt-28 lg:px-12 lg:pb-0 lg:pt-[6.75rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
             Services / CA License #{SITE.license}
           </span>
@@ -464,7 +447,7 @@ function VisionStatement() {
           surfaces stack (Brian 2026-07-10: "perfect line down the middle"). */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <div
-          className="relative flex items-center px-6 py-16 lg:py-24 lg:pr-16"
+          className="relative flex items-center px-6 py-24 lg:pr-16"
           style={{ paddingLeft: undefined }}
         >
           <div className="w-full lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
@@ -656,7 +639,7 @@ function ProcessSection() {
       className="relative bg-[#f7f7f3] text-[#141414]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 pt-20 lg:px-12 lg:pt-28">
+      <div className="mx-auto max-w-7xl px-6 pt-24 lg:px-12 lg:pt-[7.5rem]">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
             <span className="svc-rise block font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
@@ -674,41 +657,16 @@ function ProcessSection() {
       {/* The strip that goes across the screen — overflows and slides on scrub */}
       <div className="relative mt-12 lg:mt-16">
         <div className="svc-hairline absolute left-0 top-0 h-px w-full bg-black/15" aria-hidden="true" />
-        {/* Desktop: the strip slides across the screen on scrub. min-w 165vw
-            GUARANTEES overflow at any monitor width — on wide screens the six
-            stages used to fit inside the viewport, so nothing slid and the
-            whole process sat exposed (Brian 2026-07-12: "you can see all the
-            steps"). Never all stages on screen at once. */}
-        <div className="hidden overflow-hidden lg:block">
-          <ol className="svc-strip-inner flex w-max min-w-[165vw] items-baseline justify-between gap-0 px-12 pb-14 pt-7">
-            {STAGES.map((stage, i) => (
-              <li key={stage} className="flex items-baseline whitespace-nowrap">
-                <span className="font-numbers text-[11px] text-black/60" aria-hidden="true">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="ml-2.5 font-labels text-[12px] uppercase tracking-[0.16em] text-black/80">
-                  {stage}
-                </span>
-                {i < STAGES.length - 1 && (
-                  <span
-                    className="ml-10 font-labels text-[12px] text-[var(--color-accent)]"
-                    aria-hidden="true"
-                  >
-                    +
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-        {/* Mobile: no scrub to drive the slide — all six stages stack in a grid */}
-        <ol className="grid grid-cols-2 gap-x-4 gap-y-8 px-6 pb-10 pt-6 lg:hidden">
+        {/* One static band, every stage visible (Brian 2026-07-13: no slide).
+            Six columns on desktop, 2×3 below lg; long labels wrap inside
+            their own column. */}
+        <ol className="grid grid-cols-2 gap-x-4 gap-y-8 px-6 pb-10 pt-6 lg:grid-cols-6 lg:gap-x-8 lg:px-12 lg:pb-14 lg:pt-7">
           {STAGES.map((stage, i) => (
             <li key={stage}>
               <span className="font-numbers text-[11px] text-[var(--color-accent)]" aria-hidden="true">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 font-labels text-[10px] uppercase leading-5 tracking-[0.15em] text-black/80">
+              <p className="mt-2 font-labels text-[10px] uppercase leading-5 tracking-[0.15em] text-black/80 lg:text-[11px] lg:tracking-[0.16em]">
                 {stage}
               </p>
             </li>
