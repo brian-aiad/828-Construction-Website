@@ -674,9 +674,13 @@ function ProcessSection() {
       {/* The strip that goes across the screen — overflows and slides on scrub */}
       <div className="relative mt-12 lg:mt-16">
         <div className="svc-hairline absolute left-0 top-0 h-px w-full bg-black/15" aria-hidden="true" />
-        {/* Desktop: the overflowing strip slides across the screen on scrub */}
+        {/* Desktop: the strip slides across the screen on scrub. min-w 165vw
+            GUARANTEES overflow at any monitor width — on wide screens the six
+            stages used to fit inside the viewport, so nothing slid and the
+            whole process sat exposed (Brian 2026-07-12: "you can see all the
+            steps"). Never all stages on screen at once. */}
         <div className="hidden overflow-hidden lg:block">
-          <ol className="svc-strip-inner flex w-max items-baseline gap-0 px-12 pb-14 pt-7">
+          <ol className="svc-strip-inner flex w-max min-w-[165vw] items-baseline justify-between gap-0 px-12 pb-14 pt-7">
             {STAGES.map((stage, i) => (
               <li key={stage} className="flex items-baseline whitespace-nowrap">
                 <span className="font-numbers text-[11px] text-black/60" aria-hidden="true">
@@ -687,7 +691,7 @@ function ProcessSection() {
                 </span>
                 {i < STAGES.length - 1 && (
                   <span
-                    className="mx-10 font-labels text-[12px] text-[var(--color-accent)]"
+                    className="ml-10 font-labels text-[12px] text-[var(--color-accent)]"
                     aria-hidden="true"
                   >
                     +
