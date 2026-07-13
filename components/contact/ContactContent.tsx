@@ -67,17 +67,17 @@ const inquiryRows = [
 const SERVICE_PATH_ROWS = [
   {
     slug: "adu",
-    image: "/images/generated/services-row-adu-v2.jpg",
+    image: "/images/generated/contact-path-adu-v2.png",
     line: "New living space, permitted and built to hold value.",
   },
   {
     slug: "remediation",
-    image: "/images/generated/services-row-remediation-v2.jpg",
+    image: "/images/generated/contact-path-remediation-v2.png",
     line: "Find the cause, open only what matters, rebuild correctly.",
   },
   {
     slug: "consulting",
-    image: "/images/generated/services-row-consulting-v2.jpg",
+    image: "/images/generated/contact-path-consulting-v2.png",
     line: "Decide before you spend. Scope, risk, cost, and next moves.",
   },
 ];
@@ -416,136 +416,197 @@ function InsightsPrep() {
   );
 }
 
-// ── Section 04 — service paths as full-bleed rows + shrunk South Bay row ─────
-// Joe (IMG_1127): rows spread all the way across, illuminate on scroll with a
-// picture illuminating alongside — "how we're doing on that one service page."
-// V4: the services-index stage grammar verbatim — dim rows ink in the focus
-// band and the ACTIVE row opens a full-width picture stage beneath its title
-// (same 950ms soft-bezier stage, caption, maroon progress line). No pinned
-// runway — that stays the services page's signature; contact walks in natural
-// flow on every viewport. Ink and picture follow scroll only (no hover
-// override — the services 2026-07-12 lesson).
+// ── Section 04 — service paths: the services-page SCROLLING, restyled ───────
+// Joe (IMG_1127): "how we're doing on that one service page… as you scroll they
+// illuminate and a picture illuminates with it." Brian (2026-07-13): match the
+// services page's runway scrolling — the walk is deliberate, scroll-driven —
+// but do NOT copy the look. Differentiators here: shorter 150vh runway (50vh a
+// service vs 70vh), smaller titles, and the picture stage is INDENTED with a
+// drawing vertical maroon bar on its left edge (services: full-width stage,
+// horizontal top line). Mobile walks in natural flow (no pin).
+function useTravelIndex(
+  wrapRef: React.RefObject<HTMLElement | null>,
+  rowRefs: React.MutableRefObject<Array<HTMLElement | null>>,
+  count: number
+) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const lgQuery = window.matchMedia("(min-width: 1024px)");
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      if (lgQuery.matches) {
+        const wrap = wrapRef.current;
+        if (!wrap) return;
+        const runway = wrap.offsetHeight - window.innerHeight;
+        if (runway <= 0) {
+          setActive(0);
+          return;
+        }
+        const progress = Math.min(
+          0.999,
+          Math.max(0, -wrap.getBoundingClientRect().top / runway)
+        );
+        const next = Math.min(count - 1, Math.floor(progress * count));
+        setActive((prev) => (prev === next ? prev : next));
+        return;
+      }
+      const focus = window.innerHeight * 0.38;
+      let best = 0;
+      rowRefs.current.forEach((el, i) => {
+        if (el && el.getBoundingClientRect().top <= focus) best = i;
+      });
+      setActive((prev) => (prev === best ? prev : best));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("load", onScroll, { passive: true });
+    lgQuery.addEventListener("change", onScroll);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(() => onScroll()).catch(() => {});
+    }
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", onScroll);
+      lgQuery.removeEventListener("change", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [wrapRef, rowRefs, count]);
+  return active;
+}
+
 function ServicePathRows() {
+  const wrapRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  const activeIdx = useFocusIndex(rowRefs, 0.5);
+  const activeIdx = useTravelIndex(wrapRef, rowRefs, SERVICE_PATH_ROWS.length);
 
   return (
+    <>
     <section
+      ref={wrapRef}
       data-section="contact-paths"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] pb-20 pt-28 text-[#141414] lg:pb-28"
+      className="relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+150vh)]"
       style={{ overflowX: "clip" }}
     >
-      <div className="px-6 lg:px-12">
-        <div className="mx-auto max-w-7xl">
+      {/* Deliberate walk: the panel pins while the runway scrolls (lg+). */}
+      <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
+        <div className="mx-auto max-w-7xl px-6 pb-4 pt-28 lg:px-12 lg:pt-[6.5rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Focused service paths
           </span>
+
+          <div className="mt-6 h-px w-full bg-black/12" aria-hidden="true" />
+          {SERVICE_PATH_ROWS.map((row, i) => {
+            const service = SERVICES.find((s) => s.slug === row.slug)!;
+            const open = activeIdx === i;
+            return (
+              <Link
+                key={row.slug}
+                href={`/services/${row.slug}`}
+                aria-label={`View ${service.title}`}
+                className="group block border-b border-black/12"
+              >
+                <div
+                  ref={(el) => {
+                    rowRefs.current[i] = el;
+                  }}
+                  className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4"
+                >
+                  <span
+                    className={`font-display font-normal leading-[1.02] tracking-tight transition-colors duration-300 text-[clamp(1.9rem,3.9vw,3.5rem)] ${
+                      open ? "text-[#141414]" : "text-black/[0.46]"
+                    }`}
+                  >
+                    {service.title}
+                  </span>
+                  <span
+                    className={`font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
+                      open ? "text-black/75" : "text-black/60"
+                    }`}
+                  >
+                    {String(i + 1).padStart(2, "0")} / {service.short}
+                    <span
+                      className={`ml-3 inline-block transition-all duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
+                        open
+                          ? "translate-x-0 text-[var(--color-accent)]"
+                          : "-translate-x-1"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      →
+                    </span>
+                  </span>
+                </div>
+
+                {/* Indented picture stage — same walk, different composition. */}
+                <div
+                  className="grid"
+                  style={{
+                    gridTemplateRows: open ? "1fr" : "0fr",
+                    transition:
+                      "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
+                  }}
+                  aria-hidden={!open}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="relative mb-6 mt-1 h-[34vh] overflow-hidden lg:mb-5 lg:ml-[14%] lg:h-[calc(100svh-31rem)] lg:min-h-[12rem]">
+                      <Image
+                        src={row.image}
+                        alt={`${service.title} by 828 Construction`}
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 1536px) 100vw, 1100px"
+                        quality={92}
+                        unoptimized
+                        onError={imgError}
+                        className="object-cover transition-transform duration-[1600ms] ease-out"
+                        style={{
+                          filter: "contrast(1.05) saturate(1.05)",
+                          transform: open ? "scale(1.03)" : "scale(1.08)",
+                        }}
+                      />
+                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-14 lg:px-6">
+                        <p className="max-w-md text-[13px] leading-5 text-white/85">
+                          {row.line}
+                        </p>
+                        <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
+                          View {service.title} →
+                        </span>
+                      </div>
+                      <div
+                        className="absolute bottom-0 left-0 top-0 w-[3px] bg-[var(--color-accent)]"
+                        style={{
+                          transform: open ? "scaleY(1)" : "scaleY(0)",
+                          transformOrigin: "top",
+                          opacity: 0.85,
+                          transition:
+                            "transform 900ms cubic-bezier(0.16,1,0.3,1) 150ms",
+                        }}
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
-      <div className="mx-auto mt-6 max-w-7xl px-6 lg:px-12">
-        <div className="h-px w-full bg-black/12" aria-hidden="true" />
-        {SERVICE_PATH_ROWS.map((row, i) => {
-          const service = SERVICES.find((s) => s.slug === row.slug)!;
-          const open = activeIdx === i;
-          return (
-            <Link
-              key={row.slug}
-              href={`/services/${row.slug}`}
-              aria-label={`View ${service.title}`}
-              className="group block border-b border-black/12"
-            >
-              <div
-                ref={(el) => {
-                  rowRefs.current[i] = el;
-                }}
-                className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-6"
-              >
-                <span
-                  className={`font-display font-normal leading-[1.02] tracking-tight transition-colors duration-300 text-[clamp(2rem,4.2vw,3.8rem)] ${
-                    open ? "text-[#141414]" : "text-black/[0.46]"
-                  }`}
-                >
-                  {service.title}
-                </span>
-                <span
-                  className={`font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
-                    open ? "text-black/75" : "text-black/60"
-                  }`}
-                >
-                  {String(i + 1).padStart(2, "0")} / {service.short}
-                  <span
-                    className={`ml-3 inline-block transition-all duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
-                      open
-                        ? "translate-x-0 text-[var(--color-accent)]"
-                        : "-translate-x-1"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    →
-                  </span>
-                </span>
-              </div>
+    </section>
 
-              {/* The illuminating picture stage — services grammar, natural flow. */}
-              <div
-                className="grid"
-                style={{
-                  gridTemplateRows: open ? "1fr" : "0fr",
-                  transition:
-                    "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
-                }}
-                aria-hidden={!open}
-              >
-                <div className="min-h-0 overflow-hidden">
-                  <div className="relative -mt-1 mb-6 h-[36vh] overflow-hidden lg:mb-7 lg:h-[42vh]">
-                    <Image
-                      src={row.image}
-                      alt={`${service.title} by 828 Construction`}
-                      fill
-                      loading="lazy"
-                      sizes="(max-width: 1536px) 100vw, 1280px"
-                      quality={90}
-                      onError={imgError}
-                      className="object-cover transition-transform duration-[1600ms] ease-out"
-                      style={{
-                        filter: "contrast(1.05) saturate(1.05)",
-                        transform: open ? "scale(1.03)" : "scale(1.08)",
-                      }}
-                    />
-                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-16 lg:px-7 lg:pb-5">
-                      <p className="max-w-md text-[13px] leading-5 text-white/85">
-                        {row.line}
-                      </p>
-                      <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
-                        View {service.title} →
-                      </span>
-                    </div>
-                    <div
-                      className="absolute left-0 top-0 h-[2px] bg-[var(--color-accent)]"
-                      style={{
-                        width: open ? "100%" : "0%",
-                        opacity: 0.8,
-                        transition:
-                          "width 900ms cubic-bezier(0.16,1,0.3,1) 150ms",
-                      }}
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-
-        {/* The shrunk fourth row — service area (verbiage per IMG_1127). */}
-        <div
-          ref={(el) => {
-            rowRefs.current[SERVICE_PATH_ROWS.length] = el;
-          }}
-          className="mt-14 border border-black/10 bg-white/55 lg:mt-16"
-        >
+    {/* The shrunk fourth row — service area (verbiage per IMG_1127). Lives
+        OUTSIDE the runway section so it can never ride over the pinned panel;
+        same stack surface (ContactFlow wraps the fragment). */}
+    <div className="relative bg-[#f7f7f3] text-[#141414]" data-header-light="">
+      <div className="mx-auto max-w-7xl px-6 pb-20 pt-6 lg:px-12 lg:pb-24">
+        <div className="border border-black/10 bg-white/55">
           <div className="grid gap-x-10 gap-y-6 px-6 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-10">
             <div>
               <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/54">
@@ -585,7 +646,8 @@ function ServicePathRows() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
+    </>
   );
 }
 

@@ -2,6 +2,21 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Contact V4.1: whisper veil on cream + services runway walk (terminal B)
+
+- Brian's V4 screenshots: prep section read "grayed out" (the black cover veil
+  on a cream surface) and the paths rows should scroll like the services page
+  without copying its look.
+- ContactFlow veil now surface-aware: 0.08 max over [data-header-light]
+  surfaces, 0.28 over dark ones.
+- Paths: pinned 150vh runway walk on lg+ (useTravelIndex port — deterministic
+  progress math), differentiated from services: 50vh/service pacing, smaller
+  titles, stage indented 14% with a drawing vertical maroon bar. Mobile stays
+  natural flow. South Bay box moved out of the runway section (was overlapping
+  the pinned panel) — same stack surface, lands after the walk.
+- QA: tsc clean; functional-qa PASS d+m; verbiage 15/15; seam sweeps 2x both
+  viewports; settle torture down 28/28 + up 22/22 x2 (stable server).
+
 ## 2026-07-13 — Home statement→approach snap-edge + flush marquee (3 Brian rounds)
 
 - Round 1: the statement→approach transition never snapped ("nothing happens

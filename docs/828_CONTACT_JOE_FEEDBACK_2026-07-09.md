@@ -141,6 +141,23 @@ the home-about flow. Words unchanged — composition pass only:
 - QA: functional-qa PASS d+m; verbiage 15/15; seam sweep 2x clean; settle
   torture down+up 2x clean; reveal-probe PASS.
 
+### V4.1 (2026-07-13, Brian's screenshot feedback on V4)
+
+- "Grayed out top section": the stacked-surface cover veil (black 0->0.28)
+  reads as a dirty gray-out on cream surfaces. ContactFlow veils are now
+  surface-aware: light surfaces take 0.08 max, dark keep 0.28.
+- "Match the services-page scrolling, but not a copy": the paths rows now walk
+  a pinned 150vh runway on desktop (deterministic scroll-per-service, exactly
+  the services mechanic) with deliberately different clothes: 50vh per service
+  (vs 70vh), smaller titles, the stage indented 14% with a drawing VERTICAL
+  maroon bar (vs full-width stage + horizontal top line). Mobile: natural-flow
+  focus walk, no pin. South Bay box moved outside the runway section (it was
+  riding over the pinned panel) — same stack surface, arrives after the walk.
+- QA: functional-qa PASS d+m post-restructure; verbiage 15/15; seam sweeps 2x;
+  settle torture: down 28/28 + up 22/22 x2 clean on a stable server (one
+  earlier polluted run traced to another terminal's HMR mid-edit 500s, not the
+  page).
+
 ## Requirements ledger
 
 > OWNERSHIP (2026-07-09 01:05, terminal B): /contact + the site-wide footer fix are
