@@ -32,7 +32,9 @@ export default function BrandMarqueeBottom({
     : compact
       ? "clamp(1.25rem, 2.2vw, 2.35rem)"
       : "clamp(1.9rem, 3.6vw, 3.75rem)";
-  const paddingClass = panel ? "pr-16" : compact ? "pr-10" : "pr-16";
+  // panel: tight tail — "CONSTRUCTION" runs into the next "828" so the loop
+  // reads as one continuous train (Brian, 2026-07-13).
+  const paddingClass = panel ? "pr-4" : compact ? "pr-10" : "pr-16";
 
   const setPaused = (paused: boolean) => {
     if (!trackRef.current) return;

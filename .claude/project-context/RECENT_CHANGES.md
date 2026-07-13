@@ -2,6 +2,21 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Footer two-tone boxes + continuous marquee train (terminal B)
+
+- Brian: the all-black footer's info boxes should carry two different colors
+  that match the site; wording/layout untouched. First try (deep maroon) read
+  too red per Brian's live feedback — final: charcoal #161616 nav/copyright
+  box + warm bone #e8e4dc Serving box with ink text (black -> charcoal ->
+  bone tonal steps, site ink/cream family). License chip keeps the maroon
+  border on bone.
+- Rotating 828 CONSTRUCTION marquee: panel repetition gap pr-16 -> pr-4 so
+  "CONSTRUCTION" runs into the next "828" — one continuous train per Brian.
+- QA: tsc clean; contact functional-qa PASS; footer verified desktop+mobile
+  screenshots. NOTE: site-smoke currently flags /portfolio (hidden headings
+  after reload + a React mount warning) — traced to another terminal's
+  uncommitted portfolio WIP in the tree, not the footer change.
+
 ## 2026-07-13 — Approach walk faster + full-screen statement + marquee moved into the approach
 
 - Brian round 5: walk "takes too long" → runway trimmed 190vh → 120vh

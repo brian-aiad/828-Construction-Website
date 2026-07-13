@@ -111,7 +111,11 @@ export default function Footer() {
           </div>
         </a>
 
-        <div className="flex flex-col border-t border-white/10 bg-black px-6 py-7 text-white md:px-9 md:py-8 lg:min-h-[30rem] lg:border-l lg:border-t-0 lg:px-[5.1vw] lg:py-[4.5rem]">
+        {/* Brian 2026-07-13 (two passes): the info boxes carry two tones —
+            charcoal nav box + warm bone serving box ("lighter", after the
+            deep-maroon try read too red). Black -> charcoal -> bone steps
+            keep the footer in the site's ink/cream family. */}
+        <div className="flex flex-col border-t border-white/10 bg-[#161616] px-6 py-7 text-white md:px-9 md:py-8 lg:min-h-[30rem] lg:border-l lg:border-t-0 lg:px-[5.1vw] lg:py-[4.5rem]">
           <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-3 lg:flex lg:flex-col lg:gap-[0.7rem]">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
@@ -131,13 +135,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col overflow-hidden border-t border-white/10 bg-black px-6 pb-0 pt-7 text-white md:px-9 md:pt-8 lg:min-h-[30rem] lg:border-l lg:border-t-0 lg:px-[5.2vw] lg:pb-0 lg:pt-[5.5rem]">
+        <div className="flex flex-col overflow-hidden border-t border-white/10 bg-[#e8e4dc] px-6 pb-0 pt-7 text-[#141414] md:px-9 md:pt-8 lg:min-h-[30rem] lg:border-l lg:border-t-0 lg:px-[5.2vw] lg:pb-0 lg:pt-[5.5rem]">
           <div>
-            <p className={`${labelClass} text-white/46`}>Serving</p>
-            <h3 className="mt-3 font-display text-[clamp(1.2rem,1.25vw,1.4rem)] font-medium leading-tight text-white">
+            <p className={`${labelClass} text-black/52`}>Serving</p>
+            <h3 className="mt-3 font-display text-[clamp(1.2rem,1.25vw,1.4rem)] font-medium leading-tight text-[#141414]">
               Torrance, CA
             </h3>
-            <address className="mt-3 not-italic text-sm leading-6 text-white/64">
+            <address className="mt-3 not-italic text-sm leading-6 text-black/72">
               {streetLine}
               <br />
               {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
@@ -145,14 +149,14 @@ export default function Footer() {
           </div>
 
           <div className="mt-5 lg:mt-6">
-            <p className={`${labelClass} text-white/46`}>Service Area</p>
-            <p className="mt-3 max-w-md text-[13px] leading-6 text-white/58">
+            <p className={`${labelClass} text-black/52`}>Service Area</p>
+            <p className="mt-3 max-w-md text-[13px] leading-6 text-black/62">
               {SITE.serviceArea.join(" / ")}
             </p>
           </div>
 
           <div className="mt-6 lg:mt-8">
-            <p className="inline-flex border border-[var(--color-accent)]/55 px-4 py-2.5 font-labels text-[10px] uppercase tracking-[0.18em] text-white/72">
+            <p className="inline-flex border border-[var(--color-accent)]/60 px-4 py-2.5 font-labels text-[10px] uppercase tracking-[0.18em] text-black/72">
               CA License #{SITE.license}
             </p>
           </div>
@@ -160,7 +164,7 @@ export default function Footer() {
           <BrandMarqueeBottom
             panel
             className="mt-7 -mx-6 w-[calc(100%+3rem)] lg:mt-auto lg:-mx-7 lg:w-[calc(100%+3.5rem)] translate-y-[0.12rem] md:-mx-9 md:w-[calc(100%+4.5rem)] lg:-mx-[5.2vw] lg:w-[calc(100%+10.4vw)]"
-            itemClassName="text-white"
+            color="rgb(0, 0, 0)" itemClassName="text-black"
           />
         </div>
       </section>
