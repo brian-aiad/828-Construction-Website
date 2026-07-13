@@ -60,10 +60,33 @@ export default function AboutPreview() {
       gsap.set(copyEls, { y: 20, opacity: 0 });
       gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
 
+      const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+
       if (!AnimationController.shouldAnimate()) {
         gsap.set(headlineLines, { yPercent: 0 });
-        gsap.set(copyEls, { y: 0, opacity: 1 });
         gsap.set(frames, { clipPath: "inset(0%)" });
+
+        if (prefersReducedMotion || !isMobile) {
+          gsap.set(copyEls, { y: 0, opacity: 1 });
+          return;
+        }
+
+        // Mobile text entrance — y+opacity only (failsafe-resettable, Fix 18).
+        if (headlineRef.current) {
+          gsap.set(headlineRef.current, { y: 22, opacity: 0 });
+          revealCleanups.push(
+            revealOnVisible([headlineRef.current], (el) =>
+              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
+            )
+          );
+        }
+        copyEls.forEach((c) => {
+          revealCleanups.push(
+            revealOnVisible([c], (el) =>
+              gsap.to(el, { y: 0, opacity: 1, duration: 0.65, ease: "power3.out" })
+            )
+          );
+        });
         return;
       }
 
@@ -169,7 +192,7 @@ export default function AboutPreview() {
             <div className="about-copy-el mt-8">
               <Link
                 href="/about"
-                className="group inline-flex items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black"
+                className="group inline-flex items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black max-lg:min-h-[44px] max-lg:pt-3 max-lg:pb-1.5"
               >
                 Learn more
                 <span className="transition-transform duration-200 group-hover:translate-x-1">

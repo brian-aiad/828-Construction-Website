@@ -93,12 +93,50 @@ export default function HomeVisionSequence() {
 
       if (!AnimationController.shouldAnimate()) {
         gsap.set(headlineLines, { yPercent: 0 });
-        gsap.set([...introEls, ...processRows, ...processHead, ...closingEls], {
-          y: 0,
-          opacity: 1,
-        });
         if (railFillEl) gsap.set(railFillEl, { scaleY: 1, transformOrigin: "top" });
         if (photoRef.current) gsap.set(photoRef.current, { clipPath: "inset(0%)" });
+
+        const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+        if (prefersReducedMotion || !isMobile) {
+          gsap.set([...introEls, ...processRows, ...processHead, ...closingEls], {
+            y: 0,
+            opacity: 1,
+          });
+          return;
+        }
+
+        // Mobile text entrance — decisive IO y+opacity rises. Every hidden
+        // state is y+opacity so LenisProvider's failsafe (Fix 18) resets it if
+        // an IntersectionObserver ever misses; text is never stranded. The
+        // sticky process walk stays desktop-only (natural flow on mobile).
+        if (headlineRef.current) {
+          gsap.set(headlineRef.current, { y: 22, opacity: 0 });
+          revealCleanups.push(
+            revealOnVisible([headlineRef.current], (el) =>
+              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
+            )
+          );
+        }
+        revealCleanups.push(
+          revealOnVisible(introEls, (el, i) =>
+            gsap.to(el, { y: 0, opacity: 1, duration: 0.65, delay: i * 0.05, ease: "power3.out" })
+          )
+        );
+        revealCleanups.push(
+          revealOnVisible(processHead, (el, i) =>
+            gsap.to(el, { y: 0, opacity: 1, duration: 0.65, delay: i * 0.05, ease: "power3.out" })
+          )
+        );
+        revealCleanups.push(
+          revealOnVisible(processRows, (el) =>
+            gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" })
+          )
+        );
+        revealCleanups.push(
+          revealOnVisible(closingEls, (el) =>
+            gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" })
+          )
+        );
         return;
       }
 
@@ -319,8 +357,8 @@ export default function HomeVisionSequence() {
       >
         <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/generated/home-process-fireplace-bg.webp"
-            alt="Finished interior with stone fireplace and warm built-in lighting"
+            src="/images/generated/home-vision-fireplace-work-v2.png"
+            alt="Finished custom interior with stone fireplace, built-in shelving, and warm residential craftsmanship"
             fill
             loading="lazy"
             sizes="100vw"
@@ -468,11 +506,11 @@ export default function HomeVisionSequence() {
                 <ol className="border-t border-white/12">
                   {PROCESS_STEPS_V2.map((step, i) => (
                     <li key={step.number} className="relative">
-                      <div className="process-row grid grid-cols-[2rem_8rem_minmax(0,1fr)] items-center gap-4 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)_auto] lg:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] lg:gap-5 lg:py-5">
+                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)_auto] sm:gap-4 lg:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] lg:gap-5 lg:py-5">
                         <span className="process-num font-numbers text-[11px] text-white/50 transition-colors duration-400">
                           {step.number}
                         </span>
-                        <div className="process-thumb relative h-20 overflow-hidden bg-white/5 lg:h-[5.5rem]">
+                        <div className="process-thumb relative h-14 overflow-hidden bg-white/5 sm:h-20 lg:h-[5.5rem]">
                           <Image
                             src={processImages[i] ?? "/images/process/detail.jpg"}
                             alt=""
@@ -483,7 +521,7 @@ export default function HomeVisionSequence() {
                             style={{ filter: "contrast(1.06) saturate(1.08)" }}
                           />
                         </div>
-                        <h4 className="process-title font-editorial text-[clamp(1.25rem,2.15vw,2.1rem)] font-normal leading-tight text-white/70 transition-all duration-400">
+                        <h4 className="process-title font-editorial text-[1.15rem] font-normal leading-tight text-white/70 transition-all duration-400 sm:text-[clamp(1.25rem,2.15vw,2.1rem)]">
                           {step.title}
                         </h4>
                         <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 sm:block">

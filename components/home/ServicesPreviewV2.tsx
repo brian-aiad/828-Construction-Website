@@ -64,11 +64,45 @@ export default function ServicesPreviewV2() {
       gsap.set(captions, { y: 18, opacity: 0 });
       if (introRef.current) gsap.set(introRef.current, { y: 20, opacity: 0 });
 
+      const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+
       if (!AnimationController.shouldAnimate()) {
+        // Images always resolve instantly on mobile — no image entrance.
         gsap.set(headlineLines, { yPercent: 0 });
         gsap.set(frames, { clipPath: "inset(0%)" });
-        gsap.set(captions, { y: 0, opacity: 1 });
-        if (introRef.current) gsap.set(introRef.current, { y: 0, opacity: 1 });
+
+        if (prefersReducedMotion || !isMobile) {
+          gsap.set(captions, { y: 0, opacity: 1 });
+          if (introRef.current) gsap.set(introRef.current, { y: 0, opacity: 1 });
+          return;
+        }
+
+        // Mobile text entrance: lightweight decisive IO rises. Every hidden
+        // state is y+opacity, so LenisProvider's global failsafe (Fix 18)
+        // resets it (y:0/opacity:1) if an IntersectionObserver ever misses —
+        // content can never be stranded invisible.
+        if (headlineRef.current) {
+          gsap.set(headlineRef.current, { y: 22, opacity: 0 });
+          revealCleanups.push(
+            revealOnVisible([headlineRef.current], (el) =>
+              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
+            )
+          );
+        }
+        if (introRef.current) {
+          revealCleanups.push(
+            revealOnVisible([introRef.current], (el) =>
+              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
+            )
+          );
+        }
+        captions.forEach((cap) => {
+          revealCleanups.push(
+            revealOnVisible([cap], (el) =>
+              gsap.to(el, { y: 0, opacity: 1, duration: 0.65, ease: "power3.out" })
+            )
+          );
+        });
         return;
       }
 
@@ -317,7 +351,7 @@ export default function ServicesPreviewV2() {
         <div className="mt-12 lg:hidden">
           <Link
             href="/services"
-            className="group inline-flex items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60"
+            className="group inline-flex min-h-[44px] items-center gap-2 border-b border-black/20 pt-3 pb-1.5 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60"
           >
             All Services
             <span className="transition-transform duration-200 group-hover:translate-x-1">

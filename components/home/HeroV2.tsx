@@ -172,7 +172,7 @@ export default function HeroV2() {
         >
           <p
             ref={eyebrowRef}
-            className="flex items-center gap-4 font-labels text-[clamp(0.9rem,1.45vw,1.25rem)] uppercase tracking-[0.34em] text-white/78"
+            className="flex items-center gap-3 font-labels text-[clamp(0.9rem,1.45vw,1.25rem)] uppercase tracking-[0.22em] text-white/78 sm:gap-4 sm:tracking-[0.34em]"
           >
             <span
               aria-hidden="true"
