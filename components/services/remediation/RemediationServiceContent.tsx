@@ -347,7 +347,7 @@ function RemediationHero() {
       style={{ overflowX: "clip" }}
     >
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.45fr)_minmax(0,0.55fr)]">
-        <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:px-14 lg:py-28">
+        <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:px-14 lg:pb-28 lg:pt-32">
           <Link
             href="/services"
             className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/64 transition-colors hover:text-white"
@@ -544,13 +544,15 @@ function RemediationFaq() {
 // ── Section 3 — the approach / build philosophy ─────────────────────────────
 function RemediationApproach() {
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  // Focus line at 0.60 (was 0.52): the section pins at top:0 with all four rows
-  // static and shorter than the viewport, so a 0.52 line rested nearest row 03
+  // Focus line at 0.66 (was 0.52): the section pins at top:0 with all four rows
+  // static and shorter than the viewport, so a lower line rested nearest row 03
   // and step 04 ("Build back / Reconstruction") never ignited — the maroon
   // progress rail capped at 75% and the reconstruction crossfade never showed.
-  // 0.60 lets the final row win the focus at pin while 01–03 still play in the
-  // entry sweep, so every step gets its moment and the rail completes.
-  const activeIdx = useFocusIndex(rowRefs, 0.6);
+  // 0.66 lets the final row (pinned center ~614 of 900 after the header-clearance
+  // top-padding bump) win the focus at pin while 01–03 still play in the entry
+  // sweep, so every step gets its moment and the rail completes. Re-tune this if
+  // the approach section's top padding changes again.
+  const activeIdx = useFocusIndex(rowRefs, 0.66);
   const activePhoto = APPROACH_PHOTOS[activeIdx] ?? APPROACH_PHOTOS[0];
 
   return (
@@ -560,7 +562,7 @@ function RemediationApproach() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-20">
+      <div className="mx-auto max-w-7xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)] lg:gap-20">
           <div>
             <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/64">
@@ -724,7 +726,7 @@ function RemediationMethod() {
       className="relative bg-[#f7f4f0] text-black"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:py-20">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
         <div className="grid grid-cols-2 gap-3">
           {METHOD_PHOTOS.map((photo, i) => (
             <div
@@ -784,7 +786,7 @@ function RemediationCta() {
       className="relative border-t border-white/10 bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:py-28">
         <div className="grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:gap-20">
           <div className="flex flex-col justify-between gap-10">
             <div>

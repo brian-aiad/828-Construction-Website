@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICES } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,9 +16,9 @@ gsap.registerPlugin(ScrollTrigger);
 // parallax scrub inside each frame, hover scale. One spacing rhythm.
 
 const SERVICE_IMAGES: Record<string, string> = {
-  adu: "/images/projects/service-adu.jpg",
-  remediation: "/images/projects/remediation-active.jpg",
-  consulting: "/images/projects/consulting-plans.jpg",
+  adu: "/images/generated/home-services-adu-v3.jpg",
+  remediation: "/images/generated/home-services-remediation-v3.jpg",
+  consulting: "/images/generated/home-services-consulting-v3.jpg",
 };
 
 const SERVICE_TAGLINES: Record<string, string> = {
@@ -46,6 +47,10 @@ export default function ServicesPreviewV2() {
 
     const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
 
+    // One-shot reveals use IntersectionObserver — ScrollTrigger positional
+    // once-triggers go stale after route transitions (PATTERNS.md Fix 22).
+    const revealCleanups: Array<() => void> = [];
+
     const ctx = gsap.context(() => {
       const headlineLines = gsap.utils.toArray<HTMLElement>(".svc-headline-line");
       const frames = cards
@@ -68,31 +73,27 @@ export default function ServicesPreviewV2() {
       }
 
       // Headline mask reveal — decisive one-shot so it always completes
-      gsap.fromTo(
-        headlineLines,
-        { yPercent: 110 },
-        {
-          yPercent: 0,
-          duration: 0.95,
-          stagger: 0.1,
-          ease: "power3.out",
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: headlineRef.current ?? section,
-            start: "top 92%",
-            once: true,
-          },
-        }
+      revealCleanups.push(
+        revealOnVisible([headlineRef.current ?? section], () => {
+          gsap.fromTo(
+            headlineLines,
+            { yPercent: 110 },
+            {
+              yPercent: 0,
+              duration: 0.95,
+              stagger: 0.1,
+              ease: "power3.out",
+            }
+          );
+        })
       );
 
       if (introRef.current) {
-        gsap.to(introRef.current, {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: { trigger: introRef.current, start: "top 84%", once: true },
-        });
+        revealCleanups.push(
+          revealOnVisible([introRef.current], (el) => {
+            gsap.to(el, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" });
+          })
+        );
       }
 
       // Each card: frame clip-reveal + caption rise, tied to its own position
@@ -114,13 +115,11 @@ export default function ServicesPreviewV2() {
           });
         }
         if (caption) {
-          gsap.to(caption, {
-            y: 0,
-            opacity: 1,
-            duration: 0.75,
-            ease: "power3.out",
-            scrollTrigger: { trigger: card, start: "top 70%", once: true },
-          });
+          revealCleanups.push(
+            revealOnVisible([card], () => {
+              gsap.to(caption, { y: 0, opacity: 1, duration: 0.75, ease: "power3.out" });
+            })
+          );
         }
         // Parallax inside the frame
         if (inner) {
@@ -162,6 +161,7 @@ export default function ServicesPreviewV2() {
     }, sectionRef);
 
     return () => {
+      revealCleanups.forEach((dispose) => dispose());
       hoverCleanups.current.forEach((fn) => fn());
       hoverCleanups.current = [];
       try {
@@ -199,7 +199,7 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#f7f7f3] py-16 text-[#111] lg:py-18"
+      className="relative bg-[#f7f7f3] pb-16 pt-24 text-[#111] lg:pb-18 lg:pt-[7.5rem]"
       data-section="services-v2"
     >
       <div className="mx-auto max-w-[1680px] px-6 lg:px-12">
@@ -258,6 +258,8 @@ export default function ServicesPreviewV2() {
                     fill
                     loading="lazy"
                     sizes="(max-width: 1024px) 100vw, 56vw"
+                    quality={93}
+                    unoptimized
                     placeholder="blur"
                     blurDataURL={BLUR_PLACEHOLDER}
                     onError={imgError}
@@ -294,6 +296,8 @@ export default function ServicesPreviewV2() {
                         fill
                         loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 34vw"
+                        quality={93}
+                        unoptimized
                         placeholder="blur"
                         blurDataURL={BLUR_PLACEHOLDER}
                         onError={imgError}

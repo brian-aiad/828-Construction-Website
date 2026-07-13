@@ -332,7 +332,7 @@ function SolutionsSection() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-20 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:gap-20 lg:px-12 lg:py-28">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 pb-20 pt-28 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:gap-20 lg:px-12 lg:py-28">
         <div>
           <span className="con-rise block font-labels text-[10px] uppercase tracking-[0.24em] text-white/60">
             Field-based advisory
@@ -473,7 +473,7 @@ function QuestionsSection() {
       className="relative bg-[#f7f7f3] text-[#111]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6 pb-20 pt-28 lg:px-12 lg:py-28">
         <span className="con-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/55">
           Questions and answers
         </span>
@@ -550,7 +550,7 @@ function ConsultingCta() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 pb-24 pt-20 lg:px-12 lg:pb-32 lg:pt-28">
+      <div className="mx-auto max-w-7xl px-6 pb-24 pt-28 lg:px-12 lg:pb-32 lg:pt-28">
         <span className="con-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
           Start the conversation
         </span>

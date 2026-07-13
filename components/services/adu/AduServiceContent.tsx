@@ -567,7 +567,7 @@ function AduFaq() {
       className="relative bg-[#f7f7f3] text-[#111]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-24">
+      <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:pb-24 lg:pt-[7.5rem]">
         <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-black/55">
           FAQ / Frequently asked questions
         </span>
@@ -722,7 +722,7 @@ function AduAcronym() {
       >
         ADU
       </div>
-      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-28">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-[7.5rem]">
         <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
           What we drive for
         </span>
@@ -796,7 +796,7 @@ function AduInvitation() {
       className="relative border-t border-white/10 bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-[7.5rem]">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-20">
           <div>
             <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">

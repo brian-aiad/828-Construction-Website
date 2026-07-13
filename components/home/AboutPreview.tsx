@@ -137,7 +137,7 @@ export default function AboutPreview() {
       data-section="about-preview"
     >
       <div className="mx-auto max-w-[1680px] px-6 pb-24 lg:px-12 lg:pb-36">
-        <div className="grid gap-10 pt-10 lg:grid-cols-12 lg:gap-12 lg:pt-14">
+        <div className="grid gap-10 pt-24 lg:grid-cols-12 lg:gap-12 lg:pt-[7.5rem]">
           <div className="lg:col-span-7">
             <p className="about-copy-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent)] lg:mb-8">
               <span

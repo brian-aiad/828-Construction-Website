@@ -480,7 +480,10 @@ function PortfolioHero({
               <span className="font-labels text-[9px] uppercase tracking-[0.24em] text-white/36">
                 Selected residential work
               </span>
-              <h1 className="mt-4 max-w-4xl font-editorial text-[clamp(3rem,7.5vw,8.2rem)] leading-[0.82] tracking-normal">
+              {/* Clamp sized so "Remodels," always fits the col-span-5 card
+                  column — global overflow-wrap:break-word otherwise splits the
+                  word from its comma and a line starts with ", " (Fix 21). */}
+              <h1 className="mt-4 max-w-4xl font-editorial text-[clamp(3rem,6.6vw,6.4rem)] leading-[0.86] tracking-normal">
                 Remodels, ADUs, repairs.
               </h1>
             </div>
@@ -763,7 +766,7 @@ export default function PortfolioContent() {
 
       <ResidenceGalleries />
 
-      <section data-section="portfolio-cta" className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 py-12 lg:px-12">
+      <section data-section="portfolio-cta" className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 pb-12 pt-12 lg:px-12 lg:pt-28">
         <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="portfolio-reveal" data-gsap-reveal="true">

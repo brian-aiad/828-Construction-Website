@@ -657,16 +657,17 @@ function ProcessSection() {
       {/* The strip that goes across the screen — overflows and slides on scrub */}
       <div className="relative mt-12 lg:mt-16">
         <div className="svc-hairline absolute left-0 top-0 h-px w-full bg-black/15" aria-hidden="true" />
-        {/* One static band, every stage visible (Brian 2026-07-13: no slide).
-            Six columns on desktop, 2×3 below lg; long labels wrap inside
-            their own column. */}
-        <ol className="grid grid-cols-2 gap-x-4 gap-y-8 px-6 pb-10 pt-6 lg:grid-cols-6 lg:gap-x-8 lg:px-12 lg:pb-14 lg:pt-7">
+        {/* One static band, every stage visible and every stage on ONE line
+            (Brian 2026-07-13). xl+: all six inline across a single row,
+            number beside label, nowrap. lg: three across, two tidy rows.
+            Below lg: the 2×3 stack. Nothing ever wraps mid-label. */}
+        <ol className="grid grid-cols-2 gap-x-4 gap-y-8 px-6 pb-10 pt-6 lg:grid-cols-3 lg:gap-y-10 lg:px-12 lg:pb-14 lg:pt-7 xl:flex xl:items-baseline xl:justify-between xl:gap-0">
           {STAGES.map((stage, i) => (
-            <li key={stage}>
+            <li key={stage} className="lg:flex lg:items-baseline lg:gap-2.5 lg:whitespace-nowrap">
               <span className="font-numbers text-[11px] text-[var(--color-accent)]" aria-hidden="true">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 font-labels text-[10px] uppercase leading-5 tracking-[0.15em] text-black/80 lg:text-[11px] lg:tracking-[0.16em]">
+              <p className="mt-2 font-labels text-[10px] uppercase leading-5 tracking-[0.15em] text-black/80 lg:mt-0 lg:text-[11px] lg:tracking-[0.16em] xl:text-[10px] 2xl:text-[11px]">
                 {stage}
               </p>
             </li>

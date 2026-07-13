@@ -330,7 +330,7 @@ export default function HomeVisionSequence() {
           aria-hidden="true"
         />
 
-        <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 py-16 sm:min-h-[48rem] lg:min-h-[92vh] lg:px-12 lg:py-20">
+        <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 pb-16 pt-24 sm:min-h-[48rem] lg:min-h-[92vh] lg:px-12 lg:pb-20 lg:pt-20">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12">
           <div className="lg:col-span-7">
             <p className="vision-intro-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-white/64 lg:mb-8">

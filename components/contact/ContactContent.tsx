@@ -257,7 +257,7 @@ function GetInTouch() {
     <section
       data-section="contact-inquiry"
       data-header-dark=""
-      className="relative overflow-hidden bg-black px-6 pb-20 pt-16 text-white lg:px-12 lg:pb-28 lg:pt-24"
+      className="relative overflow-hidden bg-black px-6 pb-20 pt-28 text-white lg:px-12 lg:pb-28"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
@@ -352,7 +352,7 @@ function InsightsPrep() {
     <section
       data-section="contact-prep"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-10 pt-16 text-[#141414] lg:px-12 lg:pb-12 lg:pt-24"
+      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-10 pt-28 text-[#141414] lg:px-12 lg:pb-12"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
@@ -399,7 +399,7 @@ function ServicePathRows() {
     <section
       data-section="contact-paths"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] pb-20 pt-4 text-[#141414] lg:pb-28"
+      className="relative overflow-hidden bg-[#f7f7f3] pb-20 pt-28 text-[#141414] lg:pb-28"
       style={{ overflowX: "clip" }}
     >
       <div className="px-6 lg:px-12">
