@@ -38,7 +38,10 @@ function attachRevealFailsafe() {
 
   const forceReveal = (el: HTMLElement) => {
     gsap.to(el, {
-      opacity: 1,
+      // autoAlpha (not bare opacity): GSAP's autoAlpha-hidden elements carry
+      // visibility:hidden alongside opacity:0 — restoring only opacity left
+      // them invisible and "rescued" at the same time (found 2026-07-13).
+      autoAlpha: 1,
       clipPath: "inset(0% 0% 0% 0%)",
       y: 0,
       x: 0,
