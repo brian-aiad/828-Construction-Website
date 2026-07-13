@@ -183,6 +183,7 @@ function AboutHero() {
     <section
       ref={sectionRef}
       data-section=""
+      data-header-dark=""
       className="relative min-h-[100svh] bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
@@ -407,7 +408,7 @@ function OriginSection({
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="" className="relative bg-[#050505] pb-20 pt-24 text-white lg:pb-24 lg:pt-[7.5rem]" style={{ overflowX: "clip" }}>
+    <section ref={sectionRef} data-section="" data-header-dark="" className="relative bg-[#050505] pb-20 pt-24 text-white lg:pb-24 lg:pt-[7.5rem]" style={{ overflowX: "clip" }}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(99,26,22,0.16),transparent_30%)]" />
       <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.15]" />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
@@ -526,8 +527,10 @@ function CraftSection() {
           gsap.to(rest, {
             xPercent: 0,
             opacity: 1,
-            duration: 0.85,
-            ease: "power3.out",
+            // Brian (2026-07-13): the completions ran too quick to be seen
+            // while scrolling — long, even glide instead of a front-loaded pop.
+            duration: 1.7,
+            ease: "power2.out",
             overwrite: true,
             // Clear the raster-layer hint once the slide finishes — a permanent
             // will-change on reading text keeps it on its own compositor layer
@@ -536,7 +539,7 @@ function CraftSection() {
           });
         }
         if (body) {
-          gsap.to(body, { y: 0, opacity: 1, duration: 0.7, delay: 0.12, ease: "power3.out", overwrite: true });
+          gsap.to(body, { y: 0, opacity: 1, duration: 1.2, delay: 0.35, ease: "power2.out", overwrite: true });
         }
         letter?.classList.add("text-accent");
       };
@@ -559,7 +562,7 @@ function CraftSection() {
             if (index >= 0) reveal(index);
           });
         },
-        { rootMargin: "0px 0px -14% 0px", threshold: 0.05 }
+        { rootMargin: "0px 0px -20% 0px", threshold: 0.05 }
       );
       rowRefs.current.forEach((row) => row && io?.observe(row));
 
@@ -720,6 +723,7 @@ function SouthBaySection() {
     <section
       ref={sectionRef}
       data-section=""
+      data-header-dark=""
       className="relative flex items-center bg-[#070707] py-20 text-white lg:py-24"
       style={{ overflowX: "clip" }}
     >
@@ -816,7 +820,7 @@ function AboutCTA() {
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="" className="relative grid bg-black text-white lg:grid-cols-2" style={{ overflowX: "clip" }}>
+    <section ref={sectionRef} data-section="" data-header-dark="" className="relative grid bg-black text-white lg:grid-cols-2" style={{ overflowX: "clip" }}>
       <div className="relative min-h-[40svh] overflow-hidden lg:min-h-[68svh]">
         <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
