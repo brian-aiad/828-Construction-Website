@@ -629,17 +629,19 @@ function PrinciplesSection() {
 
 // ── Section 4 — foundational principles + the stage strip + media band ──────
 // Mimics the NS Process composition Joe showed: light surface, heading split,
-// one hairline strip of numbered stages sliding across the screen, then a
-// full-bleed media band. "The footer stays."
+// a slim hairline strip of the six stages, then the media band. Desktop is
+// ONE viewport (Brian 2026-07-13): heading + strip keep natural height and
+// the band absorbs everything that remains, so the sentence, all six stages,
+// the photograph, and the CTA share a single screen. "The footer stays."
 function ProcessSection() {
   return (
     <section
       data-section="services-process"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#141414]"
+      className="relative bg-[#f7f7f3] text-[#141414] lg:flex lg:h-svh lg:flex-col"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 pt-24 lg:px-12 lg:pt-[7.5rem]">
+      <div className="mx-auto w-full max-w-7xl px-6 pt-24 lg:px-12 lg:pt-24">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
             <span className="svc-rise block font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
@@ -654,14 +656,11 @@ function ProcessSection() {
         </div>
       </div>
 
-      {/* The strip that goes across the screen — overflows and slides on scrub */}
-      <div className="relative mt-12 lg:mt-16">
+      {/* Slim stage strip — hairline / one line of stages / hairline. No block
+          of dead space beneath (Brian 2026-07-13). */}
+      <div className="relative mt-12 lg:mt-8">
         <div className="svc-hairline absolute left-0 top-0 h-px w-full bg-black/15" aria-hidden="true" />
-        {/* One static band, every stage visible and every stage on ONE line
-            (Brian 2026-07-13). xl+: all six inline across a single row,
-            number beside label, nowrap. lg: three across, two tidy rows.
-            Below lg: the 2×3 stack. Nothing ever wraps mid-label. */}
-        <ol className="grid grid-cols-2 gap-x-4 gap-y-8 px-6 pb-10 pt-6 lg:grid-cols-3 lg:gap-y-10 lg:px-12 lg:pb-14 lg:pt-7 xl:flex xl:items-baseline xl:justify-between xl:gap-0">
+        <ol className="grid grid-cols-2 gap-x-4 gap-y-6 px-6 py-6 lg:grid-cols-3 lg:gap-y-6 lg:px-12 lg:py-5 xl:flex xl:items-baseline xl:justify-between xl:gap-0">
           {STAGES.map((stage, i) => (
             <li key={stage} className="lg:flex lg:items-baseline lg:gap-2.5 lg:whitespace-nowrap">
               <span className="font-numbers text-[11px] text-[var(--color-accent)]" aria-hidden="true">
@@ -673,17 +672,21 @@ function ProcessSection() {
             </li>
           ))}
         </ol>
+        <div className="absolute bottom-0 left-0 h-px w-full bg-black/15" aria-hidden="true" />
       </div>
 
-      {/* Full-bleed media band with the start CTA */}
-      <div className="svc-clip relative h-[62vh] overflow-hidden lg:h-[74vh]" data-gsap-reveal="true" data-header-dark="">
+      {/* Full-bleed media band with the start CTA — fills the rest of the
+          viewport on desktop */}
+      <div className="svc-clip relative h-[62vh] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1" data-gsap-reveal="true" data-header-dark="">
         <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
-            src="/images/projects/adu-framing.jpg"
-            alt="ADU framing in progress by 828 Construction"
+            src="/images/generated/services-process-vision-build-v3.png"
+            alt="Clean residential construction framing progressing toward a finished vision"
             fill
             loading="lazy"
             sizes="100vw"
+            quality={92}
+            unoptimized
             placeholder="blur"
             blurDataURL={BLUR_PLACEHOLDER}
             onError={imgError}
