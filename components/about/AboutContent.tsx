@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SERVICE_AREAS, SITE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import AboutFlow from "@/components/about/AboutFlow";
 
@@ -69,35 +70,46 @@ const craft = [
   },
 ];
 
-function useReveal(sectionRef: React.RefObject<HTMLElement | null>, selector: string, start = "top 78%") {
+// Entrance reveals key off ACTUAL on-screen visibility (IntersectionObserver,
+// PATTERNS.md Fix 22), never `once: true` positional ScrollTriggers. Every
+// section here lives inside AboutFlow's sticky stack, where a trigger's
+// document offset goes stale the moment a surface pins — a positional
+// once-trigger whose start is never "crossed" leaves its text hidden forever
+// after a nav round-trip or mid-page refresh. IO can't go stale: on screen =
+// revealed. Decisive `gsap.to` (no scrub, overwrite) so the reveal always
+// completes; words are visible-by-default in JSX and hidden only here, gated.
+// `start` retained for call-site readability (advisory only).
+function useReveal(sectionRef: React.RefObject<HTMLElement | null>, selector: string, _start = "top 78%") {
   useEffect(() => {
     const section = sectionRef.current;
     if (!section || !AnimationController.shouldAnimate()) return;
 
-    const items = section.querySelectorAll<HTMLElement>(selector);
+    const items = Array.from(section.querySelectorAll<HTMLElement>(selector));
     if (!items.length) return;
 
+    let dispose = () => {};
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        items,
-        { y: 28, opacity: 0 },
-        {
+      items.forEach((el) => el.setAttribute("data-gsap-reveal", "true"));
+      gsap.set(items, { y: 28, opacity: 0 });
+      dispose = revealOnVisible([section], () => {
+        gsap.to(items, {
           y: 0,
           opacity: 1,
           duration: 0.85,
           stagger: 0.08,
           ease: "power3.out",
-          scrollTrigger: { trigger: section, start, once: true },
-        }
-      );
+          overwrite: true,
+        });
+      });
     }, sectionRef);
 
     return () => {
+      dispose();
       try {
         ctx.revert();
       } catch {}
     };
-  }, [sectionRef, selector, start]);
+  }, [sectionRef, selector, _start]);
 }
 
 // ── Hero — compact dossier: identity + immediate proof, no dead middle ─────
@@ -352,20 +364,21 @@ function OriginSection({
     const section = sectionRef.current;
     if (!section || !AnimationController.shouldAnimate()) return;
 
+    let rowsDispose = () => {};
+    let portraitDispose = () => {};
     const ctx = gsap.context(() => {
       if (portraitRef.current) {
-        gsap.fromTo(
-          portraitRef.current,
-          { clipPath: "inset(0% 0% 14% 0%)", y: 30 },
-          {
-            clipPath: "inset(0%)",
-            y: 0,
-            duration: 1.05,
-            ease: "power3.out",
-            scrollTrigger: { trigger: section, start: "top 70%", once: true },
-          }
-        );
-        gsap.to(portraitRef.current, {
+        const portrait = portraitRef.current;
+        // Clip reveal keys off visibility (Fix 22) — a stale once-trigger here
+        // would leave the portrait clipped/offset, and the Fix 18 failsafe
+        // only rescues inset(100%)/opacity<0.08, not this partial clip. IO on
+        // the 14%-clipped node is safe (Fix 23 only bites at 100% clip). No
+        // overwrite so the decorative parallax below survives.
+        gsap.set(portrait, { clipPath: "inset(0% 0% 14% 0%)", y: 30 });
+        portraitDispose = revealOnVisible([portrait], () => {
+          gsap.to(portrait, { clipPath: "inset(0%)", y: 0, duration: 1.05, ease: "power3.out" });
+        });
+        gsap.to(portrait, {
           yPercent: -5,
           ease: "none",
           scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.2 },
@@ -385,22 +398,23 @@ function OriginSection({
         );
       }
 
-      rowRefs.current.forEach((row) => {
-        if (!row) return;
-        gsap.fromTo(
-          row,
-          { y: 24, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            ease: "power2.out",
-            scrollTrigger: { trigger: row, start: "top 92%", end: "top 66%", scrub: 1.1 },
-          }
-        );
+      // Standards rows (01/02/03) are content-critical text inside the sticky
+      // stack — decisive per-row IO reveals (Fix 25), not scrub-tied triggers
+      // that park at partial opacity when a surface pins. Each row rises as it
+      // enters; once revealed it stays (no scroll-up re-hide).
+      const rows = rowRefs.current.filter((r): r is HTMLDivElement => !!r);
+      rows.forEach((row) => {
+        row.setAttribute("data-gsap-reveal", "true");
+        gsap.set(row, { y: 24, opacity: 0 });
+      });
+      rowsDispose = revealOnVisible(rows, (row) => {
+        gsap.to(row, { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", overwrite: true });
       });
     }, sectionRef);
 
     return () => {
+      rowsDispose();
+      portraitDispose();
       try {
         ctx.revert();
       } catch {}
