@@ -146,6 +146,13 @@ Pre-existing, untouched, still open: /services/remediation React
 state-update-warning on mount; header BOOK CALL button absent (smoke script
 expects it). Services landing V3 (prior batch) was still uncommitted in the
 working tree when this session started.
+## Portfolio Remodel Gallery Revamp (2026-06-02)
+
+Portfolio was reorganized around the new Cerritos and Tustin bath remodel documentation. The page now opens with a photography-first project board, keeps the existing case-index hover/click section and bottom work wall, and replaces the old lightbox with a project dossier modal. The fake-looking foundation photo is no longer presented as work photography; that project now renders an explicit documentation-pending plate.
+
+- Latest preflight report: `.claude-work/preflight/2026-06-02-04-38/report.json`
+- Verification: `npx tsc --noEmit`, `npm run lint`, `npm run build`, Playwright desktop/mobile portfolio modal checks, `npm run preflight:full`
+- Full preflight result: 16/16 route/viewport checks passing, nav/SplitType cleanup passing, hard-refresh stability passing
 
 ## Push + Local Cleanup Handoff (2026-05-26)
 
