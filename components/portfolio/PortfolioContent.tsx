@@ -1,134 +1,34 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PROJECTS, Project, ProjectCategory, SITE } from "@/lib/constants";
-import Lightbox from "@/components/gallery/Lightbox";
-import ResidenceGalleries from "@/components/portfolio/ResidenceGalleries";
+import { SITE } from "@/lib/constants";
+import {
+  PORTFOLIO_CASES,
+  EXAMPLE_PROJECT,
+  PortfolioCase,
+} from "@/components/portfolio/portfolioCases.data";
 import PortfolioFlow from "@/components/portfolio/PortfolioFlow";
 import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
+import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
 import { lqip } from "@/lib/image-placeholders";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Dark 1×1 SVG — shows instantly while real image loads, no blank flash
-function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
-  e.currentTarget.style.opacity = "0";
-}
+// V4 revamp (Brian, 2026-07-13): the page IS the three photographed
+// residences. Each residence gets its own dossier surface in the site's
+// stacked-surface flow; the full photo set stays reachable through the
+// per-case lightbox instead of an uncurated thumbnail wall. One clearly
+// labeled in-progress example (Redondo Beach) follows the real work.
+// Page signature: the traveling contact strip — a decorative row of real
+// frames drifting laterally on scrub inside each case surface.
 
-type Filter = "All" | ProjectCategory;
-
-const CATEGORY_ORDER: ProjectCategory[] = ["Bath Remodel", "ADU Construction", "Remediation", "Consulting"];
-const MAX_HERO_PROJECTS = 5;
-const MAX_INDEX_PROJECTS = 5;
-
-function cleanText(value: string) {
-  return value
-    .replace(/\u00c2\u00b7/g, "/")
-    .replace(/\u00e2\u20ac\u201d/g, "-")
-    .replace(/\u00e2\u20ac\u201c/g, "-")
-    .replace(/\u00e2\u20ac\u2122/g, "'")
-    .replace(/\u00e2\u20ac\u0153|\u00e2\u20ac\u009d/g, '"');
-}
-
-function projectImage(project: Project) {
-  return project.image;
-}
-
-function hasRealPhoto(project: Project) {
-  return !project.tempPhoto;
-}
-
-function categorySortValue(category: ProjectCategory) {
-  const index = CATEGORY_ORDER.indexOf(category);
-  return index === -1 ? CATEGORY_ORDER.length : index;
-}
-
-function categoryList(projects: Project[]): Filter[] {
-  const found = Array.from(new Set(projects.map((project) => project.category)));
-  found.sort((a, b) => categorySortValue(a) - categorySortValue(b));
-  return ["All", ...found];
-}
-
-function archiveSort(projects: Project[]) {
-  return [...projects].sort((a, b) => {
-    const rankA = a.portfolioRank ?? Number.POSITIVE_INFINITY;
-    const rankB = b.portfolioRank ?? Number.POSITIVE_INFINITY;
-    if (rankA !== rankB) return rankA - rankB;
-    if (a.featured !== b.featured) return a.featured ? -1 : 1;
-    return categorySortValue(a.category) - categorySortValue(b.category) || a.id - b.id;
-  });
-}
-
-function diverseProjectSet(projects: Project[], limit: number) {
-  const ordered = archiveSort(projects);
-  const selected: Project[] = [];
-
-  CATEGORY_ORDER.forEach((category) => {
-    const match = ordered.find(
-      (project) => project.category === category && !selected.some((item) => item.id === project.id)
-    );
-    if (match) selected.push(match);
-  });
-
-  ordered.forEach((project) => {
-    if (selected.length < limit && !selected.some((item) => item.id === project.id)) {
-      selected.push(project);
-    }
-  });
-
-  return selected.slice(0, limit);
-}
-
-function heroProjectSet(projects: Project[]) {
-  const heroReady = projects.filter((project) => project.heroReady);
-  return archiveSort(heroReady.length ? heroReady : projects).slice(0, MAX_HERO_PROJECTS);
-}
-
-function PendingProjectPlate({
-  project,
-  index,
-  compact = false,
-}: {
-  project: Project;
-  index?: number;
-  compact?: boolean;
-}) {
-  return (
-    <div className="absolute inset-0 overflow-hidden bg-[#111] text-white">
-      <div className="absolute inset-0 blueprint-grid opacity-[0.18]" aria-hidden="true" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(99,26,22,0.20),transparent_34%),linear-gradient(135deg,#161616_0%,#080808_72%)]" />
-      <div className="absolute left-0 top-0 h-px w-full bg-white/12" />
-      <div className="absolute bottom-0 left-0 h-px w-full bg-[var(--color-accent)]/45" />
-      <div className="relative z-10 flex h-full flex-col justify-between p-4 lg:p-6">
-        <div className="flex items-center justify-between gap-4">
-          <span className="font-labels text-[8px] uppercase tracking-[0.2em] text-white/38">
-            Documentation pending
-          </span>
-          {typeof index === "number" && (
-            <span className="font-numbers text-xs font-bold text-white/24">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-          )}
-        </div>
-        <div>
-          <span className="mb-4 block h-px w-12 bg-[var(--color-accent)]/70" />
-          <h3 className={`${compact ? "text-2xl" : "text-[clamp(1.8rem,4vw,4rem)]"} max-w-xl font-editorial leading-[0.9] text-white`}>
-            {cleanText(project.title)}
-          </h3>
-          <p className="mt-4 max-w-sm font-labels text-[8px] uppercase leading-5 tracking-[0.16em] text-white/34">
-            Scope logged. Photography pending.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+type LightboxState = { c: number; p: number } | null;
 
 function usePortfolioMotion() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -142,26 +42,15 @@ function usePortfolioMotion() {
 
   useEffect(() => {
     const root = rootRef.current;
-    if (
-      !root ||
-      window.innerWidth < 1024 ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) return;
+    if (!root || !AnimationController.shouldAnimate() || window.innerWidth < 1024) return;
 
     const revealCleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
-      const reveals = gsap.utils.toArray<HTMLElement>(".portfolio-reveal");
-      const tiles = gsap.utils.toArray<HTMLElement>(".portfolio-tile");
-      const lines = gsap.utils.toArray<HTMLElement>(".draw-line");
-      const contactFrames = gsap.utils.toArray<HTMLElement>(".archive-frame");
-
-      // Fix 25 — these headings now live inside PortfolioFlow's sticky stacked
-      // surfaces. A scrub-parked ScrollTrigger goes stale once a surface pins
-      // (its doc offset freezes) and the autoAlpha:0 heading can rest invisible.
-      // Reveal off actual on-screen visibility with a decisive once-tween so it
-      // always completes; data-gsap-reveal lets the LenisProvider failsafe
-      // rescue anything still stuck.
+      // Content reveals: IO-decisive once-tweens only (Fix 22/25) — elements
+      // are visible in JSX; GSAP hides them here, immediately before wiring
+      // the visibility-truthful reveal.
+      const reveals = gsap.utils.toArray<HTMLElement>(".pf-reveal");
       reveals.forEach((el) => {
         gsap.set(el, { autoAlpha: 0, y: 26 });
         revealCleanups.push(
@@ -177,69 +66,78 @@ function usePortfolioMotion() {
         );
       });
 
-      contactFrames.forEach((el, index) => {
+      // Photo tiles settle in with a clip wipe — decisive, observed on the
+      // unclipped parent (Fix 23), staggered by the tile's grid position.
+      const tileGroups = gsap.utils.toArray<HTMLElement>("[data-tile-group]");
+      tileGroups.forEach((group) => {
+        const tiles = Array.from(group.querySelectorAll<HTMLElement>(".pf-tile"));
+        if (!tiles.length) return;
+        tiles.forEach((tile) => {
+          gsap.set(tile, { clipPath: "inset(0% 0% 16% 0%)", y: 30, autoAlpha: 0 });
+        });
+        revealCleanups.push(
+          revealOnVisible([group], () => {
+            gsap.to(tiles, {
+              clipPath: "inset(0% 0% 0% 0%)",
+              y: 0,
+              autoAlpha: 1,
+              duration: 1.0,
+              stagger: 0.09,
+              ease: "power3.out",
+              overwrite: true,
+            });
+          })
+        );
+      });
+
+      // Signature: traveling contact strip — decorative lateral drift on
+      // scrub. Content never depends on it, so a parked scrub is harmless.
+      gsap.utils.toArray<HTMLElement>("[data-strip-track]").forEach((track, i) => {
+        const dir = i % 2 === 0 ? 1 : -1;
         gsap.fromTo(
-          el,
+          track,
+          { xPercent: dir * 7 },
           {
-            autoAlpha: 0,
-            y: 42 + index * 3,
-            rotate: index % 2 === 0 ? -1.6 : 1.2,
-            clipPath: "inset(12% 0% 12% 0%)",
-          },
-          {
-            autoAlpha: 1,
-            y: 0,
-            rotate: 0,
-            clipPath: "inset(0% 0% 0% 0%)",
-            duration: 1,
-            delay: index * 0.035,
-            ease: "power3.out",
+            xPercent: dir * -7,
+            ease: "none",
             scrollTrigger: {
-              trigger: el,
-              start: "top 92%",
-              toggleActions: "play none none reverse",
+              trigger: track,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1.4,
             },
           }
         );
-
-        const image = el.querySelector("img");
-        if (image) {
-          gsap.to(image, {
-            yPercent: index % 2 === 0 ? -8 : 6,
-            ease: "none",
-            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: 1.8 },
-          });
-        }
       });
 
-      tiles.forEach((el, index) => {
-        gsap.fromTo(
-          el,
-          {
-            y: 34,
-            clipPath: index % 3 === 0 ? "inset(0% 0% 18% 0%)" : "inset(14% 0% 0% 0%)",
-          },
-          {
-            y: 0,
-            clipPath: "inset(0% 0% 0% 0%)",
-            ease: "none",
-            scrollTrigger: { trigger: el, start: "top 92%", end: "top 58%", scrub: 1.35 },
-          }
-        );
-      });
-
-      lines.forEach((el) => {
+      // Maroon hairlines draw on scrub (decorative).
+      gsap.utils.toArray<HTMLElement>(".draw-line").forEach((el) => {
         gsap.fromTo(
           el,
           { scaleX: 0 },
           {
             scaleX: 1,
             ease: "none",
+            transformOrigin: "left",
+            scrollTrigger: { trigger: el, start: "top 92%", end: "top 60%", scrub: 1 },
+          }
+        );
+      });
+
+      // Lead photos breathe: slow inner parallax on scrub (decorative).
+      gsap.utils.toArray<HTMLElement>("[data-lead-parallax] img").forEach((img) => {
+        gsap.fromTo(
+          img,
+          { yPercent: -5, scale: 1.08 },
+          {
+            yPercent: 5,
+            scale: 1.08,
+            ease: "none",
             scrollTrigger: {
-              trigger: el,
-              start: "top 92%",
-              end: "top 62%",
-              scrub: 1,
+              trigger: img.parentElement,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1.6,
             },
           }
         );
@@ -259,543 +157,708 @@ function usePortfolioMotion() {
   return rootRef;
 }
 
-function ProjectIndexRow({
-  project,
-  active,
-  number,
-  onSelect,
-  onOpen,
-}: {
-  project: Project;
-  active: boolean;
-  number: number;
-  onSelect: () => void;
-  onOpen: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onPointerEnter={onSelect}
-      onFocus={onSelect}
-      onMouseDown={onSelect}
-      onClick={onOpen}
-      className={`index-row group relative grid w-full grid-cols-[3rem_1fr] gap-4 overflow-hidden border px-4 py-4 text-left transition-colors sm:grid-cols-[4rem_1fr_7rem] sm:items-center ${
-        active ? "border-white/24 bg-white/[0.055] text-white" : "border-white/10 bg-white/[0.018] text-white/60 hover:border-white/20 hover:bg-white/[0.035] hover:text-white"
-      }`}
-      style={{ opacity: 1, transform: "none", visibility: "visible" }}
-    >
-      <span
-        className={`absolute bottom-0 left-0 top-0 w-[3px] bg-[var(--color-accent)] transition-opacity ${
-          active ? "opacity-100" : "opacity-0"
-        }`}
-        aria-hidden="true"
-      />
-      <span className={`font-numbers text-xl font-bold leading-none ${active ? "text-[var(--color-accent)]" : "text-white/24"}`}>
-        {String(number).padStart(2, "0")}
-      </span>
-      <span>
-        <span className="block font-editorial text-[clamp(1.45rem,2.45vw,2.7rem)] leading-[0.94]">
-          {cleanText(project.title)}
-        </span>
-        <span className="mt-2 block font-labels text-[8px] uppercase leading-5 tracking-[0.16em] text-white/36">
-          {project.category} / {cleanText(project.location)} / {cleanText(project.spec)}
-        </span>
-      </span>
-      <span className={`hidden justify-self-end border px-4 py-3 font-labels text-[8px] uppercase tracking-[0.16em] transition-colors sm:block ${
-        active ? "border-white/28 text-white/70" : "border-white/12 text-white/38 group-hover:border-white/30 group-hover:text-white"
-      }`}>
-        Open
-      </span>
-    </button>
-  );
-}
-
-function ProjectWallTile({
-  project,
+function CaseTile({
+  src,
+  caseData,
   index,
+  dark,
+  aspect = "aspect-[4/5]",
+  sizes,
   onOpen,
 }: {
-  project: Project;
+  src: string;
+  caseData: PortfolioCase;
   index: number;
-  onOpen: (project: Project) => void;
+  dark: boolean;
+  aspect?: string;
+  sizes: string;
+  onOpen: (src: string) => void;
 }) {
-  const spanClass = index % 9 === 0 || index % 9 === 5
-    ? "md:col-span-2 md:row-span-2"
-    : index % 9 === 2
-      ? "md:row-span-2"
-      : "";
-
   return (
     <button
       type="button"
-      onClick={() => onOpen(project)}
+      onClick={() => onOpen(src)}
       data-gsap-reveal="true"
-      className={`portfolio-tile group relative min-h-[18rem] overflow-hidden bg-black text-left ${spanClass}`}
+      aria-label={`View photo — ${caseData.gallery.title}`}
+      className={`pf-tile group relative block w-full overflow-hidden text-left ${aspect} ${
+        dark ? "bg-[#111]" : "bg-[#e8e3da]"
+      } focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]`}
     >
-      {hasRealPhoto(project) ? (
-        <>
-          <Image
-            src={projectImage(project)}
-            alt={project.title}
-            fill
-            loading="lazy"
-            sizes={spanClass.includes("col-span-2") ? "(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 52vw" : "(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 28vw"}
-            placeholder="blur"
-            blurDataURL={lqip(projectImage(project))}
-            onError={imgError}
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
-            style={{ filter: "contrast(1.05) saturate(1.04)" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/14 to-transparent" />
-        </>
-      ) : (
-        <PendingProjectPlate project={project} index={index} />
-      )}
-      <div className="absolute left-4 top-4 flex items-center gap-3">
-        <span className="h-px w-8 bg-[var(--color-accent)]" />
-        <span className="font-labels text-[8px] uppercase tracking-[0.18em] text-white/52">
-          {project.category}
-        </span>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 p-5">
-        <div className="font-labels text-[8px] uppercase tracking-[0.18em] text-white/38">
-          {cleanText(project.location)}
-        </div>
-        <h3 className="mt-2 max-w-lg font-editorial text-[clamp(1.55rem,2.6vw,3rem)] leading-[0.94] text-white">
-          {cleanText(project.title)}
-        </h3>
-      </div>
+      <Image
+        src={src}
+        alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${index + 1}`}
+        fill
+        loading="lazy"
+        sizes={sizes}
+        quality={74}
+        placeholder="blur"
+        blurDataURL={lqip(src)}
+        className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
+        style={{ filter: "contrast(1.04) saturate(1.04)" }}
+      />
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 bg-[var(--color-accent)] transition-transform duration-500 group-hover:scale-x-100"
+      />
     </button>
   );
 }
 
-function HeroProjectFrame({
-  project,
-  index,
-  onOpen,
-  className = "",
-  size = "wide",
-  hero = false,
-}: {
-  project: Project;
-  index: number;
-  onOpen: (project: Project) => void;
-  className?: string;
-  size?: "wide" | "tall" | "small";
-  hero?: boolean;
-}) {
-  const sizes = hero
-    ? size === "wide"
-      ? "(max-width: 768px) 100vw, (max-width: 1200px) 58vw, 56vw"
-      : size === "tall"
-        ? "(max-width: 768px) 100vw, (max-width: 1200px) 42vw, 34vw"
-        : "(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 28vw"
-    : size === "wide"
-      ? "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 42vw"
-      : size === "tall"
-        ? "(max-width: 768px) 100vw, (max-width: 1200px) 34vw, 28vw"
-        : "(max-width: 768px) 50vw, (max-width: 1200px) 24vw, 18vw";
-  const titleClass =
-    size === "small"
-      ? "text-[clamp(1.15rem,1.7vw,1.8rem)] leading-[0.96]"
-      : "text-[clamp(1.65rem,3vw,3.4rem)] leading-[0.9]";
-
+// Traveling contact strip — the page's signature. Decorative duplicates of
+// real frames on a scrub-drifting track; never interactive, never content.
+function ContactStrip({ photos, title, dark }: { photos: string[]; title: string; dark: boolean }) {
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(project)}
-      className={`group relative min-h-[14rem] overflow-hidden bg-black text-left ${className}`}
-    >
-      {hasRealPhoto(project) ? (
-        <>
-          <Image
-            src={projectImage(project)}
-            alt={project.title}
-            fill
-            loading={hero || index === 0 ? "eager" : "lazy"}
-            fetchPriority={hero && index === 0 ? "high" : "auto"}
-            quality={hero ? 92 : 88}
-            sizes={sizes}
-            placeholder="blur"
-            blurDataURL={lqip(projectImage(project))}
-            onError={imgError}
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-            style={{ filter: "contrast(1.03) saturate(1.02)" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/6 to-transparent" />
-        </>
-      ) : (
-        <PendingProjectPlate project={project} index={index} />
-      )}
-      <div className="absolute left-4 top-4 flex items-center gap-3">
-        <span className="font-numbers text-xs font-bold text-white/36">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="h-px w-9 bg-[var(--color-accent)]/75" />
-        <span className="font-labels text-[8px] uppercase tracking-[0.2em] text-white/48">
-          {project.category}
-        </span>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6">
-        <span className="font-labels text-[8px] uppercase tracking-[0.2em] text-white/44">
-          {cleanText(project.location)}
-        </span>
-        <h2 className={`mt-2 max-w-xl font-editorial text-white ${titleClass}`}>
-          {cleanText(project.title)}
-        </h2>
-      </div>
-      <span className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 bg-[var(--color-accent)] transition-transform duration-500 group-hover:scale-x-100" />
-    </button>
-  );
-}
-
-function PortfolioHero({
-  projects,
-  categories,
-  onOpen,
-}: {
-  projects: Project[];
-  categories: Filter[];
-  onOpen: (project: Project) => void;
-}) {
-  const scopeLine = categories.filter((category) => category !== "All").join(" / ");
-  const heroClasses = [
-    "lg:col-span-4 lg:row-span-2",
-    "lg:col-span-3",
-    "lg:col-span-3",
-    "lg:col-span-6",
-    "lg:col-span-6",
-  ];
-  const heroSizes: Array<"wide" | "tall" | "small"> = ["tall", "small", "small", "wide", "wide"];
-
-  return (
-    <section data-section="portfolio-hero" className="relative overflow-hidden bg-black px-4 pb-4 pt-24 text-white sm:px-6 lg:px-8 lg:pt-28">
-      <DraftingMotionLayer intensity="quiet" variant="intro" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_14%,rgba(99,26,22,0.14),transparent_28%)]" aria-hidden="true" />
-      <div className="relative z-10 mx-auto max-w-[92rem]">
-        <div className="grid auto-rows-[16rem] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:auto-rows-[15.5rem]">
-          <div className="relative row-span-2 flex min-h-[31rem] flex-col gap-10 border border-white/10 bg-white/[0.025] p-5 backdrop-blur-sm sm:col-span-2 sm:min-h-[29rem] lg:col-span-5 lg:row-span-2 lg:min-h-0 lg:justify-between lg:gap-0 lg:p-7">
-            <div className="absolute -left-px top-7 hidden h-24 w-px bg-[var(--color-accent)]/60 lg:block" aria-hidden="true" />
-            <div>
-              <span className="font-labels text-[9px] uppercase tracking-[0.24em] text-white/36">
-                Selected residential work
-              </span>
-              {/* Clamp sized so "Remodels," always fits the col-span-5 card
-                  column — global overflow-wrap:break-word otherwise splits the
-                  word from its comma and a line starts with ", " (Fix 21). */}
-              <h1 className="mt-4 max-w-4xl font-editorial text-[clamp(3rem,6.6vw,6.4rem)] leading-[0.86] tracking-normal">
-                Remodels, ADUs, repairs.
-              </h1>
-            </div>
-            <div>
-              <p className="max-w-md text-sm leading-7 text-white/54">
-                Browse finished work by scope, then open a project for the complete photo set.
-              </p>
-              <div className="mt-5 border-t border-white/10 pt-4 font-labels text-[8px] uppercase leading-5 tracking-[0.18em] text-white/34">
-                {scopeLine}
-              </div>
-            </div>
+    <div aria-hidden="true" className="pointer-events-none mt-14 overflow-hidden lg:mt-20">
+      <div
+        data-strip-track=""
+        className="flex w-full gap-3 lg:w-[112%] lg:-ml-[6%] lg:gap-4"
+      >
+        {photos.map((src) => (
+          <div
+            key={src}
+            className={`relative h-32 flex-1 overflow-hidden sm:h-44 lg:h-56 ${
+              dark ? "bg-[#111]" : "bg-[#e8e3da]"
+            }`}
+          >
+            <Image
+              src={src}
+              alt=""
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 33vw, 40vw"
+              quality={62}
+              placeholder="blur"
+              blurDataURL={lqip(src)}
+              className="object-cover"
+              style={{ filter: "contrast(1.04) saturate(1.02)" }}
+            />
           </div>
-
-          {projects.slice(0, MAX_HERO_PROJECTS).map((project, index) => {
-            return (
-              <HeroProjectFrame
-                key={project.id}
-                project={project}
-                index={index}
-                onOpen={onOpen}
-                size={heroSizes[index] ?? "small"}
-                hero
-                className={`min-h-0 ${heroClasses[index] ?? "lg:col-span-3"}`}
-              />
-            );
-          })}
-          {projects.length === 0 && (
-            <div className="col-span-2 row-span-2 border border-white/10 bg-[#101010] p-6">
-              <div className="flex h-full flex-col justify-end">
-                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/34">
-                  Archive pending
-                </span>
-                <h2 className="mt-4 font-editorial text-[clamp(2rem,5vw,4rem)] leading-[0.9]">
-                  Project photography will appear here.
-                </h2>
-              </div>
-            </div>
-          )}
-        </div>
+        ))}
       </div>
-    </section>
+      <div className={`mt-3 font-labels text-[8px] uppercase tracking-[0.2em] ${dark ? "text-white/30" : "text-black/32"}`}>
+        {title} / working frames
+      </div>
+    </div>
+  );
+}
+
+function CaseLedger({
+  caseData,
+  dark,
+  onOpenSet,
+}: {
+  caseData: PortfolioCase;
+  dark: boolean;
+  onOpenSet: () => void;
+}) {
+  const { project, gallery } = caseData;
+  const hairline = dark ? "border-white/12" : "border-black/12";
+  const label = dark ? "text-white/38" : "text-black/42";
+  const value = dark ? "text-white/72" : "text-black/78";
+  const rows: Array<[string, string]> = [
+    ["Scope", gallery.scope],
+    ["Location", project.location],
+    ["Detail", project.spec],
+    ["Documentation", `${gallery.photos.length} photographs`],
+  ];
+
+  return (
+    <div>
+      <dl>
+        {rows.map(([k, v]) => (
+          <div key={k} className={`grid grid-cols-[7.5rem_1fr] gap-4 border-t ${hairline} py-3.5`}>
+            <dt className={`font-labels text-[9px] uppercase leading-5 tracking-[0.18em] ${label}`}>{k}</dt>
+            <dd className={`text-[13px] leading-6 ${value}`}>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="draw-line h-px bg-[var(--color-accent)]/55" />
+      <p className={`mt-6 max-w-md text-sm leading-7 ${dark ? "text-white/56" : "text-black/62"}`}>
+        {project.description}
+      </p>
+      <button
+        type="button"
+        onClick={onOpenSet}
+        className={`mt-8 inline-flex min-h-[44px] items-center gap-3 border px-6 py-3.5 font-labels text-[9px] uppercase tracking-[0.18em] transition-colors ${
+          dark
+            ? "border-white/25 text-white/80 hover:border-white hover:text-white"
+            : "border-black/25 text-black/75 hover:border-black hover:text-black"
+        }`}
+      >
+        Open the full set
+        <span className="font-numbers text-[10px] text-[var(--color-accent)]">
+          {gallery.photos.length}
+        </span>
+        <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+      </button>
+    </div>
+  );
+}
+
+function CaseNumberBlock({ index, title, dark }: { index: number; title: string; dark: boolean }) {
+  return (
+    <div className="pf-reveal" data-gsap-reveal="true">
+      <span className="font-numbers text-[11px] font-bold text-[var(--color-accent)]">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <h2
+        className={`mt-3 font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.94] ${
+          dark ? "text-white" : "text-black"
+        }`}
+      >
+        {title}
+      </h2>
+    </div>
   );
 }
 
 export default function PortfolioContent() {
-  const [activeFilter, setActiveFilter] = useState<Filter>("All");
-  const [lightboxProject, setLightboxProject] = useState<Project | null>(null);
+  const [lightbox, setLightbox] = useState<LightboxState>(null);
   const rootRef = usePortfolioMotion();
 
-  const portfolioProjects = useMemo(() => archiveSort(PROJECTS.filter(hasRealPhoto)), []);
-  const heroProjects = useMemo(() => heroProjectSet(portfolioProjects), [portfolioProjects]);
-  const indexProjects = useMemo(() => diverseProjectSet(portfolioProjects, MAX_INDEX_PROJECTS), [portfolioProjects]);
-  const wallProjects = portfolioProjects;
-  const categories = useMemo(() => categoryList(portfolioProjects), [portfolioProjects]);
-  const [activeIndexId, setActiveIndexId] = useState(indexProjects[0]?.id ?? PROJECTS[0].id);
-
-  const activeIndexProject = useMemo(
-    () => indexProjects.find((project) => project.id === activeIndexId) ?? indexProjects[0] ?? PROJECTS[0],
-    [activeIndexId, indexProjects]
-  );
-
+  // Deep-link landing (home cards → /portfolio#<residence>): jump instantly
+  // to the anchored case, re-asserting across the browser fragment scroll,
+  // the Lenis mount reset, and late layout. A real scroll gesture aborts.
   useEffect(() => {
-    indexProjects.forEach((project) => {
-      if (!hasRealPhoto(project)) return;
-      const image = new window.Image();
-      image.decoding = "async";
-      image.src = projectImage(project);
-    });
-  }, [indexProjects]);
-
-  useEffect(() => {
-    if (window.location.hash !== "#project-index") return;
-
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById("project-index")?.scrollIntoView({ block: "start" });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
+    const id = window.location.hash.replace("#", "");
+    if (!PORTFOLIO_CASES.some((c) => c.gallery.id === id)) return;
+    let aborted = false;
+    const abort = () => {
+      aborted = true;
+    };
+    window.addEventListener("wheel", abort, { passive: true, once: true });
+    window.addEventListener("touchmove", abort, { passive: true, once: true });
+    const jump = () => {
+      if (aborted) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      const y = el.getBoundingClientRect().top + window.scrollY - 96;
+      const root = document.documentElement;
+      const prev = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      window.scrollTo(0, Math.max(0, y));
+      root.style.scrollBehavior = prev;
+    };
+    const raf = window.requestAnimationFrame(jump);
+    const timers = [120, 350, 700, 1100].map((ms) => setTimeout(jump, ms));
+    return () => {
+      window.cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      window.removeEventListener("wheel", abort);
+      window.removeEventListener("touchmove", abort);
+    };
   }, []);
 
-  const filteredProjects = useMemo(() => {
-    return activeFilter === "All"
-      ? wallProjects
-      : wallProjects.filter((project) => project.category === activeFilter);
-  }, [activeFilter, wallProjects]);
-  const categoryCount = (category: Filter) => {
-    if (category === "All") return wallProjects.length;
-    return wallProjects.filter((project) => project.category === category).length;
-  };
-  const visibleCategories = categories.filter((category) => category === "All" || categoryCount(category) > 0);
+  const close = useCallback(() => setLightbox(null), []);
+  const step = useCallback((dir: number) => {
+    setLightbox((cur) => {
+      if (!cur) return cur;
+      const set = PORTFOLIO_CASES[cur.c].gallery.photos;
+      return { c: cur.c, p: (cur.p + dir + set.length) % set.length };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [lightbox, close, step]);
+
+  const openAt = useCallback((c: number, src?: string) => {
+    const photos = PORTFOLIO_CASES[c].gallery.photos;
+    const p = src ? Math.max(0, photos.indexOf(src)) : 0;
+    setLightbox({ c, p });
+  }, []);
+
+  const active = lightbox ? PORTFOLIO_CASES[lightbox.c] : null;
+  const [cerritos, elSereno, tustin] = PORTFOLIO_CASES;
 
   return (
     <div ref={rootRef} className="bg-[#f5f0e9] text-black">
       <PortfolioFlow>
-      <PortfolioHero projects={heroProjects} categories={categories} onOpen={setLightboxProject} />
-
-      <section
-        id="project-index"
-        data-section="portfolio-index"
-        className="relative scroll-mt-24 bg-black px-6 pb-14 pt-24 text-white lg:px-12 lg:pb-20 lg:pt-28"
-      >
-        <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.14]" />
-        <div className="absolute bottom-10 right-10 hidden h-32 w-32 border border-white/10 lg:block" />
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.94fr] lg:items-start">
-          <div>
-            <div className="portfolio-reveal mb-7 max-w-2xl" data-gsap-reveal="true">
-              <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-white/38">
-                Case index
-              </span>
-              <h2 className="mt-4 font-editorial text-[clamp(2.7rem,5.8vw,5.8rem)] leading-[0.86]">
-                Project index
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setLightboxProject(activeIndexProject)}
-              className="mb-8 block w-full text-left lg:hidden"
-            >
-              <div className="mb-3 flex items-center justify-between border-y border-white/12 py-3">
-                <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/46">
-                  Selected preview
-                </span>
-                <span className="font-numbers text-sm font-bold text-[var(--color-accent)]">
-                  {String(indexProjects.findIndex((project) => project.id === activeIndexProject.id) + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <div className="relative min-h-[18rem] overflow-hidden border border-white/12 bg-[#111]">
-                {hasRealPhoto(activeIndexProject) ? (
-                  <>
-                    <Image
-                      key={`mobile-${activeIndexProject.id}`}
-                      src={projectImage(activeIndexProject)}
-                      alt={activeIndexProject.title}
-                      fill
-                      loading="eager"
-                      fetchPriority="high"
-                      sizes="(max-width: 1024px) 100vw, 42vw"
-                      placeholder="blur"
-                      blurDataURL={lqip(projectImage(activeIndexProject))}
-                      onError={imgError}
-                      className="object-cover"
-                      style={{ filter: "contrast(1.06) saturate(1.04)" }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
-                  </>
-                ) : (
-                  <PendingProjectPlate project={activeIndexProject} compact />
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
-                    {activeIndexProject.category}
+        {/* ── Surface 1 · Hero: statement + residence index + real triptych ── */}
+        <section
+          data-section="portfolio-hero"
+          data-header-dark=""
+          className="relative bg-black px-6 pb-16 pt-28 text-white lg:px-12 lg:pb-20 lg:pt-32"
+          style={{ overflowX: "clip" }}
+        >
+          <DraftingMotionLayer intensity="quiet" variant="intro" />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(circle_at_76%_12%,rgba(99,26,22,0.16),transparent_30%)]"
+            aria-hidden="true"
+          />
+          <div className="relative z-10 mx-auto max-w-7xl">
+            <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
+              <div className="flex flex-col justify-between">
+                <div>
+                  <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/38">
+                    Portfolio / Selected residential work
                   </span>
-                  <h3 className="mt-3 font-editorial text-[clamp(1.9rem,10vw,3rem)] leading-[0.9] text-white">
-                    {cleanText(activeIndexProject.title)}
-                  </h3>
+                  <h1 className="mt-5 max-w-xl font-editorial text-[clamp(2.2rem,4.5vw,4.6rem)] leading-[0.9]">
+                    Remodels, ADUs, repairs.
+                  </h1>
+                  <p className="mt-6 max-w-md text-sm leading-7 text-white/56">
+                    Three residences, photographed the way they were built — completely.
+                    Open any project for the full set.
+                  </p>
+                </div>
+
+                <nav aria-label="Residence index" className="mt-12 lg:mt-10">
+                  {PORTFOLIO_CASES.map((c, i) => (
+                    <a
+                      key={c.gallery.id}
+                      href={`#${c.gallery.id}`}
+                      className="group grid min-h-[44px] grid-cols-[2.6rem_1fr_auto] items-baseline gap-4 border-t border-white/12 py-4 transition-colors hover:bg-white/[0.03]"
+                    >
+                      <span className="font-numbers text-sm font-bold text-white/28 transition-colors group-hover:text-[var(--color-accent)]">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span>
+                        <span className="block font-editorial text-[clamp(1.25rem,1.9vw,1.9rem)] leading-tight text-white/86 transition-colors group-hover:text-white">
+                          {c.gallery.title}
+                        </span>
+                        <span className="mt-1 block font-labels text-[8px] uppercase leading-4 tracking-[0.16em] text-white/36">
+                          {c.gallery.scope} / {c.project.location}
+                        </span>
+                      </span>
+                      <span className="hidden font-numbers text-[10px] text-white/34 sm:block">
+                        {c.gallery.photos.length} photos
+                      </span>
+                    </a>
+                  ))}
+                  <div className="draw-line h-px bg-[var(--color-accent)]/55" />
+                </nav>
+              </div>
+
+              <div className="grid grid-cols-2 grid-rows-2 gap-3">
+                <a
+                  href={`#${cerritos.gallery.id}`}
+                  aria-label="Jump to Cerritos Residence"
+                  className="group relative row-span-2 block min-h-[22rem] overflow-hidden bg-[#111] sm:min-h-[26rem]"
+                >
+                  <Image
+                    src={cerritos.lead}
+                    alt="Cerritos Residence master bath — glass shower enclosure and dark feature tile"
+                    fill
+                    priority
+                    fetchPriority="high"
+                    quality={90}
+                    sizes="(max-width: 1024px) 50vw, 30vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                    style={{ filter: "contrast(1.04) saturate(1.05)" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/74">
+                    Cerritos, CA
+                  </span>
+                </a>
+                <a
+                  href={`#${elSereno.gallery.id}`}
+                  aria-label="Jump to El Sereno Residence"
+                  className="group relative block overflow-hidden bg-[#111]"
+                >
+                  <Image
+                    src={elSereno.lead}
+                    alt="El Sereno Residence bath — geometric star tile and soaking tub"
+                    fill
+                    priority
+                    quality={86}
+                    sizes="(max-width: 1024px) 50vw, 28vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                    style={{ filter: "contrast(1.04) saturate(1.05)" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/74">
+                    El Sereno, CA
+                  </span>
+                </a>
+                <a
+                  href={`#${tustin.gallery.id}`}
+                  aria-label="Jump to Tustin Residence"
+                  className="group relative block overflow-hidden bg-[#111]"
+                >
+                  <Image
+                    src={tustin.lead}
+                    alt="Tustin Residence — light blue soaking tub with glass shower surround"
+                    fill
+                    priority
+                    quality={86}
+                    sizes="(max-width: 1024px) 50vw, 28vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                    style={{ filter: "contrast(1.04) saturate(1.05)" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/74">
+                    Tustin, CA
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Surface 2 · Cerritos: lead-left, sticky dossier right ── */}
+        <section
+          id="cerritos-residence"
+          data-section="case-cerritos"
+          data-header-light=""
+          className="relative scroll-mt-24 bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
+          style={{ overflowX: "clip" }}
+        >
+          <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
+          <div className="relative z-10 mx-auto max-w-7xl">
+            <div className="grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:gap-14">
+              <div data-lead-parallax="" className="relative aspect-[4/5] overflow-hidden bg-[#e8e3da] lg:aspect-auto lg:min-h-[38rem]">
+                <Image
+                  src={cerritos.lead}
+                  alt="Cerritos Residence master bath overview — frameless glass shower, dark vertical feature tile, dual marble vanity"
+                  fill
+                  loading="lazy"
+                  quality={86}
+                  sizes="(max-width: 1024px) 100vw, 54vw"
+                  placeholder="blur"
+                  blurDataURL={lqip(cerritos.lead)}
+                  className="object-cover"
+                  style={{ filter: "contrast(1.04) saturate(1.05)" }}
+                />
+              </div>
+              <div className="lg:self-stretch">
+                <div className="lg:sticky lg:top-28">
+                  <CaseNumberBlock index={0} title={cerritos.gallery.title} dark={false} />
+                  <div className="pf-reveal mt-8" data-gsap-reveal="true">
+                    <CaseLedger caseData={cerritos} dark={false} onOpenSet={() => openAt(0)} />
+                  </div>
                 </div>
               </div>
-            </button>
-            <div className="draw-line mb-3 h-px origin-left bg-[var(--color-accent)]/58" />
-            <div className="grid gap-2">
-              {indexProjects.map((project, index) => (
-                <ProjectIndexRow
-                  key={project.id}
-                  project={project}
-                  active={project.id === activeIndexProject.id}
-                  number={index + 1}
-                  onSelect={() => setActiveIndexId(project.id)}
-                  onOpen={() => setLightboxProject(project)}
+            </div>
+
+            <div data-tile-group="" className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-16">
+              {cerritos.grid.map((src, i) => (
+                <CaseTile
+                  key={src}
+                  src={src}
+                  caseData={cerritos}
+                  index={i}
+                  dark={false}
+                  aspect={i === 0 ? "aspect-[4/5] col-span-2 md:col-span-1" : "aspect-[4/5]"}
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                  onOpen={(s) => openAt(0, s)}
                 />
               ))}
             </div>
-          </div>
 
-          <div
-            className="hidden lg:block lg:self-stretch"
-            style={{ opacity: 1, transform: "none", visibility: "visible" }}
-          >
-            <div className="sticky top-24">
-              <button
-                type="button"
-                onClick={() => setLightboxProject(activeIndexProject)}
-                className="group block w-full text-left"
-                aria-live="polite"
-              >
-                <div className="mb-4 flex items-center justify-between border-y border-white/12 py-3">
-                  <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/46">
-                    Selected preview / {activeIndexProject.category}
-                  </span>
-                  <span className="font-numbers text-sm font-bold text-[var(--color-accent)]">
-                    {String(indexProjects.findIndex((project) => project.id === activeIndexProject.id) + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="relative min-h-[25rem] overflow-hidden border border-white/12 bg-[#111]">
-                  {hasRealPhoto(activeIndexProject) ? (
-                    <>
-                      <Image
-                        key={activeIndexProject.id}
-                        src={projectImage(activeIndexProject)}
-                        alt={activeIndexProject.title}
-                        fill
-                        loading="eager"
-                        fetchPriority="high"
-                        sizes="(max-width: 1024px) 100vw, 42vw"
-                        placeholder="blur"
-                        blurDataURL={lqip(projectImage(activeIndexProject))}
-                        onError={imgError}
-                        className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                        style={{ filter: "contrast(1.06) saturate(1.04)" }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-transparent to-transparent" />
-                    </>
-                  ) : (
-                    <PendingProjectPlate project={activeIndexProject} />
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/42">
-                      {cleanText(activeIndexProject.location)}
-                    </span>
-                    <h3 className="mt-3 font-editorial text-[clamp(2rem,4vw,4rem)] leading-[0.9] text-white">
-                      {cleanText(activeIndexProject.title)}
-                    </h3>
+            <ContactStrip photos={cerritos.strip} title={cerritos.gallery.title} dark={false} />
+          </div>
+        </section>
+
+        {/* ── Surface 3 · El Sereno: full-bleed lead, two-chapter grid ── */}
+        <section
+          id="el-sereno-residence"
+          data-section="case-el-sereno"
+          data-header-dark=""
+          className="relative scroll-mt-24 bg-[#0a0a0a] px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-28 lg:pt-28"
+          style={{ overflowX: "clip" }}
+        >
+          <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.1]" />
+          <div className="relative z-10 mx-auto max-w-7xl">
+            <div data-lead-parallax="" className="relative aspect-[4/3] overflow-hidden bg-[#111] sm:aspect-[16/8] lg:aspect-[21/9]">
+              <Image
+                src={elSereno.lead}
+                alt="El Sereno Residence bath — geometric star-pattern tile, soaking tub, and matte black fixtures"
+                fill
+                loading="lazy"
+                quality={88}
+                sizes="(max-width: 1280px) 100vw, 1216px"
+                placeholder="blur"
+                blurDataURL={lqip(elSereno.lead)}
+                className="object-cover"
+                style={{ filter: "contrast(1.04) saturate(1.05)" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-transparent to-transparent" />
+            </div>
+
+            <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
+              <div className="lg:self-stretch">
+                <div className="lg:sticky lg:top-28">
+                  <CaseNumberBlock index={1} title={elSereno.gallery.title} dark />
+                  <div className="pf-reveal mt-8" data-gsap-reveal="true">
+                    <CaseLedger caseData={elSereno} dark onOpenSet={() => openAt(1)} />
                   </div>
                 </div>
-                <p className="mt-5 max-w-lg text-sm leading-7 text-white/50">
-                  {cleanText(activeIndexProject.description)}
+              </div>
+
+              <div>
+                {[elSereno.grid, elSereno.gridB ?? []].map((chapter, chapterIdx) =>
+                  chapter.length ? (
+                    <div key={chapterIdx} className={chapterIdx === 1 ? "mt-10" : ""}>
+                      <div className="mb-4 flex items-center gap-3">
+                        <span className="h-px w-8 bg-[var(--color-accent)]/70" aria-hidden="true" />
+                        <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/44">
+                          {elSereno.chapterLabels?.[chapterIdx]}
+                        </span>
+                      </div>
+                      <div data-tile-group="" className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                        {chapter.map((src, i) => (
+                          <CaseTile
+                            key={src}
+                            src={src}
+                            caseData={elSereno}
+                            index={i}
+                            dark
+                            aspect={i === 0 ? "aspect-[4/5] col-span-2 md:col-span-1" : "aspect-[4/5]"}
+                            sizes="(max-width: 768px) 50vw, 20vw"
+                            onOpen={(s) => openAt(1, s)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null
+                )}
+              </div>
+            </div>
+
+            <ContactStrip photos={elSereno.strip} title={elSereno.gallery.title} dark />
+          </div>
+        </section>
+
+        {/* ── Surface 4 · Tustin: dossier bar + offset grid ── */}
+        <section
+          id="tustin-residence"
+          data-section="case-tustin"
+          data-header-light=""
+          className="relative scroll-mt-24 bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
+          style={{ overflowX: "clip" }}
+        >
+          <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
+          <div className="relative z-10 mx-auto max-w-7xl">
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+              <CaseNumberBlock index={2} title={tustin.gallery.title} dark={false} />
+              <div className="pf-reveal" data-gsap-reveal="true">
+                <CaseLedger caseData={tustin} dark={false} onOpenSet={() => openAt(2)} />
+              </div>
+            </div>
+
+            <div className="mt-12 grid grid-cols-2 gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4">
+              <div data-tile-group="" className="grid gap-3 lg:gap-4">
+                <CaseTile
+                  src={tustin.lead}
+                  caseData={tustin}
+                  index={0}
+                  dark={false}
+                  aspect="aspect-[4/3]"
+                  sizes="(max-width: 1024px) 50vw, 44vw"
+                  onOpen={(s) => openAt(2, s)}
+                />
+                <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                  {tustin.grid.slice(0, 2).map((src, i) => (
+                    <CaseTile
+                      key={src}
+                      src={src}
+                      caseData={tustin}
+                      index={i + 1}
+                      dark={false}
+                      sizes="(max-width: 1024px) 25vw, 22vw"
+                      onOpen={(s) => openAt(2, s)}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div data-tile-group="" className="grid gap-3 lg:mt-20 lg:gap-4">
+                <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                  {tustin.grid.slice(2, 4).map((src, i) => (
+                    <CaseTile
+                      key={src}
+                      src={src}
+                      caseData={tustin}
+                      index={i + 3}
+                      dark={false}
+                      sizes="(max-width: 1024px) 25vw, 18vw"
+                      onOpen={(s) => openAt(2, s)}
+                    />
+                  ))}
+                </div>
+                <CaseTile
+                  src={tustin.grid[4]}
+                  caseData={tustin}
+                  index={5}
+                  dark={false}
+                  aspect="aspect-[4/3]"
+                  sizes="(max-width: 1024px) 50vw, 36vw"
+                  onOpen={(s) => openAt(2, s)}
+                />
+              </div>
+            </div>
+
+            <ContactStrip photos={tustin.strip} title={tustin.gallery.title} dark={false} />
+          </div>
+        </section>
+
+        {/* ── Surface 5 · Next up: one honest in-progress example ── */}
+        <section
+          data-section="portfolio-next"
+          data-header-dark=""
+          className="relative bg-black px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-24 lg:pt-28"
+          style={{ overflowX: "clip" }}
+        >
+          <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
+          <div className="relative z-10 mx-auto max-w-7xl">
+            <div className="grid gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
+              <div className="pf-reveal" data-gsap-reveal="true">
+                <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/38">
+                  Next up
+                </span>
+                <h2 className="mt-4 font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.94]">
+                  {EXAMPLE_PROJECT.title}
+                </h2>
+                <div className="mt-5 inline-flex items-center gap-2 border border-[var(--color-accent)]/55 px-3 py-2">
+                  <span className="h-1.5 w-1.5 bg-[var(--color-accent)]" aria-hidden="true" />
+                  <span className="font-labels text-[8px] uppercase tracking-[0.2em] text-white/72">
+                    In progress — photography pending
+                  </span>
+                </div>
+                <p className="mt-6 max-w-md text-sm leading-7 text-white/56">
+                  {EXAMPLE_PROJECT.description}
                 </p>
-              </button>
+                <div className="mt-6 border-t border-white/12 pt-4 font-labels text-[8px] uppercase leading-5 tracking-[0.16em] text-white/36">
+                  {EXAMPLE_PROJECT.spec} / {EXAMPLE_PROJECT.location}
+                </div>
+              </div>
+
+              <div data-tile-group="" className="grid grid-cols-3 gap-3">
+                {(EXAMPLE_PROJECT.images ?? [EXAMPLE_PROJECT.image]).map((src, i) => (
+                  <div
+                    key={src}
+                    data-gsap-reveal="true"
+                    className={`pf-tile relative overflow-hidden bg-[#111] ${
+                      i === 0 ? "col-span-3 aspect-[16/8]" : "col-span-3 aspect-[16/8] sm:col-span-1 sm:aspect-[4/5]"
+                    } ${i === 0 ? "" : "hidden sm:block"}`}
+                  >
+                    <Image
+                      src={src}
+                      alt={`Representative frame ${i + 1} — ${EXAMPLE_PROJECT.title} scope reference`}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 30vw"
+                      quality={72}
+                      placeholder="blur"
+                      blurDataURL={lqip(src)}
+                      className="object-cover"
+                      style={{ filter: "contrast(1.04) saturate(1.02)" }}
+                    />
+                  </div>
+                ))}
+                <p className="col-span-3 font-labels text-[8px] uppercase leading-5 tracking-[0.18em] text-white/34">
+                  Representative frames — full documentation follows completion.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section data-section="portfolio-wall" className="relative overflow-hidden bg-[#f5f0e9] px-6 pb-18 pt-28 lg:px-12 lg:pb-24 lg:pt-32">
-        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.1]" />
-        <div className="relative z-10 mx-auto max-w-7xl">
-          <div className="portfolio-reveal mb-10 grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end" data-gsap-reveal="true">
-            <div>
+        {/* ── Surface 6 · CTA ── */}
+        <section
+          data-section="portfolio-cta"
+          data-header-light=""
+          className="relative bg-[#f5f0e9] px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-28"
+          style={{ overflowX: "clip" }}
+        >
+          <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
+          <div className="relative z-10 mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="pf-reveal" data-gsap-reveal="true">
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
-                Work wall
+                Ready to compare notes
               </span>
-              <h2 className="mt-5 font-editorial text-[clamp(2.8rem,6vw,6rem)] leading-[0.88]">
-                Photo sets, details, and close reads.
+              <h2 className="mt-3 max-w-2xl font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.92]">
+                Ready to price the next scope?
               </h2>
             </div>
-            <div className="flex flex-wrap gap-2 lg:justify-end">
-              {visibleCategories.map((category) => {
-                const active = activeFilter === category;
-                return (
-                  <button
-                    key={category}
-                    type="button"
-                    data-portfolio-filter={category}
-                    aria-label={`Filter portfolio by ${category}`}
-                    onClick={() => setActiveFilter(category)}
-                    className={`border px-4 py-3 font-labels text-[9px] uppercase tracking-[0.16em] transition-colors ${
-                      active
-                        ? "border-black bg-black text-white"
-                        : "border-black/12 bg-white/62 text-black/54 hover:border-black/35 hover:text-black"
-                    }`}
-                  >
-                    {category} / {categoryCount(category)}
-                  </button>
-                );
-              })}
+            <div className="pf-reveal flex flex-wrap gap-3 lg:justify-end" data-gsap-reveal="true">
+              <a
+                href={SITE.phoneHref}
+                className="min-h-[44px] bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
+              >
+                Call {SITE.phone}
+              </a>
+              <Link
+                href="/contact"
+                className="min-h-[44px] border border-black/20 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/70 transition-colors hover:border-black hover:text-black"
+              >
+                Start a project
+              </Link>
             </div>
           </div>
-
-          <div className="grid auto-rows-[18rem] grid-cols-1 gap-3 md:grid-cols-3">
-            {filteredProjects.map((project, index) => (
-              <ProjectWallTile
-                key={`${activeFilter}-${project.id}`}
-                project={project}
-                index={index}
-                onOpen={setLightboxProject}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <ResidenceGalleries />
-
-      <section data-section="portfolio-cta" className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 pb-12 pt-28 lg:px-12 lg:pt-28">
-        <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="portfolio-reveal" data-gsap-reveal="true">
-            <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
-              Ready to compare notes
-            </span>
-            <h2 className="mt-3 max-w-3xl font-editorial text-[clamp(2.6rem,5vw,5.6rem)] leading-[0.88]">
-              Ready to price the next scope?
-            </h2>
-          </div>
-          <div className="portfolio-reveal flex flex-wrap gap-3 lg:justify-end" data-gsap-reveal="true">
-            <a
-              href={SITE.phoneHref}
-              className="bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
-            >
-              Call {SITE.phone}
-            </a>
-            <Link
-              href="/contact"
-              className="border border-black/15 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/62 transition-colors hover:border-black hover:text-black"
-            >
-              Start a project
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
       </PortfolioFlow>
 
-      <Lightbox project={lightboxProject} onClose={() => setLightboxProject(null)} />
+      {/* Per-case lightbox — full photo set, arrows/Esc/backdrop/scroll-lock */}
+      {active && lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${active.gallery.title} photo viewer`}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/92 p-4 lg:p-10"
+          onClick={close}
+        >
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close photo viewer"
+            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center border border-white/25 font-labels text-lg text-white/80 transition-colors hover:border-white hover:text-white lg:right-8 lg:top-8"
+          >
+            ×
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              step(-1);
+            }}
+            aria-label="Previous photo"
+            className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-white/20 font-labels text-white/70 transition-colors hover:border-white hover:text-white lg:left-8"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              step(1);
+            }}
+            aria-label="Next photo"
+            className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-white/20 font-labels text-white/70 transition-colors hover:border-white hover:text-white lg:right-8"
+          >
+            ›
+          </button>
+          <div className="relative h-full w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+            <Image
+              key={active.gallery.photos[lightbox.p]}
+              src={active.gallery.photos[lightbox.p]}
+              alt={`${active.gallery.title} — ${active.gallery.scope}, photo ${lightbox.p + 1} of ${active.gallery.photos.length}`}
+              fill
+              sizes="100vw"
+              quality={82}
+              className="object-contain"
+              priority
+            />
+          </div>
+          <p className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 font-labels text-[10px] uppercase tracking-[0.2em] text-white/70">
+            {active.gallery.title}
+            <span className="mx-2 text-white/35">/</span>
+            {String(lightbox.p + 1).padStart(2, "0")} — {String(active.gallery.photos.length).padStart(2, "0")}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

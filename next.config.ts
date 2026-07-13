@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Dev server writes to .next-dev so `next build` / preflight / deploy runs
+  // (which wipe .next) can never corrupt a running `npm run dev` on :3001.
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   devIndicators: false,
   images: {
     formats: ["image/webp", "image/avif"],

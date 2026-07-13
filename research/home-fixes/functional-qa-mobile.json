@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:3000/contact",
+  "url": "http://localhost:3001",
   "viewport": {
     "width": 390,
     "height": 844
@@ -12,9 +12,9 @@
     "winWidth": 390
   },
   "heroCheck": {
-    "found": false,
-    "imgFound": false,
-    "imgFilter": null
+    "found": true,
+    "imgFound": true,
+    "imgFilter": "none"
   },
   "counters": {
     "found": false,
@@ -24,6 +24,24 @@
   "pinGap": {
     "found": false
   },
-  "totalHeight": 4810,
+  "headingsCheck": {
+    "headings": [
+      "Transforming properties, delivering solutions.",
+      "One company,multiple solutions.",
+      "Refining industry standards.",
+      "Quality is the strategy."
+    ],
+    "duplicateHeadings": []
+  },
+  "motionDensity": {
+    "gsapStyledElements": 77,
+    "gsapTransforms": 52,
+    "gsapOpacityLt1": 38,
+    "totalElements": 518,
+    "movementRatio": 0.149,
+    "threshold": ">= 5 GSAP-styled elements",
+    "motionDensityPass": true
+  },
+  "totalHeight": 7567,
   "PASS": true
 }

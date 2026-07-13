@@ -29,12 +29,12 @@
     "duplicateHeadings": []
   },
   "motionDensity": {
-    "gsapStyledElements": 67,
-    "gsapTransforms": 62,
-    "gsapOpacityLt1": 41,
+    "gsapStyledElements": 65,
+    "gsapTransforms": 56,
+    "gsapOpacityLt1": 45,
     "threshold": ">= 50 GSAP-styled elements",
     "motionDensityPass": true
   },
-  "totalHeight": 4611,
+  "totalHeight": 4683,
   "PASS": true
 }

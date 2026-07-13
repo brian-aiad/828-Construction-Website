@@ -134,12 +134,14 @@ export default function HeroV2() {
     >
       <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
         <Image
-          src="/images/generated/home-hero-simple-adu-bluehour.jpg"
-          alt="Modern ADU and outdoor living build at blue hour"
+          src="/images/generated/home-hero-bluehour-adu-v2.png"
+          alt="Modern South Bay ADU with warm interior lighting at blue hour"
           fill
           priority
           fetchPriority="high"
           sizes="100vw"
+          quality={92}
+          unoptimized
           className="hero-kenburns object-cover"
         />
       </div>

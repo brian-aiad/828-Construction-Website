@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:3000/projects",
+  "url": "http://localhost:3001",
   "viewport": {
     "width": 1440,
     "height": 900
@@ -13,8 +13,8 @@
   },
   "heroCheck": {
     "found": true,
-    "imgFound": false,
-    "imgFilter": null
+    "imgFound": true,
+    "imgFilter": "none"
   },
   "counters": {
     "found": false,
@@ -24,6 +24,24 @@
   "pinGap": {
     "found": false
   },
-  "totalHeight": 3160,
+  "headingsCheck": {
+    "headings": [
+      "Transforming properties, delivering solutions.",
+      "One company,multiple solutions.",
+      "Refining industry standards.",
+      "Quality is the strategy."
+    ],
+    "duplicateHeadings": []
+  },
+  "motionDensity": {
+    "gsapStyledElements": 114,
+    "gsapTransforms": 67,
+    "gsapOpacityLt1": 83,
+    "totalElements": 537,
+    "movementRatio": 0.212,
+    "threshold": ">= 50 GSAP-styled elements",
+    "motionDensityPass": true
+  },
+  "totalHeight": 6933,
   "PASS": true
 }

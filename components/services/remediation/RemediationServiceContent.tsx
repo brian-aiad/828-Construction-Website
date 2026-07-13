@@ -53,6 +53,21 @@ const FAQS = [
 
 // Verbatim from Joe's phone notes ("Section 3 process — Remediation: The
 // approach / Build philosophy").
+const FAQ_PHOTOS = [
+  {
+    src: "/images/generated/remediation-faq-cause-moisture-v3.png",
+    alt: "Moisture intrusion inspection at an opened residential wall section",
+  },
+  {
+    src: "/images/generated/remediation-faq-containment-v3.png",
+    alt: "Clean remediation containment setup with air filtration equipment",
+  },
+  {
+    src: "/images/generated/remediation-faq-air-quality-v3.png",
+    alt: "Air quality and moisture control equipment in a clean residential remediation area",
+  },
+] as const;
+
 const APPROACH = [
   ["01", "Initial call"],
   ["02", "Visual inspection / Testing"],
@@ -62,22 +77,22 @@ const APPROACH = [
 
 const APPROACH_PHOTOS = [
   {
-    src: "/images/generated/remediation-step-initial-call-v2.png",
+    src: "/images/generated/remediation-step-initial-call-v3.png",
     alt: "Initial remediation call setup with project notes, plans, and phone",
     label: "Initial call",
   },
   {
-    src: "/images/generated/remediation-step-visual-testing-v2.png",
+    src: "/images/generated/remediation-step-visual-testing-v3.png",
     alt: "Moisture testing at an opened residential wall during remediation inspection",
     label: "Visual inspection / Testing",
   },
   {
-    src: "/images/generated/remediation-step-scope-work-v2.png",
+    src: "/images/generated/remediation-step-scope-work-v3.png",
     alt: "Remediation scope of work documents, floor plans, and marked project photos",
     label: "Remediation / Scope of work",
   },
   {
-    src: "/images/generated/remediation-step-reconstruction-v2.png",
+    src: "/images/generated/remediation-step-reconstruction-v3.png",
     alt: "Clean residential rebuild with new drywall after remediation",
     label: "Build back / Reconstruction",
   },
@@ -98,13 +113,13 @@ const EQUIPMENT = [
   {
     model: "Flair E8",
     role: "Air filtration",
-    src: "/images/generated/remediation-equipment-air-filtration-v2.png",
+    src: "/images/generated/remediation-equipment-air-filtration-v3.png",
     alt: "Portable air filtration equipment in a clean remediation workspace",
   },
   {
     model: "277 MR",
     role: "Moisture control",
-    src: "/images/generated/remediation-equipment-moisture-control-v2.png",
+    src: "/images/generated/remediation-equipment-moisture-control-v3.png",
     alt: "Professional moisture control equipment in a contained remediation workspace",
   },
 ];
@@ -411,7 +426,7 @@ function RemediationHero() {
         <div className="rem-hero-media relative order-2 min-h-[46vh] overflow-hidden lg:min-h-screen">
           <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/generated/remediation-hero-controlled-work-v2.png"
+              src="/images/generated/remediation-hero-controlled-work-v3.png"
               alt="Controlled remediation work area with exposed framing and drying equipment"
               fill
               priority
@@ -438,7 +453,15 @@ function RemediationHero() {
 }
 
 // ── Section 2 — FAQ (NS Perspectives grammar) ───────────────────────────────
-function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) {
+function FaqCard({
+  faq,
+  index,
+  photo,
+}: {
+  faq: (typeof FAQS)[number];
+  index: number;
+  photo: (typeof FAQ_PHOTOS)[number];
+}) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const dark = index % 2 === 0;
@@ -452,6 +475,26 @@ function FaqCard({ faq, index }: { faq: (typeof FAQS)[number]; index: number }) 
       }`}
     >
       <div>
+        <div className="relative mb-6 h-40 overflow-hidden bg-black/5 sm:h-44">
+          <Image
+            src={photo.src}
+            alt={photo.alt}
+            fill
+            sizes="(max-width: 640px) 100vw, 33vw"
+            quality={90}
+            unoptimized
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
+            onError={imgError}
+            className="object-cover"
+            style={{
+              filter: dark
+                ? "contrast(1.05) saturate(1.03)"
+                : "contrast(1.02) saturate(1.02)",
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+        </div>
         <span
           className={`font-numbers text-xs font-bold ${
             dark ? "text-white/72" : "text-[var(--color-accent)]"
@@ -553,7 +596,7 @@ function RemediationFaq() {
 
         <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:mt-16">
           {FAQS.map((faq, i) => (
-            <FaqCard key={faq.q} faq={faq} index={i} />
+            <FaqCard key={faq.q} faq={faq} index={i} photo={FAQ_PHOTOS[i]} />
           ))}
         </div>
       </div>
@@ -728,11 +771,11 @@ function RemediationApproach() {
 const METHOD_PHOTOS = [
   // Swappable slots — Brian is generating a multi-photo set to drop in here.
   {
-    src: "/images/generated/remediation-method-diagnostic-v2.png",
+    src: "/images/generated/remediation-method-diagnostic-v3.png",
     alt: "Opened wall condition before remediation repair",
   },
   {
-    src: "/images/generated/remediation-method-restoration-v2.png",
+    src: "/images/generated/remediation-method-restoration-v3.png",
     alt: "Remediation drying equipment in a clean work area",
   },
 ];
