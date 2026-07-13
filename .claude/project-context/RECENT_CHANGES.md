@@ -2,6 +2,33 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Header-clearance standard at snapped rests, site-wide
+
+- Brian: snapping is loved, but sections rested with their first content
+  nearly flush under the fixed header ("SINCE 2004", "One company," crammed
+  below the bar). SITE-WIDE STANDARD: at every stacked surface's snapped rest
+  (top=0, desktop 1440x900), clearance from the header's live bottom to the
+  first readable content sits in the ~56–80px band. Top-padding-only edits —
+  no verbiage/layout/design changes.
+- Agents applied per-section padding across all 7 pages before hitting
+  session limits; coordinator measured every surface post-edit with
+  clearance.mjs (.claude-work/research/clearance-final/): home 63/414(hero
+  para)/63, about 141(hero)/63/63/80/79, services 51(hero)/162/73/63, adu
+  54/63/63/64, remediation 63/144/63/63/56, consulting 78/55/55/55, contact
+  79/63/63/63, portfolio 47(card-edge, visually composed)/63/79/80/117 — all
+  readable-content rests in band, symmetrical.
+- BONUS FIX while verifying: /portfolio hero H1 clamp (7.5vw/8.2rem cap) was
+  wider than its col-span-5 card, and the global overflow-wrap:break-word
+  split "Remodels," from its comma — a line started with ", " (Fix 21
+  class). Clamp retuned to 6.6vw/6.4rem cap: verified no punctuation-led
+  lines and no overflow at 390/1024/1440/1920.
+- Geometry re-verified post-padding (offsets all shifted): tsc clean; home
+  walk 5/5 lit-in-view + settle 37/37 down 32/32 up; settle spots clean on
+  about 11/11, services 41/41, portfolio 60/60, adu 11/11, remediation
+  11/11, consulting 12/12, contact 15/15; functional-qa home PASS both
+  viewports. ServicesPreviewV2's in-tree rework (Fix 22 IO reveals + real
+  v3 photos) rides along, exercised by the same QA.
+
 ## 2026-07-12 — ADU V3.4: junction settle + compact acronym (Brian)
 
 - SETTLE: AduFlow wired to the canonical junction-settle hook
