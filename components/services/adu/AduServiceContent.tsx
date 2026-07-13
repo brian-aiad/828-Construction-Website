@@ -57,11 +57,11 @@ const FAQS = [
 // interleaved with photo cells in a checkerboard.
 const FAQ_PHOTOS = [
   {
-    src: "/images/generated/adu-faq-interior-v2.jpg",
+    src: "/images/generated/adu-faq-interior-v3.png",
     alt: "Finished compact ADU interior with warm kitchen and living area",
   },
   {
-    src: "/images/projects/garage-conversion.jpg",
+    src: "/images/generated/adu-faq-garage-conversion-v3.png",
     alt: "Garage conversion ADU by 828 Construction",
   },
 ];
@@ -393,7 +393,7 @@ function AduHero() {
         <div className="relative order-2 min-h-[46vh] overflow-hidden lg:order-1 lg:min-h-screen">
           <div className="adu-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/generated/adu-hero-exterior-v2.jpg"
+              src="/images/generated/adu-hero-exterior-v3.png"
               alt="Modern detached ADU exterior with warm wood, black-framed doors, and drought-tolerant landscaping"
               fill
               priority
@@ -588,25 +588,39 @@ function AduFaq() {
             "smaller little sections" in a tidy checkerboard beside it.
             Photo slots are swap-ready for the new client images. */}
         <div className="mt-12 grid grid-cols-1 gap-4 lg:mt-14 lg:grid-cols-12">
-          <div className="relative order-2 min-h-[16rem] lg:order-1 lg:col-span-5 lg:min-h-0">
-            <div className="adu-clip absolute inset-0" data-gsap-reveal="true">
-              <div className="adu-parallax absolute inset-x-0" style={{ top: "-6%", height: "112%" }}>
-                <Image
-                  src={FAQ_PHOTOS[0].src}
-                  alt={FAQ_PHOTOS[0].alt}
-                  fill
-                  loading="lazy"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                  quality={92}
-                  unoptimized
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                  onError={imgError}
-                  className="object-cover"
-                  style={{ filter: "contrast(1.05) saturate(1.05)" }}
-                />
+          <div className="order-2 grid grid-cols-1 gap-4 lg:order-1 lg:col-span-5">
+            {FAQ_PHOTOS.map((photo, i) => (
+              <div
+                key={photo.src}
+                className="relative min-h-[15rem] overflow-hidden lg:min-h-[19rem]"
+              >
+                <div
+                  className="adu-clip absolute inset-0"
+                  data-gsap-reveal="true"
+                  data-stagger={String(i * 0.1)}
+                >
+                  <div
+                    className="adu-parallax absolute inset-x-0"
+                    style={{ top: "-6%", height: "112%" }}
+                  >
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                      quality={92}
+                      unoptimized
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                      style={{ filter: "contrast(1.05) saturate(1.05)" }}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
           <div className="order-1 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:order-2 lg:col-span-7">
             <FaqCard faq={FAQS[0]} index={0} dark stagger={0} />
@@ -623,15 +637,15 @@ function AduFaq() {
 // ── Section 3 — what ADU means to 828 (acronym values + watermark drift) ────
 const ACRONYM_PHOTOS = [
   {
-    src: "/images/generated/adu-acronym-aligned-v2.jpg",
+    src: "/images/generated/adu-acronym-aligned-v3.png",
     alt: "Contractor and homeowner reviewing a completed ADU exterior together",
   },
   {
-    src: "/images/generated/adu-acronym-dedicated-v2.jpg",
+    src: "/images/generated/adu-acronym-dedicated-v3.png",
     alt: "ADU interior finish detail checked carefully with a level",
   },
   {
-    src: "/images/generated/adu-acronym-understanding-v2.jpg",
+    src: "/images/generated/adu-acronym-understanding-v3.png",
     alt: "Contractor guiding a homeowner through organized ADU framing in progress",
   },
 ];
