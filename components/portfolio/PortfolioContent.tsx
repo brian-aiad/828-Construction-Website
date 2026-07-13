@@ -766,7 +766,7 @@ export default function PortfolioContent() {
 
       <ResidenceGalleries />
 
-      <section data-section="portfolio-cta" className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 pb-12 pt-12 lg:px-12 lg:pt-28">
+      <section data-section="portfolio-cta" className="relative overflow-hidden border-t border-black/10 bg-[#f5f0e9] px-6 pb-12 pt-28 lg:px-12 lg:pt-28">
         <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="portfolio-reveal" data-gsap-reveal="true">

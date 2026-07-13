@@ -109,34 +109,49 @@ const EQUIPMENT = [
   },
 ];
 
-// Live-rect focus selection (sticky-proof — PATTERNS.md Fix 22 timing rule).
-function useFocusIndex(
-  refs: React.MutableRefObject<Array<HTMLElement | null>>,
-  focusRatio = 0.52
+// Step-walk driver (services-page "bulletproof index walk" grammar, Brian
+// 2026-07-13): desktop (lg+) pins the approach panel over a tall runway and
+// the active step is a pure function of scroll progress — runway/4 of
+// dedicated scroll per step. The section ARRIVES FIRST (progress 0 until its
+// top reaches the viewport top), then the walk plays; no rect feedback, no
+// focus-ratio tuning, cannot skip or ignite mid-arrival. Below lg there is no
+// pin (mobile scroll philosophy) — monotone last-row-past-focus walk with an
+// arrival guard.
+function useStepWalk(
+  wrapRef: React.RefObject<HTMLElement | null>,
+  rowRefs: React.MutableRefObject<Array<HTMLElement | null>>,
+  count: number
 ) {
   const [active, setActive] = useState(0);
   useEffect(() => {
+    const lgQuery = window.matchMedia("(min-width: 1024px)");
     let raf = 0;
     const measure = () => {
       raf = 0;
-      const focus = window.innerHeight * focusRatio;
-      let best = 0;
-      let bestDist = Infinity;
-      let contained = false;
-      refs.current.forEach((el, i) => {
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        if (!contained && r.top <= focus && r.bottom >= focus) {
-          best = i;
-          contained = true;
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+      if (lgQuery.matches) {
+        const runway = wrap.offsetHeight - window.innerHeight;
+        if (runway <= 0) {
+          setActive(0);
           return;
         }
-        if (contained) return;
-        const dist = Math.abs(r.top + r.height / 2 - focus);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
+        const progress = Math.min(
+          0.999,
+          Math.max(0, -wrap.getBoundingClientRect().top / runway)
+        );
+        const next = Math.min(count - 1, Math.floor(progress * count));
+        setActive((prev) => (prev === next ? prev : next));
+        return;
+      }
+      if (wrap.getBoundingClientRect().top > window.innerHeight * 0.6) {
+        setActive(0);
+        return;
+      }
+      const focus = window.innerHeight * 0.38;
+      let best = 0;
+      rowRefs.current.forEach((el, i) => {
+        if (el && el.getBoundingClientRect().top <= focus) best = i;
       });
       setActive((prev) => (prev === best ? prev : best));
     };
@@ -146,12 +161,17 @@ function useFocusIndex(
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    lgQuery.addEventListener("change", onScroll);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(() => onScroll()).catch(() => {});
+    }
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      lgQuery.removeEventListener("change", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [refs, focusRatio]);
+  }, [wrapRef, rowRefs, count]);
   return active;
 }
 
@@ -483,7 +503,7 @@ function RemediationFaq() {
     <section
       data-section="rem-faq"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#111]"
+      className="relative bg-[#f7f7f3] pt-24 text-[#111]"
       style={{ overflowX: "clip" }}
     >
       {/* NS Perspectives echo: rolling strip of the three questions (decorative;
@@ -543,26 +563,24 @@ function RemediationFaq() {
 
 // ── Section 3 — the approach / build philosophy ─────────────────────────────
 function RemediationApproach() {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
-  // Focus line at 0.66 (was 0.52): the section pins at top:0 with all four rows
-  // static and shorter than the viewport, so a lower line rested nearest row 03
-  // and step 04 ("Build back / Reconstruction") never ignited — the maroon
-  // progress rail capped at 75% and the reconstruction crossfade never showed.
-  // 0.66 lets the final row (pinned center ~614 of 900 after the header-clearance
-  // top-padding bump) win the focus at pin while 01–03 still play in the entry
-  // sweep, so every step gets its moment and the rail completes. Re-tune this if
-  // the approach section's top padding changes again.
-  const activeIdx = useFocusIndex(rowRefs, 0.66);
+  // Desktop: 260svh runway — the panel pins once the section has fully
+  // arrived, then each step owns ~40svh of dedicated scroll (services-page
+  // bulletproof-walk grammar). Mobile: natural height, monotone focus walk.
+  const activeIdx = useStepWalk(sectionRef, rowRefs, APPROACH.length);
   const activePhoto = APPROACH_PHOTOS[activeIdx] ?? APPROACH_PHOTOS[0];
 
   return (
     <section
+      ref={sectionRef}
       data-section="rem-approach"
       data-header-dark=""
-      className="relative bg-black text-white"
+      className="relative bg-black text-white lg:h-[260svh]"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto max-w-7xl px-6 pb-16 pt-20 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
+      <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:items-center lg:overflow-hidden">
+      <div className="mx-auto w-full max-w-7xl px-6 pb-16 pt-20 lg:px-12 lg:pb-10 lg:pt-24">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)] lg:gap-20">
           <div>
             <span className="rem-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/64">
@@ -645,7 +663,7 @@ function RemediationApproach() {
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="sticky top-24 h-[min(calc(100vh-14rem),34rem)] min-h-[24rem] overflow-hidden">
+            <div className="h-[min(calc(100svh-14rem),34rem)] min-h-[24rem] overflow-hidden">
               <div className="rem-clip absolute inset-0" data-gsap-reveal="true">
                 {/* Crossfading plate: inspection (steps 01–02) → rebuilt (03–04) */}
                 <div
@@ -699,6 +717,7 @@ function RemediationApproach() {
           </div>
         </div>
       </div>
+      </div>
     </section>
   );
 }
@@ -726,7 +745,7 @@ function RemediationMethod() {
       className="relative bg-[#f7f4f0] text-black"
       style={{ overflowX: "clip" }}
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 pb-16 pt-28 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
         <div className="grid grid-cols-2 gap-3">
           {METHOD_PHOTOS.map((photo, i) => (
             <div

@@ -2,6 +2,34 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Remediation: arrive-first step walk + site-wide occlusion audit
+
+- Brian (video + screenshots): (1) FAQ rolling-questions strip parked half-cut
+  under the header when the surface snapped; (2) the approach steps ignited
+  while the section was still arriving — "go to the section first, then let me
+  scroll through" like the other pages.
+- FIX 1: FAQ section pt-24 (padding, NOT margin — a first-child margin
+  collapses through the section boundary and the strip stayed at y=0). Strip
+  now rests 96px from top vs header bottom 57 — CLEAR. Note: fd27e94's
+  clearance tool skips aria-hidden nodes, which is exactly how the decorative
+  strip escaped the site-wide pass.
+- FIX 2: approach section rebuilt on the services-page "bulletproof walk"
+  grammar — 260svh runway, panel lg:sticky/h-svh/centered, active step =
+  pure function of scroll progress (~40svh per step), progress 0 until the
+  section top reaches the viewport top so it ARRIVES FIRST with step 01 held;
+  replaced the focus-ratio-tuned useFocusIndex (0.66 magic number gone).
+  Mobile: no pin, monotone last-row-past-focus walk with arrival guard.
+  Probe: pre-arrival→1, 10%→1, 30%→2, 60%→3, 90%→4, deterministic.
+- SITE-WIDE strict occlusion audit (occlusion-audit.mjs — includes aria-hidden
+  and images, closing the fd27e94 blind spot): every stacked surface on all 8
+  routes rested at snap position, both viewports. Result: zero text
+  occlusions; only by-design full-bleed hero photos bleed under the glass
+  header. Two sub-standard rests fixed: remediation method mobile pt-28
+  (photos tucked 17px under header) and portfolio CTA mobile pt-28 ("Ready to
+  compare notes" at 0px air).
+- Sweeps s6+s7 clean ×2 viewports (s7 console noise = concurrent-terminal HMR;
+  isolated pass 0 errors); functional-qa PASS both; tsc clean.
+
 ## 2026-07-13 — Contact V4.1: whisper veil on cream + services runway walk (terminal B)
 
 - Brian's V4 screenshots: prep section read "grayed out" (the black cover veil

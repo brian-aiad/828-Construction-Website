@@ -2,6 +2,21 @@
 
 _Add todos here. Remove when done. Date all entries._
 
+## Remediation imagery — note for the photo-set terminal (2026-07-10)
+
+- Real-photo review (all 126 optimized shots, contact sheets in
+  `.claude-work/research/remediation-joe-feedback/sheet-*.png`): the three
+  residence sets are ALL finished-remodel photography — no demo/containment/
+  equipment/mold subject matter, so remediation PROCESS slots still need the
+  generated set.
+- RECOMMENDATION for the approach crossfade's "Build back / Reconstruction"
+  state (steps 03–04): use a REAL finished interior instead of a generated
+  room — e.g. `cerritos-residence/01-2176.jpg` (bright full-bathroom view;
+  reads "space returned to daily life", V4 prefers real client photos).
+  Inspection state (01–02) stays subject-specific.
+- Not applied by the remediation terminal to avoid clobbering the in-flight
+  uncommitted imagery rework in RemediationServiceContent.tsx.
+
 ## Next AI Handoff Notes (2026-05-26)
 
 - The repo was pushed and locally cleaned on 2026-05-26. Do not assume `.next`, server logs, or prior Playwright output still exist locally.
