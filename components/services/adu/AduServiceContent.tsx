@@ -93,6 +93,40 @@ const QUALIFIERS = [
   "Do you value clear communication and a highly considerate building experience?",
 ];
 
+// House-grammar headline reveal: each word rises + fades on its own, driven by
+// the existing `.adu-rise` IntersectionObserver pipeline (Fix 22 decisive — no
+// scroll math, immune to sticky-stack offset drift). Words are atomic
+// inline-block units separated by real breakable spaces, so the line still
+// wraps only at word boundaries (Fix 21) and reads verbatim to a screen reader.
+// Reduced-motion leaves every word visible (useAduMotion's shouldAnimate gate).
+function RevealWords({
+  text,
+  base = 0,
+  step = 0.06,
+}: {
+  text: string;
+  base?: number;
+  step?: number;
+}) {
+  const words = text.split(" ");
+  return (
+    <>
+      {words.flatMap((word, i) => {
+        const span = (
+          <span
+            key={i}
+            className="adu-rise inline-block"
+            data-stagger={(base + i * step).toFixed(2)}
+          >
+            {word}
+          </span>
+        );
+        return i < words.length - 1 ? [span, " "] : [span];
+      })}
+    </>
+  );
+}
+
 // Live-rect acronym ignition (sticky-proof — PATTERNS.md Fix 22 timing rule).
 // Returns a `primary` index (drives the sticky photo crossfade + caption) and
 // an `active` mask (drives per-row maroon ignition).
@@ -384,9 +418,16 @@ function AduHero() {
           55%  { transform: scaleY(1); transform-origin: bottom; }
           100% { transform: scaleY(0); transform-origin: bottom; }
         }
+        /* Above-the-fold entrance (CSS keyframe = LCP-safe, always ends
+           visible), same measured-safe pattern as the letter cascade. */
+        @keyframes aduFadeUp {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         @media (prefers-reduced-motion: reduce) {
           .adu-letter { animation: none !important; opacity: 1 !important; transform: none !important; }
           .adu-cue-line { animation: none !important; }
+          .adu-fade { animation: none !important; opacity: 1 !important; transform: none !important; }
         }
       `}</style>
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
@@ -418,11 +459,15 @@ function AduHero() {
         <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:order-2 lg:px-14 lg:py-28">
           <Link
             href="/services"
-            className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/65 transition-colors hover:text-white"
+            className="adu-fade inline-flex w-fit min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] text-white/65 transition-colors hover:text-white lg:min-h-0"
+            style={{ animation: "aduFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both" }}
           >
             Back to services
           </Link>
-          <span className="mt-9 block font-labels text-[10px] uppercase tracking-[0.24em] text-white/48">
+          <span
+            className="adu-fade mt-4 block font-labels text-[10px] uppercase tracking-[0.24em] text-white/48 lg:mt-9"
+            style={{ animation: "aduFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.22s both" }}
+          >
             ADU Construction / CA License #{SITE.license}
           </span>
 
@@ -447,12 +492,18 @@ function AduHero() {
             <div className="relative w-[2px] shrink-0 self-stretch bg-white/12" aria-hidden="true">
               <div className="adu-vline absolute inset-0 bg-[var(--color-accent-light)]" style={{ opacity: 0.9 }} />
             </div>
-            <p className="max-w-md self-center text-[15px] leading-8 text-white/62 sm:text-base">
+            <p
+              className="adu-fade max-w-md self-center text-[15px] leading-8 text-white/62 sm:text-base"
+              style={{ animation: "aduFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.5s both" }}
+            >
               {HERO_PARAGRAPH}
             </p>
           </div>
 
-          <div className="mt-11 flex flex-wrap items-center gap-4">
+          <div
+            className="adu-fade mt-11 flex flex-wrap items-center gap-4"
+            style={{ animation: "aduFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.72s both" }}
+          >
             <a
               href={SITE.phoneHref}
               className="btn-shine btn-lift bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
@@ -502,7 +553,7 @@ function FaqCard({
   return (
     <article
       data-stagger={stagger}
-      className={`adu-rise flex min-h-[16rem] flex-col justify-between border p-6 sm:p-7 lg:min-h-[19rem] ${
+      className={`adu-rise flex min-h-[11rem] flex-col justify-between border p-6 sm:min-h-[16rem] sm:p-7 lg:min-h-[19rem] ${
         dark ? "border-transparent bg-[#111] text-white" : "border-black/12 bg-white text-[#111]"
       } ${className}`}
     >
@@ -740,8 +791,8 @@ function AduAcronym() {
         <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
           What we drive for
         </span>
-        <h2 className="adu-rise mt-5 font-display font-light leading-[1.08] text-[clamp(1.8rem,3.2vw,3.4rem)]" data-stagger="0.08">
-          What ADU means to 828.
+        <h2 className="mt-5 font-display font-light leading-[1.08] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+          <RevealWords text="What ADU means to 828." base={0.05} step={0.06} />
         </h2>
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:mt-10 lg:grid-cols-12 lg:gap-12">
@@ -816,8 +867,8 @@ function AduInvitation() {
             <span className="adu-rise block font-labels text-[10px] uppercase tracking-[0.22em] text-white/58">
               Start here
             </span>
-            <h2 className="adu-rise mt-5 font-display font-light leading-[1.1] text-[clamp(1.8rem,3.2vw,3.4rem)]" data-stagger="0.08">
-              An invitation to work together
+            <h2 className="mt-5 font-display font-light leading-[1.1] text-[clamp(1.8rem,3.2vw,3.4rem)]">
+              <RevealWords text="An invitation to work together" base={0.05} step={0.06} />
             </h2>
             <p className="adu-rise mt-7 max-w-md text-sm leading-7 text-white/55" data-stagger="0.16">
               If this resonates with your expectations, we welcome the
