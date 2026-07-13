@@ -180,6 +180,57 @@ function useContactMotion() {
         );
       }
 
+      // ── Get-in-touch band composes in two beats (Brian, 2026-07-13) ────────
+      // BEAT 1 — the call/email/base ledger rises in sequence from the left.
+      // BEAT 2 — the message card slides in from the right and fades up. Both
+      // are decisive IO one-shots (never scroll-math — Fix 25) and every target
+      // is visible-by-default in JSX (Fix 14) + data-gsap-reveal so the global
+      // failsafe (Fix 18) rescues any left hidden. The section owns
+      // overflowX:clip, so the card's inbound x-offset can never open a
+      // horizontal scrollbar. Inputs stay interactive: autoAlpha flips the card
+      // to visible the instant the reveal starts, and the card is never the
+      // thing that gates typing (it reveals on entering the viewport).
+      const desktopSlide = window.matchMedia("(min-width: 1024px)").matches;
+
+      const ledger = gsap.utils.toArray<HTMLElement>(".ct-ledger");
+      if (!reduced && ledger.length) {
+        ledger.forEach((el) => gsap.set(el, { autoAlpha: 0, y: 26 }));
+        // Reveal each row when IT enters (robust — no row can stay hidden), but
+        // key the delay off row index so a band that arrives all-at-once still
+        // reads as a staggered cascade rather than a single pop.
+        revealCleanups.push(
+          revealOnVisible(ledger, (el, i) => {
+            gsap.to(el, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.8,
+              delay: Math.min(i, 3) * 0.12,
+              ease: "power3.out",
+            });
+          })
+        );
+      }
+
+      const card = root.querySelector<HTMLElement>(".ct-form-card");
+      if (!reduced && card) {
+        gsap.set(card, {
+          autoAlpha: 0,
+          x: desktopSlide ? 60 : 0,
+          y: desktopSlide ? 0 : 30,
+        });
+        revealCleanups.push(
+          revealOnVisible([card], (el) => {
+            gsap.to(el, {
+              autoAlpha: 1,
+              x: 0,
+              y: 0,
+              duration: 0.95,
+              ease: "power3.out",
+            });
+          })
+        );
+      }
+
     }, rootRef);
 
     ctxRef.current = ctx;
@@ -259,7 +310,7 @@ function GetInTouch() {
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="ct-rise flex flex-wrap items-end justify-between gap-6">
           <div>
             <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/48">
               Project inquiry
@@ -284,7 +335,8 @@ function GetInTouch() {
                 href={row.href}
                 target={row.href.startsWith("http") ? "_blank" : undefined}
                 rel={row.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="ct-rise group block border-b border-white/10 py-7 first:border-t"
+                data-gsap-reveal="true"
+                className="ct-ledger group block border-b border-white/10 py-7 first:border-t"
               >
                 <div className="flex items-baseline justify-between gap-6">
                   <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/46">
@@ -321,7 +373,10 @@ function GetInTouch() {
           </div>
 
           {/* Message form — visual form; backend remains on hold (CLAUDE.md). */}
-          <div className="ct-rise border border-white/12 bg-white/[0.03] p-6 sm:p-8 lg:p-10">
+          <div
+            data-gsap-reveal="true"
+            className="ct-form-card border border-white/12 bg-white/[0.03] p-6 sm:p-8 lg:p-10"
+          >
             <div className="mb-8 flex items-center justify-between gap-5 border-b border-white/10 pb-5">
               <div>
                 <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/42">
@@ -606,7 +661,7 @@ function ServicePathRows() {
         same stack surface (ContactFlow wraps the fragment). */}
     <div className="relative bg-[#f7f7f3] text-[#141414]" data-header-light="">
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-6 lg:px-12 lg:pb-24">
-        <div className="border border-black/10 bg-white/55">
+        <div className="ct-rise border border-black/10 bg-white/55">
           <div className="grid gap-x-10 gap-y-6 px-6 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-10">
             <div>
               <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/54">
@@ -623,7 +678,7 @@ function ServicePathRows() {
               </p>
               <a
                 href={SITE.phoneHref}
-                className="mt-6 inline-flex bg-black px-6 py-3.5 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
+                className="mt-6 inline-flex bg-black px-6 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)] lg:py-3.5"
               >
                 Call {formatPhone(SITE.phone)}
               </a>
