@@ -45,6 +45,34 @@ const BENEFITS = [
   "Peace of mind",
 ];
 
+const BENEFIT_PHOTOS = [
+  {
+    src: "/images/generated/consulting-benefit-early-detection-v2.png",
+    alt: "Opened residential wall inspected with moisture meter and consulting tools",
+    label: "Early detection",
+  },
+  {
+    src: "/images/generated/consulting-benefit-creative-solution-v2.png",
+    alt: "Construction plans and material samples arranged for consulting problem solving",
+    label: "Creative solution",
+  },
+  {
+    src: "/images/generated/consulting-benefit-preventative-care-v2.png",
+    alt: "Window flashing and exterior detail reviewed with preventative care tools",
+    label: "Preventative care",
+  },
+  {
+    src: "/images/generated/consulting-benefit-structure-assessment-v2.png",
+    alt: "Framed residential opening assessed with plans, level, and construction tools",
+    label: "Structure assessment",
+  },
+  {
+    src: "/images/generated/consulting-benefit-peace-of-mind-v2.png",
+    alt: "Organized consulting table with plans and material samples in a finished home",
+    label: "Peace of mind",
+  },
+] as const;
+
 const FAQ_INTRO =
   "As a general contractor offering consulting and home inspection servicing, we provide the peace of mind by uncovering hidden issues, ensuring structural integrity, and delivering tailored solutions that align with your vision.";
 
@@ -377,6 +405,7 @@ function SolutionsSection() {
     0.55,
     '[data-section="consulting-questions"]'
   );
+  const activePhoto = BENEFIT_PHOTOS[activeIdx] ?? BENEFIT_PHOTOS[0];
 
   return (
     <section
@@ -407,6 +436,70 @@ function SolutionsSection() {
           >
             {SOLUTIONS_BODY}
           </p>
+          <div
+            className="con-rise mt-10 hidden overflow-hidden border border-white/10 bg-white/[0.03] lg:block"
+            data-stagger="0.2"
+          >
+            <div className="relative h-[19rem]">
+              {BENEFIT_PHOTOS.map((photo, i) => {
+                const active = activeIdx === i;
+                return (
+                  <div
+                    key={photo.src}
+                    aria-hidden={!active}
+                    className="absolute inset-0 transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    style={{ opacity: active ? 1 : 0 }}
+                  >
+                    <Image
+                      src={photo.src}
+                      alt={active ? photo.alt : ""}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 1024px) 0px, 36vw"
+                      quality={92}
+                      unoptimized
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
+                      onError={imgError}
+                      className="object-cover"
+                      style={{ filter: "contrast(1.05) saturate(1.04)" }}
+                    />
+                  </div>
+                );
+              })}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+              <span className="absolute bottom-5 left-5 font-labels text-[9px] uppercase tracking-[0.2em] text-white/72">
+                {activePhoto.label}
+              </span>
+            </div>
+          </div>
+          <div className="mt-8 grid grid-cols-2 gap-3 lg:hidden">
+            {BENEFIT_PHOTOS.map((photo) => (
+              <div
+                key={photo.src}
+                className="con-rise relative min-h-[9.5rem] overflow-hidden bg-white/[0.04]"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  loading="lazy"
+                  sizes="50vw"
+                  quality={88}
+                  unoptimized
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                  onError={imgError}
+                  className="object-cover"
+                  style={{ filter: "contrast(1.05) saturate(1.04)" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-transparent to-transparent" />
+                <span className="absolute bottom-3 left-3 font-labels text-[8px] uppercase tracking-[0.18em] text-white/72">
+                  {photo.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Benefits ledger — rows ignite in the focus band, maroon rail tracks */}
