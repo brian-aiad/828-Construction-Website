@@ -9,6 +9,7 @@ type BrandMarqueeBottomProps = {
   itemClassName?: string;
   compact?: boolean;
   panel?: boolean;
+  giant?: boolean;
   text?: string;
   color?: string;
 };
@@ -18,23 +19,29 @@ export default function BrandMarqueeBottom({
   itemClassName = "",
   compact = false,
   panel = false,
+  giant = false,
   text = "828 CONSTRUCTION",
   color = "rgba(255, 255, 255, 0.28)",
 }: BrandMarqueeBottomProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const heightClass = panel
-    ? "h-12 lg:h-[4.3rem]"
-    : compact
-      ? "h-12"
-      : "h-[clamp(4.4rem,9vw,8.4rem)]";
-  const fontSize = panel
-    ? "clamp(2.55rem, 4.25vw, 3.45rem)"
-    : compact
-      ? "clamp(1.25rem, 2.2vw, 2.35rem)"
-      : "clamp(1.9rem, 3.6vw, 3.75rem)";
+  // giant: the NS-reference footer wordmark — huge, bottom-cropped train.
+  const heightClass = giant
+    ? "h-[clamp(5rem,11vw,10.5rem)]"
+    : panel
+      ? "h-12 lg:h-[4.3rem]"
+      : compact
+        ? "h-12"
+        : "h-[clamp(4.4rem,9vw,8.4rem)]";
+  const fontSize = giant
+    ? "clamp(4.6rem, 10.5vw, 10rem)"
+    : panel
+      ? "clamp(2.55rem, 4.25vw, 3.45rem)"
+      : compact
+        ? "clamp(1.25rem, 2.2vw, 2.35rem)"
+        : "clamp(1.9rem, 3.6vw, 3.75rem)";
   // panel: tight tail — "CONSTRUCTION" runs into the next "828" so the loop
   // reads as one continuous train (Brian, 2026-07-13).
-  const paddingClass = panel ? "pr-4" : compact ? "pr-10" : "pr-16";
+  const paddingClass = panel || giant ? "pr-4" : compact ? "pr-10" : "pr-16";
 
   const setPaused = (paused: boolean) => {
     if (!trackRef.current) return;

@@ -30,7 +30,7 @@ const labelClass = "font-labels text-[10px] uppercase tracking-[0.22em]";
 // changing any visual (44px would require respacing the column, which is not
 // allowed here). Clears the WCAG 2.5.8 AA 24px floor.
 const panelLinkClass =
-  "group relative w-fit font-labels text-[11px] uppercase tracking-[0.16em] text-white/64 transition-colors before:absolute before:inset-x-0 before:-inset-y-[5px] before:content-[''] hover:text-white";
+  "group relative w-fit font-labels text-[11px] uppercase tracking-[0.16em] text-black/72 transition-colors before:absolute before:inset-x-0 before:-inset-y-[5px] before:content-[''] hover:text-black";
 
 function formatPhone(phone: string) {
   const digits = phone.replace(/\D/g, "");
@@ -52,7 +52,7 @@ export default function Footer() {
   return (
     // min-h-svh: the footer owns the full screen at final rest (Brian
     // 2026-07-13) — same content, the top band just breathes to fill.
-    <footer className="relative flex min-h-svh flex-col overflow-hidden bg-black text-white" data-section="footer">
+    <footer className="relative flex min-h-svh flex-col overflow-hidden bg-black text-white" data-section="footer" data-header-dark="">
       <section className="flex flex-1 flex-col justify-center bg-black px-6 pb-9 pt-24 md:px-8 md:pb-12 md:pt-28 lg:px-3 lg:pb-9 lg:pt-32" data-footer-section="top-band">
         <div className="grid w-full gap-7 lg:grid-cols-[10fr_15fr] lg:items-start lg:gap-0">
           <div>
@@ -95,10 +95,10 @@ export default function Footer() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-[10fr_8fr_7fr]" data-footer-section="panels">
+      <section className="relative grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
-          className="group relative min-h-[11.5rem] overflow-hidden bg-black text-white md:min-h-[16rem] lg:min-h-[30rem]"
+          className="group relative min-h-[11.5rem] overflow-hidden bg-black text-white md:min-h-[16rem] lg:min-h-[55svh]"
         >
           <Image
             src="/images/generated/footer-consultation-cta.webp"
@@ -121,8 +121,8 @@ export default function Footer() {
             charcoal nav box + warm bone serving box ("lighter", after the
             deep-maroon try read too red). Black -> charcoal -> bone steps
             keep the footer in the site's ink/cream family. */}
-        <div className="flex flex-col border-t border-white/10 bg-[#161616] px-6 py-7 text-white md:px-9 md:py-8 lg:min-h-[30rem] lg:border-l lg:border-t-0 lg:px-[5.1vw] lg:py-[4.5rem]">
-          <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-3 lg:flex lg:flex-col lg:gap-[0.7rem]">
+        <div className="flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-7 text-[#141414] md:px-9 md:py-8 lg:min-h-[55svh] lg:justify-center lg:border-l lg:border-t-0 lg:px-[4vw] lg:py-[4.5rem]">
+          <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-3 lg:flex lg:flex-col lg:gap-[0.7rem] lg:pl-[26%]">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
                 {link.label}
@@ -131,17 +131,17 @@ export default function Footer() {
             ))}
           </nav>
 
-          <div className="mt-7 lg:mt-auto">
-            <p className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/44">
+          <div className="mt-7 lg:mt-9 lg:pl-[26%]">
+            <p className="font-labels text-[10px] uppercase tracking-[0.18em] text-black/55">
               &copy; {year} 828 Construction
             </p>
-            <p className="mt-2 max-w-sm text-xs leading-relaxed text-white/44">
+            <p className="mt-2 max-w-sm text-xs leading-relaxed text-black/55">
               All rights reserved.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col overflow-hidden border-t border-white/10 bg-[#e8e4dc] px-6 pb-0 pt-7 text-[#141414] md:px-9 md:pt-8 lg:min-h-[30rem] lg:border-l lg:border-t-0 lg:px-[5.2vw] lg:pb-0 lg:pt-[5.5rem]">
+        <div className="flex flex-col border-t border-black/8 bg-white px-6 pb-32 pt-7 text-[#141414] md:px-9 md:pt-8 lg:min-h-[55svh] lg:justify-center lg:border-l lg:border-t-0 lg:px-[4.5vw] lg:pb-36 lg:pt-8">
           <div>
             <p className={`${labelClass} text-black/52`}>Serving</p>
             <h3 className="mt-3 font-display text-[clamp(1.2rem,1.25vw,1.4rem)] font-medium leading-tight text-[#141414]">
@@ -167,11 +167,16 @@ export default function Footer() {
             </p>
           </div>
 
-          <BrandMarqueeBottom
-            panel
-            className="mt-7 -mx-6 w-[calc(100%+3rem)] lg:mt-auto lg:-mx-7 lg:w-[calc(100%+3.5rem)] translate-y-[0.12rem] md:-mx-9 md:w-[calc(100%+4.5rem)] lg:-mx-[5.2vw] lg:w-[calc(100%+10.4vw)]"
-            color="rgb(0, 0, 0)" itemClassName="text-black"
-          />
+        </div>
+
+        {/* NS-reference giant wordmark: rides the bottom edge of the light
+            panels, bottom-cropped at the snapped rest. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 right-0 z-10 w-full overflow-hidden lg:w-1/2"
+          style={{ transform: "translateY(16%)" }}
+        >
+          <BrandMarqueeBottom giant color="rgb(12, 12, 12)" itemClassName="text-[#0c0c0c]" />
         </div>
       </section>
     </footer>

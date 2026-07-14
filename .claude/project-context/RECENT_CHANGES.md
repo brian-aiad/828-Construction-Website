@@ -2,6 +2,23 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Footer rebuilt to the NS Builders reference (terminal B)
+
+- Brian: copy the NS footer nearly exactly — elongated full-screen snap,
+  same colors/positioning/panel sizes, black top bar at the snapped rest.
+  All wording unchanged.
+- Header goes BLACK over the footer (data-header-dark on the footer root —
+  the zone-aware bar picks it up at snap, NS-style).
+- Panels: NS proportions (photo 2fr | nav 1fr | serving 1fr, 55svh row; black
+  top band fills the rest of the viewport). Nav panel = NS light gray #ECEBE7
+  with ink links (indented, vertically centered, (c) block under the links);
+  serving panel = white, vertically centered.
+- Giant NS wordmark: new `giant` BrandMarqueeBottom preset (clamp 4.6-10rem)
+  as a bottom-cropped overlay riding the light panels' bottom edge, rotating
+  with the continuous train. Removed the small in-panel marquee.
+- QA: footer-cover probe 8/8 still PASS post-rebuild; functional-qa PASS d+m;
+  tsc clean; desktop + mobile rest screenshots match the NS reference.
+
 ## 2026-07-13 — Full-screen footer cover + snap, site-wide (terminal B)
 
 - Brian: on every page the footer should end the scroll like the other
