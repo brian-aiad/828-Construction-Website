@@ -2,6 +2,24 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Full-screen footer cover + snap, site-wide (terminal B)
+
+- Brian: on every page the footer should end the scroll like the other
+  sections — previous section blacked out/shaded beneath it, full screen,
+  snapping like every junction. No wording/size/structure changes.
+- Mechanism (PATTERNS "Full-screen footer cover"): all 8 flows pin their last
+  surface + veil it under the footer; 100svh [data-footer-runway] spacer gives
+  the pin room; FooterRevealWrapper = [data-footer-surface] z-20 pulled up
+  100svh via :has() CSS so it truly covers; canonical useJunctionSettle now
+  sees the footer surface document-wide; Footer is min-h-svh (top band
+  breathes to fill).
+- Debug trail: abutting footers never overlap (prevBottom == footerTop) so
+  the settle could not engage — the runway + negative margin create a real
+  cover junction with linear glide math.
+- QA: footer-cover probe 8/8 routes PASS (final footer top 0, veil active,
+  composed band stops); contact seam sweep + settle torture (down 22/22,
+  up 18/18) clean; about sweep clean; functional-qa PASS d+m; tsc clean.
+
 ## 2026-07-13 — Footer two-tone boxes + continuous marquee train (terminal B)
 
 - Brian: the all-black footer's info boxes should carry two different colors

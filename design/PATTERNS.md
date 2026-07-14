@@ -995,6 +995,33 @@ all indices must be lit-while-visible). Both viewports.
 
 ---
 
+### Pattern: Full-screen footer cover (site-wide, 2026-07-13)
+
+Brian: at the end of every page the footer must arrive like a stacked surface —
+previous section pinned + veiled beneath it, full-screen at rest, snapped by
+the junction settle. Four cooperating pieces (all required):
+
+1. Every *Flow pins its LAST surface too (no more last-surface-relative
+   exception) and renders a veil on it; the veil's trigger is the footer
+   element (`[data-footer-surface]`).
+2. A sticky element cannot pin at its container's end — each flow renders a
+   100svh `[data-footer-runway]` spacer after its last surface to give it
+   pin room.
+3. The footer wrapper (`FooterRevealWrapper`) carries `data-footer-surface`,
+   `relative z-20` (flows sit at z-10), and globals.css pulls it up by the
+   runway height (`body:has([data-footer-runway]) [data-footer-surface]
+   { margin-top: -100svh; }`) so it genuinely TRAVELS OVER the pinned surface
+   — abutting in normal flow never overlaps, and the settle's band math
+   (top < prevBottom − margin) can never engage on an abutting footer.
+4. `useJunctionSettle` queries surfaces DOCUMENT-wide plus
+   `[data-footer-surface]` — the footer junction snaps like any other.
+   The Footer itself is `min-h-svh` (top band flexes) so the final rest owns
+   the full viewport exactly.
+
+Verified: footer-cover probe (.claude-work/research/settle-port/
+footer-cover-probe.mjs) — 8/8 routes: final rest footer top 0, last-surface
+veil active, band stops composed (crop-aware for short last surfaces).
+
 ### Pattern: Asterisk Dropdown Reveal (V2)
 
 **Usage:** "Book Call" CTA in header (reveals phone number) AND FAQ expanders on ADU / Remediation / Consulting service pages.
