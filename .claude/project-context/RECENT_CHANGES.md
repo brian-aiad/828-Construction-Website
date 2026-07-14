@@ -2,6 +2,47 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-14 — SITE EXCELLENCE PASS: mobile + reveals + stress hardening (7 agents)
+
+- Brian's "biggest edit": every page amazing on every screen, every animation
+  unbreakable by a user, word animations where sections sat static — format
+  and verbiage frozen, desktop pixel-equivalent (proven per page with
+  before/after captures; the chrome pass used a masked control diff).
+- SYSTEMIC ROOT CAUSE FOUND: AnimationController.shouldAnimate() is false
+  below 1024px, so every page rendered STATIC on mobile ("nothing pops up
+  when you scroll" verbatim). Each page now runs the house IO-decisive
+  reveal grammar on mobile — failsafe-tagged y+opacity states, reduced-motion
+  never hides, above-fold stays visible (LCP) — while scroll-hijack motion
+  (settle, walks, parallax) stays desktop-only by design.
+- REAL BUGS FIXED: consulting benefits rows 02-04 could NEVER ignite on any
+  viewport (Fix 27 short-pinned trap; useFocusIndex rewritten to cover-rise
+  progress anchored min(secH,vh), verified 0>1>2>3>4 fwd+rev at 4 widths);
+  LenisProvider force-reveal restored opacity but not visibility (autoAlpha-
+  hidden elements were "rescued" invisible — now autoAlpha:1); About's
+  useReveal/standards/portrait were riding the 2.5s failsafe instead of
+  firing (converted to IO-decisive, visuals identical).
+- MOBILE FIXES: home hero eyebrow + all 5 process titles hold one line to
+  360px; ADU FAQ density (page ~185px shorter) + tap targets; consulting
+  tablet Q&A gap filled + 3 links to 44px; contact call CTA 44px; header
+  wordmark/menu 44px hit areas (zero rendered pixels — control-diff proven);
+  footer nav links to 27px (WCAG AA 24px floor; 44px needs visible respacing
+  — declined per format freeze).
+- NEW ENTRANCES: contact form slides in from the side + two-beat band
+  (Brian's example); ADU hero fade-up + per-word headline stagger; mobile
+  reveals across home/remediation/consulting/contact/adu.
+- STRESS: per-page torture suites (fling x10, wheel-spam during settle,
+  FAQ churn while scrolling, focus-then-scroll, keyboard traversal,
+  resize mid-scroll, tab blur/focus, 5-offset hard refresh, nav-away-back)
+  — all green, 0 console errors anywhere.
+- Integration re-verified on the combined tree WITH the concurrent
+  footer-cover + NS footer + Portfolio V4 work: tsc clean, all 7 flows
+  settle clean (footer riding as a surface), home walk 5/5, consulting
+  benefits 5/5 at 3 widths, functional-qa PASS both viewports.
+- Commits: adu 5413bf2, about beda0b3, home 8e99727, contact 357fd17,
+  failsafe 8d14383, header 211311a, remediation 806d14d, consulting
+  69e042d (pushed to main → production). Services' agent edits landed via
+  the concurrent c31a177; its verification completed by the coordinator.
+
 ## 2026-07-13 — Footer NS round 2: Brian's side-by-side fixes (terminal B)
 
 - Wordmark confined to the white serving box only (lg:w-1/4, bottom padding,
