@@ -26,10 +26,12 @@ const SELECTS: Record<
   { projectId: number; lead: number; grid: number[]; gridB?: number[]; chapterLabels?: [string, string]; strip: number[] }
 > = {
   "cerritos-residence": {
+    // 2026-07-13 critique pass: dropped the soft mirror-room wide (1) and the
+    // second tulip vignette (14) — near-dupes read as filler at editorial size.
     projectId: 1,
     lead: 0,
-    grid: [1, 3, 5, 12, 19, 22],
-    strip: [2, 14, 26],
+    grid: [3, 9, 12, 22, 19],
+    strip: [2, 21, 26],
   },
   "el-sereno-residence": {
     projectId: 2,
@@ -40,10 +42,12 @@ const SELECTS: Record<
     strip: [12, 15, 16],
   },
   "tustin-residence": {
+    // Strip swapped off the soft herringbone/tub macro crops (7, 8) for the
+    // sharp niche-shelf and tub-filler details (2026-07-13 critique pass).
     projectId: 3,
     lead: 0,
     grid: [3, 2, 12, 13, 15, 33],
-    strip: [7, 8, 39],
+    strip: [5, 6, 39],
   },
 };
 

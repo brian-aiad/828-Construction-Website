@@ -110,11 +110,15 @@ export default function PortfolioFlow({ children }: { children: React.ReactNode 
         if (!next) return;
         const veil = el.querySelector<HTMLElement>("[data-cover-veil]");
         if (!veil) return;
+        // Surface-aware veil (ContactFlow V4.1 lesson): a 0.28 black veil
+        // reads as depth on dark surfaces but as a dirty gray-out on cream
+        // ones — light surfaces take a whisper veil instead.
+        const light = el.querySelector("[data-header-light]") !== null;
         gsap.fromTo(
           veil,
           { opacity: 0 },
           {
-            opacity: 0.28,
+            opacity: light ? 0.08 : 0.28,
             ease: "none",
             scrollTrigger: {
               trigger: next,

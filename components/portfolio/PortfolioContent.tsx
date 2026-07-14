@@ -12,7 +12,6 @@ import {
   PortfolioCase,
 } from "@/components/portfolio/portfolioCases.data";
 import PortfolioFlow from "@/components/portfolio/PortfolioFlow";
-import DraftingMotionLayer from "@/components/system/DraftingMotionLayer";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
@@ -61,6 +60,9 @@ function usePortfolioMotion() {
               duration: 0.9,
               ease: "power3.out",
               overwrite: true,
+              // Release the composited layer at rest — a leftover fractional
+              // transform leaves headings with subpixel color fringing.
+              onComplete: () => gsap.set(el, { clearProps: "transform,willChange" }),
             });
           })
         );
@@ -85,6 +87,8 @@ function usePortfolioMotion() {
               stagger: 0.09,
               ease: "power3.out",
               overwrite: true,
+              onComplete: () =>
+                gsap.set(tiles, { clearProps: "transform,clipPath,willChange" }),
             });
           })
         );
@@ -235,7 +239,7 @@ function ContactStrip({ photos, title, dark }: { photos: string[]; title: string
           </div>
         ))}
       </div>
-      <div className={`mt-3 font-labels text-[8px] uppercase tracking-[0.2em] ${dark ? "text-white/30" : "text-black/32"}`}>
+      <div className={`mt-3 font-labels text-[8px] uppercase tracking-[0.2em] ${dark ? "text-white/58" : "text-black/58"}`}>
         {title} / working frames
       </div>
     </div>
@@ -253,7 +257,7 @@ function CaseLedger({
 }) {
   const { project, gallery } = caseData;
   const hairline = dark ? "border-white/12" : "border-black/12";
-  const label = dark ? "text-white/38" : "text-black/42";
+  const label = dark ? "text-white/58" : "text-black/62";
   const value = dark ? "text-white/72" : "text-black/78";
   const rows: Array<[string, string]> = [
     ["Scope", gallery.scope],
@@ -286,7 +290,7 @@ function CaseLedger({
         }`}
       >
         Open the full set
-        <span className="font-numbers text-[10px] text-[var(--color-accent)]">
+        <span className={`font-numbers text-[10px] ${dark ? "text-white/85" : "text-[var(--color-accent)]"}`}>
           {gallery.photos.length}
         </span>
         <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -298,7 +302,10 @@ function CaseLedger({
 function CaseNumberBlock({ index, title, dark }: { index: number; title: string; dark: boolean }) {
   return (
     <div className="pf-reveal" data-gsap-reveal="true">
-      <span className="font-numbers text-[11px] font-bold text-[var(--color-accent)]">
+      {/* Maroon fails contrast on the dark surfaces — white numeral with a
+          maroon tick keeps the accent vocabulary without the 1.6:1 read. */}
+      <span className={`inline-flex items-center gap-2 font-numbers text-[11px] font-bold ${dark ? "text-white/85" : "text-[var(--color-accent)]"}`}>
+        {dark && <span className="h-[2px] w-5 bg-[var(--color-accent)]" aria-hidden="true" />}
         {String(index + 1).padStart(2, "0")}
       </span>
       <h2
@@ -358,12 +365,33 @@ export default function PortfolioContent() {
     });
   }, []);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const lightboxOpen = lightbox !== null;
+
   useEffect(() => {
-    if (!lightbox) return;
+    if (!lightboxOpen) return;
+    // aria-modal alone doesn't stop keyboard users falling behind the
+    // overlay: move focus in on open, cycle Tab inside, restore on close.
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    dialogRef.current
+      ?.querySelector<HTMLElement>('[aria-label="Close photo viewer"]')
+      ?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
       else if (e.key === "ArrowRight") step(1);
       else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "Tab") {
+        const focusables = dialogRef.current?.querySelectorAll<HTMLElement>("button");
+        if (!focusables?.length) return;
+        const list = Array.from(focusables);
+        const idx = list.indexOf(document.activeElement as HTMLElement);
+        const next = e.shiftKey
+          ? list[(idx - 1 + list.length) % list.length]
+          : list[(idx + 1) % list.length];
+        e.preventDefault();
+        next.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
@@ -371,8 +399,10 @@ export default function PortfolioContent() {
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
+      returnFocusRef.current?.focus?.();
+      returnFocusRef.current = null;
     };
-  }, [lightbox, close, step]);
+  }, [lightboxOpen, close, step]);
 
   const openAt = useCallback((c: number, src?: string) => {
     const photos = PORTFOLIO_CASES[c].gallery.photos;
@@ -393,7 +423,6 @@ export default function PortfolioContent() {
           className="relative bg-black px-6 pb-16 pt-28 text-white lg:px-12 lg:pb-20 lg:pt-32"
           style={{ overflowX: "clip" }}
         >
-          <DraftingMotionLayer intensity="quiet" variant="intro" />
           <div
             className="absolute inset-0 bg-[radial-gradient(circle_at_76%_12%,rgba(99,26,22,0.16),transparent_30%)]"
             aria-hidden="true"
@@ -402,7 +431,7 @@ export default function PortfolioContent() {
             <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
               <div className="flex flex-col justify-between">
                 <div>
-                  <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/38">
+                  <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/62">
                     Portfolio / Selected residential work
                   </span>
                   <h1 className="mt-5 max-w-xl font-editorial text-[clamp(2.2rem,4.5vw,4.6rem)] leading-[0.9]">
@@ -428,11 +457,11 @@ export default function PortfolioContent() {
                         <span className="block font-editorial text-[clamp(1.25rem,1.9vw,1.9rem)] leading-tight text-white/86 transition-colors group-hover:text-white">
                           {c.gallery.title}
                         </span>
-                        <span className="mt-1 block font-labels text-[8px] uppercase leading-4 tracking-[0.16em] text-white/36">
+                        <span className="mt-1 block font-labels text-[8px] uppercase leading-4 tracking-[0.16em] text-white/56">
                           {c.gallery.scope} / {c.project.location}
                         </span>
                       </span>
-                      <span className="hidden font-numbers text-[10px] text-white/34 sm:block">
+                      <span className="hidden font-numbers text-[10px] text-white/60 sm:block">
                         {c.gallery.photos.length} photos
                       </span>
                     </a>
@@ -444,7 +473,6 @@ export default function PortfolioContent() {
               <div className="grid grid-cols-2 grid-rows-2 gap-3">
                 <a
                   href={`#${cerritos.gallery.id}`}
-                  aria-label="Jump to Cerritos Residence"
                   className="group relative row-span-2 block min-h-[22rem] overflow-hidden bg-[#111] sm:min-h-[26rem]"
                 >
                   <Image
@@ -458,48 +486,46 @@ export default function PortfolioContent() {
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
                     style={{ filter: "contrast(1.04) saturate(1.05)" }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/74">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
                     Cerritos, CA
                   </span>
                 </a>
                 <a
                   href={`#${elSereno.gallery.id}`}
-                  aria-label="Jump to El Sereno Residence"
                   className="group relative block overflow-hidden bg-[#111]"
                 >
                   <Image
                     src={elSereno.lead}
                     alt="El Sereno Residence bath — geometric star tile and soaking tub"
                     fill
-                    priority
+                    loading="eager"
                     quality={86}
                     sizes="(max-width: 1024px) 50vw, 28vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
                     style={{ filter: "contrast(1.04) saturate(1.05)" }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/74">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
                     El Sereno, CA
                   </span>
                 </a>
                 <a
                   href={`#${tustin.gallery.id}`}
-                  aria-label="Jump to Tustin Residence"
                   className="group relative block overflow-hidden bg-[#111]"
                 >
                   <Image
                     src={tustin.lead}
                     alt="Tustin Residence — light blue soaking tub with glass shower surround"
                     fill
-                    priority
+                    loading="eager"
                     quality={86}
                     sizes="(max-width: 1024px) 50vw, 28vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
                     style={{ filter: "contrast(1.04) saturate(1.05)" }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/74">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
                     Tustin, CA
                   </span>
                 </a>
@@ -543,6 +569,8 @@ export default function PortfolioContent() {
               </div>
             </div>
 
+            {/* Dominant first frame + closing wide keeps the grid art-directed
+                (not a uniform 3×2) and leaves no orphan cell at 390px. */}
             <div data-tile-group="" className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-16">
               {cerritos.grid.map((src, i) => (
                 <CaseTile
@@ -551,8 +579,8 @@ export default function PortfolioContent() {
                   caseData={cerritos}
                   index={i}
                   dark={false}
-                  aspect={i === 0 ? "aspect-[4/5] col-span-2 md:col-span-1" : "aspect-[4/5]"}
-                  sizes="(max-width: 768px) 50vw, 33vw"
+                  aspect={i === 0 ? "col-span-2 aspect-[8/5]" : "aspect-[4/5]"}
+                  sizes={i === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 50vw, 33vw"}
                   onOpen={(s) => openAt(0, s)}
                 />
               ))}
@@ -583,7 +611,7 @@ export default function PortfolioContent() {
                 placeholder="blur"
                 blurDataURL={lqip(elSereno.lead)}
                 className="object-cover"
-                style={{ filter: "contrast(1.04) saturate(1.05)" }}
+                style={{ filter: "contrast(1.04) saturate(1.05)", objectPosition: "50% 68%" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-transparent to-transparent" />
             </div>
@@ -604,7 +632,7 @@ export default function PortfolioContent() {
                     <div key={chapterIdx} className={chapterIdx === 1 ? "mt-10" : ""}>
                       <div className="mb-4 flex items-center gap-3">
                         <span className="h-px w-8 bg-[var(--color-accent)]/70" aria-hidden="true" />
-                        <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/44">
+                        <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/62">
                           {elSereno.chapterLabels?.[chapterIdx]}
                         </span>
                       </div>
@@ -649,7 +677,9 @@ export default function PortfolioContent() {
               </div>
             </div>
 
-            <div className="mt-12 grid grid-cols-2 gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4">
+            {/* Column groups stack at 390px — side-by-side nesting quarters the
+                cells into illegible ~90px swatches (2026-07-13 critique). */}
+            <div className="mt-12 grid gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4">
               <div data-tile-group="" className="grid gap-3 lg:gap-4">
                 <CaseTile
                   src={tustin.lead}
@@ -708,14 +738,14 @@ export default function PortfolioContent() {
         <section
           data-section="portfolio-next"
           data-header-dark=""
-          className="relative bg-black px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-24 lg:pt-28"
+          className="relative bg-black px-6 pb-32 pt-24 text-white lg:px-12 lg:pb-40 lg:pt-28"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
           <div className="relative z-10 mx-auto max-w-7xl">
             <div className="grid gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
               <div className="pf-reveal" data-gsap-reveal="true">
-                <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/38">
+                <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/62">
                   Next up
                 </span>
                 <h2 className="mt-4 font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.94]">
@@ -730,7 +760,7 @@ export default function PortfolioContent() {
                 <p className="mt-6 max-w-md text-sm leading-7 text-white/56">
                   {EXAMPLE_PROJECT.description}
                 </p>
-                <div className="mt-6 border-t border-white/12 pt-4 font-labels text-[8px] uppercase leading-5 tracking-[0.16em] text-white/36">
+                <div className="mt-6 border-t border-white/12 pt-4 font-labels text-[8px] uppercase leading-5 tracking-[0.16em] text-white/58">
                   {EXAMPLE_PROJECT.spec} / {EXAMPLE_PROJECT.location}
                 </div>
               </div>
@@ -758,7 +788,7 @@ export default function PortfolioContent() {
                     />
                   </div>
                 ))}
-                <p className="col-span-3 font-labels text-[8px] uppercase leading-5 tracking-[0.18em] text-white/34">
+                <p className="col-span-3 font-labels text-[8px] uppercase leading-5 tracking-[0.18em] text-white/60">
                   Representative frames — full documentation follows completion.
                 </p>
               </div>
@@ -776,7 +806,7 @@ export default function PortfolioContent() {
           <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
           <div className="relative z-10 mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="pf-reveal" data-gsap-reveal="true">
-              <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/42">
+              <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/62">
                 Ready to compare notes
               </span>
               <h2 className="mt-3 max-w-2xl font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.92]">
@@ -804,6 +834,7 @@ export default function PortfolioContent() {
       {/* Per-case lightbox — full photo set, arrows/Esc/backdrop/scroll-lock */}
       {active && lightbox && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={`${active.gallery.title} photo viewer`}
