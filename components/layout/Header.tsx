@@ -161,7 +161,7 @@ export default function Header() {
             <Link
               href="/"
               aria-label="828 Construction"
-              className="flex shrink-0 items-center"
+              className="flex min-h-11 shrink-0 items-center"
               onClick={() => {
                 if (pathname === "/") window.scrollTo(0, 0);
               }}
@@ -413,7 +413,7 @@ export default function Header() {
                               {/* Services overview */}
                               <Link
                                 href="/services"
-                                className="flex items-center justify-between py-3 border-b border-white/[0.04]"
+                                className="relative flex items-center justify-between py-3 border-b border-white/[0.04] before:absolute before:inset-x-0 before:-top-0.5 before:bottom-0 before:content-['']"
                               >
                                 <span className="font-labels text-[11px] text-gray-500 tracking-[0.18em] uppercase">
                                   All Services
