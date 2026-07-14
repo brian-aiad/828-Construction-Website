@@ -54,13 +54,13 @@ export default function Footer() {
     // 2026-07-13) — same content, the top band just breathes to fill.
     <footer className="relative flex min-h-svh flex-col overflow-hidden bg-black text-white" data-section="footer" data-header-dark="">
       <section className="flex flex-1 flex-col justify-center bg-black px-6 pb-9 pt-24 md:px-8 md:pb-12 md:pt-28 lg:px-3 lg:pb-9 lg:pt-32" data-footer-section="top-band">
-        <div className="grid w-full gap-7 lg:grid-cols-[10fr_15fr] lg:items-start lg:gap-0">
+        <div className="grid w-full gap-7 lg:grid-cols-2 lg:items-start lg:gap-0">
           <div>
             <h2 className="max-w-[24rem] font-display text-[1.9rem] md:text-[2.6rem] lg:text-[clamp(2.4rem,3.7vw,3.4rem)] font-normal leading-[1.02] tracking-[-0.01em] text-white">
               Quality is the strategy.
             </h2>
 
-            <ul className="mt-5 flex items-center gap-5 lg:mt-7" aria-label="Social links">
+            <ul className="-ml-2 mt-5 flex items-center gap-5 lg:mt-7" aria-label="Social links">
               {SOCIAL_LINKS.map((social) => (
                 <li key={social.label}>
                   <a
@@ -80,13 +80,13 @@ export default function Footer() {
           <div className="lg:pt-1">
             <a
               href={SITE.phoneHref}
-              className="relative block font-display text-[1.7rem] md:text-[2.4rem] lg:text-[clamp(2.2rem,3.7vw,3.4rem)] font-normal leading-[1.05] text-white/46 lg:text-white/38 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 lg:before:hidden"
+              className="relative block font-display text-[1.7rem] md:text-[2.4rem] lg:text-[clamp(1.7rem,2.85vw,2.8rem)] font-normal leading-[1.05] text-white/46 lg:text-white/38 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 lg:before:hidden"
             >
               {formattedPhone}
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="relative mt-2 block font-display text-[1.1rem] md:text-[1.6rem] lg:text-[clamp(1.5rem,3.4vw,3.15rem)] font-normal leading-[1.08] text-white/40 lg:mt-4 lg:text-white/30 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 lg:before:hidden"
+              className="relative mt-2 block font-display text-[1.1rem] md:text-[1.6rem] lg:text-[clamp(1.5rem,2.5vw,2.45rem)] font-normal leading-[1.08] text-white/40 lg:mt-3 lg:text-white/30 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 lg:before:hidden"
             >
               <span className="inline-block">828constructionca</span>
               <span className="inline-block">@gmail.com</span>
@@ -110,7 +110,7 @@ export default function Footer() {
           />
           <div className="absolute inset-0 bg-black/18" aria-hidden="true" />
           <div className="absolute left-0 right-0 top-[44%] z-10 px-7 md:px-9 lg:px-[5vw]">
-            <span className="block border-b border-white/62 pb-2 font-display text-[clamp(1.5rem,2vw,1.85rem)] font-normal leading-none text-white">
+            <span className="block border-b border-white/62 pb-2 font-display text-[clamp(1.25rem,1.65vw,1.55rem)] font-normal leading-none text-white">
               Book a Call
               <span className="ml-3" aria-hidden="true">→</span>
             </span>
@@ -169,12 +169,11 @@ export default function Footer() {
 
         </div>
 
-        {/* NS-reference giant wordmark: rides the bottom edge of the light
-            panels, bottom-cropped at the snapped rest. */}
+        {/* NS-reference wordmark: lives INSIDE the white serving box only,
+            fully visible with a little bottom padding (Brian round 2). */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 right-0 z-10 w-full overflow-hidden lg:w-1/2"
-          style={{ transform: "translateY(16%)" }}
+          className="pointer-events-none absolute bottom-2 right-0 z-10 w-full overflow-hidden lg:bottom-3 lg:w-1/4"
         >
           <BrandMarqueeBottom giant color="rgb(12, 12, 12)" itemClassName="text-[#0c0c0c]" />
         </div>

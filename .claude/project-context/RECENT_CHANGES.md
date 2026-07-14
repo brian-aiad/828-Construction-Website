@@ -2,6 +2,48 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-07-13 — Footer NS round 2: Brian's side-by-side fixes (terminal B)
+
+- Wordmark confined to the white serving box only (lg:w-1/4, bottom padding,
+  fully visible — no crop), sized to the panel (giant preset 2.9-5.2rem).
+- Phone/email flush with the gray panel's left edge: top band 50/50 grid,
+  both sized to fit one line in the column (2.8rem/2.45rem max).
+- Book a Call smaller (clamp 1.25-1.55rem); socials -ml-2 so the first icon
+  glyph is flush with the headline's left edge.
+- QA: footer-cover probe 8/8, functional-qa PASS d+m, tsc clean.
+
+## 2026-07-13 — Portfolio V4 real-work revamp (Brian voice directive)
+
+- Brian: page read as "a bunch of things thrown into one place" — showcase the
+  three REAL residences first, DELETE fabricated projects (Garage Conversion
+  Glass Entry, Detached ADU New Construction, South Bay Outdoor Living + all
+  stock one-offs), generate ONE example project in another South Bay city with
+  temp photos, make it flow like the rest of the site.
+- lib/constants.ts PROJECTS reduced to Cerritos / El Sereno (new entry) /
+  Tustin (real, portfolioRank 1–3) + "Redondo Beach Residence" example
+  (tempPhoto, honest "In progress — photography pending" presentation).
+  Consumers audited: ProjectsPreview/ProjectsGallery unrouted; [slug] service
+  route shadowed by static pages and empty-category safe.
+- PortfolioContent rebuilt: compact V4-scale hero (statement + residence index
+  + real triptych) → three case-dossier surfaces with curated selects (picked
+  from indexed contact sheets, .claude-work/research/portfolio-revamp/) +
+  scope/location/spec/documentation ledgers + per-case full-set lightbox →
+  Next-up example plate → CTA. ResidenceGalleries.tsx absorbed and deleted;
+  new components/portfolio/portfolioCases.data.ts composes PROJECTS +
+  RESIDENCE_GALLERIES.
+- New page signature: traveling contact strip (decorative scrub drift;
+  PATTERNS.md per-page table updated — old cinema-strip entry was stale).
+- PortfolioFlow: surface-aware veil ported from ContactFlow V4.1 (0.08 on
+  cream — no gray-out). Header morph zones added (data-header-dark/light).
+- Brian mid-build: "TAKE OFF THIS RULER COMPONENT" → DraftingMotionLayer
+  removed from the portfolio hero.
+- Settle-torture harness clean-check upgraded to the Fix 26 lesson-4
+  flush-rest definition (min(vh, prevBottom)); lightbox harness now scrolls
+  through Lenis before clicking (raw CDP scroll gets reconciled away).
+- QA: functional-qa PASS d+m; deep links PASS direct + via home cards d+m;
+  lightbox full-cycle PASS d+m; seam sweeps 2× clean d+m; settle 21/21 down +
+  17/17 up 2×; text-fit 0 issues 2×; tsc clean. Page height 20.3k→8.9k px.
+
 ## 2026-07-13 — Footer rebuilt to the NS Builders reference (terminal B)
 
 - Brian: copy the NS footer nearly exactly — elongated full-screen snap,

@@ -26,14 +26,14 @@ export default function BrandMarqueeBottom({
   const trackRef = useRef<HTMLDivElement>(null);
   // giant: the NS-reference footer wordmark — huge, bottom-cropped train.
   const heightClass = giant
-    ? "h-[clamp(5rem,11vw,10.5rem)]"
+    ? "h-[clamp(3.2rem,5.8vw,5.6rem)]"
     : panel
       ? "h-12 lg:h-[4.3rem]"
       : compact
         ? "h-12"
         : "h-[clamp(4.4rem,9vw,8.4rem)]";
   const fontSize = giant
-    ? "clamp(4.6rem, 10.5vw, 10rem)"
+    ? "clamp(2.9rem, 5.4vw, 5.2rem)"
     : panel
       ? "clamp(2.55rem, 4.25vw, 3.45rem)"
       : compact
