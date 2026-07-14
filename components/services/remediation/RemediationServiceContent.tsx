@@ -213,6 +213,7 @@ function useRemediationMotion() {
       const clips = gsap.utils.toArray<HTMLElement>(".rem-clip");
       const hairlines = gsap.utils.toArray<HTMLElement>(".rem-hairline");
       const cards = gsap.utils.toArray<HTMLElement>(".rem-card");
+      const mphotos = gsap.utils.toArray<HTMLElement>(".rem-mphoto");
       const parallaxImgs = gsap.utils.toArray<HTMLElement>(".rem-parallax");
       const parallaxSoft = gsap.utils.toArray<HTMLElement>(".rem-parallax-soft");
       const heroMedia = root.querySelector<HTMLElement>(".rem-hero-media");
@@ -221,6 +222,8 @@ function useRemediationMotion() {
       const plateL = root.querySelector<HTMLElement>(".rem-plate-left");
       const plateR = root.querySelector<HTMLElement>(".rem-plate-right");
 
+      const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+
       // Initial states live HERE, not in JSX (Fix 14). Rises use opacity, NOT
       // autoAlpha: visibility:hidden drops below-fold headings out of the
       // accessibility tree and breaks axe heading-order (h1 → h3).
@@ -228,48 +231,43 @@ function useRemediationMotion() {
       // Photos settle in (opacity+scale) — ANY clip direction shows a
       // stray sliver when a sweep frame catches the first tween moments.
       gsap.set(clips, { opacity: 0, scale: 1.04, transformOrigin: "center" });
+      gsap.set(mphotos, { opacity: 0, y: 30, scale: 1.03, transformOrigin: "center" });
       gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
       gsap.set(cards, { y: 34, opacity: 0 });
-      if (plateL) gsap.set(plateL, { x: -44, opacity: 0 });
-      if (plateR) gsap.set(plateR, { x: 44, opacity: 0 });
+      // Plates slide from the outer edges on desktop; on mobile they rise
+      // (an x-slide on two side-by-side narrow plates shifts within the
+      // clipped section and reads as a wobble, so keep mobile transform on Y).
+      if (plateL) gsap.set(plateL, isMobile ? { y: 30, opacity: 0 } : { x: -44, opacity: 0 });
+      if (plateR) gsap.set(plateR, isMobile ? { y: 30, opacity: 0 } : { x: 44, opacity: 0 });
       if (seam) gsap.set(seam, { scaleY: 0, transformOrigin: "top" });
 
-      if (!AnimationController.shouldAnimate()) {
+      // Reduced motion is the ONLY branch that never hides — everything paints
+      // in its final state, no reveals. Mobile (below) still reveals on scroll
+      // so the page doesn't read as a wall of static text (Brian 2026-07-13:
+      // "nothing pops up when you scroll to them").
+      if (prefersReducedMotion) {
         gsap.set(rises, { opacity: 1, y: 0 });
         gsap.set(clips, { opacity: 1, scale: 1 });
+        gsap.set(mphotos, { opacity: 1, y: 0, scale: 1 });
         gsap.set(hairlines, { scaleX: 1 });
         gsap.set(cards, { y: 0, opacity: 1 });
-        if (plateL) gsap.set(plateL, { x: 0, opacity: 1 });
-        if (plateR) gsap.set(plateR, { x: 0, opacity: 1 });
+        if (plateL) gsap.set(plateL, { x: 0, y: 0, opacity: 1 });
+        if (plateR) gsap.set(plateR, { x: 0, y: 0, opacity: 1 });
         if (seam) gsap.set(seam, { scaleY: 1 });
         return;
       }
 
-      // Hero entrance — transform-only on text (above-the-fold, LCP-safe:
-      // no opacity change) + media wipes in from the copy side.
-      if (heroMedia) {
-        gsap.fromTo(
-          heroMedia,
-          { clipPath: "inset(0% 0% 0% 22%)" },
-          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.15, ease: "power3.out", delay: 0.1 }
-        );
-      }
-      if (heroLines.length) {
-        gsap.fromTo(
-          heroLines,
-          { y: 30 },
-          { y: 0, duration: 0.95, stagger: 0.09, ease: "power3.out" }
-        );
-      }
-
-      // One-shot entrances key off real visibility (Fix 22), never scroll math.
+      // ── Shared IO reveals (desktop AND mobile) — one-shot entrances key off
+      // real on-screen visibility (Fix 22), never scroll math. On mobile these
+      // replace the old "show everything instantly" branch. ──
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
           gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
         })
       );
       // Fully-clipped nodes have an empty intersection rect (Fix 23) — observe
-      // the unclipped parent, reveal the child.
+      // the unclipped parent, reveal the child. (These use scale, not clip, but
+      // the parent-observe pattern is kept for consistency + robustness.)
       revealCleanups.push(
         revealOnVisible(
           clips.map((el) => el.parentElement ?? el),
@@ -286,17 +284,30 @@ function useRemediationMotion() {
           }
         )
       );
+      // Mobile-only approach photo strip (desktop shows the sticky crossfade
+      // plate instead; these are lg:hidden so IO never fires on desktop).
+      if (mphotos.length) {
+        revealCleanups.push(
+          revealOnVisible(mphotos, (el, i) => {
+            gsap.to(el, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              delay: 0.06 * (i % 2),
+              ease: "power3.out",
+            });
+          })
+        );
+      }
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
           gsap.to(el, { scaleX: 1, duration: 0.9, ease: "power2.inOut" });
         })
       );
-
-      // Sustained scrub motion (Fix 15) — every scrubbed initial state stays
-      // readable if its trigger never fires (Fix 22).
-      // Stacked-surface rule (About grammar): reveals INSIDE a sticky
-      // surface must be decisive once-reveals keyed to real visibility —
-      // scroll-math scrubs park once the surface pins (PATTERNS Fix 22).
+      // Stacked-surface rule (About grammar): reveals INSIDE a sticky surface
+      // must be decisive once-reveals keyed to real visibility — scroll-math
+      // scrubs park once the surface pins (PATTERNS Fix 22 / Fix 25).
       revealCleanups.push(
         revealOnVisible(cards, (el) => {
           const siblings = Array.from(el.parentElement?.children ?? []);
@@ -313,9 +324,10 @@ function useRemediationMotion() {
       if (plateL && plateR && plateL.parentElement) {
         revealCleanups.push(
           revealOnVisible([plateL.parentElement], () => {
-            gsap.to(plateL, { x: 0, opacity: 1, duration: 0.95, ease: "power3.out" });
+            gsap.to(plateL, { x: 0, y: 0, opacity: 1, duration: 0.95, ease: "power3.out" });
             gsap.to(plateR, {
               x: 0,
+              y: 0,
               opacity: 1,
               duration: 0.95,
               delay: 0.08,
@@ -329,6 +341,26 @@ function useRemediationMotion() {
           revealOnVisible([seam.parentElement.parentElement ?? seam.parentElement], () => {
             gsap.to(seam, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
           })
+        );
+      }
+
+      // ── Desktop-only flourishes (loved as-is; NOT run on mobile) ──
+      if (isMobile) return;
+
+      // Hero entrance — transform-only on text (above-the-fold, LCP-safe:
+      // no opacity change) + media wipes in from the copy side.
+      if (heroMedia) {
+        gsap.fromTo(
+          heroMedia,
+          { clipPath: "inset(0% 0% 0% 22%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.15, ease: "power3.out", delay: 0.1 }
+        );
+      }
+      if (heroLines.length) {
+        gsap.fromTo(
+          heroLines,
+          { y: 30 },
+          { y: 0, duration: 0.95, stagger: 0.09, ease: "power3.out" }
         );
       }
 
@@ -683,7 +715,11 @@ function RemediationApproach() {
 
             <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:hidden">
               {APPROACH_PHOTOS.map((photo) => (
-                <div key={photo.src} className="relative min-h-[15rem] overflow-hidden bg-white/5">
+                <div
+                  key={photo.src}
+                  data-gsap-reveal="true"
+                  className="rem-mphoto relative min-h-[15rem] overflow-hidden bg-white/5"
+                >
                   <Image
                     src={photo.src}
                     alt={photo.alt}
