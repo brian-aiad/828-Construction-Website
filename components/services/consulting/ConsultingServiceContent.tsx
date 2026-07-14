@@ -89,37 +89,78 @@ function useFocusIndex(
       raf = 0;
       const vh = window.innerHeight;
       const focus = vh * focusRatio;
-      let best = 0;
-      let bestDist = Infinity;
-      let contained = false;
-      refs.current.forEach((el, i) => {
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        if (!contained && r.top <= focus && r.bottom >= focus) {
-          best = i;
-          contained = true;
-          return;
-        }
-        if (contained) return;
-        const dist = Math.abs(r.top + r.height / 2 - focus);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      });
-      // Tail completion for the pinned-and-covered phase: as the covering
-      // surface's top approaches the last row (both in vh units, viewport-
-      // relative so it self-adapts), snap active to the last row while it is
-      // still visible. Monotonic — reverses cleanly as the cover recedes.
-      const lastIdx = refs.current.length - 1;
-      const lastEl = refs.current[lastIdx];
+      const count = refs.current.filter(Boolean).length;
+      const lastIdx = count - 1;
+      const firstEl = refs.current.find(Boolean) ?? null;
+      const section = firstEl?.closest<HTMLElement>("[data-section]") ?? null;
       const cover = coverSelector
-        ? document.querySelector(coverSelector)
+        ? document.querySelector<HTMLElement>(coverSelector)
         : null;
-      if (lastEl && cover) {
-        const lastTop = lastEl.getBoundingClientRect().top / vh;
-        const coverTop = cover.getBoundingClientRect().top / vh;
-        if (coverTop < lastTop + 0.18) best = lastIdx;
+      const secRect = section ? section.getBoundingClientRect() : null;
+      const secH = secRect ? secRect.height : Infinity;
+      const coverTop = cover ? cover.getBoundingClientRect().top : Infinity;
+
+      let best = 0;
+
+      // Pinned-and-covered phase (short stacked surface, desktop): once the
+      // section stops at the top and the covering surface begins riding up from
+      // the bottom, the row rects FREEZE — the focus line can no longer sweep
+      // them (PATTERNS.md Fix 27, the short-section trap). Drive the active row
+      // off the cover's rise progress instead, so the highlight + maroon rail
+      // travel continuously across ALL rows (no dead frame, no 0→last jump) and
+      // reverse cleanly as the cover recedes.
+      //
+      // Detect the phase by the cover's OVERLAP with the short section box
+      // (coverTop <= secH), not a secTop threshold — the latter jitters ±px
+      // around the pin boundary and flips the branch back to focus-band, which
+      // resets active to 0 mid-sweep. Overlap is monotonic in scroll, so the
+      // cascade never reverses spuriously.
+      // These stacked surfaces are sticky-positioned on EVERY device
+      // (ConsultingFlow.applyStackTops runs regardless of shouldAnimate), so a
+      // short section pins at top:0 and a tall one pins with its bottom at the
+      // viewport bottom. In both cases the covering surface (questions) then
+      // rides up from the bottom and the row rects FREEZE — a focus-band sweep
+      // can no longer reach the lower rows before they are covered (Fix 27).
+      // The cover first touches the pinned section at coverTop ≈ min(secH, vh).
+      const coverStart = Math.min(secH, vh);
+      if (section && cover && coverTop <= coverStart) {
+        // Complete the whole 0→last cascade within the window where the LAST
+        // row is still uncovered (cover edge above its top), so every row
+        // ignites while fully visible. Anchor progress to coverStart (prog 0 →
+        // row 0 the instant the cover touches) and reach the last row's top at
+        // prog 1. Fully monotonic — no dead frame, no 0→last jump, reverses
+        // cleanly as the cover recedes.
+        const lastEl = refs.current[lastIdx];
+        const lastTop = lastEl ? lastEl.getBoundingClientRect().top : coverStart * 0.8;
+        const span = Math.max(1, coverStart - lastTop);
+        const prog = Math.min(1, Math.max(0, (coverStart - coverTop) / span));
+        best = Math.min(lastIdx, Math.floor(prog * count));
+      } else if (section && cover) {
+        // Approach, before the cover overlaps: hold row 0 so the whole ignition
+        // is ONE clean sweep during the pinned cover phase (letting a focus-band
+        // sweep run here would light 0→n as the section rises, then the pin
+        // phase would re-sweep from 0 — a visible double cascade).
+        best = 0;
+      } else {
+        // Approach / non-pinned (mobile scrolls this section normally): the row
+        // that owns the focus band, else the nearest by center.
+        let bestDist = Infinity;
+        let contained = false;
+        refs.current.forEach((el, i) => {
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          if (!contained && r.top <= focus && r.bottom >= focus) {
+            best = i;
+            contained = true;
+            return;
+          }
+          if (contained) return;
+          const dist = Math.abs(r.top + r.height / 2 - focus);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+          }
+        });
       }
       setActive((prev) => (prev === best ? prev : best));
     };
@@ -162,20 +203,28 @@ function useConsultingMotion() {
       const hairlines = gsap.utils.toArray<HTMLElement>(".con-hairline");
       const parallaxImgs = gsap.utils.toArray<HTMLElement>(".con-parallax");
 
-      // Initial states live HERE, not in JSX (Fix 14). Rises use opacity, NOT
-      // autoAlpha — visibility:hidden pulls headings out of the a11y tree.
-      gsap.set(rises, { opacity: 0, y: 26 });
-      gsap.set(clips, { clipPath: "inset(0% 0% 100% 0%)" });
-      gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
+      const { enabled, prefersReducedMotion } = AnimationController.getConfig();
 
-      if (!AnimationController.shouldAnimate()) {
+      // Reduced motion: reveal everything immediately, hide nothing (mandate).
+      if (prefersReducedMotion) {
         gsap.set(rises, { opacity: 1, y: 0 });
         gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
         gsap.set(hairlines, { scaleX: 1 });
         return;
       }
 
-      // One-shot entrances key off real visibility (Fix 22), never scroll math.
+      // Initial states live HERE, not in JSX (Fix 14). Rises use opacity, NOT
+      // autoAlpha — visibility:hidden pulls headings out of the a11y tree.
+      // These apply on mobile AND desktop: the entrances below are
+      // IntersectionObserver-driven (native-scroll, no scroll hijack), so mobile
+      // gets the same quiet rise/clip/hairline reveals the desktop does — the
+      // whole page no longer pops in statically below 1024px (V4 direction #7).
+      gsap.set(rises, { opacity: 0, y: 26 });
+      gsap.set(clips, { clipPath: "inset(0% 0% 100% 0%)" });
+      gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
+
+      // One-shot entrances key off real visibility (Fix 22/23) — decisive,
+      // failsafe-tagged (data-gsap-reveal on clip wrappers), mobile-safe.
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
           const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
@@ -207,19 +256,23 @@ function useConsultingMotion() {
         })
       );
 
-      // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
-      parallaxImgs.forEach((el) => {
-        gsap.to(el, {
-          yPercent: -8,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el.parentElement ?? el,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.6,
-          },
+      // Sustained parallax scrub (Fix 15) — DESKTOP ONLY. Scroll-linked motion
+      // stays off touch to avoid scroll-coupled jank; the photo rests static and
+      // fully visible on mobile (no hidden initial state on the parallax layer).
+      if (enabled) {
+        parallaxImgs.forEach((el) => {
+          gsap.to(el, {
+            yPercent: -8,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el.parentElement ?? el,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1.6,
+            },
+          });
         });
-      });
+      }
     }, root);
 
     ctxRef.current = ctx;
@@ -248,9 +301,9 @@ function ConsultingHero() {
         <div className="relative flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))] lg:pr-14 lg:py-28">
           <Link
             href="/services"
-            className="font-labels text-[10px] uppercase tracking-[0.18em] text-black/65 transition-colors hover:text-black"
+            className="block py-4 -my-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/65 transition-colors hover:text-black"
           >
-            Back to services
+            <span className="inline-block">Back to services</span>
           </Link>
           <span className="mt-9 block font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
             Construction Consulting / CA License #{SITE.license}
@@ -510,14 +563,14 @@ function QuestionsSection() {
             </div>
           </div>
           <QuestionCard question={QUESTIONS[1]} index={1} dark={false} stagger={0.16} />
-          <div className="relative hidden min-h-[15rem] overflow-hidden lg:block lg:min-h-[19rem]">
+          <div className="relative hidden min-h-[15rem] overflow-hidden sm:block lg:min-h-[19rem]">
             <div className="con-clip absolute inset-0" data-gsap-reveal="true" data-stagger="0.22">
               <Image
                 src={FAQ_PHOTOS[1].src}
                 alt={FAQ_PHOTOS[1].alt}
                 fill
                 loading="lazy"
-                sizes="(max-width: 1024px) 0px, 25vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 quality={92}
                 unoptimized
                 placeholder="blur"
@@ -568,7 +621,7 @@ function ConsultingCta() {
         <div className="con-rise mt-9 flex flex-wrap items-center gap-x-8 gap-y-4" data-stagger="0.16">
           <a
             href={SITE.phoneHref}
-            className="group inline-flex items-baseline gap-3 font-display text-lg text-white/85 transition-colors hover:text-white lg:text-xl"
+            className="group inline-flex items-baseline gap-3 py-2.5 -my-2.5 font-display text-lg text-white/85 transition-colors hover:text-white lg:text-xl"
           >
             Call {SITE.phone}
             <span
@@ -580,7 +633,7 @@ function ConsultingCta() {
           </a>
           <Link
             href="/contact"
-            className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/65 underline decoration-white/25 underline-offset-8 transition-colors hover:text-white hover:decoration-[var(--color-accent)]"
+            className="inline-block py-4 -my-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white/65 underline decoration-white/25 underline-offset-8 transition-colors hover:text-white hover:decoration-[var(--color-accent)]"
           >
             Request consulting
           </Link>

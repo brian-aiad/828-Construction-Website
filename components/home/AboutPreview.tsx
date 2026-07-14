@@ -17,22 +17,22 @@ gsap.registerPlugin(ScrollTrigger);
 
 const DETAIL_IMAGES = [
   {
-    src: "/images/projects/cerritos-residence/home-preview-vanity.jpg",
-    alt: "Finished dual vanity from the Cerritos Residence bath remodel",
+    src: "/images/projects/cerritos-residence/home-preview-editorial-v3.jpg",
+    alt: "Cerritos Residence bath remodel overview with glass shower, dark feature tile, vanity, and finish details",
     project: "Cerritos Residence",
     meta: "Bath Remodel / Cerritos, CA",
     href: "/portfolio#cerritos-residence",
   },
   {
-    src: "/images/projects/el-sereno-residence/01-2194.jpg",
-    alt: "Round wood-framed mirror over a vessel sink on geometric star tile, El Sereno Residence bath remodel",
+    src: "/images/projects/el-sereno-residence/home-preview-editorial-v3.jpg",
+    alt: "El Sereno Residence bath and outdoor living project with deck, railing, tile, and woodwork details",
     project: "El Sereno Residence",
     meta: "Bath Remodel / El Sereno, CA",
     href: "/portfolio#el-sereno-residence",
   },
   {
-    src: "/images/projects/tustin-residence/home-preview-tub-detail.jpg",
-    alt: "Warm tub and towel detail from the Tustin Residence bath refresh",
+    src: "/images/projects/tustin-residence/home-preview-editorial-v3.jpg",
+    alt: "Tustin Residence bath refresh with blue tub, glass shower, tile work, lighting, and finish details",
     project: "Tustin Residence",
     meta: "Bath Refresh / Tustin, CA",
     href: "/portfolio#tustin-residence",

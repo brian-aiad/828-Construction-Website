@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:3001",
+  "url": "http://localhost:3001/",
   "viewport": {
     "width": 390,
     "height": 844
@@ -34,14 +34,14 @@
     "duplicateHeadings": []
   },
   "motionDensity": {
-    "gsapStyledElements": 77,
-    "gsapTransforms": 52,
-    "gsapOpacityLt1": 38,
-    "totalElements": 518,
-    "movementRatio": 0.149,
+    "gsapStyledElements": 80,
+    "gsapTransforms": 55,
+    "gsapOpacityLt1": 62,
+    "totalElements": 520,
+    "movementRatio": 0.154,
     "threshold": ">= 5 GSAP-styled elements",
     "motionDensityPass": true
   },
-  "totalHeight": 7567,
+  "totalHeight": 7521,
   "PASS": true
 }

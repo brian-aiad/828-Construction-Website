@@ -25,8 +25,12 @@ const FOOTER_LINKS = [
 const labelClass = "font-labels text-[10px] uppercase tracking-[0.22em]";
 // Joe (IMG_1127, 2026-07-09): footers must read as ONE black zone — no cream
 // panels breaking the surface on the way up. All panel surfaces stay black.
+// Packed nav column (~28px vertical pitch): the ::before extends the tap area
+// to fill the row gap — max reach without overlapping the neighbour's target or
+// changing any visual (44px would require respacing the column, which is not
+// allowed here). Clears the WCAG 2.5.8 AA 24px floor.
 const panelLinkClass =
-  "group relative w-fit font-labels text-[11px] uppercase tracking-[0.16em] text-white/64 transition-colors hover:text-white";
+  "group relative w-fit font-labels text-[11px] uppercase tracking-[0.16em] text-white/64 transition-colors before:absolute before:inset-x-0 before:-inset-y-[5px] before:content-[''] hover:text-white";
 
 function formatPhone(phone: string) {
   const digits = phone.replace(/\D/g, "");
@@ -46,8 +50,10 @@ export default function Footer() {
   const streetLine = SITE.address.street.replace(" STE", ", STE");
 
   return (
-    <footer className="relative overflow-hidden bg-black text-white" data-section="footer">
-      <section className="bg-black px-6 pb-9 pt-14 md:px-8 md:pb-12 md:pt-24 lg:px-3 lg:pb-9 lg:pt-28" data-footer-section="top-band">
+    // min-h-svh: the footer owns the full screen at final rest (Brian
+    // 2026-07-13) — same content, the top band just breathes to fill.
+    <footer className="relative flex min-h-svh flex-col overflow-hidden bg-black text-white" data-section="footer">
+      <section className="flex flex-1 flex-col justify-center bg-black px-6 pb-9 pt-24 md:px-8 md:pb-12 md:pt-28 lg:px-3 lg:pb-9 lg:pt-32" data-footer-section="top-band">
         <div className="grid w-full gap-7 lg:grid-cols-[10fr_15fr] lg:items-start lg:gap-0">
           <div>
             <h2 className="max-w-[24rem] font-display text-[1.9rem] md:text-[2.6rem] lg:text-[clamp(2.4rem,3.7vw,3.4rem)] font-normal leading-[1.02] tracking-[-0.01em] text-white">
@@ -62,7 +68,7 @@ export default function Footer() {
                     aria-label={social.label}
                     target={social.href === "#" ? undefined : "_blank"}
                     rel={social.href === "#" ? undefined : "noopener noreferrer"}
-                    className="group flex h-10 w-10 items-center justify-center text-white/42 transition-colors hover:text-white/72"
+                    className="group relative flex h-10 w-10 items-center justify-center text-white/42 transition-colors before:absolute before:-inset-0.5 before:content-[''] hover:text-white/72"
                   >
                     <span className="h-6 w-6">{social.icon}</span>
                   </a>
@@ -74,13 +80,13 @@ export default function Footer() {
           <div className="lg:pt-1">
             <a
               href={SITE.phoneHref}
-              className="block font-display text-[1.7rem] md:text-[2.4rem] lg:text-[clamp(2.2rem,3.7vw,3.4rem)] font-normal leading-[1.05] text-white/46 lg:text-white/38 transition-colors hover:text-white/68"
+              className="relative block font-display text-[1.7rem] md:text-[2.4rem] lg:text-[clamp(2.2rem,3.7vw,3.4rem)] font-normal leading-[1.05] text-white/46 lg:text-white/38 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 lg:before:hidden"
             >
               {formattedPhone}
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="mt-2 block font-display text-[1.1rem] md:text-[1.6rem] lg:text-[clamp(1.5rem,3.4vw,3.15rem)] font-normal leading-[1.08] text-white/40 lg:mt-4 lg:text-white/30 transition-colors hover:text-white/62"
+              className="relative mt-2 block font-display text-[1.1rem] md:text-[1.6rem] lg:text-[clamp(1.5rem,3.4vw,3.15rem)] font-normal leading-[1.08] text-white/40 lg:mt-4 lg:text-white/30 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 lg:before:hidden"
             >
               <span className="inline-block">828constructionca</span>
               <span className="inline-block">@gmail.com</span>

@@ -750,3 +750,12 @@ html.lenis body {
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* Footer cover (Brian 2026-07-13): on flow pages, every *Flow renders a
+   100svh [data-footer-runway] spacer after its last surface. Pulling the
+   footer up by the same amount makes it TRAVEL OVER the pinned last surface
+   (true cover, like every junction) instead of abutting the wrap end. Scoped
+   with :has so non-flow pages keep a normal footer. */
+body:has([data-footer-runway]) [data-footer-surface] {
+  margin-top: -100svh;
+}

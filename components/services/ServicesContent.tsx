@@ -205,8 +205,13 @@ function useServicesMotion() {
       gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
       gsap.set(seams, { scaleY: 0, transformOrigin: "top" });
 
-      if (!AnimationController.shouldAnimate()) {
-        // Mobile / reduced motion: everything readable immediately.
+      const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+
+      if (prefersReducedMotion) {
+        // Reduced motion ONLY: everything readable immediately, no entrance.
+        // (Mobile is handled below — it now earns the same house-grammar
+        // entrances desktop has; Brian 2026-07-13: "some sections nothing pops
+        // up when you scroll to them." Reduced-motion never hides.)
         gsap.set(rises, { autoAlpha: 1, y: 0 });
         gsap.set(shifts, { y: 0 });
         gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
@@ -215,16 +220,19 @@ function useServicesMotion() {
         return;
       }
 
-      // One-shot entrances key off real visibility (Fix 22). A fully-clipped
-      // element never intersects (Fix 23) — observe parents, reveal children.
+      // One-shot entrances key off real visibility (Fix 22) — runs on BOTH
+      // desktop AND mobile (transform/opacity only, no scroll-hijack). A
+      // fully-clipped element never intersects (Fix 23) — observe parents,
+      // reveal children. Decisive `gsap.to` (no scrub) always completes inside
+      // sticky-stacked surfaces (Fix 25).
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
-          gsap.to(el, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out" });
+          gsap.to(el, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out", overwrite: "auto" });
         })
       );
       revealCleanups.push(
         revealOnVisible(shifts, (el) => {
-          gsap.to(el, { y: 0, duration: 0.9, ease: "power3.out" });
+          gsap.to(el, { y: 0, duration: 0.9, ease: "power3.out", overwrite: "auto" });
         })
       );
       revealCleanups.push(
@@ -236,22 +244,67 @@ function useServicesMotion() {
               (wrapper as HTMLElement);
             gsap.to(el, {
               clipPath: "inset(0% 0% 0% 0%)",
-              duration: 1.15,
+              duration: isMobile ? 0.9 : 1.15,
               ease: "power3.inOut",
+              overwrite: "auto",
             });
           }
         )
       );
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
-          gsap.to(el, { scaleX: 1, duration: 1.0, ease: "power2.inOut" });
+          gsap.to(el, { scaleX: 1, duration: 1.0, ease: "power2.inOut", overwrite: "auto" });
         })
       );
       revealCleanups.push(
         revealOnVisible(seams, (el) => {
-          gsap.to(el, { scaleY: 1, duration: 1.0, delay: 0.2, ease: "power2.inOut" });
+          gsap.to(el, { scaleY: 1, duration: 1.0, delay: 0.2, ease: "power2.inOut", overwrite: "auto" });
         })
       );
+
+      if (isMobile) {
+        // Mobile scroll philosophy: entrances only, NO scrubbed parallax
+        // (avoids drift/jank on touch). The section walks (index + principles)
+        // run from useTravelIndex regardless.
+        //
+        // Never-missing-text failsafe (Fix 25 standard), mobile-only: the whole
+        // page's motion now rides on these IO entrances, so a belt-and-suspenders
+        // sweep force-reveals any target on-screen yet still hidden. Desktop
+        // already has LenisProvider's global failsafe (Fix 18). Self-clears once
+        // nothing is stuck (or after ~12s).
+        const revealTargets = [...rises, ...clips, ...hairlines, ...seams];
+        let sweeps = 0;
+        const failsafe = window.setInterval(() => {
+          sweeps += 1;
+          let remaining = 0;
+          revealTargets.forEach((el) => {
+            if (!el.isConnected) return;
+            const cs = getComputedStyle(el);
+            const hidden =
+              parseFloat(cs.opacity) < 0.05 ||
+              cs.visibility === "hidden" ||
+              (cs.clipPath || "").includes("100%");
+            if (!hidden) return;
+            const r = el.getBoundingClientRect();
+            const onScreen = r.top < window.innerHeight * 0.8 && r.bottom > 0;
+            if (onScreen) {
+              gsap.set(el, {
+                autoAlpha: 1,
+                y: 0,
+                scaleX: 1,
+                scaleY: 1,
+                clipPath: "inset(0% 0% 0% 0%)",
+                overwrite: true,
+              });
+            } else {
+              remaining += 1;
+            }
+          });
+          if (remaining === 0 || sweeps > 12) window.clearInterval(failsafe);
+        }, 1000);
+        revealCleanups.push(() => window.clearInterval(failsafe));
+        return;
+      }
 
       // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
       // Photographs breathe: parallax drift + a scale settle (1.07 → 1.0)

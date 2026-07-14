@@ -49,5 +49,12 @@ export default function FooterRevealWrapper({
     return () => { try { ctx.revert(); } catch {} };
   }, [pathname]);
 
-  return <div ref={ref}>{children}</div>;
+  // data-footer-surface: the footer is the site-wide LAST stacked surface —
+  // flows pin their final section under it, the settle snaps its junction,
+  // and z-20 lifts it above every flow's pinned surfaces (flows sit at z-10).
+  return (
+    <div ref={ref} data-footer-surface="" className="relative z-20">
+      {children}
+    </div>
+  );
 }

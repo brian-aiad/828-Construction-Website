@@ -37,13 +37,10 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
     );
 
     const applyStackTops = () => {
-      stacks.forEach((el, i) => {
-        const isLast = i === stacks.length - 1;
-        if (isLast) {
-          el.style.position = "relative";
-          el.style.top = "auto";
-          return;
-        }
+      stacks.forEach((el) => {
+        // Footer-cover (Brian 2026-07-13): the LAST surface pins too — the
+        // site footer ([data-footer-surface], z-20) rides over it like any
+        // next surface, so no page tail ever peeks above the footer at rest.
         el.style.position = "sticky";
         el.style.top = `${Math.min(0, window.innerHeight - el.offsetHeight)}px`;
       });
@@ -95,7 +92,10 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
 
     const ctx = gsap.context(() => {
       stacks.forEach((el, i) => {
-        const next = stacks[i + 1];
+        // The footer is the surface after the last stack child.
+        const next =
+          stacks[i + 1] ??
+          document.querySelector<HTMLElement>("[data-footer-surface]");
         if (!next) return;
         const veil = el.querySelector<HTMLElement>("[data-cover-veil]");
         if (!veil) return;
@@ -162,7 +162,7 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
           style={{ zIndex: i + 1 }}
         >
           {child}
-          {i < items.length - 1 && (
+          {(
             <div
               data-cover-veil=""
               aria-hidden="true"
@@ -171,6 +171,11 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
           )}
         </div>
       ))}
+      {/* Footer runway: a sticky element cannot pin at its container's
+          end — this spacer gives the LAST surface room to stay pinned
+          while the site footer (z-20) rides over it, exactly like every
+          other cover junction (Brian 2026-07-13 full-screen footer). */}
+      <div aria-hidden="true" data-footer-runway="" className="pointer-events-none h-svh" />
     </div>
   );
 }

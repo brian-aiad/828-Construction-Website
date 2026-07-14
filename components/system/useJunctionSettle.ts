@@ -105,8 +105,14 @@ export function useJunctionSettle(
       const wrap = wrapRef.current;
       if (!wrap) return null;
       const vh = window.innerHeight;
+      // Document-wide: the site footer is a stacked surface too (Brian
+      // 2026-07-13 full-screen-footer cover) — it lives OUTSIDE the flow
+      // wrap, so scoping to wrap would leave the footer junction unsnapped.
+      // Every page has exactly one flow, so document order == stack order.
       const surfaces = Array.from(
-        wrap.querySelectorAll<HTMLElement>(surfaceSelector)
+        document.querySelectorAll<HTMLElement>(
+          `${surfaceSelector}, [data-footer-surface]`
+        )
       );
       // Deepest intruder (largest top): with overlapping bands more than one
       // surface can rest mid-band; resolving the deepest first converges.
