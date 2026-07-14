@@ -2,6 +2,15 @@
 
 _Add todos here. Remove when done. Date all entries._
 
+## Portfolio "Next up" example project (2026-07-13)
+
+- "Redondo Beach Residence" on /portfolio is a Brian-requested EXAMPLE with
+  temp photos (adu-exterior-new / adu-interior-living / kitchen-dark), labeled
+  "In progress — photography pending". Swap in real documentation when a real
+  next project exists; data lives in lib/constants.ts (id 4, tempPhoto).
+- El Sereno gallery label still pending Joe ("Bath Remodel & Outdoor Living"
+  kept as-is per standing note).
+
 ## Remediation imagery — note for the photo-set terminal (2026-07-10)
 
 - Real-photo review (all 126 optimized shots, contact sheets in
