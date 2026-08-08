@@ -90,7 +90,8 @@ export default function ContactForm() {
       );
       if (firstInvalidName) {
         const firstField = form.elements.namedItem(firstInvalidName) as HTMLElement | null;
-        firstField?.focus();
+        firstField?.scrollIntoView({ block: "center", behavior: "smooth" });
+        window.setTimeout(() => firstField?.focus({ preventScroll: true }), 220);
       }
       return;
     }

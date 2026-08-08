@@ -47,27 +47,27 @@ const BENEFITS = [
 
 const BENEFIT_PHOTOS = [
   {
-    src: "/images/generated/consulting-benefit-early-detection-v2.png",
+    src: "/images/projects/consulting-inspection.jpg",
     alt: "Opened residential wall inspected with moisture meter and consulting tools",
     label: "Early detection",
   },
   {
-    src: "/images/generated/consulting-benefit-creative-solution-v2.png",
+    src: "/images/generated/services-consulting-table-v2.png",
     alt: "Construction plans and material samples arranged for consulting problem solving",
     label: "Creative solution",
   },
   {
-    src: "/images/generated/consulting-benefit-preventative-care-v2.png",
+    src: "/images/services/consulting-detail.jpg",
     alt: "Window flashing and exterior detail reviewed with preventative care tools",
     label: "Preventative care",
   },
   {
-    src: "/images/generated/consulting-benefit-structure-assessment-v2.png",
+    src: "/images/projects/consulting-blueprints.jpg",
     alt: "Framed residential opening assessed with plans, level, and construction tools",
     label: "Structure assessment",
   },
   {
-    src: "/images/generated/consulting-benefit-peace-of-mind-v2.png",
+    src: "/images/generated/consulting-hero-advisory-table-v3.png",
     alt: "Organized consulting table with plans and material samples in a finished home",
     label: "Peace of mind",
   },

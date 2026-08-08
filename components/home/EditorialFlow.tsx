@@ -47,7 +47,13 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
     // Stacked surfaces — measured sticky tops (taller-than-viewport sections
     // stick only once their bottom reaches the viewport bottom).
     const applyStackTops = () => {
+      const stackEnabled = AnimationController.shouldAnimate();
       stacks.forEach((el) => {
+        if (!stackEnabled) {
+          el.style.position = "relative";
+          el.style.top = "auto";
+          return;
+        }
         // Footer-cover (Brian 2026-07-13): the LAST surface pins too — the
         // site footer ([data-footer-surface], z-20) rides over it like any
         // next surface, so no page tail ever peeks above the footer at rest.
@@ -159,8 +165,8 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
         <div
           key={i}
           data-stack-surface=""
-          data-header-light=""
-          className="relative bg-[#f7f7f3] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.55)]"
+          data-header-dark=""
+          className="relative bg-[#050505] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.9)]"
           style={{ zIndex: i + 1 }}
         >
           {child}

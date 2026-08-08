@@ -38,6 +38,7 @@ export default function HomeVisionSequence() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const statementRef = useRef<HTMLParagraphElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
+  const photoFrameRef = useRef<HTMLDivElement>(null);
   const photoInnerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,12 +90,12 @@ export default function HomeVisionSequence() {
       gsap.set(processHead, { y: 20, opacity: 0 });
       gsap.set(closingEls, { y: 18, opacity: 0 });
       if (railFillEl) gsap.set(railFillEl, { scaleY: 0, transformOrigin: "top" });
-      if (photoRef.current) gsap.set(photoRef.current, { clipPath: "inset(10% 9% 10% 9%)" });
+      if (photoFrameRef.current) gsap.set(photoFrameRef.current, { clipPath: "inset(10% 9% 10% 9%)" });
 
       if (!AnimationController.shouldAnimate()) {
         gsap.set(headlineLines, { yPercent: 0 });
         if (railFillEl) gsap.set(railFillEl, { scaleY: 1, transformOrigin: "top" });
-        if (photoRef.current) gsap.set(photoRef.current, { clipPath: "inset(0%)" });
+        if (photoFrameRef.current) gsap.set(photoFrameRef.current, { clipPath: "inset(0%)" });
 
         const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
         if (prefersReducedMotion || !isMobile) {
@@ -164,8 +165,8 @@ export default function HomeVisionSequence() {
       );
 
       // Landscape photograph — grows from an inset frame to full bleed
-      if (photoRef.current) {
-        gsap.to(photoRef.current, {
+      if (photoFrameRef.current) {
+        gsap.to(photoFrameRef.current, {
           clipPath: "inset(0% 0% 0% 0%)",
           ease: "none",
           scrollTrigger: {
@@ -343,7 +344,7 @@ export default function HomeVisionSequence() {
     <section
       ref={sectionRef}
       data-section="vision"
-      className="relative bg-[#f7f7f3] text-[#111]"
+      className="relative bg-[#050505] text-white"
     >
       {/* Intro — asymmetric editorial split. FULL SCREEN on desktop (Brian,
           2026-07-13 round 2): the statement owns the whole viewport at its
@@ -355,21 +356,27 @@ export default function HomeVisionSequence() {
         className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:h-svh lg:min-h-0"
         data-gsap-reveal="true"
       >
-        <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
-          <Image
-            src="/images/generated/home-vision-fireplace-work-v2.png"
-            alt="Finished custom interior with stone fireplace, built-in shelving, and warm residential craftsmanship"
-            fill
-            loading="lazy"
-            sizes="100vw"
-            className="object-cover"
-            style={{ filter: "contrast(1.04) saturate(1.04)" }}
+        <div
+          ref={photoFrameRef}
+          className="absolute inset-0 overflow-hidden"
+          style={{ willChange: "clip-path" }}
+          aria-hidden="true"
+        >
+          <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
+            <Image
+              src="/images/generated/home-vision-fireplace-work-v2.png"
+              alt=""
+              fill
+              loading="lazy"
+              sizes="100vw"
+              className="object-cover"
+              style={{ filter: "contrast(1.04) saturate(1.04)" }}
+            />
+          </div>
+          <div
+            className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.54)_44%,rgba(0,0,0,0.2)_100%),linear-gradient(180deg,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.18)_48%,rgba(0,0,0,0.72)_100%)]"
           />
         </div>
-        <div
-          className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.54)_44%,rgba(0,0,0,0.2)_100%),linear-gradient(180deg,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.18)_48%,rgba(0,0,0,0.72)_100%)]"
-          aria-hidden="true"
-        />
 
         <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 pb-16 pt-24 sm:min-h-[48rem] lg:h-full lg:min-h-0 lg:px-12 lg:pb-20 lg:pt-20">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12">
@@ -383,9 +390,9 @@ export default function HomeVisionSequence() {
             </p>
             <h3
               ref={headlineRef}
-              className="max-w-[12ch] font-editorial text-[clamp(3rem,5vw,5.25rem)] font-normal leading-[0.94] tracking-[-0.01em] text-white"
+              className="max-w-[12ch] font-editorial text-[clamp(3rem,5vw,5.25rem)] font-normal leading-[1.04] text-white"
             >
-              <span className="block overflow-hidden">
+              <span className="-my-[0.24em] block overflow-hidden py-[0.24em]">
                 <span className="vision-headline-line block">
                   Refining industry standards.
                 </span>
@@ -439,17 +446,14 @@ export default function HomeVisionSequence() {
       <div
         data-header-dark=""
         data-snap-edge=""
-        className="process-travel relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+120vh)]"
+        className="process-travel relative bg-[#0a0a0a] text-white min-[1180px]:h-[calc(100svh+120vh)]"
       >
-        {/* pt-14 clears the fixed header (condensed h-14) so the marquee strip
-            is actually VISIBLE at the panel top instead of pinned behind the
-            bar (Brian, 2026-07-13). */}
-        <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col lg:overflow-hidden lg:pt-[3.5rem]">
+        <div className="min-[1180px]:sticky min-[1180px]:top-14 min-[1180px]:flex min-[1180px]:h-[calc(100svh-3.5rem)] min-[1180px]:flex-col min-[1180px]:overflow-hidden">
         {/* Marquee — refined mono strip, hairline-bounded, pinned with the panel */}
-        <div className="border-y border-black/10 bg-[#f7f7f3] py-5" aria-hidden="true">
+        <div className="border-y border-white/10 bg-[#050505] py-5" aria-hidden="true">
           <div
-            className="flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-black/45"
-            style={{ animation: "marqueeScroll 40s linear infinite" }}
+            className="home-vision-marquee flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-white/38"
+            style={{ animation: "marqueeScroll 72s linear infinite" }}
           >
             {[...marquee, ...marquee, ...marquee, ...marquee].map((item, i) => (
               <span key={`${item}-${i}`} className="flex items-center gap-10">
@@ -464,20 +468,20 @@ export default function HomeVisionSequence() {
             ))}
           </div>
         </div>
-        <div className="mx-auto flex w-full max-w-[1680px] flex-col px-6 pt-14 pb-16 lg:flex-1 lg:justify-center lg:px-12 lg:py-0">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-            <div className="lg:col-span-5">
-              <p className="process-head-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-8">
+        <div className="mx-auto flex w-full max-w-[1680px] flex-col px-6 pt-14 pb-16 min-[1180px]:flex-1 min-[1180px]:justify-center min-[1180px]:px-12 min-[1180px]:pb-14 min-[1180px]:pt-10">
+          <div className="grid gap-10 min-[1180px]:grid-cols-12 min-[1180px]:items-center min-[1180px]:gap-12">
+            <div className="min-[1180px]:col-span-5 min-[1180px]:max-w-[34rem]">
+              <p className="process-head-el mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-7">
                 <span
                   aria-hidden="true"
                   className="inline-block h-px w-10 bg-[var(--color-accent-light)]"
                 />
                 The approach
               </p>
-              <h3 className="process-head-el max-w-[12ch] font-editorial text-[clamp(2.2rem,3.8vw,3.7rem)] font-normal leading-[1.06] tracking-[-0.01em] text-white">
-                Build philosophy, made visible.
+              <h3 className="process-head-el max-w-[12.5ch] font-editorial text-[clamp(2.45rem,3.65vw,3.85rem)] font-normal leading-[0.98] text-white">
+                Build Philosophy
               </h3>
-              <p className="process-head-el mt-6 max-w-sm text-[15px] leading-7 text-white/60">
+              <p className="process-head-el mt-6 max-w-[24rem] text-[15px] leading-7 text-white/60">
                 Clear communication, clean sequencing, and a finish that holds
                 up after the crew leaves.
               </p>
@@ -492,8 +496,8 @@ export default function HomeVisionSequence() {
               </div>
             </div>
 
-            <div className="lg:col-span-6 lg:col-start-7">
-              <div className="process-list relative pl-6 lg:pl-8">
+            <div className="min-[1180px]:col-span-6 min-[1180px]:col-start-7">
+              <div className="process-list relative pl-6 min-[1180px]:pl-8">
                 {/* Progress rail — maroon fill draws down as the rows pass */}
                 <div
                   aria-hidden="true"
@@ -506,7 +510,7 @@ export default function HomeVisionSequence() {
                 <ol className="border-t border-white/12">
                   {PROCESS_STEPS_V2.map((step, i) => (
                     <li key={step.number} className="relative">
-                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)_auto] sm:gap-4 lg:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] lg:gap-5 lg:py-5">
+                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)_auto] sm:gap-4 min-[1180px]:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] min-[1180px]:gap-5 min-[1180px]:py-5">
                         <span className="process-num font-numbers text-[11px] text-white/50 transition-colors duration-400">
                           {step.number}
                         </span>

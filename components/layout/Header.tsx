@@ -167,11 +167,11 @@ export default function Header() {
               }}
             >
               <span
-                className={`font-display font-medium text-[15px] sm:text-base lg:text-lg tracking-[0.14em] whitespace-nowrap transition-colors duration-500 ${
+                className={`font-display font-semibold text-base sm:text-[17px] lg:text-xl tracking-[0.105em] whitespace-nowrap transition-colors duration-500 ${
                   light ? "text-[#111]" : "text-white"
                 }`}
               >
-                828 CONSTRUCTION
+                828CONSTRUCTION
               </span>
             </Link>
 
@@ -384,7 +384,7 @@ export default function Header() {
                         className={`w-full flex items-center justify-between py-4 border-b font-display font-bold text-3xl tracking-tight transition-colors duration-200 ${
                           isServicesActive
                             ? "text-white border-gray-700"
-                            : "text-gray-600 border-gray-900 hover:text-white hover:border-gray-700"
+                            : "text-gray-400 border-gray-800 hover:text-white hover:border-gray-600"
                         }`}
                       >
                         <span>{link.label}</span>
@@ -392,7 +392,7 @@ export default function Header() {
                           className={`font-labels text-[9px] tracking-[0.2em] uppercase transition-colors duration-200 ${
                             mobileServicesOpen
                               ? "text-[var(--color-accent-light)]"
-                              : "text-gray-600"
+                              : "text-gray-400"
                           }`}
                         >
                           {mobileServicesOpen ? "–" : "+"}
@@ -418,7 +418,7 @@ export default function Header() {
                                 <span className="font-labels text-[11px] text-gray-500 tracking-[0.18em] uppercase">
                                   All Services
                                 </span>
-                                <span className="font-labels text-[9px] text-gray-600 tracking-[0.1em] uppercase">
+                                <span className="font-labels text-[9px] text-gray-500 tracking-[0.1em] uppercase">
                                   →
                                 </span>
                               </Link>
@@ -429,13 +429,13 @@ export default function Header() {
                                   className={`flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0 transition-colors duration-150 ${
                                     pathname === `/services/${service.slug}`
                                       ? "text-[var(--color-accent-light)]"
-                                      : "text-gray-400 hover:text-white"
+                                      : "text-gray-300 hover:text-white"
                                   }`}
                                 >
                                   <span className="font-display font-bold text-lg tracking-tight">
                                     {service.title}
                                   </span>
-                                  <span className="font-labels text-[8px] text-gray-600 tracking-[0.15em] uppercase">
+                                  <span className="font-labels text-[8px] text-gray-500 tracking-[0.15em] uppercase">
                                     {service.short}
                                   </span>
                                 </Link>
@@ -464,7 +464,7 @@ export default function Header() {
                       className={`block py-4 border-b font-display font-bold text-3xl tracking-tight transition-colors duration-200 ${
                         pathname === link.href
                           ? "text-white border-gray-700"
-                          : "text-gray-600 border-gray-900 hover:text-white hover:border-gray-700"
+                          : "text-gray-400 border-gray-800 hover:text-white hover:border-gray-600"
                       }`}
                     >
                       {link.label}
