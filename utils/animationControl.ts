@@ -1,13 +1,13 @@
 /**
  * AnimationController
- * Two-layer detection only:
- *   1. Screen width < 1024 → mobile/tablet (no scroll-hijacking)
- *   2. prefers-reduced-motion → user preference
+ * Three-layer detection:
+ *   1. Screen width < 1180 → mobile/tablet (no scroll-hijacking)
+ *   2. Coarse pointer at <= 1366px → iPad/tablet class (normal scroll)
+ *   3. prefers-reduced-motion → user preference
  *
- * NOTE: We intentionally SKIP navigator.maxTouchPoints / ontouchstart because
- * Windows laptops (and many trackpad devices) report touch support even though
- * they are effectively desktop environments. That check was killing animations
- * for most Windows desktop users.
+ * NOTE: We still avoid raw navigator.maxTouchPoints / ontouchstart. Some
+ * Windows laptops report touch support while users operate them as desktop
+ * machines. Pointer media queries are a better signal for tablet ergonomics.
  */
 export class AnimationController {
   private static _instance: AnimationController | null = null;
@@ -15,16 +15,19 @@ export class AnimationController {
   private _isMobile: boolean = false;
   private _prefersReducedMotion: boolean = false;
   private _desktopQuery: MediaQueryList | null = null;
+  private _coarseTabletQuery: MediaQueryList | null = null;
   private _reducedMotionQuery: MediaQueryList | null = null;
 
   private constructor() {
     if (typeof window === "undefined") return;
 
-    this._desktopQuery = window.matchMedia("(min-width: 1024px)");
+    this._desktopQuery = window.matchMedia("(min-width: 1180px)");
+    this._coarseTabletQuery = window.matchMedia("(pointer: coarse) and (max-width: 1366px)");
     this._reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     this._syncFromMedia();
 
     this._desktopQuery.addEventListener("change", this._onMediaChange);
+    this._coarseTabletQuery.addEventListener("change", this._onMediaChange);
     this._reducedMotionQuery.addEventListener("change", this._onMediaChange);
     window.addEventListener("resize", this._onResize.bind(this), { passive: true });
   }
@@ -34,7 +37,9 @@ export class AnimationController {
   };
 
   private _syncFromMedia() {
-    this._isMobile = !(this._desktopQuery?.matches ?? window.innerWidth >= 1024);
+    const isDesktopWidth = this._desktopQuery?.matches ?? window.innerWidth >= 1180;
+    const isCoarseTablet = this._coarseTabletQuery?.matches ?? false;
+    this._isMobile = !isDesktopWidth || isCoarseTablet;
     this._prefersReducedMotion = this._reducedMotionQuery?.matches ?? false;
   }
 

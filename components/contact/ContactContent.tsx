@@ -276,14 +276,14 @@ function ContactHero() {
       </div>
 
       {/* Off to the side (Joe, IMG_1123): the listening line rides the upper right. */}
-      <div className="relative z-10 flex justify-end px-6 pt-24 lg:px-12 lg:pt-28">
+      <div className="relative z-10 hidden justify-end px-6 pt-24 sm:flex lg:px-12 lg:pt-28">
         <p className="ct-rise max-w-xs text-right text-sm leading-7 text-white/82 sm:max-w-sm lg:text-[15px] lg:leading-8">
           Our journey begins with active listening, where each conversation
           begins the foundation of shaping your vision.
         </p>
       </div>
 
-      <div className="relative z-10 px-6 pb-9 lg:px-12 lg:pb-11">
+      <div className="relative z-10 px-6 pb-9 pt-28 sm:pt-0 lg:px-12 lg:pb-11">
         <span className="font-labels text-[10px] uppercase tracking-[0.26em] text-white/62">
           Contact / 828 Construction
         </span>
@@ -291,6 +291,10 @@ function ContactHero() {
           Building lasting partnerships.
         </h1>
         <div className="ct-line mt-5 h-px w-full max-w-36 origin-left bg-[var(--color-accent)]" />
+        <p className="mt-4 max-w-md text-sm leading-7 text-white/76 sm:hidden">
+          Our journey begins with active listening, where each conversation
+          begins the foundation of shaping your vision.
+        </p>
         <p className="mt-4 max-w-md text-sm leading-7 text-white/72">
           Forging exceptional partnership defined by artistry and enduring
           values
@@ -546,7 +550,7 @@ function ServicePathRows() {
       ref={wrapRef}
       data-section="contact-paths"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+150vh)]"
+      className="motion-runway relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+150vh)]"
       style={{ overflowX: "clip" }}
     >
       {/* Deliberate walk: the panel pins while the runway scrolls (lg+). */}
@@ -626,7 +630,7 @@ function ServicePathRows() {
                           transform: open ? "scale(1.03)" : "scale(1.08)",
                         }}
                       />
-                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-14 lg:px-6">
+                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-5 pt-14 lg:px-6 lg:pb-8">
                         <p className="max-w-md text-[13px] leading-5 text-white/85">
                           {row.line}
                         </p>

@@ -15,7 +15,7 @@
  */
 import { test, expect, Page } from "@playwright/test";
 
-const BASE = "http://localhost:3000";
+const BASE = process.env.TEST_BASE_URL || "http://localhost:3000";
 
 const NAV_PAIRS: [string, string, string, string][] = [
   ["/", "home", "/about", "about"],
@@ -229,6 +229,8 @@ test.describe("Client-side navigation — image visibility", () => {
     await page.waitForTimeout(800);
 
     const stillHidden = await page.evaluate(() => {
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
       return Array.from(
         document.querySelectorAll<HTMLElement>("[data-gsap-reveal]")
       )
@@ -236,6 +238,7 @@ test.describe("Client-side navigation — image visibility", () => {
           if (!el.isConnected || el.getAttribute("aria-hidden") === "true") return false;
           const rect = el.getBoundingClientRect();
           if (rect.width === 0 || rect.height === 0) return false;
+          if (rect.top >= vh || rect.bottom <= 0 || rect.left >= vw || rect.right <= 0) return false;
           const style = window.getComputedStyle(el);
           return (
             parseFloat(style.opacity) < 0.05 ||

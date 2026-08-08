@@ -26,6 +26,14 @@ async function withConsoleCapture(page: Page, fn: () => Promise<void>): Promise<
   return errors;
 }
 
+async function scrollContactFormIntoView(page: Page) {
+  const nameInput = page.locator("#cf-name");
+  await expect(nameInput).toHaveCount(1, { timeout: 10_000 });
+  await nameInput.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(900);
+  await expect(nameInput).toBeVisible({ timeout: 10_000 });
+}
+
 // ── 1. Rapid navigation between all routes ───────────────────────────────────
 test.describe("Rapid navigation stress", () => {
   test("navigate all routes in quick succession — no console errors", async ({ page }) => {
@@ -101,6 +109,7 @@ test.describe("Contact form stress", () => {
   test("empty submit triggers validation, not crash", async ({ page }) => {
     await page.goto(`${BASE}/contact`);
     await page.waitForLoadState("networkidle");
+    await scrollContactFormIntoView(page);
 
     const submitBtn = page.locator("button[type='submit']");
     await expect(submitBtn).toBeVisible({ timeout: 5000 });
@@ -116,6 +125,7 @@ test.describe("Contact form stress", () => {
   test("special characters in fields do not crash the form", async ({ page }) => {
     await page.goto(`${BASE}/contact`);
     await page.waitForLoadState("networkidle");
+    await scrollContactFormIntoView(page);
 
     const nameInput = page.locator("#cf-name");
     const phoneInput = page.locator("#cf-phone");
@@ -139,6 +149,7 @@ test.describe("Contact form stress", () => {
   test("rapid double-submit is debounced — only one request fires", async ({ page }) => {
     await page.goto(`${BASE}/contact`);
     await page.waitForLoadState("networkidle");
+    await scrollContactFormIntoView(page);
 
     const nameInput = page.locator("#cf-name");
     const phoneInput = page.locator("#cf-phone");
@@ -268,6 +279,7 @@ test.describe("Keyboard navigation", () => {
   test("tab through all contact form fields — all accessible", async ({ page }) => {
     await page.goto(`${BASE}/contact`);
     await page.waitForLoadState("networkidle");
+    await scrollContactFormIntoView(page);
 
     // Skip link should be first focusable element
     await page.keyboard.press("Tab");
@@ -281,6 +293,7 @@ test.describe("Keyboard navigation", () => {
 
     // Each field should be focusable
     for (const id of ["#cf-name", "#cf-phone", "#cf-email", "#cf-service", "#cf-message"]) {
+      await page.locator(id).scrollIntoViewIfNeeded();
       await page.locator(id).focus();
       const isFocused = await page.locator(id).evaluate((el) => el === document.activeElement);
       expect(isFocused, `Field ${id} should be focusable`).toBe(true);

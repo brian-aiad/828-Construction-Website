@@ -70,15 +70,12 @@ const craft = [
   },
 ];
 
-// Entrance reveals key off ACTUAL on-screen visibility (IntersectionObserver,
-// PATTERNS.md Fix 22), never `once: true` positional ScrollTriggers. Every
-// section here lives inside AboutFlow's sticky stack, where a trigger's
-// document offset goes stale the moment a surface pins — a positional
-// once-trigger whose start is never "crossed" leaves its text hidden forever
-// after a nav round-trip or mid-page refresh. IO can't go stale: on screen =
-// revealed. Decisive `gsap.to` (no scrub, overwrite) so the reveal always
-// completes; words are visible-by-default in JSX and hidden only here, gated.
-// `start` retained for call-site readability (advisory only).
+// Entrance reveals key off actual on-screen visibility. A previous sticky
+// About stack made positional ScrollTriggers brittle after pins, route changes,
+// and mid-page refreshes; IO keeps these content reveals tied to what is
+// visible instead of to stale document offsets. Words are visible by default in
+// JSX and hidden only here, gated. `start` is retained for call-site readability
+// as an advisory label.
 function useReveal(sectionRef: React.RefObject<HTMLElement | null>, selector: string, _start = "top 78%") {
   useEffect(() => {
     const section = sectionRef.current;
@@ -203,8 +200,8 @@ function AboutHero() {
       <div className="absolute inset-0 overflow-hidden">
         <div ref={photoRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/generated/about-hero-quality-luxury-v2.jpg"
-            alt="Residential construction planning table with drawings and materials"
+            src="/images/generated/about-hero-quality-luxury-v5.jpg"
+            alt="Premium residential construction workspace with framing, plans, and material samples"
             fill
             priority
             fetchPriority="high"
@@ -226,8 +223,8 @@ function AboutHero() {
       </div>
 
       {/* Dossier — floating glass panel, one continuous composition */}
-      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-6 pb-16 pt-28 lg:px-12 lg:pt-32">
-        <div className="w-full max-w-[26.5rem] border border-white/12 bg-black/55 p-7 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.85)] backdrop-blur-xl lg:p-9">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-start px-6 pb-16 pt-48 sm:pt-52 lg:px-12 lg:pt-[16rem]">
+        <div className="w-full max-w-[25.5rem] border border-white/12 bg-black/60 p-6 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:p-7 lg:max-w-[26rem] lg:p-8">
         <div>
           <p data-hero-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
             <span className="h-px w-7 bg-accent" aria-hidden="true" />
@@ -272,8 +269,8 @@ function AboutHero() {
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-[4.5rem] z-[5] select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.075] lg:top-[5.25rem]"
-        style={{ fontSize: "clamp(2.2rem, 8vw, 8rem)", letterSpacing: "0.05em", willChange: "transform" }}
+        className="pointer-events-none absolute inset-x-0 top-[6.7rem] z-[5] select-none whitespace-nowrap text-center font-editorial text-[1.45rem] font-bold uppercase leading-none text-white/[0.085] sm:top-[6.25rem] sm:text-[3.6rem] lg:top-[6.2rem] lg:text-[5.35rem] xl:text-[6.15rem] 2xl:text-[7rem]"
+        style={{ letterSpacing: "0.05em", willChange: "transform" }}
       >
         828 Construction
       </div>
@@ -283,78 +280,9 @@ function AboutHero() {
   );
 }
 
-// Swappable portrait slot — drop /images/about/joe-portrait.jpg in and it
-// renders on the next build/refresh; until then, a quiet pending plate holds
-// the composition (existence checked server-side, no failed request).
-function PortraitSlot({
-  hasPortrait,
-  hasTemporaryPortrait,
-}: {
-  hasPortrait: boolean;
-  hasTemporaryPortrait: boolean;
-}) {
-  const portraitSrc = hasPortrait
-    ? "/images/about/joe-portrait.jpg"
-    : hasTemporaryPortrait
-      ? "/images/about/joe-portrait-temporary.png"
-      : null;
-  const isTemporary = !hasPortrait && hasTemporaryPortrait;
-  const missing = !portraitSrc;
-
-  return (
-    <div className="relative overflow-hidden border border-white/12 bg-[#0d0d0d]" style={{ aspectRatio: "3 / 4" }}>
-      {portraitSrc && (
-        <Image
-          src={portraitSrc}
-          alt={
-            isTemporary
-              ? "Temporary portrait placeholder for Joe P, founder of 828 Construction"
-              : "Joe P, founder of 828 Construction"
-          }
-          fill
-          sizes="(max-width: 1024px) 88vw, 30vw"
-          className="object-cover"
-          style={{ filter: "contrast(1.05) saturate(1.0) brightness(0.95)" }}
-        />
-      )}
-      {isTemporary && (
-        <div className="absolute inset-x-0 top-4 mx-4 border border-white/18 bg-black/62 px-3 py-2 text-center backdrop-blur-sm">
-          <span className="font-labels text-[8px] uppercase tracking-[0.24em] text-white/78">
-            Temporary until portrait
-          </span>
-        </div>
-      )}
-      {missing && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-          <span
-            className="flex h-16 w-16 items-center justify-center rounded-full border border-white/16 font-editorial text-xl text-white/55"
-            aria-hidden="true"
-          >
-            JP
-          </span>
-          <span className="font-labels text-[8px] uppercase tracking-[0.26em] text-white/34">
-            Portrait — coming soon
-          </span>
-        </div>
-      )}
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-white/12 bg-black/55 px-4 py-3 backdrop-blur-sm">
-        <span className="font-labels text-[8.5px] uppercase tracking-[0.22em] text-white/72">Joe P</span>
-        <span className="font-labels text-[8.5px] uppercase tracking-[0.22em] text-white/40">Founder</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Builder profile — condensed: quote + portrait, standards pulled up tight ──
-function OriginSection({
-  hasPortrait,
-  hasTemporaryPortrait,
-}: {
-  hasPortrait: boolean;
-  hasTemporaryPortrait: boolean;
-}) {
+// ── Builder profile — founder statement + standards, no portrait slot ──────
+function OriginSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const portraitRef = useRef<HTMLDivElement>(null);
   const quoteLineRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -365,26 +293,7 @@ function OriginSection({
     if (!section || !AnimationController.shouldAnimate()) return;
 
     let rowsDispose = () => {};
-    let portraitDispose = () => {};
     const ctx = gsap.context(() => {
-      if (portraitRef.current) {
-        const portrait = portraitRef.current;
-        // Clip reveal keys off visibility (Fix 22) — a stale once-trigger here
-        // would leave the portrait clipped/offset, and the Fix 18 failsafe
-        // only rescues inset(100%)/opacity<0.08, not this partial clip. IO on
-        // the 14%-clipped node is safe (Fix 23 only bites at 100% clip). No
-        // overwrite so the decorative parallax below survives.
-        gsap.set(portrait, { clipPath: "inset(0% 0% 14% 0%)", y: 30 });
-        portraitDispose = revealOnVisible([portrait], () => {
-          gsap.to(portrait, { clipPath: "inset(0%)", y: 0, duration: 1.05, ease: "power3.out" });
-        });
-        gsap.to(portrait, {
-          yPercent: -5,
-          ease: "none",
-          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.2 },
-        });
-      }
-
       // The maroon quote rule draws down alongside the founder statement.
       if (quoteLineRef.current) {
         gsap.fromTo(
@@ -398,10 +307,8 @@ function OriginSection({
         );
       }
 
-      // Standards rows (01/02/03) are content-critical text inside the sticky
-      // stack — decisive per-row IO reveals (Fix 25), not scrub-tied triggers
-      // that park at partial opacity when a surface pins. Each row rises as it
-      // enters; once revealed it stays (no scroll-up re-hide).
+      // Standards rows are content-critical, so use decisive per-row IO reveals
+      // instead of scrubbed triggers that can park at partial opacity.
       const rows = rowRefs.current.filter((r): r is HTMLDivElement => !!r);
       rows.forEach((row) => {
         row.setAttribute("data-gsap-reveal", "true");
@@ -414,7 +321,6 @@ function OriginSection({
 
     return () => {
       rowsDispose();
-      portraitDispose();
       try {
         ctx.revert();
       } catch {}
@@ -432,7 +338,7 @@ function OriginSection({
         </p>
         <h2 className="sr-only">The builder profile</h2>
 
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
           <div className="lg:col-span-7">
             <div className="relative pl-7 lg:pl-9">
               <span className="absolute left-0 top-1 h-[calc(100%-0.5rem)] w-[2px] bg-white/10" aria-hidden="true">
@@ -446,40 +352,28 @@ function OriginSection({
                 and perform.
               </p>
             </div>
-
-            <div className="mt-12 border-t border-white/10 lg:mt-14">
-              {standards.map((item, index) => (
-                <div
-                  key={item.number}
-                  ref={(el) => {
-                    rowRefs.current[index] = el;
-                  }}
-                  className="grid items-baseline gap-1.5 border-b border-white/10 py-6 sm:grid-cols-[3.2rem_14.5rem_1fr] sm:gap-5 lg:py-7"
-                >
-                  <span className="font-numbers text-[12px]" style={{ color: "var(--color-accent-light)" }}>
-                    {item.number}
-                  </span>
-                  <h3 className="whitespace-nowrap font-editorial text-[clamp(1.35rem,1.8vw,1.7rem)] font-semibold leading-none">
-                    {item.title}
-                  </h3>
-                  <p className="max-w-xl text-sm leading-relaxed text-white/56">{item.body}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="lg:col-span-5 lg:pl-6">
-            <div
-              ref={portraitRef}
-              data-gsap-reveal="true"
-              className="mx-auto w-full max-w-sm lg:ml-auto lg:mr-0 lg:max-w-[22rem]"
-              style={{ willChange: "clip-path, transform" }}
-            >
-              <PortraitSlot
-                hasPortrait={hasPortrait}
-                hasTemporaryPortrait={hasTemporaryPortrait}
-              />
-            </div>
+          <div className="border-t border-white/10 lg:col-span-5">
+            {standards.map((item, index) => (
+              <div
+                key={item.number}
+                ref={(el) => {
+                  rowRefs.current[index] = el;
+                }}
+                className="grid gap-3 border-b border-white/10 py-6 sm:grid-cols-[3.2rem_1fr] sm:gap-5 lg:py-7"
+              >
+                <span className="font-numbers text-[12px]" style={{ color: "var(--color-accent-light)" }}>
+                  {item.number}
+                </span>
+                <div>
+                  <h3 className="font-editorial text-[clamp(1.35rem,1.8vw,1.7rem)] font-semibold leading-none">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/56">{item.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -501,19 +395,17 @@ function CraftSection() {
     const section = sectionRef.current;
     if (!section) return;
 
-    // The CRAFT surface lives inside AboutFlow's sticky stack — once the
-    // surface pins, document-offset ScrollTrigger positions go stale (home
-    // process rows had the same failure, PATTERNS.md Fix 22). Word-completion
-    // therefore uses rect-based IntersectionObserver reveals (immune to
-    // pinning) that are DECISIVE (play once, always finish) — text can never
-    // be left missing. Words are visible by default with no JS; GSAP hides
-    // them only here, gated, and three failsafes force-reveal stuck rows.
+    // Word-completion uses rect-based IO reveals that play once and always
+    // finish. Words are visible by default with no JS; GSAP hides them only
+    // here, gated, and failsafes force-reveal stuck rows.
     let io: IntersectionObserver | null = null;
     let sweepTimer: ReturnType<typeof setInterval> | null = null;
 
     const ctx = gsap.context(() => {
       if (!AnimationController.shouldAnimate()) {
-        letterRefs.current.forEach((l) => l?.classList.add("text-accent"));
+        letterRefs.current.forEach((l) => {
+          if (l) l.style.color = "#a3342b";
+        });
         return;
       }
 
@@ -555,7 +447,7 @@ function CraftSection() {
         if (body) {
           gsap.to(body, { y: 0, opacity: 1, duration: 1.2, delay: 0.35, ease: "power2.out", overwrite: true });
         }
-        letter?.classList.add("text-accent");
+        if (letter) letter.style.color = "#a3342b";
       };
 
       // Hide only now that a reveal path exists (words are visible in JSX).
@@ -631,7 +523,7 @@ function CraftSection() {
               Method
             </p>
             <h2 data-craft-reveal className="font-editorial text-[clamp(1.9rem,2.6vw,2.5rem)] font-light leading-[1.05]">
-              The principles behind the work.
+              The mindset behind every build.
             </h2>
           </div>
         </div>
@@ -650,7 +542,8 @@ function CraftSection() {
                   ref={(el) => {
                     letterRefs.current[index] = el;
                   }}
-                  className="text-black/85 transition-colors duration-500"
+                  className="transition-colors duration-500"
+                  style={{ color: "#a3342b" }}
                 >
                   {item.letter}
                 </span>
@@ -711,7 +604,7 @@ function SouthBaySection() {
   const marqueeRow = (duration: string, reverse = false) => (
     <div className="overflow-hidden" aria-hidden="true">
       <div
-        className="flex w-max items-center whitespace-nowrap"
+        className="about-area-marquee flex w-max items-center whitespace-nowrap"
         style={{
           animation: `marqueeScroll ${duration} linear infinite`,
           animationDirection: reverse ? "reverse" : "normal",
@@ -721,10 +614,10 @@ function SouthBaySection() {
           <div key={copy} className="flex items-center">
             {SERVICE_AREAS.map((area) => (
               <span key={`${copy}-${area}`} className="flex items-center">
-                <span className="font-editorial text-[clamp(2rem,4.2vw,4rem)] font-semibold uppercase leading-none text-white/[0.08]">
+                <span className="font-editorial text-[clamp(1.65rem,7vw,2.6rem)] font-semibold uppercase leading-none text-white/[0.07] min-[1180px]:text-[clamp(2rem,4.2vw,4rem)] min-[1180px]:text-white/[0.08]">
                   {area}
                 </span>
-                <span className="mx-8 h-1.5 w-1.5 rotate-45 bg-accent/45 lg:mx-12" />
+                <span className="mx-6 h-1.5 w-1.5 rotate-45 bg-accent/40 min-[1180px]:mx-12 min-[1180px]:bg-accent/45" />
               </span>
             ))}
           </div>
@@ -738,7 +631,7 @@ function SouthBaySection() {
       ref={sectionRef}
       data-section=""
       data-header-dark=""
-      className="relative flex items-center bg-[#070707] py-20 text-white lg:py-24"
+      className="relative flex min-h-[72svh] items-center bg-[#070707] py-16 text-white min-[1180px]:min-h-svh min-[1180px]:py-24"
       style={{ overflowX: "clip" }}
     >
       <div
@@ -757,7 +650,7 @@ function SouthBaySection() {
       </div>
 
       {/* Joe (IMG_1024): cities rolling across the screen — the horizon layer. */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 flex -translate-y-1/2 flex-col gap-6 lg:gap-9">
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 flex -translate-y-1/2 flex-col gap-4 min-[1180px]:gap-9">
         {marqueeRow("74s")}
         {marqueeRow("92s", true)}
       </div>
@@ -834,8 +727,8 @@ function AboutCTA() {
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="" data-header-dark="" className="relative grid bg-black text-white lg:grid-cols-2" style={{ overflowX: "clip" }}>
-      <div className="relative min-h-[40svh] overflow-hidden lg:min-h-[68svh]">
+    <section ref={sectionRef} data-section="" data-header-dark="" className="relative grid min-h-svh bg-black text-white lg:grid-cols-2" style={{ overflowX: "clip" }}>
+      <div className="relative min-h-[40svh] overflow-hidden lg:min-h-svh">
         <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
             src="/images/generated/about-cta-first-conversation-v2.jpg"
@@ -855,7 +748,7 @@ function AboutCTA() {
         />
       </div>
 
-      <div className="relative flex items-center px-6 py-18 lg:px-16 lg:py-24">
+      <div className="relative flex items-center px-6 py-18 lg:min-h-svh lg:px-16 lg:py-24">
         <span ref={seamRef} className="absolute left-0 top-0 hidden h-full w-px bg-accent/60 lg:block" aria-hidden="true" />
         <div className="max-w-lg">
           <p data-cta-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-white/42">
@@ -889,20 +782,11 @@ function AboutCTA() {
   );
 }
 
-export default function AboutContent({
-  hasPortrait = false,
-  hasTemporaryPortrait = false,
-}: {
-  hasPortrait?: boolean;
-  hasTemporaryPortrait?: boolean;
-}) {
+export default function AboutContent() {
   return (
     <AboutFlow>
       <AboutHero />
-      <OriginSection
-        hasPortrait={hasPortrait}
-        hasTemporaryPortrait={hasTemporaryPortrait}
-      />
+      <OriginSection />
       <CraftSection />
       <SouthBaySection />
       <AboutCTA />

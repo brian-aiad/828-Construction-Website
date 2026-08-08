@@ -37,7 +37,13 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
     );
 
     const applyStackTops = () => {
+      const stackEnabled = AnimationController.shouldAnimate();
       stacks.forEach((el) => {
+        if (!stackEnabled) {
+          el.style.position = "relative";
+          el.style.top = "auto";
+          return;
+        }
         // Footer-cover (Brian 2026-07-13): the LAST surface pins too — the
         // site footer ([data-footer-surface], z-20) rides over it like any
         // next surface, so no page tail ever peeks above the footer at rest.

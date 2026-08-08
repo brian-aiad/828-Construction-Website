@@ -471,10 +471,10 @@ function AduHero() {
             ADU Construction / CA License #{SITE.license}
           </span>
 
-          <div className="mt-9 flex items-stretch gap-6 sm:gap-8">
+          <div className="mt-9 flex flex-col items-stretch gap-6 sm:flex-row sm:gap-8">
             {/* Joe: "the phrase built with intent, but running downwards" */}
             <h1
-              className="font-display font-bold leading-none tracking-tight text-[clamp(2.6rem,4.5vw,4.4rem)]"
+              className="hidden font-display font-bold leading-none tracking-tight text-[clamp(2.6rem,4.5vw,4.4rem)] sm:block"
               style={{ writingMode: "vertical-rl" }}
             >
               {HERO_PHRASE.split("").map((ch, i) => (
@@ -489,11 +489,14 @@ function AduHero() {
                 </span>
               ))}
             </h1>
-            <div className="relative w-[2px] shrink-0 self-stretch bg-white/12" aria-hidden="true">
+            <h1 className="font-display text-[2.75rem] font-bold leading-[0.95] tracking-tight sm:hidden">
+              {HERO_PHRASE}
+            </h1>
+            <div className="relative h-px w-full shrink-0 self-stretch bg-white/12 sm:h-auto sm:w-[2px]" aria-hidden="true">
               <div className="adu-vline absolute inset-0 bg-[var(--color-accent-light)]" style={{ opacity: 0.9 }} />
             </div>
             <p
-              className="adu-fade max-w-md self-center text-[15px] leading-8 text-white/62 sm:text-base"
+              className="adu-fade max-w-md self-start text-[15px] leading-8 text-white/62 sm:self-center sm:text-base"
               style={{ animation: "aduFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.5s both" }}
             >
               {HERO_PARAGRAPH}

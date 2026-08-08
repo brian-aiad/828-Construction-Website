@@ -651,7 +651,7 @@ function RemediationApproach() {
       ref={sectionRef}
       data-section="rem-approach"
       data-header-dark=""
-      className="relative bg-black text-white lg:h-[260svh]"
+      className="motion-runway relative bg-black text-white lg:h-[260svh]"
       style={{ overflowX: "clip" }}
     >
       <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:items-center lg:overflow-hidden">

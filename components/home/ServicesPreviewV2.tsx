@@ -11,9 +11,8 @@ import { revealOnVisible } from "@/utils/revealOnVisible";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// NS-grammar services: light editorial section, big quiet headline row,
-// large photography with captions BELOW the frame (never overlaid),
-// parallax scrub inside each frame, hover scale. One spacing rhythm.
+// NS-grammar services: dark editorial section, compact enough for all three
+// service entries to read together on desktop, with captions below the frame.
 
 const SERVICE_IMAGES: Record<string, string> = {
   adu: "/images/generated/home-services-adu-v3.jpg",
@@ -21,14 +20,8 @@ const SERVICE_IMAGES: Record<string, string> = {
   consulting: "/images/generated/home-services-consulting-v3.jpg",
 };
 
-const SERVICE_TAGLINES: Record<string, string> = {
-  adu: "Designed for functionality, built to last.",
-  remediation: "Root-cause solutions. Not surface fixes.",
-  consulting: "Clarity before commitment.",
-};
-
 const BLUR_PLACEHOLDER =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNlOGU4ZTMiLz48L3N2Zz4=";
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwNzA3MDciLz48L3N2Zz4=";
 
 function imgError(e: React.SyntheticEvent<HTMLImageElement>) {
   e.currentTarget.style.opacity = "0";
@@ -210,20 +203,17 @@ export default function ServicesPreviewV2() {
     service: (typeof SERVICES)[number],
     index: number
   ) => (
-    <div className="svc-caption mt-4 flex items-baseline justify-between gap-6 lg:mt-5">
+    <div className="svc-caption mt-3 flex flex-col gap-2 border-t border-white/12 pt-3 sm:flex-row sm:items-start sm:justify-between sm:gap-5 lg:mt-4">
       <div>
-        <h3 className="font-editorial text-[clamp(1.25rem,1.7vw,1.65rem)] font-normal leading-tight text-[#111]">
+        <h3 className="font-editorial text-[clamp(1.35rem,1.55vw,1.75rem)] font-normal leading-tight text-white">
           {service.title}
         </h3>
-        <p className="mt-1 max-w-sm text-sm leading-6 text-black/52">
-          {SERVICE_TAGLINES[service.slug]}
-        </p>
       </div>
-      <div className="hidden shrink-0 text-right sm:block">
-        <p className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/40">
+      <div className="shrink-0 text-left sm:max-w-[12rem] sm:text-right">
+        <p className="font-labels text-[8px] uppercase leading-[1.7] tracking-[0.24em] text-white/38 sm:text-[9px]">
           {service.short}
         </p>
-        <p className="mt-1.5 font-numbers text-[10px] text-[var(--color-accent)]">
+        <p className="mt-1 font-numbers text-[10px] text-[#b98b82]">
           0{index + 1}
         </p>
       </div>
@@ -233,21 +223,26 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#f7f7f3] pb-16 pt-24 text-[#111] lg:pb-18 lg:pt-[7.5rem]"
+      className="relative overflow-hidden bg-[#050505] pb-16 pt-20 text-white lg:min-h-svh lg:pb-12 lg:pt-[5.75rem]"
       data-section="services-v2"
+      data-header-dark=""
     >
-      <div className="mx-auto max-w-[1680px] px-6 lg:px-12">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[var(--color-accent)] opacity-70"
+      />
+      <div className="mx-auto max-w-[1680px] px-5 sm:px-6 lg:px-10 2xl:px-12">
         {/* Header row — headline left, copy + link right */}
-        <div className="grid gap-7 lg:grid-cols-12 lg:gap-10">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
           <div className="lg:col-span-7">
             <h2
               ref={headlineRef}
-              className="font-editorial text-[clamp(2.25rem,3.8vw,3.7rem)] font-normal leading-[1.04] tracking-[-0.01em] text-[#111]"
+              className="font-editorial text-[clamp(2.15rem,3.35vw,3.45rem)] font-normal leading-[1.02] text-white"
             >
-              <span className="block overflow-hidden">
+              <span className="-my-[0.14em] block overflow-hidden py-[0.14em]">
                 <span className="svc-headline-line block">One company,</span>
               </span>
-              <span className="block overflow-hidden">
+              <span className="-my-[0.14em] block overflow-hidden py-[0.14em]">
                 <span className="svc-headline-line block text-[var(--color-accent)]">
                   multiple solutions.
                 </span>
@@ -255,14 +250,14 @@ export default function ServicesPreviewV2() {
             </h2>
           </div>
           <div ref={introRef} className="flex flex-col justify-end lg:col-span-4 lg:col-start-9">
-            <p className="max-w-md text-[15px] leading-7 text-black/60 lg:max-w-sm">
+            <p className="max-w-md text-[14px] leading-6 text-white/58 lg:max-w-sm">
               Whether it&apos;s an ongoing maintenance, essential repairs, or a
               new ADU. 828 Construction helps homeowners bring their vision to
               life and keep their homes performing at their best.
             </p>
             <Link
               href="/services"
-              className="group mt-5 hidden w-fit items-center gap-2 border-b border-black/20 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60 transition-colors hover:border-black hover:text-black lg:inline-flex"
+              className="group mt-4 hidden w-fit items-center gap-2 border-b border-white/22 pb-1 font-labels text-[10px] uppercase tracking-[0.18em] text-white/55 transition-colors hover:border-white hover:text-white lg:inline-flex"
             >
               All Services
               <span className="transition-transform duration-200 group-hover:translate-x-1">
@@ -273,7 +268,7 @@ export default function ServicesPreviewV2() {
         </div>
 
         {/* Work grid — one tall frame left, two stacked right, captions below */}
-        <div className="mt-9 grid grid-cols-1 gap-x-8 gap-y-10 lg:mt-10 lg:grid-cols-12 lg:gap-y-0">
+        <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-9 lg:mt-8 lg:grid-cols-12 lg:gap-y-0">
           <div
             ref={(el) => {
               cardRefs.current[0] = el;
@@ -282,7 +277,7 @@ export default function ServicesPreviewV2() {
           >
             <Link href={`/services/${adu.slug}`} aria-label={adu.title} className="block">
               <div
-                className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3] lg:aspect-[5/3.85]"
+                className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#111] lg:aspect-[16/8.7]"
                 data-gsap-reveal="true"
               >
                 <div className="svc-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
@@ -298,7 +293,7 @@ export default function ServicesPreviewV2() {
                     blurDataURL={BLUR_PLACEHOLDER}
                     onError={imgError}
                     className="object-cover"
-                    style={{ filter: "contrast(1.04) saturate(1.06)" }}
+                    style={{ filter: "contrast(1.08) saturate(0.95) brightness(0.84)" }}
                   />
                 </div>
               </div>
@@ -306,7 +301,7 @@ export default function ServicesPreviewV2() {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-10 lg:col-span-4 lg:col-start-9 lg:gap-8 lg:pt-6">
+          <div className="flex flex-col gap-9 lg:col-span-4 lg:col-start-9 lg:gap-5 lg:pt-0">
             {[remediation, consulting].map((service, i) => (
               <div
                 key={service.slug}
@@ -320,7 +315,7 @@ export default function ServicesPreviewV2() {
                   className="block"
                 >
                   <div
-                    className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#e8e8e3] lg:aspect-[16/10]"
+                    className="svc-frame relative aspect-[4/3] overflow-hidden bg-[#111] lg:aspect-[16/6.35]"
                     data-gsap-reveal="true"
                   >
                     <div className="svc-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
@@ -336,7 +331,7 @@ export default function ServicesPreviewV2() {
                         blurDataURL={BLUR_PLACEHOLDER}
                         onError={imgError}
                         className="object-cover"
-                        style={{ filter: "contrast(1.04) saturate(1.06)" }}
+                        style={{ filter: "contrast(1.08) saturate(0.95) brightness(0.84)" }}
                       />
                     </div>
                   </div>
@@ -351,7 +346,7 @@ export default function ServicesPreviewV2() {
         <div className="mt-12 lg:hidden">
           <Link
             href="/services"
-            className="group inline-flex min-h-[44px] items-center gap-2 border-b border-black/20 pt-3 pb-1.5 font-labels text-[10px] uppercase tracking-[0.18em] text-black/60"
+            className="group inline-flex min-h-[44px] items-center gap-2 border-b border-white/22 pb-1.5 pt-3 font-labels text-[10px] uppercase tracking-[0.18em] text-white/58"
           >
             All Services
             <span className="transition-transform duration-200 group-hover:translate-x-1">

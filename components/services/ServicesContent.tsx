@@ -364,21 +364,22 @@ function ServicesIndex() {
       ref={wrapRef}
       data-section="services-index"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+210vh)]"
+      className="motion-runway relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+210vh)]"
       style={{ overflowX: "clip" }}
     >
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pb-16 pt-28 lg:px-12 lg:pb-0 lg:pt-[6.75rem]">
-          <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
-            Services / CA License #{SITE.license}
-          </span>
-          <h1 className="mt-4 font-display font-bold leading-[1.05] tracking-tight text-[clamp(2rem,3.8vw,3.7rem)]">
-            Three ways to build with control.
-          </h1>
+        <div className="mx-auto max-w-7xl px-6 pb-16 pt-20 lg:px-12 lg:pb-0 lg:pt-[6.75rem]">
+          <div className="flex items-center justify-between gap-6 border-b border-black/12 pb-6 lg:pb-7">
+            <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
+              Services / CA License #{SITE.license}
+            </span>
+            <span className="hidden font-labels text-[9px] uppercase tracking-[0.2em] text-black/38 sm:inline">
+              Select a service
+            </span>
+          </div>
 
           {/* Full-width list: dim rows illuminate; the photograph stage travels */}
-          <div className="svc-shift mt-12 lg:mt-8">
-            <div className="h-px w-full bg-black/12" aria-hidden="true" />
+          <div className="svc-shift">
             {SERVICE_ROWS.map((row, i) => {
               const service = SERVICES.find((s) => s.slug === row.slug)!;
               const open = activeIdx === i;
@@ -393,7 +394,7 @@ function ServicesIndex() {
                     ref={(el) => {
                       rowRefs.current[i] = el;
                     }}
-                    className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-4"
+                    className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5 lg:py-3"
                   >
                     <span
                       className={`svc-row-title font-display font-normal leading-[1.02] tracking-tight transition-colors duration-300 text-[clamp(2.3rem,4.9vw,4.4rem)] ${
@@ -428,7 +429,7 @@ function ServicesIndex() {
                       the closing one; mobile keeps identical timing so the
                       in-flow list reflow stays net-zero. */}
                   <div
-                    className={`grid ${open ? "lg:[transition-delay:110ms]" : "[transition-delay:0ms]"}`}
+                    className={`svc-row-stage grid ${open ? "lg:[transition-delay:110ms]" : "[transition-delay:0ms]"}`}
                     style={{
                       gridTemplateRows: open ? "1fr" : "0fr",
                       transition:
@@ -437,7 +438,7 @@ function ServicesIndex() {
                     aria-hidden={!open}
                   >
                     <div className="min-h-0 overflow-hidden">
-                      <div className="relative -mt-2 mb-6 h-[42vh] overflow-hidden lg:mb-5 lg:h-[calc(100svh-34rem)] lg:min-h-[15rem]">
+                      <div className="relative -mt-2 mb-6 h-[42vh] overflow-hidden lg:mb-4 lg:h-[calc(100svh-36.25rem)] lg:min-h-[12rem]">
                         <Image
                           src={row.image}
                           alt={`${service.title} by 828 Construction`}
@@ -455,7 +456,7 @@ function ServicesIndex() {
                             transform: open ? "scale(1.03)" : "scale(1.08)",
                           }}
                         />
-                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-4 pt-16 lg:px-7 lg:pb-5">
+                        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-5 pt-16 lg:px-7 lg:pb-8">
                           <p className="max-w-md text-[13px] leading-5 text-white/85">
                             {row.line}
                           </p>
@@ -569,7 +570,7 @@ function PrinciplesSection() {
       ref={wrapRef}
       data-section="services-principles"
       data-header-dark=""
-      className="relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+240vh)]"
+      className="motion-runway relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+240vh)]"
       style={{ overflowX: "clip" }}
     >
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
@@ -730,7 +731,7 @@ function ProcessSection() {
 
       {/* Full-bleed media band with the start CTA — fills the rest of the
           viewport on desktop */}
-      <div className="svc-clip relative h-[62vh] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1" data-gsap-reveal="true" data-header-dark="">
+      <div className="svc-clip relative h-[62vh] overflow-hidden lg:h-auto lg:min-h-[18rem] lg:flex-1" data-gsap-reveal="true" data-header-dark="">
         <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
             src="/images/generated/services-process-vision-build-v3.png"

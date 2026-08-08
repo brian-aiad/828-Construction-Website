@@ -14,6 +14,7 @@
   --accent-copper: #631A16;
   --accent-copper-light: #872720;
   --accent-copper-dark: #3F0F0C;
+  --color-splash-background: #080808;
 
   /* Gradient tokens for splash + dark-section depth */
   --gradient-splash-vertical: linear-gradient(180deg, #000000 0%, #0A0A0A 60%, #1A1A1A 100%);
@@ -32,23 +33,20 @@
   }
 
   .splash-wordmark {
-    max-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2.5rem);
     justify-content: center;
-    font-size: clamp(2.05rem, 9.3vw, 2.7rem) !important;
-    gap: 0.16em !important;
-    letter-spacing: -0.015em !important;
+    font-size: clamp(1.12rem, 5.5vw, 1.56rem) !important;
+    gap: 0.14em !important;
+    letter-spacing: 0 !important;
   }
 
   .splash-tagline {
-    max-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2.5rem);
     text-align: center;
-    line-height: 1.55 !important;
-    letter-spacing: 0.16em !important;
-    color: rgba(255, 255, 255, 0.38) !important;
-  }
-
-  .splash-tagline::before {
-    font-size: clamp(0.64rem, 2.8vw, 0.82rem) !important;
+    font-size: clamp(0.54rem, 2.2vw, 0.66rem) !important;
+    line-height: 1.45 !important;
+    letter-spacing: 0.13em !important;
+    color: rgba(255, 255, 255, 0.34) !important;
   }
 
   .splash-skip {
@@ -107,13 +105,65 @@ body {
   overscroll-behavior-x: none;
 }
 
-.splash-tagline {
-  font-size: 0 !important;
-}
+/* Tablet/mobile motion contract: below desktop-class width, or on iPad-like
+   coarse-pointer screens, pages must read as natural scroll. Tailwind's lg
+   utilities start at 1024px, which includes iPad landscape, so override the
+   sticky/viewport/clip pieces there while leaving desktop motion untouched. */
+@media (max-width: 1179px), (pointer: coarse) and (max-width: 1366px) {
+  .lg\:sticky {
+    position: relative !important;
+    top: auto !important;
+  }
 
-.splash-tagline::before {
-  content: "Torrance / CA / Since 2004";
-  font-size: clamp(0.48rem, 0.9vw, 0.68rem);
+  .lg\:overflow-hidden {
+    overflow: visible !important;
+  }
+
+  .lg\:h-svh,
+  .lg\:sticky[class*="lg:h-["] {
+    height: auto !important;
+  }
+
+  .process-travel,
+  .motion-runway {
+    height: auto !important;
+  }
+
+  [data-stack-surface] {
+    min-height: auto !important;
+  }
+
+  [data-gsap-reveal] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    clip-path: none !important;
+    transform: none !important;
+  }
+
+  [data-footer-runway] {
+    height: 0 !important;
+  }
+
+  .about-area-marquee {
+    animation: none !important;
+    transform: translate3d(-12vw, 0, 0);
+  }
+
+  .home-vision-marquee {
+    animation: none !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+    transform: none !important;
+  }
+
+  .svc-row-stage {
+    transition: none !important;
+  }
+
+  [data-section="services-process"] .svc-clip {
+    height: 62vh !important;
+  }
 }
 
 img,
@@ -751,11 +801,6 @@ html.lenis body {
   background: transparent;
 }
 
-/* Footer cover (Brian 2026-07-13): on flow pages, every *Flow renders a
-   100svh [data-footer-runway] spacer after its last surface. Pulling the
-   footer up by the same amount makes it TRAVEL OVER the pinned last surface
-   (true cover, like every junction) instead of abutting the wrap end. Scoped
-   with :has so non-flow pages keep a normal footer. */
-body:has([data-footer-runway]) [data-footer-surface] {
-  margin-top: -100svh;
-}
+/* Flow pages already render a 100svh [data-footer-runway] while their final
+   surface is sticky. Keep the footer in normal flow after that runway; pulling
+   it upward creates an overlap zone where the footer and final CTA compete. */

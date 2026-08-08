@@ -62,56 +62,64 @@ export default function SplashScreen() {
       return;
     }
 
-    gsap.set(splash,   { opacity: 1, clipPath: "inset(0 0 0% 0)" });
-    gsap.set(allChars, { yPercent: 56, rotationX: 14, opacity: 0, scale: 0.97, filter: "blur(3px)", transformOrigin: "50% 80%" });
-    gsap.set(underline,{ scaleX: 0, opacity: 0 });
-    gsap.set(tagline,  { opacity: 0, yPercent: 6 });
+    gsap.set(splash, { opacity: 1 });
+    gsap.set(pChars, { yPercent: 22, opacity: 0 });
+    gsap.set(sChars, { yPercent: 18, opacity: 0 });
+    gsap.set(underline, { scaleX: 0, opacity: 0 });
+    gsap.set(tagline, { opacity: 0, y: 6 });
 
     const tl = gsap.timeline({ defaults: { overwrite: "auto" } });
     tlRef.current = tl;
 
     // "828" rises in, letter by letter
     tl.to(pChars, {
-      yPercent: 0, rotationX: 0, opacity: 1, scale: 1, filter: "blur(0px)",
-      stagger: { each: 0.05, from: "start" },
-      duration: 0.95, ease: "expo.out",
-    }, 0.18);
+      yPercent: 0,
+      opacity: 1,
+      stagger: { each: 0.045, from: "start" },
+      duration: 0.72,
+      ease: "power3.out",
+    }, 0.12);
 
     // "CONSTRUCTION" follows
     tl.to(sChars, {
-      yPercent: 0, rotationX: 0, opacity: 1, scale: 1, filter: "blur(0px)",
-      stagger: { each: 0.028, from: "start" },
-      duration: 0.88, ease: "expo.out",
-    }, 0.34);
+      yPercent: 0,
+      opacity: 1,
+      stagger: { each: 0.02, from: "start" },
+      duration: 0.68,
+      ease: "power3.out",
+    }, 0.24);
 
     // maroon underline draws left-to-right
-    tl.to(underline, { scaleX: 1, opacity: 1, duration: 0.62, ease: "power4.out" }, 1.22);
+    tl.to(underline, { scaleX: 1, opacity: 1, duration: 0.48, ease: "power3.out" }, 0.9);
 
     // tagline fades in quietly during hold
-    tl.to(tagline, { opacity: 1, yPercent: 0, duration: 0.55, ease: "power2.out" }, 1.64);
+    tl.to(tagline, { opacity: 1, y: 0, duration: 0.38, ease: "power2.out" }, 1.18);
 
     // hold — the mark sits briefly, then clears fast enough for repeat visits to feel direct
-    tl.to({}, { duration: 0.42 }, 1.74);
+    tl.to({}, { duration: 0.34 }, 1.46);
 
     // exit — tagline fades first
-    tl.to(tagline, { opacity: 0, duration: 0.22, ease: "sine.in" }, 2.18);
+    tl.to(tagline, { opacity: 0, duration: 0.2, ease: "sine.in" }, 1.9);
 
     // chars drift upward and dissolve
     tl.to(allChars, {
-      yPercent: -38, opacity: 0, filter: "blur(4px)",
-      stagger: { each: 0.016, from: "start" },
-      duration: 0.45, ease: "power2.inOut",
-    }, 2.22);
+      yPercent: -18,
+      opacity: 0,
+      stagger: { each: 0.012, from: "start" },
+      duration: 0.34,
+      ease: "power2.inOut",
+    }, 1.94);
 
     // underline retracts
-    tl.to(underline, { scaleX: 0, opacity: 0, duration: 0.28, ease: "power3.inOut" }, 2.24);
+    tl.to(underline, { scaleX: 0, opacity: 0, duration: 0.24, ease: "power3.inOut" }, 1.96);
 
-    // curtain wipes up
+    // curtain clears
     tl.to(splash, {
-      clipPath: "inset(0 0 100% 0)",
-      duration: 0.58, ease: "expo.inOut",
+      opacity: 0,
+      duration: 0.42,
+      ease: "power2.inOut",
       onComplete: dismiss,
-    }, 2.54);
+    }, 2.2);
 
     return () => {
       document.body.style.overflow = "";
@@ -126,35 +134,28 @@ export default function SplashScreen() {
     <div
       ref={splashRef}
       aria-hidden="true"
+      className="splash-screen"
       style={{
         position: "fixed", inset: 0, zIndex: 9980,
-        background: "var(--gradient-splash-vertical)",
+        background: "var(--color-splash-background)",
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
-        gap: "1.4em",
+        gap: "1.05rem",
         opacity: 0, pointerEvents: "auto",
       }}
     >
-      {/* maroon vignette from bottom */}
-      <div aria-hidden="true" style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: "linear-gradient(to top, rgba(99,26,22,0.20) 0%, rgba(99,26,22,0.06) 28%, transparent 52%)",
-      }} />
-
       {/* wordmark */}
       <div className="splash-wordmark" style={{
         position: "relative",
         display: "flex", alignItems: "baseline", gap: "0.18em",
         fontFamily: "var(--font-inter), 'Helvetica Neue', Arial, sans-serif",
         fontWeight: 700,
-        fontSize: "clamp(0.82rem, 2.4vw, 1.82rem)",
-        letterSpacing: "-0.01em",
+        fontSize: "clamp(1.1rem, 2.2vw, 1.85rem)",
+        letterSpacing: "0",
         textTransform: "uppercase",
         color: "#fff",
         lineHeight: 1,
         userSelect: "none",
-        perspective: "900px",
-        perspectiveOrigin: "50% 50%",
       }}>
         {/* "828" + underline */}
         <span style={{ position: "relative", display: "inline-block", whiteSpace: "nowrap" }}>
@@ -162,7 +163,7 @@ export default function SplashScreen() {
             <span
               key={i}
               ref={(el) => { prefixRefs.current[i] = el; }}
-              style={{ display: "inline-block", transformStyle: "preserve-3d", willChange: "transform, opacity, filter" }}
+              style={{ display: "inline-block", willChange: "transform, opacity" }}
             >
               {char}
             </span>
@@ -184,7 +185,7 @@ export default function SplashScreen() {
             <span
               key={i}
               ref={(el) => { suffixRefs.current[i] = el; }}
-              style={{ display: "inline-block", transformStyle: "preserve-3d", willChange: "transform, opacity, filter" }}
+              style={{ display: "inline-block", willChange: "transform, opacity" }}
             >
               {char}
             </span>
@@ -200,13 +201,13 @@ export default function SplashScreen() {
         style={{
           fontFamily: "var(--font-space-mono), monospace",
           fontSize: "clamp(0.48rem, 0.9vw, 0.68rem)",
-          letterSpacing: "0.28em",
+          letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.28)",
+          color: "rgba(255,255,255,0.36)",
           opacity: 0,
         }}
       >
-        Torrance · CA · Since 2004
+        Torrance / CA / Since 2004
       </span>
 
       <button

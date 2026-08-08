@@ -1,0 +1,473 @@
+import { expect, Page, test } from "@playwright/test";
+
+const BASE = process.env.TEST_BASE_URL || "http://localhost:3000";
+const ROUTES = [
+  "/",
+  "/about",
+  "/services",
+  "/services/adu",
+  "/services/remediation",
+  "/services/consulting",
+  "/portfolio",
+  "/projects",
+  "/process",
+  "/contact",
+];
+
+async function settle(page: Page, ms = 650) {
+  await page.waitForTimeout(ms);
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event("resize"));
+  });
+  await page.waitForTimeout(250);
+}
+
+async function skipSplash(page: Page) {
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem("828:splash-seen", "1");
+  });
+}
+
+async function collectAnimationFailures(page: Page) {
+  return page.evaluate(() => {
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+    const failures: string[] = [];
+
+    const isVisible = (el: Element, rect: DOMRect) => {
+      const style = window.getComputedStyle(el);
+      if (style.visibility === "hidden" || style.display === "none") return false;
+      if (Number(style.opacity) < 0.08) return false;
+      if (rect.width < 2 || rect.height < 2) return false;
+      if (rect.bottom <= 0 || rect.top >= viewportH) return false;
+      return true;
+    };
+
+    const isTopPainted = (el: Element, rect: DOMRect) => {
+      const left = Math.max(1, rect.left + Math.min(8, rect.width / 2));
+      const right = Math.min(viewportW - 1, rect.right - Math.min(8, rect.width / 2));
+      const top = Math.max(1, rect.top + Math.min(8, rect.height / 2));
+      const bottom = Math.min(viewportH - 1, rect.bottom - Math.min(8, rect.height / 2));
+      const points = [
+        [(left + right) / 2, (top + bottom) / 2],
+        [left, top],
+        [right, top],
+        [left, bottom],
+        [right, bottom],
+      ] as const;
+
+      return points.some(([x, y]) => {
+        const stack = document.elementsFromPoint(x, y);
+        return stack.some((candidate) => candidate === el || candidate.contains(el) || el.contains(candidate));
+      });
+    };
+
+    const clipAncestors = (el: Element) => {
+      const ancestors: Array<{
+        tag: string;
+        rect: DOMRect;
+        clip: string;
+        overflowX: string;
+        overflowY: string;
+      }> = [];
+      let node = el.parentElement;
+      while (node && node !== document.body && node !== document.documentElement) {
+        const style = window.getComputedStyle(node);
+        const clip = style.clipPath;
+        const clipsX = style.overflowX === "hidden" || style.overflowX === "clip";
+        const clipsY = style.overflowY === "hidden" || style.overflowY === "clip";
+        if (
+          clipsX ||
+          clipsY ||
+          (clip && clip !== "none")
+        ) {
+          ancestors.push({
+            tag: node.tagName.toLowerCase(),
+            rect: node.getBoundingClientRect(),
+            clip,
+            overflowX: style.overflowX,
+            overflowY: style.overflowY,
+          });
+        }
+        node = node.parentElement;
+      }
+      return ancestors;
+    };
+
+    const selectors = [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "p",
+      "a",
+      "button",
+      "[class*='headline']",
+      "[class*='title']",
+    ].join(",");
+    const meaningfulInCore: string[] = [];
+
+    document.querySelectorAll<HTMLElement>(selectors).forEach((el) => {
+      const text = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+      if (!text) return;
+      if (el.closest("[aria-hidden='true']")) return;
+      if (el.closest("header")) return;
+      if (el.hasAttribute("data-failsafe-exempt")) return;
+
+      const rect = el.getBoundingClientRect();
+      if (!isVisible(el, rect)) return;
+      if (!isTopPainted(el, rect)) return;
+
+      if (rect.bottom > viewportH * 0.22 && rect.top < viewportH * 0.88) {
+        meaningfulInCore.push(text.slice(0, 48));
+      }
+
+      if (rect.left < -2 || rect.right > viewportW + 2) {
+        failures.push(`viewport overflow: "${text.slice(0, 48)}" rect=${JSON.stringify(rect.toJSON())}`);
+      }
+
+      for (const ancestor of clipAncestors(el)) {
+        const ar = ancestor.rect;
+        const verticalOverlap = rect.bottom > ar.top + 2 && rect.top < ar.bottom - 2;
+        const horizontalOverlap = rect.right > ar.left + 2 && rect.left < ar.right - 2;
+        if (!verticalOverlap || !horizontalOverlap) continue;
+        const clipsByPath = ancestor.clip && ancestor.clip !== "none";
+        const clippedX =
+          (ancestor.overflowX === "hidden" || ancestor.overflowX === "clip" || clipsByPath) &&
+          (rect.left < ar.left - 2 || rect.right > ar.right + 2);
+        const clippedY =
+          (ancestor.overflowY === "hidden" || ancestor.overflowY === "clip" || clipsByPath) &&
+          (rect.top < ar.top - 2 || rect.bottom > ar.bottom + 2);
+        if (clippedX || clippedY) {
+          failures.push(
+            `clipped by ${ancestor.tag}: "${text.slice(0, 48)}" rect=${JSON.stringify(rect.toJSON())} ancestor=${JSON.stringify(ar.toJSON())} clip=${ancestor.clip} overflowX=${ancestor.overflowX} overflowY=${ancestor.overflowY}`
+          );
+          break;
+        }
+      }
+    });
+
+    document.querySelectorAll<HTMLElement>("img, picture, video, canvas").forEach((el) => {
+      if (el.closest("header") || el.closest("[aria-hidden='true']")) return;
+      const rect = el.getBoundingClientRect();
+      if (!isVisible(el, rect)) return;
+      if (!isTopPainted(el, rect)) return;
+      if (rect.bottom > viewportH * 0.22 && rect.top < viewportH * 0.88) {
+        meaningfulInCore.push(el.tagName.toLowerCase());
+      }
+    });
+
+    if (meaningfulInCore.length === 0) {
+      failures.push("blank viewport core: no visible text or media in the central reading area");
+    }
+
+    const doc = document.documentElement;
+    if (doc.scrollWidth > doc.clientWidth + 1) {
+      failures.push(`document horizontal overflow: ${doc.scrollWidth} > ${doc.clientWidth}`);
+    }
+
+    return failures;
+  });
+}
+
+async function sampleRoute(page: Page, route: string) {
+  await skipSplash(page);
+  await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
+  await settle(page, 650);
+
+  const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+  const viewportH = await page.evaluate(() => window.innerHeight);
+  const maxY = Math.max(0, scrollHeight - viewportH);
+  const positions = Array.from(
+    new Set([
+      0,
+      Math.round(maxY * 0.18),
+      Math.round(maxY * 0.36),
+      Math.round(maxY * 0.54),
+      Math.round(maxY * 0.72),
+      maxY,
+    ])
+  );
+
+  const failures: string[] = [];
+  for (const y of positions) {
+    await page.evaluate((target) => window.scrollTo({ top: target, behavior: "instant" }), y);
+    await settle(page, 900);
+    const current = await collectAnimationFailures(page);
+    failures.push(...current.map((failure) => `${route} @${y}: ${failure}`));
+  }
+
+  return failures;
+}
+
+async function collectSmallScreenContainerFailures(page: Page) {
+  return page.evaluate(() => {
+    const failures: string[] = [];
+    const doc = document.documentElement;
+
+    if (doc.scrollWidth > doc.clientWidth + 1) {
+      failures.push(`document horizontal overflow: ${doc.scrollWidth} > ${doc.clientWidth}`);
+    }
+
+    document.querySelectorAll<HTMLElement>("[data-stack-surface], .motion-runway, .process-travel").forEach((el) => {
+      const style = window.getComputedStyle(el);
+      if (style.position === "sticky" || style.position === "fixed") {
+        const label = (el.getAttribute("data-section") || el.textContent || el.className || el.tagName)
+          .toString()
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 56);
+        failures.push(`small-screen pinned container: ${label} position=${style.position}`);
+      }
+    });
+
+    document.querySelectorAll<HTMLElement>("[data-gsap-reveal]").forEach((el) => {
+      if (!el.isConnected || el.closest("[aria-hidden='true']")) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
+      const style = window.getComputedStyle(el);
+      const opacity = Number.parseFloat(style.opacity || "1");
+      const clip = style.clipPath || "";
+      if (
+        opacity < 0.08 ||
+        clip.includes("inset(100%") ||
+        clip.includes("inset(0% 100%") ||
+        clip.includes("inset(0% 0% 100%")
+      ) {
+        const label = (el.textContent || el.tagName).replace(/\s+/g, " ").trim().slice(0, 56);
+        failures.push(`visible reveal stuck: "${label}" opacity=${opacity.toFixed(2)} clip=${clip.slice(0, 44)}`);
+      }
+    });
+
+    return failures;
+  });
+}
+
+async function sectionScrollTargets(page: Page) {
+  return page.evaluate(() => {
+    const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const sectionTops = Array.from(document.querySelectorAll<HTMLElement>("[data-section], footer"))
+      .map((el) => Math.round(window.scrollY + el.getBoundingClientRect().top - 72))
+      .filter((y) => Number.isFinite(y));
+
+    return Array.from(
+      new Set([
+        0,
+        ...sectionTops,
+        Math.round(maxY * 0.18),
+        Math.round(maxY * 0.36),
+        Math.round(maxY * 0.54),
+        Math.round(maxY * 0.72),
+        Math.round(maxY * 0.9),
+        maxY,
+      ])
+    )
+      .map((y) => Math.max(0, Math.min(maxY, y)))
+      .sort((a, b) => a - b);
+  });
+}
+
+test.describe("animation hardening", () => {
+  for (const viewport of [
+    { name: "desktop", width: 1440, height: 900 },
+    { name: "large-desktop", width: 2048, height: 1113 },
+    { name: "ipad-portrait", width: 768, height: 1024 },
+    { name: "ipad-landscape", width: 1024, height: 768 },
+    { name: "mobile", width: 390, height: 844 },
+  ]) {
+    for (const route of ROUTES) {
+      const sizeTag = viewport.name === "desktop" || viewport.name === "large-desktop" ? "@desktop" : "@small-screen";
+      test(`${sizeTag} ${route} avoids clipped text and overflow at ${viewport.name}`, async ({ page }) => {
+        test.setTimeout(60_000);
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+
+        const failures = await sampleRoute(page, route);
+
+        expect(failures, failures.join("\n")).toHaveLength(0);
+      });
+    }
+  }
+
+  test("home survives rapid scroll, resize, and history stress", async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await skipSplash(page);
+    await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+    await settle(page, 1000);
+
+    for (let i = 0; i < 4; i++) {
+      await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }));
+      await page.waitForTimeout(100);
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+      await page.waitForTimeout(100);
+    }
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await settle(page, 700);
+    await page.setViewportSize({ width: 2048, height: 1113 });
+    await settle(page, 700);
+
+    await page.goto(`${BASE}/services`, { waitUntil: "domcontentloaded" });
+    await settle(page, 350);
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await settle(page, 1000);
+
+    const failures = await collectAnimationFailures(page);
+    expect(failures, failures.join("\n")).toHaveLength(0);
+  });
+
+  test("about bottom handoff does not expose previous stacked surfaces", async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await skipSplash(page);
+    await page.goto(`${BASE}/about`, { waitUntil: "domcontentloaded" });
+    await settle(page, 1000);
+
+    const maxY = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    const positions = Array.from(
+      new Set([
+        Math.round(maxY * 0.52),
+        Math.round(maxY * 0.6),
+        Math.round(maxY * 0.68),
+        Math.round(maxY * 0.76),
+        Math.round(maxY * 0.84),
+        Math.round(maxY * 0.92),
+        maxY,
+      ])
+    );
+
+    const failures: string[] = [];
+    for (const y of positions) {
+      await page.evaluate((target) => window.scrollTo({ top: target, behavior: "instant" }), y);
+      await settle(page, 550);
+      const current = await page.evaluate(() => {
+        const failureMessages: string[] = [];
+        const surfaces = Array.from(document.querySelectorAll<HTMLElement>("[data-stack-surface]"));
+        const footer = document.querySelector<HTMLElement>("[data-footer-surface]");
+        const craft = surfaces.find((surface) =>
+          (surface.innerText || "").includes("The mindset behind every build.")
+        );
+        const cta = surfaces.find((surface) =>
+          (surface.innerText || "").includes("For those who value experience and quality.")
+        );
+
+        if (!craft || !cta || !footer) {
+          return ["about bottom handoff: missing expected stack surfaces or footer"];
+        }
+
+        const footerMarginTop = Number.parseFloat(window.getComputedStyle(footer).marginTop || "0");
+        if (footerMarginTop < -1) {
+          failureMessages.push(`footer is pulled upward with negative margin (${footerMarginTop}px)`);
+        }
+
+        const ctaRect = cta.getBoundingClientRect();
+        const footerRect = footer.getBoundingClientRect();
+        const handoffStarted = ctaRect.top <= window.innerHeight || footerRect.top <= window.innerHeight;
+        if (!handoffStarted) return failureMessages;
+
+        const points = [
+          [window.innerWidth * 0.2, window.innerHeight * 0.25],
+          [window.innerWidth * 0.5, window.innerHeight * 0.25],
+          [window.innerWidth * 0.8, window.innerHeight * 0.25],
+          [window.innerWidth * 0.2, window.innerHeight * 0.5],
+          [window.innerWidth * 0.5, window.innerHeight * 0.5],
+          [window.innerWidth * 0.8, window.innerHeight * 0.5],
+          [window.innerWidth * 0.2, window.innerHeight * 0.82],
+          [window.innerWidth * 0.5, window.innerHeight * 0.82],
+          [window.innerWidth * 0.8, window.innerHeight * 0.82],
+        ] as const;
+
+        points.forEach(([x, yy]) => {
+          const top = document.elementFromPoint(x, yy);
+          const surface = top?.closest<HTMLElement>("[data-stack-surface], [data-footer-surface]");
+          if (surface === craft) {
+            failureMessages.push(
+              `CRAFT surface is topmost during CTA/footer handoff at x=${Math.round(x)}, y=${Math.round(yy)}`
+            );
+          }
+        });
+
+        return failureMessages;
+      });
+
+      failures.push(...current.map((failure) => `/about @${y}: ${failure}`));
+    }
+
+    expect(failures, failures.join("\n")).toHaveLength(0);
+  });
+
+  test("footer stays compact on phone and tablet", async ({ page }) => {
+    test.setTimeout(60_000);
+    await skipSplash(page);
+
+    for (const viewport of [
+      { name: "iphone-se", width: 375, height: 667, maxHeightRatio: 1.55 },
+      { name: "ipad-landscape", width: 1024, height: 768, maxHeightRatio: 1.25 },
+    ]) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+      await settle(page, 1000);
+      const result = await page.evaluate(() => {
+        const footer = document.querySelector<HTMLElement>("footer");
+        if (!footer) return { ok: false, reason: "missing footer", footerHeight: 0, marqueeVisible: false };
+        const marquee = footer.querySelector<HTMLElement>(".brand-marquee-bottom");
+        const footerRect = footer.getBoundingClientRect();
+        const marqueeRect = marquee?.getBoundingClientRect();
+        const marqueeVisible = !!marquee &&
+          !!marqueeRect &&
+          marqueeRect.width > 1 &&
+          marqueeRect.height > 1 &&
+          getComputedStyle(marquee).visibility !== "hidden";
+        return {
+          ok: true,
+          reason: "",
+          footerHeight: footerRect.height,
+          marqueeVisible,
+        };
+      });
+
+      expect(result.ok, `${viewport.name}: ${result.reason}`).toBe(true);
+      expect(
+        result.footerHeight,
+        `${viewport.name}: footer height ${result.footerHeight}px is too long for ${viewport.height}px viewport`
+      ).toBeLessThanOrEqual(viewport.height * viewport.maxHeightRatio);
+      expect(result.marqueeVisible, `${viewport.name}: decorative footer marquee should be hidden`).toBe(false);
+    }
+  });
+
+  for (const viewport of [
+    { name: "iphone-se", width: 375, height: 667 },
+    { name: "ipad-portrait", width: 768, height: 1024 },
+    { name: "ipad-landscape", width: 1024, height: 768 },
+  ]) {
+    for (const route of ROUTES) {
+      test(`@section-stress ${route} stays stable through every section at ${viewport.name}`, async ({ page }) => {
+        test.setTimeout(90_000);
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await skipSplash(page);
+        await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
+        await settle(page, 900);
+
+        const failures: string[] = [];
+        const targets = await sectionScrollTargets(page);
+
+        for (const y of targets) {
+          await page.evaluate((target) => window.scrollTo({ top: target, behavior: "instant" }), y);
+          await page.waitForTimeout(190);
+          await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+          await page.waitForTimeout(220);
+
+          const animationFailures = await collectAnimationFailures(page);
+          const containerFailures = await collectSmallScreenContainerFailures(page);
+          failures.push(
+            ...animationFailures.map((failure) => `${route} ${viewport.name} @${y}: ${failure}`),
+            ...containerFailures.map((failure) => `${route} ${viewport.name} @${y}: ${failure}`)
+          );
+        }
+
+        expect(failures, failures.join("\n")).toHaveLength(0);
+      });
+    }
+  }
+});

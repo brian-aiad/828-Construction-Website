@@ -50,17 +50,15 @@ export default function Footer() {
   const streetLine = SITE.address.street.replace(" STE", ", STE");
 
   return (
-    // min-h-svh: the footer owns the full screen at final rest (Brian
-    // 2026-07-13) — same content, the top band just breathes to fill.
-    <footer className="relative flex min-h-svh flex-col overflow-hidden bg-black text-white" data-section="footer" data-header-dark="">
-      <section className="flex flex-1 flex-col justify-center bg-black px-6 pb-9 pt-24 md:px-8 md:pb-12 md:pt-28 lg:px-3 lg:pb-9 lg:pt-32" data-footer-section="top-band">
-        <div className="grid w-full gap-7 lg:grid-cols-2 lg:items-start lg:gap-0">
+    <footer className="relative flex flex-col overflow-hidden bg-black text-white min-[1180px]:min-h-svh" data-section="footer" data-header-dark="">
+      <section className="flex flex-col justify-center bg-black px-6 pb-7 pt-12 md:px-8 md:pb-8 md:pt-16 min-[1180px]:px-3 min-[1180px]:pb-16 min-[1180px]:pt-32" data-footer-section="top-band">
+        <div className="grid w-full gap-5 min-[1180px]:grid-cols-2 min-[1180px]:items-start min-[1180px]:gap-0">
           <div>
-            <h2 className="max-w-[24rem] font-display text-[1.9rem] md:text-[2.6rem] lg:text-[clamp(2.4rem,3.7vw,3.4rem)] font-normal leading-[1.02] tracking-[-0.01em] text-white">
+            <h2 className="max-w-[18rem] font-display text-[1.85rem] font-normal leading-[1.02] tracking-[-0.01em] text-white md:text-[2.3rem] min-[1180px]:max-w-[22rem] min-[1180px]:text-[clamp(2.8rem,4vw,3.6rem)]">
               Quality is the strategy.
             </h2>
 
-            <ul className="-ml-2 mt-5 flex items-center gap-5 lg:mt-7" aria-label="Social links">
+            <ul className="-ml-2 mt-4 flex items-center gap-3 min-[1180px]:mt-7 min-[1180px]:gap-5" aria-label="Social links">
               {SOCIAL_LINKS.map((social) => (
                 <li key={social.label}>
                   <a
@@ -77,16 +75,16 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="lg:pt-1">
+          <div className="min-[1180px]:pt-1">
             <a
               href={SITE.phoneHref}
-              className="relative block font-display text-[1.7rem] md:text-[2.4rem] lg:text-[clamp(1.7rem,2.85vw,2.8rem)] font-normal leading-[1.05] text-white/46 lg:text-white/38 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 lg:before:hidden"
+              className="relative block font-display text-[1.45rem] font-normal leading-[1.05] text-white/46 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 md:text-[2.1rem] min-[1180px]:text-[clamp(2.1rem,3.2vw,3.2rem)] min-[1180px]:text-white/38 min-[1180px]:before:hidden"
             >
               {formattedPhone}
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="relative mt-2 block font-display text-[1.1rem] md:text-[1.6rem] lg:text-[clamp(1.5rem,2.5vw,2.45rem)] font-normal leading-[1.08] text-white/40 lg:mt-3 lg:text-white/30 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 lg:before:hidden"
+              className="relative mt-1.5 block font-display text-[1rem] font-normal leading-[1.08] text-white/40 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 md:text-[1.4rem] min-[1180px]:mt-3 min-[1180px]:text-[clamp(1.8rem,2.7vw,2.8rem)] min-[1180px]:text-white/30 min-[1180px]:before:hidden"
             >
               <span className="inline-block">828constructionca</span>
               <span className="inline-block">@gmail.com</span>
@@ -95,21 +93,22 @@ export default function Footer() {
         </div>
       </section>
 
-      <section className="relative grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr]" data-footer-section="panels">
+      <section className="relative grid grid-cols-1 min-[1180px]:grid-cols-[2fr_1fr_1fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
-          className="group relative min-h-[11.5rem] overflow-hidden bg-black text-white md:min-h-[16rem] lg:min-h-[55svh]"
+          className="group relative min-h-[8.75rem] overflow-hidden bg-black text-white md:min-h-[12.5rem] min-[1180px]:min-h-[68svh]"
         >
           <Image
             src="/images/generated/footer-consultation-cta.webp"
             alt="Builder-client consultation reviewing residential construction plans"
             fill
+            loading="eager"
             sizes="(max-width: 1024px) 100vw, 33vw"
             className="object-cover transition duration-700 group-hover:scale-105"
             style={{ filter: "contrast(1.04) saturate(0.96) brightness(0.92)" }}
           />
           <div className="absolute inset-0 bg-black/18" aria-hidden="true" />
-          <div className="absolute left-0 right-0 top-[44%] z-10 px-7 md:px-9 lg:px-[5vw]">
+          <div className="absolute left-0 right-0 top-[44%] z-10 px-7 md:px-9 min-[1180px]:px-[5vw]">
             <span className="block border-b border-white/62 pb-2 font-display text-[clamp(1.25rem,1.65vw,1.55rem)] font-normal leading-none text-white">
               Book a Call
               <span className="ml-3" aria-hidden="true">→</span>
@@ -121,8 +120,8 @@ export default function Footer() {
             charcoal nav box + warm bone serving box ("lighter", after the
             deep-maroon try read too red). Black -> charcoal -> bone steps
             keep the footer in the site's ink/cream family. */}
-        <div className="flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-7 text-[#141414] md:px-9 md:py-8 lg:min-h-[55svh] lg:justify-center lg:border-l lg:border-t-0 lg:px-[4vw] lg:py-[4.5rem]">
-          <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-3 lg:flex lg:flex-col lg:gap-[0.7rem] lg:pl-[26%]">
+        <div className="flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-6 text-[#141414] md:px-9 md:py-7 min-[1180px]:min-h-[68svh] min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[4vw] min-[1180px]:py-[4.5rem]">
+          <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-2.5 min-[1180px]:flex min-[1180px]:flex-col min-[1180px]:gap-[0.7rem] min-[1180px]:pl-[26%]">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
                 {link.label}
@@ -131,7 +130,7 @@ export default function Footer() {
             ))}
           </nav>
 
-          <div className="mt-7 lg:mt-9 lg:pl-[26%]">
+          <div className="mt-5 min-[1180px]:mt-9 min-[1180px]:pl-[26%]">
             <p className="font-labels text-[10px] uppercase tracking-[0.18em] text-black/55">
               &copy; {year} 828 Construction
             </p>
@@ -141,7 +140,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col border-t border-black/8 bg-white px-6 pb-32 pt-7 text-[#141414] md:px-9 md:pt-8 lg:min-h-[55svh] lg:justify-center lg:border-l lg:border-t-0 lg:px-[4.5vw] lg:pb-36 lg:pt-8">
+        <div className="relative flex flex-col overflow-hidden border-t border-black/8 bg-white px-6 pb-7 pt-6 text-[#141414] md:px-9 md:py-7 min-[1180px]:min-h-[68svh] min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[4.5vw] min-[1180px]:pb-36 min-[1180px]:pt-8">
+          <div className="relative z-20 grid gap-5 md:grid-cols-2 min-[1180px]:block">
           <div>
             <p className={`${labelClass} text-black/52`}>Serving</p>
             <h3 className="mt-3 font-display text-[clamp(1.2rem,1.25vw,1.4rem)] font-medium leading-tight text-[#141414]">
@@ -154,29 +154,30 @@ export default function Footer() {
             </address>
           </div>
 
-          <div className="mt-5 lg:mt-6">
+          <div className="min-[1180px]:mt-6">
             <p className={`${labelClass} text-black/52`}>Service Area</p>
             <p className="mt-3 max-w-md text-[13px] leading-6 text-black/62">
               {SITE.serviceArea.join(" / ")}
             </p>
           </div>
+          </div>
 
-          <div className="mt-6 lg:mt-8">
+          <div className="relative z-20 mt-5 min-[1180px]:mt-8">
             <p className="inline-flex border border-[var(--color-accent)]/60 px-4 py-2.5 font-labels text-[10px] uppercase tracking-[0.18em] text-black/72">
               CA License #{SITE.license}
             </p>
           </div>
 
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-[-1.9rem] z-10 hidden overflow-hidden min-[1180px]:block"
+          >
+            <BrandMarqueeBottom giant color="rgb(12, 12, 12)" itemClassName="text-[#0c0c0c]" />
+          </div>
         </div>
 
         {/* NS-reference wordmark: lives INSIDE the white serving box only,
             fully visible with a little bottom padding (Brian round 2). */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-2 right-0 z-10 w-full overflow-hidden lg:bottom-3 lg:w-1/4"
-        >
-          <BrandMarqueeBottom giant color="rgb(12, 12, 12)" itemClassName="text-[#0c0c0c]" />
-        </div>
       </section>
     </footer>
   );
