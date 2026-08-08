@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
           },
+          { key: "X-828-Deploy", value: "mobile-hardening-2026-08-08" },
         ],
       },
     ];
