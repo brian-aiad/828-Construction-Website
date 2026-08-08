@@ -50,8 +50,8 @@ export default function Footer() {
   const streetLine = SITE.address.street.replace(" STE", ", STE");
 
   return (
-    <footer className="relative flex flex-col overflow-hidden bg-black text-white min-[1180px]:min-h-svh" data-section="footer" data-header-dark="">
-      <section className="flex flex-col justify-center bg-black px-6 pb-7 pt-12 md:px-8 md:pb-8 md:pt-16 min-[1180px]:px-3 min-[1180px]:pb-16 min-[1180px]:pt-32" data-footer-section="top-band">
+    <footer className="relative flex flex-col overflow-hidden bg-black text-white min-[1180px]:h-svh min-[1180px]:min-h-[720px]" data-section="footer" data-header-dark="">
+      <section className="flex flex-col justify-center bg-black px-6 pb-7 pt-12 md:px-8 md:pb-8 md:pt-16 min-[1180px]:h-[31%] min-[1180px]:shrink-0 min-[1180px]:px-3 min-[1180px]:pb-8 min-[1180px]:pt-20" data-footer-section="top-band">
         <div className="grid w-full gap-5 min-[1180px]:grid-cols-2 min-[1180px]:items-start min-[1180px]:gap-0">
           <div>
             <h2 className="max-w-[18rem] font-display text-[1.85rem] font-normal leading-[1.02] tracking-[-0.01em] text-white md:text-[2.3rem] min-[1180px]:max-w-[22rem] min-[1180px]:text-[clamp(2.8rem,4vw,3.6rem)]">
@@ -93,10 +93,10 @@ export default function Footer() {
         </div>
       </section>
 
-      <section className="relative grid grid-cols-1 min-[1180px]:grid-cols-[2fr_1fr_1fr]" data-footer-section="panels">
+      <section className="relative grid grid-cols-1 min-[1180px]:min-h-0 min-[1180px]:flex-1 min-[1180px]:grid-cols-[2fr_1fr_1fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
-          className="group relative min-h-[8.75rem] overflow-hidden bg-black text-white md:min-h-[12.5rem] min-[1180px]:min-h-[68svh]"
+          className="group relative min-h-[8.75rem] overflow-hidden bg-black text-white md:min-h-[12.5rem] min-[1180px]:h-full min-[1180px]:min-h-0"
         >
           <Image
             src="/images/generated/footer-consultation-cta.webp"
@@ -120,7 +120,7 @@ export default function Footer() {
             charcoal nav box + warm bone serving box ("lighter", after the
             deep-maroon try read too red). Black -> charcoal -> bone steps
             keep the footer in the site's ink/cream family. */}
-        <div className="flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-6 text-[#141414] md:px-9 md:py-7 min-[1180px]:min-h-[68svh] min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[4vw] min-[1180px]:py-[4.5rem]">
+        <div className="flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-6 text-[#141414] md:px-9 md:py-7 min-[1180px]:h-full min-[1180px]:min-h-0 min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[4vw] min-[1180px]:py-[3rem]">
           <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-2.5 min-[1180px]:flex min-[1180px]:flex-col min-[1180px]:gap-[0.7rem] min-[1180px]:pl-[26%]">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
@@ -140,7 +140,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="relative flex flex-col overflow-hidden border-t border-black/8 bg-white px-6 pb-7 pt-6 text-[#141414] md:px-9 md:py-7 min-[1180px]:min-h-[68svh] min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[4.5vw] min-[1180px]:pb-36 min-[1180px]:pt-8">
+        <div className="relative flex h-full min-h-0 flex-col overflow-hidden border-t border-black/8 bg-white px-6 pb-7 pt-6 text-[#141414] md:px-9 md:py-7 min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[4.5vw] min-[1180px]:pb-24 min-[1180px]:pt-8">
           <div className="relative z-20 grid gap-5 md:grid-cols-2 min-[1180px]:block">
           <div>
             <p className={`${labelClass} text-black/52`}>Serving</p>
@@ -170,7 +170,7 @@ export default function Footer() {
 
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-[-1.9rem] z-10 hidden overflow-hidden min-[1180px]:block"
+            className="pointer-events-none absolute inset-x-0 bottom-[-1.05rem] z-10 hidden overflow-hidden min-[1180px]:block"
           >
             <BrandMarqueeBottom giant color="rgb(12, 12, 12)" itemClassName="text-[#0c0c0c]" />
           </div>
