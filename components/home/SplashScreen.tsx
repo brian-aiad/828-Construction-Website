@@ -133,7 +133,6 @@ export default function SplashScreen() {
   return (
     <div
       ref={splashRef}
-      aria-hidden="true"
       className="splash-screen"
       style={{
         position: "fixed", inset: 0, zIndex: 9980,
@@ -197,7 +196,6 @@ export default function SplashScreen() {
       <span
         ref={taglineRef}
         className="splash-tagline"
-        aria-hidden="true"
         style={{
           fontFamily: "var(--font-space-mono), monospace",
           fontSize: "clamp(0.48rem, 0.9vw, 0.68rem)",

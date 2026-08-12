@@ -628,15 +628,16 @@ function ServicePathRows() {
                   </span>
                 </div>
 
-                {/* Indented picture stage — same walk, different composition. */}
+                {/* Desktop keeps the active-row reveal. Touch layouts keep
+                    image space reserved to avoid scroll-time layout shifts. */}
                 <div
-                  className="grid"
+                  className={`grid max-xl:grid-rows-[1fr] ${
+                    open ? "xl:grid-rows-[1fr]" : "xl:grid-rows-[0fr]"
+                  }`}
                   style={{
-                    gridTemplateRows: open ? "1fr" : "0fr",
                     transition:
                       "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
                   }}
-                  aria-hidden={!open}
                 >
                   <div className="min-h-0 overflow-hidden">
                     <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%] lg:h-[calc(100svh-31rem)] lg:min-h-[12rem]">

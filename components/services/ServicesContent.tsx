@@ -418,20 +418,19 @@ function ServicesIndex() {
                     </span>
                   </div>
 
-                  {/* The traveling picture: only the active row's stage is open.
-                      950ms with a soft bezier so the handoff reads as a move,
-                      not a cut (Brian 2026-07-12). Desktop (pinned panel,
-                      overflow-hidden) sequences the opening stage 110ms behind
-                      the closing one; mobile keeps identical timing so the
-                      in-flow list reflow stays net-zero. */}
+                  {/* Desktop keeps the traveling picture handoff. Touch layouts
+                      reserve stable image space so scroll-triggered row changes
+                      cannot move surrounding content. */}
                   <div
-                    className={`svc-row-stage grid ${open ? "lg:[transition-delay:110ms]" : "[transition-delay:0ms]"}`}
+                    className={`svc-row-stage grid max-xl:grid-rows-[1fr] ${
+                      open
+                        ? "xl:grid-rows-[1fr] xl:[transition-delay:110ms]"
+                        : "xl:grid-rows-[0fr] [transition-delay:0ms]"
+                    }`}
                     style={{
-                      gridTemplateRows: open ? "1fr" : "0fr",
                       transition:
                         "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
                     }}
-                    aria-hidden={!open}
                   >
                     <div className="min-h-0 overflow-hidden">
                       <div className="relative -mt-2 mb-6 h-[42vh] overflow-hidden lg:mb-4 lg:h-[calc(100svh-36.25rem)] lg:min-h-[12rem]">
