@@ -149,21 +149,30 @@ function useContactMotion() {
     const revealCleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
+      const desktopSlide = window.matchMedia("(min-width: 1024px)").matches;
+      const touchFlow = !desktopSlide;
+
       // One-shot rises — IO-driven on every viewport (Fixes 15/22). Initial
       // states set here, never in JSX (Fix 14). Inside ContactFlow's sticky
       // stacked surfaces, scroll-math triggers go stale (Fix 25) — every
       // reveal below keys off actual visibility, never scroll position.
       const rises = gsap.utils.toArray<HTMLElement>(".ct-rise");
       if (!reduced) {
-        rises.forEach((el) => gsap.set(el, { autoAlpha: 0, y: 26 }));
         revealCleanups.push(
           revealOnVisible(rises, (el) => {
-            gsap.to(el, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.85,
-              ease: "power3.out",
-            });
+            if (touchFlow) {
+              gsap.fromTo(
+                el,
+                { opacity: 0.001, y: 16 },
+                { opacity: 1, y: 0, duration: 0.62, ease: "power3.out" }
+              );
+              return;
+            }
+            gsap.fromTo(
+              el,
+              { autoAlpha: 0, y: 26 },
+              { autoAlpha: 1, y: 0, duration: 0.85, ease: "power3.out" }
+            );
           })
         );
       }
@@ -190,43 +199,59 @@ function useContactMotion() {
       // horizontal scrollbar. Inputs stay interactive: autoAlpha flips the card
       // to visible the instant the reveal starts, and the card is never the
       // thing that gates typing (it reveals on entering the viewport).
-      const desktopSlide = window.matchMedia("(min-width: 1024px)").matches;
-
       const ledger = gsap.utils.toArray<HTMLElement>(".ct-ledger");
       if (!reduced && ledger.length) {
-        ledger.forEach((el) => gsap.set(el, { autoAlpha: 0, y: 26 }));
         // Reveal each row when IT enters (robust — no row can stay hidden), but
         // key the delay off row index so a band that arrives all-at-once still
         // reads as a staggered cascade rather than a single pop.
         revealCleanups.push(
           revealOnVisible(ledger, (el, i) => {
-            gsap.to(el, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.8,
-              delay: Math.min(i, 3) * 0.12,
-              ease: "power3.out",
-            });
+            if (touchFlow) {
+              gsap.fromTo(
+                el,
+                { opacity: 0.001, y: 16 },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.58,
+                  delay: Math.min(i, 3) * 0.06,
+                  ease: "power3.out",
+                }
+              );
+              return;
+            }
+            gsap.fromTo(
+              el,
+              { autoAlpha: 0, y: 26 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.8,
+                delay: Math.min(i, 3) * 0.12,
+                ease: "power3.out",
+              }
+            );
           })
         );
       }
 
       const card = root.querySelector<HTMLElement>(".ct-form-card");
       if (!reduced && card) {
-        gsap.set(card, {
-          autoAlpha: 0,
-          x: desktopSlide ? 60 : 0,
-          y: desktopSlide ? 0 : 30,
-        });
         revealCleanups.push(
           revealOnVisible([card], (el) => {
-            gsap.to(el, {
-              autoAlpha: 1,
-              x: 0,
-              y: 0,
-              duration: 0.95,
-              ease: "power3.out",
-            });
+            if (touchFlow) {
+              gsap.fromTo(
+                el,
+                { opacity: 0.001, y: 18 },
+                { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }
+              );
+              return;
+            }
+            gsap.fromTo(
+              el,
+              { autoAlpha: 0, x: 60, y: 0 },
+              { autoAlpha: 1, x: 0, y: 0, duration: 0.95, ease: "power3.out" }
+            );
           })
         );
       }
@@ -415,7 +440,7 @@ function InsightsPrep() {
     <section
       data-section="contact-prep"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-14 pt-18 text-[#141414] sm:pt-22 lg:px-12 lg:pb-20 lg:pt-28"
+      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-8 pt-18 text-[#141414] sm:pb-10 sm:pt-22 lg:px-12 lg:pb-20 lg:pt-28"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
@@ -555,7 +580,7 @@ function ServicePathRows() {
     >
       {/* Deliberate walk: the panel pins while the runway scrolls (lg+). */}
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pb-4 pt-14 sm:pt-18 lg:px-12 lg:pt-[6.5rem]">
+        <div className="mx-auto max-w-7xl px-6 pb-4 pt-8 sm:pt-10 lg:px-12 lg:pt-[6.5rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Focused service paths
           </span>
