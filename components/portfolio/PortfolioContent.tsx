@@ -168,6 +168,7 @@ function CaseTile({
   dark,
   aspect = "aspect-[4/5]",
   sizes,
+  eager = false,
   onOpen,
 }: {
   src: string;
@@ -176,8 +177,13 @@ function CaseTile({
   dark: boolean;
   aspect?: string;
   sizes: string;
+  eager?: boolean;
   onOpen: (src: string) => void;
 }) {
+  const fallbackTone = dark
+    ? "bg-[linear-gradient(135deg,#171313,#070707_56%,rgba(99,26,22,0.28))]"
+    : "bg-[linear-gradient(135deg,#efe7dc,#d8cab8_56%,rgba(99,26,22,0.16))]";
+
   return (
     <button
       type="button"
@@ -188,13 +194,18 @@ function CaseTile({
         dark ? "bg-[#111]" : "bg-[#e8e3da]"
       } focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]`}
     >
+      <span aria-hidden="true" className={`absolute inset-0 ${fallbackTone}`} />
+      <span
+        aria-hidden="true"
+        className={`absolute inset-x-4 top-4 h-px ${dark ? "bg-white/12" : "bg-black/10"}`}
+      />
       <Image
         src={src}
         alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${index + 1}`}
         fill
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
         sizes={sizes}
-        quality={74}
+        quality={82}
         placeholder="blur"
         blurDataURL={lqip(src)}
         className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
@@ -550,7 +561,7 @@ export default function PortfolioContent() {
                   src={cerritos.lead}
                   alt="Cerritos Residence master bath overview — frameless glass shower, dark vertical feature tile, dual marble vanity"
                   fill
-                  loading="lazy"
+                  loading="eager"
                   quality={86}
                   sizes="(max-width: 1024px) 100vw, 54vw"
                   placeholder="blur"
@@ -581,6 +592,7 @@ export default function PortfolioContent() {
                   dark={false}
                   aspect={i === 0 ? "col-span-2 aspect-[8/5]" : "aspect-[4/5]"}
                   sizes={i === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 50vw, 33vw"}
+                  eager={i < 3}
                   onOpen={(s) => openAt(0, s)}
                 />
               ))}
@@ -605,7 +617,7 @@ export default function PortfolioContent() {
                 src={elSereno.lead}
                 alt="El Sereno Residence bath — geometric star-pattern tile, soaking tub, and matte black fixtures"
                 fill
-                loading="lazy"
+                loading="eager"
                 quality={88}
                 sizes="(max-width: 1280px) 100vw, 1216px"
                 placeholder="blur"
@@ -646,6 +658,7 @@ export default function PortfolioContent() {
                             dark
                             aspect={i === 0 ? "aspect-[4/5] col-span-2 md:col-span-1" : "aspect-[4/5]"}
                             sizes="(max-width: 768px) 50vw, 20vw"
+                            eager={chapterIdx === 0 && i < 3}
                             onOpen={(s) => openAt(1, s)}
                           />
                         ))}
@@ -688,6 +701,7 @@ export default function PortfolioContent() {
                   dark={false}
                   aspect="aspect-[4/3]"
                   sizes="(max-width: 1024px) 50vw, 44vw"
+                  eager
                   onOpen={(s) => openAt(2, s)}
                 />
                 <div className="grid grid-cols-2 gap-3 lg:gap-4">
@@ -699,6 +713,7 @@ export default function PortfolioContent() {
                       index={i + 1}
                       dark={false}
                       sizes="(max-width: 1024px) 25vw, 22vw"
+                      eager={i === 0}
                       onOpen={(s) => openAt(2, s)}
                     />
                   ))}
@@ -714,6 +729,7 @@ export default function PortfolioContent() {
                       index={i + 3}
                       dark={false}
                       sizes="(max-width: 1024px) 25vw, 18vw"
+                      eager={i === 0}
                       onOpen={(s) => openAt(2, s)}
                     />
                   ))}
