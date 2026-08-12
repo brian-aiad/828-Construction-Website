@@ -9,7 +9,6 @@ import { NAV_LINKS, SERVICES, SITE } from "@/lib/constants";
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [overLight, setOverLight] = useState(false);
@@ -54,7 +53,6 @@ export default function Header() {
 
     const handleScroll = () => {
       const currentY = window.scrollY;
-      setScrolled(currentY > 32);
       const raw = Math.min(currentY / 360, 1);
       const stepped = reducedRef.current
         ? currentY > 32
@@ -67,7 +65,8 @@ export default function Header() {
         const max = Math.max(doc.scrollHeight - window.innerHeight, 1);
         progressRef.current.style.transform = `scaleX(${Math.min(currentY / max, 1).toFixed(4)})`;
       }
-      if (currentY > 300) {
+      const canAutoHide = window.matchMedia("(min-width: 1024px)").matches;
+      if (canAutoHide && currentY > 300) {
         setHidden(currentY > lastScrollY.current);
       } else {
         setHidden(false);
@@ -120,7 +119,6 @@ export default function Header() {
     return () => clearInterval(id);
   }, []);
 
-  const isHome = pathname === "/";
   const isServicesActive =
     pathname === "/services" || pathname.startsWith("/services/");
 

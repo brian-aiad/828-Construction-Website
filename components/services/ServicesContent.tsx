@@ -21,10 +21,6 @@ gsap.registerPlugin(ScrollTrigger);
 const BLUR_PLACEHOLDER =
   "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMxMTExMTEiLz48L3N2Zz4=";
 
-// Aligns constrained copy with the viewport-bleeding halves of split sections:
-// left padding = the same gutter a centered max-w-7xl container would get.
-const CONTAINER_LEFT = "max(1.5rem,calc((100vw - 80rem) / 2 + 3rem))";
-
 function imgError(e: SyntheticEvent<HTMLImageElement>) {
   e.currentTarget.style.opacity = "0";
 }
