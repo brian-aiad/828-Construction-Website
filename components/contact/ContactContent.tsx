@@ -415,7 +415,7 @@ function InsightsPrep() {
     <section
       data-section="contact-prep"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-16 pt-28 text-[#141414] lg:px-12 lg:pb-20"
+      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-14 pt-18 text-[#141414] sm:pt-22 lg:px-12 lg:pb-20 lg:pt-28"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
@@ -555,7 +555,7 @@ function ServicePathRows() {
     >
       {/* Deliberate walk: the panel pins while the runway scrolls (lg+). */}
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pb-4 pt-28 lg:px-12 lg:pt-[6.5rem]">
+        <div className="mx-auto max-w-7xl px-6 pb-4 pt-14 sm:pt-18 lg:px-12 lg:pt-[6.5rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Focused service paths
           </span>
@@ -614,12 +614,12 @@ function ServicePathRows() {
                   aria-hidden={!open}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <div className="relative mb-6 mt-1 h-[34vh] overflow-hidden lg:mb-5 lg:ml-[14%] lg:h-[calc(100svh-31rem)] lg:min-h-[12rem]">
+                    <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%] lg:h-[calc(100svh-31rem)] lg:min-h-[12rem]">
                       <Image
                         src={row.image}
                         alt={`${service.title} by 828 Construction`}
                         fill
-                        loading="lazy"
+                        loading={i === 0 ? "eager" : "lazy"}
                         sizes="(max-width: 1536px) 100vw, 1100px"
                         quality={92}
                         unoptimized

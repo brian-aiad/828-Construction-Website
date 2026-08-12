@@ -165,7 +165,7 @@ export default function Header() {
               }}
             >
               <span
-                className={`font-display font-semibold text-base sm:text-[17px] lg:text-xl tracking-[0.105em] whitespace-nowrap transition-colors duration-500 ${
+                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-xl tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap transition-colors duration-500 ${
                   light ? "text-[#111]" : "text-white"
                 }`}
               >
@@ -304,10 +304,10 @@ export default function Header() {
             </div>
 
             {/* Mobile: phone + hamburger */}
-            <div className="flex lg:hidden items-center gap-3 sm:gap-5">
+            <div className="flex lg:hidden items-center gap-2 min-[390px]:gap-3 sm:gap-5">
               <a
                 href={SITE.phoneHref}
-                className={`inline-flex min-h-11 items-center font-numbers text-[11px] transition-colors sm:text-xs ${
+                className={`hidden min-[390px]:inline-flex min-h-11 items-center font-numbers text-[11px] transition-colors sm:text-xs ${
                   light ? "text-black/55 hover:text-black" : "text-gray-400 hover:text-white"
                 }`}
               >

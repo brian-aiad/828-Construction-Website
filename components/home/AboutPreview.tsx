@@ -58,11 +58,11 @@ export default function AboutPreview() {
 
       gsap.set(headlineLines, { yPercent: 110 });
       gsap.set(copyEls, { y: 20, opacity: 0 });
-      gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
-
       const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
 
       if (!AnimationController.shouldAnimate()) {
+        // Mobile/tablet must never sit on empty photo blocks. Keep images
+        // visible by default, then add a small entrance as each frame appears.
         gsap.set(headlineLines, { yPercent: 0 });
         gsap.set(frames, { clipPath: "inset(0%)" });
 
@@ -87,8 +87,25 @@ export default function AboutPreview() {
             )
           );
         });
+        revealCleanups.push(
+          revealOnVisible(frames, (el, i) => {
+            gsap.fromTo(
+              el,
+              { opacity: 0.001, y: 18 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: Math.min(i, 2) * 0.06,
+                ease: "power3.out",
+              }
+            );
+          })
+        );
         return;
       }
+
+      gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
 
       revealCleanups.push(
         revealOnVisible([headlineRef.current ?? section], () => {
@@ -230,7 +247,7 @@ export default function AboutPreview() {
                     src={img.src}
                     alt={img.alt}
                     fill
-                    loading="lazy"
+                    loading="eager"
                     sizes="(max-width: 640px) 100vw, 33vw"
                     quality={92}
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"

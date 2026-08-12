@@ -7,11 +7,35 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS } from "@/lib/constants";
 import ImageWithFallback from "@/components/ui/ImageWithFallback";
 import { AnimationController } from "@/utils/animationControl";
+import { revealOnVisible } from "@/utils/revealOnVisible";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // Three preview projects: featured + two secondaries + one wide bottom
 const [featured, secondary1, secondary2, wide] = PROJECTS;
+
+function ProjectImageFallback({ title }: { title: string }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[#151211]">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(135deg,rgba(99,26,22,0.34),rgba(8,8,8,0.48)_42%,rgba(184,115,51,0.2))]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-5 top-5 h-px bg-white/12"
+      />
+      <div className="absolute bottom-5 left-5 right-5">
+        <span className="font-labels text-[8px] uppercase tracking-[0.2em] text-white/42">
+          828 Construction
+        </span>
+        <p className="mt-2 max-w-[16rem] font-display text-xl leading-none text-white/78">
+          {title}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function ProjectsPreview() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -27,6 +51,7 @@ export default function ProjectsPreview() {
     // ctx.revert() kills GSAP tweens but NOT DOM event listeners — storing
     // named refs here is the only way to reliably remove them on unmount.
     const hoverCleanups: Array<() => void> = [];
+    const revealCleanups: Array<() => void> = [];
 
     const ctx = gsap.context(() => {
       const trigger = sectionRef.current!;
@@ -37,16 +62,27 @@ export default function ProjectsPreview() {
       });
 
       if (!AnimationController.shouldAnimate()) {
-        // Mobile: simple on-enter reveals
+        // Mobile/tablet: visible by default, animate only once the element is
+        // actually seen. This avoids black/empty card blocks during slow image
+        // paint or full-page captures while still giving touch users motion.
         const mobileEls = trigger.querySelectorAll<HTMLElement>(
           ".proj-label, .proj-headline, .proj-counter, .proj-card"
         );
-        mobileEls.forEach((el) => {
-          gsap.from(el, {
-            opacity: 0, y: 24, duration: 0.65, ease: "power3.out",
-            scrollTrigger: { trigger: el, start: "top 88%", once: true },
-          });
-        });
+        revealCleanups.push(
+          revealOnVisible(Array.from(mobileEls), (el, i) => {
+            gsap.fromTo(
+              el,
+              { opacity: 0.001, y: 18 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.62,
+                delay: Math.min(i, 3) * 0.04,
+                ease: "power3.out",
+              }
+            );
+          })
+        );
         return;
       }
 
@@ -139,6 +175,7 @@ export default function ProjectsPreview() {
 
     return () => {
       hoverCleanups.forEach((fn) => fn());
+      revealCleanups.forEach((fn) => fn());
       ctxRef.current = null;
       try { ctx.revert(); } catch {}
     };
@@ -207,7 +244,7 @@ export default function ProjectsPreview() {
                     className="object-cover"
                     style={{ filter: "contrast(1.06) saturate(1.1)" }}
                     sizes="(max-width: 768px) 100vw, 66vw"
-                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                    fallback={<ProjectImageFallback title={featured.title} />}
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
@@ -241,10 +278,11 @@ export default function ProjectsPreview() {
                     src={secondary1.image}
                     alt={secondary1.title}
                     fill
+                    loading="eager"
                     className="object-cover"
                     style={{ filter: "contrast(1.05) saturate(1.08)" }}
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                    fallback={<ProjectImageFallback title={secondary1.title} />}
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
@@ -270,10 +308,11 @@ export default function ProjectsPreview() {
                     src={secondary2.image}
                     alt={secondary2.title}
                     fill
+                    loading="eager"
                     className="object-cover"
                     style={{ filter: "contrast(1.05) saturate(1.08)" }}
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                    fallback={<ProjectImageFallback title={secondary2.title} />}
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
@@ -303,10 +342,11 @@ export default function ProjectsPreview() {
                     src={wide.image}
                     alt={wide.title}
                     fill
+                    loading="eager"
                     className="object-cover"
                     style={{ filter: "contrast(1.05) saturate(1.08)" }}
                     sizes="100vw"
-                    fallback={<div className="absolute inset-0 bg-[#1a1a1a]" />}
+                    fallback={<ProjectImageFallback title={wide.title} />}
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/25 to-transparent" />
