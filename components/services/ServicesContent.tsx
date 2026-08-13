@@ -99,11 +99,11 @@ const STAGES = [
   "Post Construction",
 ];
 
-// Index walk driver. Desktop (lg+): the index panel is CSS-sticky over a tall
+// Index walk driver. Desktop (xl+): the index panel is CSS-sticky over a tall
 // runway and the active service is a pure function of scroll progress —
 // runway/3 of dedicated scroll per service. Deterministic math (no rect
 // feedback from the expanding stages), so the walk cannot skip, rush, or
-// flicker: bulletproof per Brian 2026-07-09. Below lg there is no pin (mobile
+// flicker: bulletproof per Brian 2026-07-09. Below xl there is no pin (mobile
 // scroll philosophy) — the active row is the last title past the focus line
 // (monotone, reflow-immune), with a top-of-page guard so the list opens on ADU.
 function useTravelIndex(
@@ -113,11 +113,14 @@ function useTravelIndex(
 ) {
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const lgQuery = window.matchMedia("(min-width: 1024px)");
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    const coarseTabletQuery = window.matchMedia(
+      "(pointer: coarse) and (max-width: 1366px)"
+    );
     let raf = 0;
     const measure = () => {
       raf = 0;
-      if (lgQuery.matches) {
+      if (desktopQuery.matches && !coarseTabletQuery.matches) {
         const wrap = wrapRef.current;
         if (!wrap) return;
         const runway = wrap.offsetHeight - window.innerHeight;
@@ -151,7 +154,8 @@ function useTravelIndex(
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
     window.addEventListener("load", onScroll, { passive: true });
-    lgQuery.addEventListener("change", onScroll);
+    desktopQuery.addEventListener("change", onScroll);
+    coarseTabletQuery.addEventListener("change", onScroll);
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(() => onScroll()).catch(() => {});
     }
@@ -159,7 +163,8 @@ function useTravelIndex(
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       window.removeEventListener("load", onScroll);
-      lgQuery.removeEventListener("change", onScroll);
+      desktopQuery.removeEventListener("change", onScroll);
+      coarseTabletQuery.removeEventListener("change", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [wrapRef, rowRefs, count]);
@@ -424,12 +429,12 @@ function ServicesIndex() {
                   <div
                     className={`svc-row-stage grid max-xl:grid-rows-[1fr] ${
                       open
-                        ? "xl:grid-rows-[1fr] xl:[transition-delay:110ms]"
-                        : "xl:grid-rows-[0fr] [transition-delay:0ms]"
+                        ? "xl:grid-rows-[1fr]"
+                        : "xl:grid-rows-[0fr]"
                     }`}
                     style={{
                       transition:
-                        "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
+                        "grid-template-rows 360ms cubic-bezier(0.16,1,0.3,1)",
                     }}
                   >
                     <div className="min-h-0 overflow-hidden">
@@ -488,7 +493,7 @@ function VisionStatement() {
     <section
       data-section="services-vision"
       data-header-dark=""
-      className="relative bg-black text-white"
+      className="relative flex min-h-svh flex-col justify-center bg-black text-white"
       style={{ overflowX: "clip" }}
     >
       {/* Same 0.9fr/1.1fr split as the values section below — the center seam
@@ -499,7 +504,7 @@ function VisionStatement() {
           className="relative flex items-center px-6 py-24 lg:pr-16"
           style={{ paddingLeft: undefined }}
         >
-          <div className="w-full lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))]">
+          <div className="w-full lg:pl-[max(3rem,calc((100vw-96rem)/2+3rem))]">
             <span className="svc-rise block font-labels text-[10px] uppercase tracking-[0.24em] text-white/60">
               The 828 standard
             </span>
@@ -565,7 +570,7 @@ function PrinciplesSection() {
       ref={wrapRef}
       data-section="services-principles"
       data-header-dark=""
-      className="motion-runway relative bg-[#0a0a0a] text-white lg:h-[calc(100svh+240vh)]"
+      className="motion-runway relative bg-[#0a0a0a] text-white max-xl:flex max-xl:min-h-svh max-xl:flex-col max-xl:justify-center lg:h-[calc(100svh+240vh)]"
       style={{ overflowX: "clip" }}
     >
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
@@ -687,7 +692,7 @@ function ProcessSection() {
     <section
       data-section="services-process"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#141414] lg:flex lg:h-svh lg:flex-col"
+      className="relative flex min-h-svh flex-col bg-[#f7f7f3] text-[#141414] lg:h-svh"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto w-full max-w-7xl px-6 pt-24 lg:px-12 lg:pt-24">

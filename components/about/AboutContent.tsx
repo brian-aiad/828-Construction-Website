@@ -329,7 +329,7 @@ function OriginSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="" data-header-dark="" className="relative bg-[#050505] pb-20 pt-24 text-white lg:pb-24 lg:pt-[7.5rem]" style={{ overflowX: "clip" }}>
+    <section ref={sectionRef} data-section="" data-header-dark="" className="relative bg-[#050505] pb-20 pt-24 text-white lg:pb-24 lg:pt-[7.5rem] xl:flex xl:min-h-svh xl:flex-col xl:justify-center" style={{ overflowX: "clip" }}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(99,26,22,0.16),transparent_30%)]" />
       <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.15]" />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
@@ -502,7 +502,7 @@ function CraftSection() {
       ref={sectionRef}
       data-section=""
       data-header-light=""
-      className="relative bg-white pb-20 pt-24 text-black lg:pb-24 lg:pt-[7.5rem]"
+      className="relative bg-white pb-20 pt-24 text-black lg:pb-24 lg:pt-[7.5rem] xl:flex xl:min-h-svh xl:flex-col xl:justify-center"
       style={{ overflowX: "clip" }}
     >
       <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.1]" />

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { FLOW_NODE_CLASS } from "@/components/system/FlowNode";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -54,6 +55,13 @@ export default function FooterRevealWrapper({
   // and z-20 lifts it above every flow's pinned surfaces (flows sit at z-10).
   return (
     <div ref={ref} data-footer-surface="" className="relative z-20">
+      <div
+        data-flow-terminal=""
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[1.4rem] top-0 z-30 hidden w-px xl:left-6 xl:block"
+      >
+        <div className={`${FLOW_NODE_CLASS} flow-node-lit top-0`} />
+      </div>
       {children}
     </div>
   );

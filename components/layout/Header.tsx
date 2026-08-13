@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { flushSync } from "react-dom";
 import { NAV_LINKS, SERVICES, SITE } from "@/lib/constants";
 
 type HeaderSurface = "dark-transparent" | "dark-solid" | "light-solid";
@@ -23,11 +22,14 @@ export default function Header() {
   const [surface, setSurface] = useState<HeaderSurface>("dark-transparent");
   const [torTime, setTorTime] = useState("");
   const progressRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const surfaceRef = useRef<HeaderSurface>("dark-transparent");
   const pathname = usePathname();
 
   useEffect(() => {
     let raf = 0;
+    let settleTimers: Array<ReturnType<typeof setTimeout>> = [];
 
     // The header follows the surface currently passing beneath it. Photo/hero
     // sections stay transparent at any scroll depth; black and cream sections
@@ -37,6 +39,7 @@ export default function Header() {
       const y = Math.min(window.innerHeight - 1, headerHeight - 6);
       const xs = [0.16, 0.32, 0.5, 0.68, 0.84].map((pct) => window.innerWidth * pct);
       const votes: HeaderSurface[] = [];
+      let center: HeaderSurface | null = null;
 
       const readAtPoint = (x: number): HeaderSurface | null => {
         const stack = document.elementsFromPoint(x, y);
@@ -58,9 +61,12 @@ export default function Header() {
         return null;
       };
 
-      for (const x of xs) {
+      for (const [index, x] of xs.entries()) {
         const pointSurface = readAtPoint(x);
-        if (pointSurface) votes.push(pointSurface);
+        if (pointSurface) {
+          votes.push(pointSurface);
+          if (index === 2) center = pointSurface;
+        }
       }
 
       if (votes.length) {
@@ -71,7 +77,6 @@ export default function Header() {
           },
           { "dark-transparent": 0, "dark-solid": 0, "light-solid": 0 }
         );
-        const center = readAtPoint(window.innerWidth / 2);
         const ranked = (Object.keys(counts) as HeaderSurface[]).sort(
           (a, b) => counts[b] - counts[a]
         );
@@ -86,7 +91,7 @@ export default function Header() {
       const next = readSurface();
       if (surfaceRef.current === next) return;
       surfaceRef.current = next;
-      flushSync(() => setSurface(next));
+      setSurface(next);
     };
 
     const syncHeader = () => {
@@ -105,8 +110,20 @@ export default function Header() {
       raf = requestAnimationFrame(syncHeader);
     };
 
+    const scheduleSettledSyncs = () => {
+      settleTimers.forEach(clearTimeout);
+      settleTimers = [90, 220, 480].map((delay) =>
+        setTimeout(scheduleSync, delay)
+      );
+    };
+
+    const onScroll = () => {
+      scheduleSync();
+      scheduleSettledSyncs();
+    };
+
     syncHeader();
-    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", scheduleSync, { passive: true });
     const mutationObserver =
       typeof MutationObserver !== "undefined"
@@ -117,16 +134,12 @@ export default function Header() {
       attributeFilter: ["data-stack-covered"],
       subtree: true,
     });
-    // Scrub animations (e.g. the expanding photograph) keep settling AFTER
-    // the last scroll event — a light poll keeps the header honest. The
-    // check is a no-op re-render-wise unless the zone actually changes.
-    const zonePoll = setInterval(scheduleSync, 50);
     return () => {
       if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", scheduleSync);
+      settleTimers.forEach(clearTimeout);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", scheduleSync);
       mutationObserver?.disconnect();
-      clearInterval(zonePoll);
     };
   }, [pathname]);
 
@@ -142,6 +155,53 @@ export default function Header() {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const menu = mobileMenuRef.current;
+    const toggle = mobileMenuButtonRef.current;
+    if (!menu || !toggle) return;
+
+    const focusableSelector =
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const frame = requestAnimationFrame(() => {
+      menu.querySelector<HTMLElement>(focusableSelector)?.focus();
+    });
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMobileOpen(false);
+        setMobileServicesOpen(false);
+        requestAnimationFrame(() => toggle.focus());
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusables = [
+        toggle,
+        ...Array.from(menu.querySelectorAll<HTMLElement>(focusableSelector)),
+      ].filter((element) => element.getClientRects().length > 0);
+      if (!focusables.length) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [mobileOpen]);
 
@@ -361,10 +421,12 @@ export default function Header() {
                 {SITE.phone}
               </a>
               <button
+                ref={mobileMenuButtonRef}
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="flex h-11 w-11 flex-col items-center justify-center gap-[5px]"
                 aria-label="Toggle menu"
                 aria-expanded={mobileOpen}
+                aria-controls="mobile-site-menu"
               >
                 <span
                   className={`block h-px w-6 transition-all duration-300 origin-center ${light ? "bg-black" : "bg-white"} ${
@@ -408,13 +470,15 @@ export default function Header() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            ref={mobileMenuRef}
+            id="mobile-site-menu"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-40 bg-black flex flex-col pt-20 px-6 pb-10 overflow-y-auto"
           >
-            <nav className="flex-1 flex flex-col justify-center space-y-1">
+            <nav aria-label="Mobile navigation" className="flex-1 flex flex-col justify-center space-y-1">
               {NAV_LINKS.map((link, i) => {
                 if (link.href === "/services") {
                   return (

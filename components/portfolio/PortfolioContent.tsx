@@ -431,7 +431,7 @@ export default function PortfolioContent() {
         <section
           data-section="portfolio-hero"
           data-header-dark=""
-          className="relative bg-black px-6 pb-16 pt-28 text-white lg:px-12 lg:pb-20 lg:pt-32"
+          className="relative min-h-svh bg-black px-6 pb-16 pt-28 text-white lg:flex lg:flex-col lg:justify-center lg:px-12 lg:pb-20 lg:pt-32"
           style={{ overflowX: "clip" }}
         >
           <div
@@ -754,7 +754,7 @@ export default function PortfolioContent() {
         <section
           data-section="portfolio-next"
           data-header-dark=""
-          className="relative bg-black px-6 pb-32 pt-24 text-white lg:px-12 lg:pb-40 lg:pt-28"
+          className="relative min-h-svh bg-black px-6 pb-32 pt-24 text-white lg:flex lg:flex-col lg:justify-center lg:px-12 lg:pb-40 lg:pt-28"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
@@ -816,29 +816,29 @@ export default function PortfolioContent() {
         <section
           data-section="portfolio-cta"
           data-header-light=""
-          className="relative bg-[#f5f0e9] px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-28"
+          className="relative flex min-h-svh flex-col justify-center bg-[#f5f0e9] px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-28"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
-          <div className="relative z-10 mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="relative z-10 mx-auto grid w-full max-w-[100rem] gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12 2xl:gap-20">
             <div className="pf-reveal" data-gsap-reveal="true">
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/62">
                 Ready to compare notes
               </span>
-              <h2 className="mt-3 max-w-2xl font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.92]">
+              <h2 className="mt-3 max-w-4xl font-editorial text-[2rem] leading-[0.94] sm:text-[2.6rem] lg:text-[3.4rem] 2xl:text-[4.75rem]">
                 Ready to price the next scope?
               </h2>
             </div>
             <div className="pf-reveal flex flex-wrap gap-3 lg:justify-end" data-gsap-reveal="true">
               <a
                 href={SITE.phoneHref}
-                className="min-h-[44px] bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
+                className="min-h-[44px] bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)] 2xl:min-h-16 2xl:px-10 2xl:py-5"
               >
                 Call {SITE.phone}
               </a>
               <Link
                 href="/contact"
-                className="min-h-[44px] border border-black/20 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/70 transition-colors hover:border-black hover:text-black"
+                className="min-h-[44px] border border-black/20 px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black/70 transition-colors hover:border-black hover:text-black 2xl:min-h-16 2xl:px-10 2xl:py-5"
               >
                 Start a project
               </Link>

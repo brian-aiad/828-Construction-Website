@@ -15,6 +15,7 @@ interface ImageWithFallbackProps {
   style?: React.CSSProperties;
   fallback: ReactNode;
   priority?: boolean;
+  loading?: "eager" | "lazy";
   sizes?: string;
   quality?: number;
 }
@@ -34,6 +35,7 @@ export default function ImageWithFallback({
   style,
   fallback,
   priority = false,
+  loading,
   sizes,
   quality,
 }: ImageWithFallbackProps) {
@@ -53,6 +55,7 @@ export default function ImageWithFallback({
       className={className}
       style={style}
       priority={priority}
+      loading={loading}
       sizes={sizes}
       quality={quality}
       onError={() => setHasError(true)}

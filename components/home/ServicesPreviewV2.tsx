@@ -223,7 +223,7 @@ export default function ServicesPreviewV2() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#050505] pb-16 pt-20 text-white lg:min-h-svh lg:pb-12 lg:pt-[5.75rem]"
+      className="relative overflow-hidden bg-[#050505] pb-16 pt-20 text-white lg:flex lg:min-h-svh lg:items-center lg:py-[5.75rem]"
       data-section="services-v2"
       data-header-dark=""
     >
@@ -231,7 +231,7 @@ export default function ServicesPreviewV2() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[var(--color-accent)] opacity-70"
       />
-      <div className="mx-auto max-w-[1680px] px-5 sm:px-6 lg:px-10 2xl:px-12">
+      <div className="mx-auto w-full max-w-[1680px] px-5 sm:px-6 lg:px-10 2xl:px-12">
         {/* Header row — headline left, copy + link right */}
         <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
           <div className="lg:col-span-7">

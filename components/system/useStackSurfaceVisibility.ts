@@ -15,22 +15,23 @@ export function useStackSurfaceVisibility(
       wrap.querySelectorAll<HTMLElement>(surfaceSelector)
     );
     if (!surfaces.length) return;
+    let frame = 0;
 
     const update = () => {
+      frame = 0;
       if (!AnimationController.shouldAnimate()) {
         surfaces.forEach((el) => el.removeAttribute("data-stack-covered"));
         return;
       }
 
+      const rects = surfaces.map((el) => el.getBoundingClientRect());
       let frontIndex = -1;
-      surfaces.forEach((el, i) => {
-        const rect = el.getBoundingClientRect();
+      rects.forEach((rect, i) => {
         if (rect.top < window.innerHeight && rect.bottom > 0) {
           frontIndex = i;
         }
       });
-      const frontRect =
-        frontIndex >= 0 ? surfaces[frontIndex].getBoundingClientRect() : null;
+      const frontRect = frontIndex >= 0 ? rects[frontIndex] : null;
       const frontIsFlush = frontRect ? frontRect.top <= 1 : false;
 
       surfaces.forEach((el, i) => {
@@ -40,15 +41,19 @@ export function useStackSurfaceVisibility(
         else el.removeAttribute("data-stack-covered");
       });
     };
+    const scheduleUpdate = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
 
     update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update, { passive: true });
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
 
     return () => {
+      if (frame) cancelAnimationFrame(frame);
       surfaces.forEach((el) => el.removeAttribute("data-stack-covered"));
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
     };
   }, [wrapRef, surfaceSelector]);
 }

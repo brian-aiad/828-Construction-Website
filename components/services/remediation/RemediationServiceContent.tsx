@@ -125,11 +125,11 @@ const EQUIPMENT = [
 ];
 
 // Step-walk driver (services-page "bulletproof index walk" grammar, Brian
-// 2026-07-13): desktop (lg+) pins the approach panel over a tall runway and
+// 2026-07-13): desktop (xl+) pins the approach panel over a tall runway and
 // the active step is a pure function of scroll progress — runway/4 of
 // dedicated scroll per step. The section ARRIVES FIRST (progress 0 until its
 // top reaches the viewport top), then the walk plays; no rect feedback, no
-// focus-ratio tuning, cannot skip or ignite mid-arrival. Below lg there is no
+// focus-ratio tuning, cannot skip or ignite mid-arrival. Below xl there is no
 // pin (mobile scroll philosophy) — monotone last-row-past-focus walk with an
 // arrival guard.
 function useStepWalk(
@@ -139,13 +139,16 @@ function useStepWalk(
 ) {
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const lgQuery = window.matchMedia("(min-width: 1024px)");
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    const coarseTabletQuery = window.matchMedia(
+      "(pointer: coarse) and (max-width: 1366px)"
+    );
     let raf = 0;
     const measure = () => {
       raf = 0;
       const wrap = wrapRef.current;
       if (!wrap) return;
-      if (lgQuery.matches) {
+      if (desktopQuery.matches && !coarseTabletQuery.matches) {
         const runway = wrap.offsetHeight - window.innerHeight;
         if (runway <= 0) {
           setActive(0);
@@ -176,14 +179,16 @@ function useStepWalk(
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
-    lgQuery.addEventListener("change", onScroll);
+    desktopQuery.addEventListener("change", onScroll);
+    coarseTabletQuery.addEventListener("change", onScroll);
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(() => onScroll()).catch(() => {});
     }
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      lgQuery.removeEventListener("change", onScroll);
+      desktopQuery.removeEventListener("change", onScroll);
+      coarseTabletQuery.removeEventListener("change", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [wrapRef, rowRefs, count]);
@@ -418,7 +423,7 @@ function RemediationHero() {
         <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:px-14 lg:pb-28 lg:pt-32">
           <Link
             href="/services"
-            className="font-labels text-[10px] uppercase tracking-[0.18em] text-white/64 transition-colors hover:text-white"
+            className="inline-flex min-h-11 w-fit items-center font-labels text-[10px] uppercase tracking-[0.18em] text-white/64 transition-colors hover:text-white lg:min-h-0"
           >
             Back to services
           </Link>
@@ -579,7 +584,7 @@ function RemediationFaq() {
     <section
       data-section="rem-faq"
       data-header-light=""
-      className="relative bg-[#f7f7f3] pt-24 text-[#111]"
+      className="relative flex min-h-svh flex-col justify-center bg-[#f7f7f3] pt-24 text-[#111]"
       style={{ overflowX: "clip" }}
     >
       {/* NS Perspectives echo: rolling strip of the three questions (decorative;
@@ -652,7 +657,7 @@ function RemediationApproach() {
       ref={sectionRef}
       data-section="rem-approach"
       data-header-dark=""
-      className="motion-runway relative bg-black text-white lg:h-[260svh]"
+      className="motion-runway relative bg-black text-white max-xl:flex max-xl:min-h-svh max-xl:flex-col max-xl:justify-center lg:h-[260svh]"
       style={{ overflowX: "clip" }}
     >
       <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:items-center lg:overflow-hidden">
@@ -822,7 +827,7 @@ function RemediationMethod() {
     <section
       data-section="rem-method"
       data-header-light=""
-      className="relative bg-[#f7f4f0] text-black"
+      className="relative flex min-h-svh flex-col justify-center bg-[#f7f4f0] text-black"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 pb-16 pt-28 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
@@ -882,7 +887,7 @@ function RemediationCta() {
     <section
       data-section="rem-cta"
       data-header-dark=""
-      className="relative border-t border-white/10 bg-[#0a0a0a] text-white"
+      className="relative flex min-h-svh flex-col justify-center border-t border-white/10 bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:py-28">

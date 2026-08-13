@@ -278,7 +278,7 @@ function ContactHero() {
       data-section="contact-hero"
       data-header-dark=""
       data-header-transparent=""
-      className="relative flex min-h-[54svh] flex-col justify-between overflow-hidden bg-black text-white"
+      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-black text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="absolute inset-0">
@@ -336,7 +336,7 @@ function GetInTouch() {
     <section
       data-section="contact-inquiry"
       data-header-dark=""
-      className="relative overflow-hidden bg-black px-6 pb-20 pt-28 text-white lg:px-12 lg:pb-28"
+      className="relative overflow-hidden bg-black px-6 pb-20 pt-28 text-white lg:px-12 lg:pb-28 xl:flex xl:min-h-svh xl:flex-col xl:justify-center"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
@@ -441,7 +441,7 @@ function InsightsPrep() {
     <section
       data-section="contact-prep"
       data-header-light=""
-      className="relative overflow-hidden bg-[#f7f7f3] px-6 pb-8 pt-18 text-[#141414] sm:pb-10 sm:pt-22 lg:px-12 lg:pb-20 lg:pt-28"
+      className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-[#f7f7f3] px-6 pb-8 pt-18 text-[#141414] sm:pb-10 sm:pt-22 lg:px-12 lg:pb-20 lg:pt-28"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
@@ -516,11 +516,14 @@ function useTravelIndex(
 ) {
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const lgQuery = window.matchMedia("(min-width: 1024px)");
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    const coarseTabletQuery = window.matchMedia(
+      "(pointer: coarse) and (max-width: 1366px)"
+    );
     let raf = 0;
     const measure = () => {
       raf = 0;
-      if (lgQuery.matches) {
+      if (desktopQuery.matches && !coarseTabletQuery.matches) {
         const wrap = wrapRef.current;
         if (!wrap) return;
         const runway = wrap.offsetHeight - window.innerHeight;
@@ -550,7 +553,8 @@ function useTravelIndex(
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
     window.addEventListener("load", onScroll, { passive: true });
-    lgQuery.addEventListener("change", onScroll);
+    desktopQuery.addEventListener("change", onScroll);
+    coarseTabletQuery.addEventListener("change", onScroll);
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(() => onScroll()).catch(() => {});
     }
@@ -558,7 +562,8 @@ function useTravelIndex(
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       window.removeEventListener("load", onScroll);
-      lgQuery.removeEventListener("change", onScroll);
+      desktopQuery.removeEventListener("change", onScroll);
+      coarseTabletQuery.removeEventListener("change", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [wrapRef, rowRefs, count]);
@@ -576,11 +581,11 @@ function ServicePathRows() {
       ref={wrapRef}
       data-section="contact-paths"
       data-header-light=""
-      className="motion-runway relative bg-[#f7f7f3] text-[#141414] lg:h-[calc(100svh+150vh)]"
+      className="motion-runway relative bg-[#f7f7f3] text-[#141414] xl:h-[calc(100svh+150vh)]"
       style={{ overflowX: "clip" }}
     >
-      {/* Deliberate walk: the panel pins while the runway scrolls (lg+). */}
-      <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
+      {/* Deliberate walk: the panel pins while the runway scrolls (xl+). */}
+      <div className="xl:sticky xl:top-0 xl:h-svh xl:overflow-hidden">
         <div className="mx-auto max-w-7xl px-6 pb-4 pt-8 sm:pt-10 lg:px-12 lg:pt-[6.5rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Focused service paths
@@ -637,11 +642,11 @@ function ServicePathRows() {
                   }`}
                   style={{
                     transition:
-                      "grid-template-rows 950ms cubic-bezier(0.22,1,0.36,1)",
+                      "grid-template-rows 360ms cubic-bezier(0.16,1,0.3,1)",
                   }}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%] lg:h-[calc(100svh-31rem)] lg:min-h-[12rem]">
+                    <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%] xl:h-[calc(100svh-31rem)] xl:min-h-[12rem]">
                       <Image
                         src={row.image}
                         alt={`${service.title} by 828 Construction`}

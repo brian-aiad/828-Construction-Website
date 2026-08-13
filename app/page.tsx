@@ -51,7 +51,8 @@ export default function HomePage() {
       <HeroV2 />
       <EditorialFlow>
         <ServicesPreviewV2 />
-        <HomeVisionSequence />
+        <HomeVisionSequence part="intro" />
+        <HomeVisionSequence part="process" />
         <AboutPreview />
       </EditorialFlow>
       <DockedCTA />

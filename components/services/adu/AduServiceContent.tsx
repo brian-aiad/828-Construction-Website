@@ -619,7 +619,7 @@ function AduFaq() {
     <section
       data-section="adu-faq"
       data-header-light=""
-      className="relative bg-[#f7f7f3] text-[#111]"
+      className="relative flex min-h-svh flex-col justify-center bg-[#f7f7f3] text-[#111]"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:pb-24 lg:pt-[7.5rem]">
@@ -780,7 +780,7 @@ function AduAcronym() {
     <section
       data-section="adu-acronym"
       data-header-dark=""
-      className="relative bg-black text-white"
+      className="relative flex min-h-svh flex-col justify-center bg-black text-white"
       style={{ overflowX: "clip" }}
     >
       {/* Page signature (PATTERNS.md): giant ADU watermark, whisper-quiet, drifting */}
@@ -862,7 +862,7 @@ function AduInvitation() {
     <section
       data-section="adu-invitation"
       data-header-dark=""
-      className="relative border-t border-white/10 bg-[#0a0a0a] text-white"
+      className="relative flex min-h-svh flex-col justify-center border-t border-white/10 bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-[7.5rem]">

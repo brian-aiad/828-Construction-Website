@@ -1,11 +1,10 @@
 "use client";
 
-import { ReactNode, useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { AnimationController } from "@/utils/animationControl";
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.config({ nullTargetWarn: false });
@@ -102,6 +101,32 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isFirstMount = useRef(true);
   const failsafeObserverRef = useRef<IntersectionObserver | null>(null);
+  const [smoothScrollEnabled, setSmoothScrollEnabled] = useState(false);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1280px)");
+    const coarseTablet = window.matchMedia(
+      "(pointer: coarse) and (max-width: 1366px)"
+    );
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+    const sync = () => {
+      setSmoothScrollEnabled(
+        desktop.matches && !coarseTablet.matches && !reducedMotion.matches
+      );
+    };
+
+    sync();
+    desktop.addEventListener("change", sync);
+    coarseTablet.addEventListener("change", sync);
+    reducedMotion.addEventListener("change", sync);
+    return () => {
+      desktop.removeEventListener("change", sync);
+      coarseTablet.removeEventListener("change", sync);
+      reducedMotion.removeEventListener("change", sync);
+    };
+  }, []);
 
   const refreshMotion = useCallback(() => {
     if (lenisRef.current) lenisRef.current.resize();
@@ -186,7 +211,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   }, [pathname, refreshMotion]);
 
   useEffect(() => {
-    if (!AnimationController.shouldAnimate()) return;
+    if (!smoothScrollEnabled) return;
 
     const lenis = new Lenis({
       duration: 1.35,
@@ -245,7 +270,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       lenisRef.current = null;
       gsap.ticker.remove(tick);
     };
-  }, [refreshMotion]);
+  }, [refreshMotion, smoothScrollEnabled]);
 
   return <>{children}</>;
 }

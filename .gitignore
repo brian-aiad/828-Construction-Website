@@ -47,6 +47,8 @@ next-env.d.ts
 
 # local visual QA artifacts
 /research/
+/output/
+/.playwright-cli/
 
 # claude scheduler lock (machine-local)
 .claude/scheduled_tasks.lock

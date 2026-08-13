@@ -110,23 +110,28 @@ body {
    utilities start at 1024px, which includes iPad landscape, so override the
    sticky/viewport/clip pieces there while leaving desktop motion untouched. */
 @media (max-width: 1279px), (pointer: coarse) and (max-width: 1366px) {
-  .lg\:sticky {
+  .lg\:sticky,
+  .xl\:sticky {
     position: relative !important;
     top: auto !important;
   }
 
-  .lg\:overflow-hidden {
+  .lg\:overflow-hidden,
+  .xl\:overflow-hidden {
     overflow: visible !important;
   }
 
   .lg\:h-svh,
-  .lg\:sticky[class*="lg:h-["] {
+  .xl\:h-svh,
+  .lg\:sticky[class*="lg:h-["],
+  .xl\:sticky[class*="xl:h-["] {
     height: auto !important;
   }
 
   .process-travel,
   .motion-runway {
     height: auto !important;
+    min-height: 100svh;
   }
 
   [data-stack-surface] {
@@ -142,6 +147,11 @@ body {
 
   [data-footer-runway] {
     height: 0 !important;
+  }
+
+  [data-flow-rail],
+  [data-flow-terminal] {
+    display: none !important;
   }
 
   .about-area-marquee {
@@ -179,6 +189,10 @@ body {
 @media (min-width: 1280px) and (pointer: fine) {
   [data-stack-surface] {
     min-height: 100svh;
+  }
+
+  [data-footer-surface] {
+    margin-top: -100svh;
   }
 
   [data-stack-surface][data-stack-covered="true"] {
@@ -477,6 +491,11 @@ h1, h2, h3 {
 
   .animate-brand-marquee {
     animation: none !important;
+  }
+
+  [data-flow-rail],
+  [data-flow-terminal] {
+    display: none !important;
   }
 }
 

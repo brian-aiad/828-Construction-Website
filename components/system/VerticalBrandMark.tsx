@@ -31,8 +31,8 @@ export default function VerticalBrandMark() {
       aria-hidden="true"
       className="pointer-events-none fixed left-[1.4rem] top-1/2 z-40 hidden -translate-y-1/2 lg:block xl:left-6"
     >
-      <div className="relative h-[34vh] w-px bg-white/[0.07]">
-        <div className="absolute inset-0 bg-[var(--color-accent)]/70" />
+      <div className="relative h-[34vh] w-px bg-[var(--color-accent)]/24">
+        <div className="absolute inset-0 bg-[var(--color-accent)]/80" />
         <div className={`${FLOW_NODE_CLASS} top-1/2`} />
       </div>
     </div>

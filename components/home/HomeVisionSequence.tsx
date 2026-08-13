@@ -33,7 +33,11 @@ const processImages = [
   "/images/generated/home-process-post-construction-v2.jpg",
 ];
 
-export default function HomeVisionSequence() {
+export default function HomeVisionSequence({
+  part,
+}: {
+  part: "intro" | "process";
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const statementRef = useRef<HTMLParagraphElement>(null);
@@ -219,7 +223,7 @@ export default function HomeVisionSequence() {
       );
 
       // Step-by-step highlight walk (exactly ONE row lit at a time) + progress
-      // rail. Desktop (lg+): the process panel is CSS-sticky over a tall runway
+      // rail. Desktop (xl+): the process panel is CSS-sticky over a tall runway
       // (.process-travel) and the active row is a PURE FUNCTION of scroll
       // progress — runway/5 of dedicated scroll each. The travel wrapper itself
       // is never sticky, so its rect tracks scroll linearly until the whole
@@ -227,13 +231,16 @@ export default function HomeVisionSequence() {
       // walk therefore always completes (05 gets its lit moment and stays lit)
       // BEFORE the next surface can cover the panel. Deterministic math, no rect
       // feedback: cannot be rushed, skipped, or frozen half-lit (services
-      // pattern, commit 3d15bdb; PATTERNS Fix 25 class). Below lg there is no
+      // pattern, commit 3d15bdb; PATTERNS Fix 25 class). Below xl there is no
       // pin — the active row is the last title past the focus line (monotone,
       // reflow-immune), preserving the mobile natural-flow reveals.
       const stepList = section.querySelector<HTMLElement>(".process-list");
       if (stepList && processRows.length) {
         const count = processRows.length;
-        const lgQuery = window.matchMedia("(min-width: 1024px)");
+        const desktopQuery = window.matchMedia("(min-width: 1280px)");
+        const coarseTabletQuery = window.matchMedia(
+          "(pointer: coarse) and (max-width: 1366px)"
+        );
         const setActive = (idx: number) => {
           processRows.forEach((row, i) =>
             row.classList.toggle("process-row-active", i === idx)
@@ -248,7 +255,7 @@ export default function HomeVisionSequence() {
         const updateActive = () => {
           let idx: number;
           let railP: number;
-          if (lgQuery.matches && travelEl) {
+          if (desktopQuery.matches && !coarseTabletQuery.matches && travelEl) {
             const runway = travelEl.offsetHeight - window.innerHeight;
             if (runway <= 0) {
               idx = 0;
@@ -291,9 +298,13 @@ export default function HomeVisionSequence() {
           onEnterBack: updateActive,
           onLeaveBack: updateActive,
         });
-        lgQuery.addEventListener("change", updateActive);
+        desktopQuery.addEventListener("change", updateActive);
+        coarseTabletQuery.addEventListener("change", updateActive);
         revealCleanups.push(() =>
-          lgQuery.removeEventListener("change", updateActive)
+          desktopQuery.removeEventListener("change", updateActive)
+        );
+        revealCleanups.push(() =>
+          coarseTabletQuery.removeEventListener("change", updateActive)
         );
         updateActive();
       }
@@ -343,9 +354,13 @@ export default function HomeVisionSequence() {
   return (
     <section
       ref={sectionRef}
-      data-section="vision"
-      className="relative bg-[#050505] text-white"
+      data-section={part === "intro" ? "vision" : "vision-process"}
+      data-header-dark=""
+      {...(part === "intro" ? { "data-header-transparent": "" } : {})}
+      className={`relative text-white ${part === "intro" ? "bg-[#050505]" : "bg-[#0a0a0a]"}`}
     >
+      {part === "intro" && (
+        <>
       {/* Intro — asymmetric editorial split. FULL SCREEN on desktop (Brian,
           2026-07-13 round 2): the statement owns the whole viewport at its
           snapped rest; the white marquee strip lives at the top of the NEXT
@@ -435,9 +450,13 @@ export default function HomeVisionSequence() {
       {/* Landscape photograph — expands from an inset frame to full bleed
           as the reader scrolls through it */}
       </div>
+        </>
+      )}
 
+      {part === "process" && (
+        <>
       {/* Process — full-bleed black panel, maroon ignition, progress rail.
-          Desktop (lg+): the panel is CSS-sticky over a runway so the 5-row
+          Desktop (xl+): the panel is CSS-sticky over a runway so the 5-row
           highlight walk owns dedicated scroll and every step gets its lit
           moment before the next surface can cover it (services pattern,
           3d15bdb). Runway trimmed 190vh → 120vh (Brian, 2026-07-13: the walk
@@ -446,10 +465,9 @@ export default function HomeVisionSequence() {
           statement, Brian round 2). Mobile keeps the compact natural flow. */}
       <div
         data-header-dark=""
-        data-snap-edge=""
-        className="process-travel relative bg-[#0a0a0a] text-white min-[1180px]:h-[calc(100svh+120vh)]"
+        className="process-travel relative bg-[#0a0a0a] text-white xl:h-[calc(100svh+120vh)]"
       >
-        <div className="min-[1180px]:sticky min-[1180px]:top-14 min-[1180px]:flex min-[1180px]:h-[calc(100svh-3.5rem)] min-[1180px]:flex-col min-[1180px]:overflow-hidden">
+        <div className="xl:sticky xl:top-14 xl:flex xl:h-[calc(100svh-3.5rem)] xl:flex-col xl:overflow-hidden">
         {/* Marquee — refined mono strip, hairline-bounded, pinned with the panel */}
         <div className="border-y border-white/10 bg-[#050505] py-5" aria-hidden="true">
           <div
@@ -511,7 +529,7 @@ export default function HomeVisionSequence() {
                 <ol className="border-t border-white/12">
                   {PROCESS_STEPS_V2.map((step, i) => (
                     <li key={step.number} className="relative">
-                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)_auto] sm:gap-4 min-[1180px]:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] min-[1180px]:gap-5 min-[1180px]:py-5">
+                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)] sm:gap-4 min-[1180px]:grid-cols-[3.5rem_9.5rem_minmax(0,1fr)] min-[1180px]:gap-5 min-[1180px]:py-5 min-[1440px]:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto]">
                         <span className="process-num font-numbers text-[11px] text-white/50 transition-colors duration-400">
                           {step.number}
                         </span>
@@ -529,7 +547,7 @@ export default function HomeVisionSequence() {
                         <h4 className="process-title font-editorial text-[1.15rem] font-normal leading-tight text-white/70 transition-all duration-400 sm:text-[clamp(1.25rem,2.15vw,2.1rem)]">
                           {step.title}
                         </h4>
-                        <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 sm:block">
+                        <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 min-[1440px]:block">
                           {step.subtitle}
                         </span>
                       </div>
@@ -548,6 +566,8 @@ export default function HomeVisionSequence() {
         </div>
         </div>
       </div>
+        </>
+      )}
     </section>
   );
 }
