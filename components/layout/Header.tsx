@@ -4,85 +4,129 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { flushSync } from "react-dom";
 import { NAV_LINKS, SERVICES, SITE } from "@/lib/constants";
+
+type HeaderSurface = "dark-transparent" | "dark-solid" | "light-solid";
+
+function sectionHasMedia(el: Element) {
+  return (
+    el.matches("[data-header-transparent], [data-header-media]") ||
+    el.closest("img, picture, video, canvas, [data-header-media]") !== null
+  );
+}
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [overLight, setOverLight] = useState(false);
+  const [surface, setSurface] = useState<HeaderSurface>("dark-transparent");
   const [torTime, setTorTime] = useState("");
-  // Graded scroll factor 0→1 over the first ~360px, quantized to 1/20 steps so
-  // the header glass thickens continuously with scroll without re-rendering
-  // per frame. Reduced motion falls back to the old binary snap.
-  const [scrollAlpha, setScrollAlpha] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
-  const reducedRef = useRef(false);
-  const lastScrollY = useRef(0);
+  const surfaceRef = useRef<HeaderSurface>("dark-transparent");
   const pathname = usePathname();
 
   useEffect(() => {
-    // The header re-forms to match whatever section is actually painted
-    // beneath it — dark zones (hero, photographs, black panels, footer) get
-    // the dark glass, light surfaces get the cream glass. Active on any page
-    // that marks zones with data-header-light (V4 direction: every page).
-    const zoneAware = !!document.querySelector("[data-header-light]");
-    const checkZone = () => {
-      if (!zoneAware) {
-        setOverLight(false);
-        return;
-      }
-      const stack = document.elementsFromPoint(window.innerWidth / 2, 40);
-      let isLight = false;
-      for (const el of stack) {
-        if (el.closest("header")) continue;
-        if (el.closest("[data-header-dark]")) {
-          isLight = false;
-          break;
+    let raf = 0;
+
+    // The header follows the surface currently passing beneath it. Photo/hero
+    // sections stay transparent at any scroll depth; black and cream sections
+    // become solid as soon as they cover the bar.
+    const readSurface = (): HeaderSurface => {
+      const headerHeight = window.matchMedia("(min-width: 1024px)").matches ? 52 : 48;
+      const y = Math.min(window.innerHeight - 1, headerHeight - 6);
+      const xs = [0.16, 0.32, 0.5, 0.68, 0.84].map((pct) => window.innerWidth * pct);
+      const votes: HeaderSurface[] = [];
+
+      const readAtPoint = (x: number): HeaderSurface | null => {
+        const stack = document.elementsFromPoint(x, y);
+        for (const el of stack) {
+          if (el.closest("header")) continue;
+          if (el.closest("[data-stack-surface][data-stack-covered]")) continue;
+
+          const transparent = el.closest("[data-header-transparent]");
+          if (transparent) return "dark-transparent";
+
+          const light = el.closest("[data-header-light]");
+          if (light) return "light-solid";
+
+          const dark = el.closest("[data-header-dark]");
+          if (dark) {
+            return sectionHasMedia(dark) ? "dark-transparent" : "dark-solid";
+          }
         }
-        if (el.closest("[data-header-light]")) {
-          isLight = true;
-          break;
-        }
+        return null;
+      };
+
+      for (const x of xs) {
+        const pointSurface = readAtPoint(x);
+        if (pointSurface) votes.push(pointSurface);
       }
-      setOverLight(isLight);
+
+      if (votes.length) {
+        const counts = votes.reduce<Record<HeaderSurface, number>>(
+          (acc, item) => {
+            acc[item] += 1;
+            return acc;
+          },
+          { "dark-transparent": 0, "dark-solid": 0, "light-solid": 0 }
+        );
+        const center = readAtPoint(window.innerWidth / 2);
+        const ranked = (Object.keys(counts) as HeaderSurface[]).sort(
+          (a, b) => counts[b] - counts[a]
+        );
+        if (center && counts[center] === counts[ranked[0]]) return center;
+        return ranked[0];
+      }
+
+      return window.scrollY < 32 ? "dark-transparent" : "dark-solid";
     };
 
-    reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const checkZone = () => {
+      const next = readSurface();
+      if (surfaceRef.current === next) return;
+      surfaceRef.current = next;
+      flushSync(() => setSurface(next));
+    };
 
-    const handleScroll = () => {
+    const syncHeader = () => {
+      raf = 0;
       const currentY = window.scrollY;
-      const raw = Math.min(currentY / 360, 1);
-      const stepped = reducedRef.current
-        ? currentY > 32
-          ? 1
-          : 0
-        : Math.round(raw * 20) / 20;
-      setScrollAlpha((prev) => (prev === stepped ? prev : stepped));
       if (progressRef.current) {
         const doc = document.documentElement;
         const max = Math.max(doc.scrollHeight - window.innerHeight, 1);
         progressRef.current.style.transform = `scaleX(${Math.min(currentY / max, 1).toFixed(4)})`;
       }
-      const canAutoHide = window.matchMedia("(min-width: 1024px)").matches;
-      if (canAutoHide && currentY > 300) {
-        setHidden(currentY > lastScrollY.current);
-      } else {
-        setHidden(false);
-      }
-      lastScrollY.current = currentY;
       checkZone();
     };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    const scheduleSync = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(syncHeader);
+    };
+
+    syncHeader();
+    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("resize", scheduleSync, { passive: true });
+    const mutationObserver =
+      typeof MutationObserver !== "undefined"
+        ? new MutationObserver(scheduleSync)
+        : null;
+    mutationObserver?.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["data-stack-covered"],
+      subtree: true,
+    });
     // Scrub animations (e.g. the expanding photograph) keep settling AFTER
     // the last scroll event — a light poll keeps the header honest. The
     // check is a no-op re-render-wise unless the zone actually changes.
-    const zonePoll = zoneAware ? setInterval(checkZone, 300) : undefined;
+    const zonePoll = setInterval(scheduleSync, 50);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (zonePoll) clearInterval(zonePoll);
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", scheduleSync);
+      window.removeEventListener("resize", scheduleSync);
+      mutationObserver?.disconnect();
+      clearInterval(zonePoll);
     };
   }, [pathname]);
 
@@ -122,9 +166,14 @@ export default function Header() {
   const isServicesActive =
     pathname === "/services" || pathname.startsWith("/services/");
 
-  // Light header mode — whenever a light-marked surface is under the bar,
-  // and never while the (black) mobile menu overlay is open.
-  const light = overLight && !mobileOpen;
+  // Light header mode — whenever a light-marked surface is under the bar, and
+  // never while the (black) mobile menu overlay is open.
+  const light = surface === "light-solid" && !mobileOpen;
+  const transparent = surface === "dark-transparent" && !mobileOpen;
+  const backgroundAlpha = light ? 0.95 : transparent ? 0.045 : 0.95;
+  const blur = transparent ? 8 : 16;
+  const borderAlpha = transparent ? 0.05 : 0.14;
+  const progressOpacity = transparent ? 0.78 : 0.95;
   const inkBase = light ? "text-black/60 hover:text-black" : "text-white/60 hover:text-white";
   const inkActive = light ? "text-black" : "text-white";
 
@@ -135,25 +184,23 @@ export default function Header() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         style={{
-          transform: hidden ? "translateY(-100%)" : "translateY(0)",
+          transform: "translateY(0)",
           backgroundColor: light
-            ? `rgba(247,247,243,${(0.55 + 0.4 * scrollAlpha).toFixed(3)})`
-            : `rgba(5,5,5,${(0.05 + 0.85 * scrollAlpha).toFixed(3)})`,
-          backdropFilter: `blur(${(4 + 14 * scrollAlpha).toFixed(1)}px)`,
-          WebkitBackdropFilter: `blur(${(4 + 14 * scrollAlpha).toFixed(1)}px)`,
+            ? `rgba(247,247,243,${backgroundAlpha})`
+            : `rgba(5,5,5,${backgroundAlpha})`,
+          backdropFilter: `blur(${blur}px)`,
+          WebkitBackdropFilter: `blur(${blur}px)`,
           borderBottom: `1px solid ${
             light
-              ? `rgba(0,0,0,${(0.1 * scrollAlpha).toFixed(3)})`
-              : `rgba(255,255,255,${(0.1 * scrollAlpha).toFixed(3)})`
+              ? `rgba(0,0,0,${borderAlpha})`
+              : `rgba(255,255,255,${borderAlpha})`
           }`,
         }}
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+        className="fixed top-0 left-0 right-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
       >
         <div className="w-full px-3 sm:px-4 lg:px-8 2xl:px-10">
           <div
-            className={`flex h-14 items-center justify-between transition-[height] duration-500 lg:grid lg:grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] lg:gap-10 ${
-              scrollAlpha > 0.5 ? "lg:h-14" : "lg:h-16"
-            }`}
+            className="flex h-12 items-center justify-between lg:h-[52px] lg:grid lg:grid-cols-[minmax(220px,1fr)_auto_minmax(220px,1fr)] lg:gap-10"
           >
             {/* Logo — text wordmark, uniform weight */}
             <Link
@@ -165,7 +212,7 @@ export default function Header() {
               }}
             >
               <span
-                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-xl tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap transition-colors duration-500 ${
+                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-[18px] tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap transition-colors duration-200 ${
                   light ? "text-[#111]" : "text-white"
                 }`}
               >
@@ -294,7 +341,7 @@ export default function Header() {
             <div className="hidden lg:flex items-center justify-end">
               {torTime && (
                 <span
-                  className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-500 ${
+                  className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-200 ${
                     light ? "text-black/60" : "text-white/30"
                   }`}
                 >
@@ -345,8 +392,15 @@ export default function Header() {
         <div
           ref={progressRef}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-left bg-[var(--color-accent)]"
-          style={{ transform: "scaleX(0)", willChange: "transform" }}
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left bg-[var(--color-accent)] transition-[opacity,box-shadow] duration-200"
+          style={{
+            transform: "scaleX(0)",
+            opacity: progressOpacity,
+            boxShadow: transparent
+              ? "0 0 14px rgba(184,115,51,0.5)"
+              : "0 0 8px rgba(184,115,51,0.32)",
+            willChange: "transform",
+          }}
         />
       </motion.header>
 

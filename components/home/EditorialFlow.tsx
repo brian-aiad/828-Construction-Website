@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
 import { useJunctionSettle } from "@/components/home/useJunctionSettle";
+import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,6 +35,7 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
   // 2026-07-13). The hook treats snap-edges exactly like surface tops —
   // resting mid-peek completes to the runway (down) or backs off (up).
   useJunctionSettle(wrapRef, "[data-stack-surface], [data-snap-edge]");
+  useStackSurfaceVisibility(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -152,7 +154,7 @@ export default function EditorialFlow({ children }: { children: React.ReactNode 
       {/* Plumb line — lives in the outer margin, desktop only */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
+        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px xl:block xl:left-6"
       >
         <div className="absolute inset-0 bg-black/[0.07]" />
         <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/70" />

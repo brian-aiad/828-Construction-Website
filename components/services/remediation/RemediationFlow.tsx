@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
 import { useJunctionSettle } from "@/components/system/useJunctionSettle";
+import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,6 +27,7 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
   // flow's FAQ answers resize surfaces after mount; the hook re-measures on
   // live rects each idle so the settle target stays correct.
   useJunctionSettle(wrapRef);
+  useStackSurfaceVisibility(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -151,7 +153,7 @@ export default function RemediationFlow({ children }: { children: React.ReactNod
     <div ref={wrapRef} data-rem-flow="" className="relative z-10 bg-[#050505]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
+        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px xl:block xl:left-6"
       >
         <div className="absolute inset-0 bg-white/[0.07]" />
         <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/70" />

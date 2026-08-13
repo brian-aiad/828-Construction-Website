@@ -403,6 +403,7 @@ function AduHero() {
     <section
       data-section="adu-hero"
       data-header-dark=""
+      data-header-transparent=""
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >

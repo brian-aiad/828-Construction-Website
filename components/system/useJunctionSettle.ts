@@ -20,10 +20,9 @@ import { useEffect, type RefObject } from "react";
 // the viewport). Overlapping bands from shorter-than-viewport sections are
 // handled by bounded re-measure correction rounds after each glide.
 //
-// Targeting is DIRECTION-AWARE: stopping while scrolling DOWN completes the
-// cover (scroll +top); UP backs off (scroll −(vh−top)). Nearest-rest or
-// percent rules trap gentle scrollers — small forward steps get undone and the
-// junction can never be crossed.
+// Targeting is MAJORITY-AWARE: when the incoming surface owns most of the
+// visible band, complete the cover; otherwise restore the previous surface.
+// Exact half rests honor gesture direction.
 //
 // The glide goes THROUGH lenis.scrollTo (window.__lenis828, exposed by
 // LenisProvider): raw window.scrollTo glides get reconciled away by Lenis'
@@ -74,7 +73,9 @@ export function useJunctionSettle(
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const lgQuery = window.matchMedia("(min-width: 1024px)");
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    const coarseTabletQuery = window.matchMedia("(pointer: coarse) and (max-width: 1366px)");
+    const shouldSettle = () => desktopQuery.matches && !coarseTabletQuery.matches;
 
     let armed = false; // true only after genuine user input
     let settling = false;
@@ -232,7 +233,12 @@ export function useJunctionSettle(
       const junction = activeJunction(isCorrection ? MIN_DIST : MARGIN);
       if (junction === null) return;
       settleRounds--;
-      const goForward = direction === 1; // honor the gesture, site-wide
+      // Majority settle: if the incoming surface owns most of the clean band,
+      // complete the cover; otherwise restore the previous surface. This keeps
+      // rests feeling intentional instead of direction-only.
+      const goForward =
+        junction.top < junction.restUp / 2 ||
+        (junction.top === junction.restUp / 2 && direction === 1);
       let target = goForward
         ? window.scrollY + junction.top // complete to the boundary
         : window.scrollY - (junction.restUp - junction.top); // restore above
@@ -244,7 +250,7 @@ export function useJunctionSettle(
     };
 
     const onIdle = () => {
-      if (!armed || settling || !lgQuery.matches) return;
+      if (!armed || settling || !shouldSettle()) return;
       settleRounds = MAX_ROUNDS;
       settleStep();
     };

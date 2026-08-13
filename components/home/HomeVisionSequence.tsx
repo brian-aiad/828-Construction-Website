@@ -353,6 +353,7 @@ export default function HomeVisionSequence() {
       <div
         ref={photoRef}
         data-header-dark=""
+        data-header-transparent=""
         className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:h-svh lg:min-h-0"
         data-gsap-reveal="true"
       >

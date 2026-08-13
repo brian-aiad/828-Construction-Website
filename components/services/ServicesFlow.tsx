@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
 import { useJunctionSettle } from "@/components/system/useJunctionSettle";
+import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -43,6 +44,7 @@ export default function ServicesFlow({
   // Junction snap-settle (Brian 2026-07-10): stops mid-cover glide to the
   // nearest canonical rest. Shared hook — all guards live inside it.
   useJunctionSettle(wrapRef);
+  useStackSurfaceVisibility(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -169,7 +171,7 @@ export default function ServicesFlow({
     <div ref={wrapRef} data-services-flow="" className="relative z-10 bg-black">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
+        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px xl:block xl:left-6"
       >
         <div className="absolute inset-0 bg-white/[0.07]" />
         <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/70" />

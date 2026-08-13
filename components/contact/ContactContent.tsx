@@ -277,6 +277,7 @@ function ContactHero() {
     <section
       data-section="contact-hero"
       data-header-dark=""
+      data-header-transparent=""
       className="relative flex min-h-[54svh] flex-col justify-between overflow-hidden bg-black text-white"
       style={{ overflowX: "clip" }}
     >

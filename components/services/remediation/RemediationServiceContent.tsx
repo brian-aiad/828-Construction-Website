@@ -410,6 +410,7 @@ function RemediationHero() {
     <section
       data-section="rem-hero"
       data-header-dark=""
+      data-header-transparent=""
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >

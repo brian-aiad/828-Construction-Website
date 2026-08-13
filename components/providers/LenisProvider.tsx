@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimationController } from "@/utils/animationControl";
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.config({ nullTargetWarn: false });
@@ -185,7 +186,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   }, [pathname, refreshMotion]);
 
   useEffect(() => {
-    if (window.innerWidth < 1024 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!AnimationController.shouldAnimate()) return;
 
     const lenis = new Lenis({
       duration: 1.35,

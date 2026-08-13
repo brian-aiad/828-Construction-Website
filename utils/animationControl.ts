@@ -1,7 +1,7 @@
 /**
  * AnimationController
  * Three-layer detection:
- *   1. Screen width < 1180 → mobile/tablet (no scroll-hijacking)
+ *   1. Screen width < 1280 → mobile/tablet (no scroll-hijacking)
  *   2. Coarse pointer at <= 1366px → iPad/tablet class (normal scroll)
  *   3. prefers-reduced-motion → user preference
  *
@@ -21,7 +21,7 @@ export class AnimationController {
   private constructor() {
     if (typeof window === "undefined") return;
 
-    this._desktopQuery = window.matchMedia("(min-width: 1180px)");
+    this._desktopQuery = window.matchMedia("(min-width: 1280px)");
     this._coarseTabletQuery = window.matchMedia("(pointer: coarse) and (max-width: 1366px)");
     this._reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     this._syncFromMedia();
@@ -37,7 +37,7 @@ export class AnimationController {
   };
 
   private _syncFromMedia() {
-    const isDesktopWidth = this._desktopQuery?.matches ?? window.innerWidth >= 1180;
+    const isDesktopWidth = this._desktopQuery?.matches ?? window.innerWidth >= 1280;
     const isCoarseTablet = this._coarseTabletQuery?.matches ?? false;
     this._isMobile = !isDesktopWidth || isCoarseTablet;
     this._prefersReducedMotion = this._reducedMotionQuery?.matches ?? false;

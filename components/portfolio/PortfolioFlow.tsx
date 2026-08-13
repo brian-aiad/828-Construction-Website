@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
 import { useJunctionSettle } from "@/components/system/useJunctionSettle";
+import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,6 +37,7 @@ export default function PortfolioFlow({ children }: { children: React.ReactNode 
   // live-rect band detection protects the internal gallery scroll runs — a stop
   // mid-gallery is not a junction, so it never settles there.
   useJunctionSettle(wrapRef);
+  useStackSurfaceVisibility(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -166,7 +168,7 @@ export default function PortfolioFlow({ children }: { children: React.ReactNode 
     <div ref={wrapRef} data-portfolio-flow="" className="relative z-10 bg-[#050505]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
+        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px xl:block xl:left-6"
       >
         <div className="absolute inset-0 bg-white/[0.07]" />
         <div ref={lineRef} className="absolute inset-0 bg-[var(--color-accent)]/70" />

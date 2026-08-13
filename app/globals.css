@@ -109,7 +109,7 @@ body {
    coarse-pointer screens, pages must read as natural scroll. Tailwind's lg
    utilities start at 1024px, which includes iPad landscape, so override the
    sticky/viewport/clip pieces there while leaving desktop motion untouched. */
-@media (max-width: 1179px), (pointer: coarse) and (max-width: 1366px) {
+@media (max-width: 1279px), (pointer: coarse) and (max-width: 1366px) {
   .lg\:sticky {
     position: relative !important;
     top: auto !important;
@@ -163,6 +163,26 @@ body {
 
   [data-section="services-process"] .svc-clip {
     height: 62vh !important;
+  }
+
+  [data-footer-email] {
+    white-space: normal !important;
+    font-size: clamp(2rem, 3.45vw, 2.55rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  [data-footer-email] span {
+    display: block !important;
+  }
+}
+
+@media (min-width: 1280px) and (pointer: fine) {
+  [data-stack-surface] {
+    min-height: 100svh;
+  }
+
+  [data-stack-surface][data-stack-covered="true"] {
+    visibility: hidden;
   }
 }
 

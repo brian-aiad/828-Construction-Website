@@ -267,6 +267,8 @@ function DetailHero({
     <section
       ref={sectionRef}
       data-section="service-detail-hero"
+      data-header-dark=""
+      data-header-transparent=""
       className="relative overflow-hidden"
       style={{ minHeight: "72vh" }}
     >
@@ -650,6 +652,7 @@ function DetailContent({
     <section
       ref={sectionRef}
       data-section="service-detail-content"
+      data-header-light=""
       className="bg-white py-16 lg:py-24"
       style={{ position: "relative", zIndex: 3, marginTop: "-5vh" }}
     >
@@ -875,6 +878,7 @@ function QualifierSection({ slug }: { slug: string }) {
     <section
       ref={sectionRef}
       data-section="service-qualifier"
+      data-header-dark=""
       className="py-24 lg:py-32"
       style={{ background: "#0a0a0a" }}
     >
@@ -1010,6 +1014,7 @@ function FeaturedWork({ slug }: { slug: string }) {
     <section
       ref={sectionRef}
       data-section="service-featured-work"
+      data-header-dark=""
       className="bg-black py-24 lg:py-32"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -1176,6 +1181,7 @@ function ProcessSnapshot({ slug, title }: { slug: string; title: string }) {
     <section
       ref={sectionRef}
       data-section="service-process-snapshot"
+      data-header-light=""
       className="relative overflow-hidden bg-white py-24 lg:py-32"
     >
       <PrecisionOverlay tone="light" opacity={0.08} />
@@ -1336,6 +1342,7 @@ function ServiceContactFormSection({ service }: { service: ServiceData }) {
       ref={sectionRef}
       id="get-estimate"
       data-section="service-contact-form"
+      data-header-dark=""
       className="bg-black py-24 lg:py-32"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -1481,6 +1488,7 @@ function RelatedServices({ slug }: { slug: string }) {
     <section
       ref={sectionRef}
       data-section="service-related"
+      data-header-dark=""
       className="py-20 lg:py-24"
       style={{ background: "#0a0a0a" }}
     >

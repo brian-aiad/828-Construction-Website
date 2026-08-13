@@ -129,6 +129,7 @@ export default function HeroV2() {
     <section
       ref={sectionRef}
       data-header-dark=""
+      data-header-transparent=""
       className="sticky top-0 z-0 h-[100svh] overflow-hidden bg-black text-white"
       aria-label="828 Construction homepage hero"
     >

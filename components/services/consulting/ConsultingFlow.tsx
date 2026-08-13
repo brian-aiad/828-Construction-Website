@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AnimationController } from "@/utils/animationControl";
 import FlowNode from "@/components/system/FlowNode";
 import { useJunctionSettle } from "@/components/home/useJunctionSettle";
+import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,6 +25,7 @@ export default function ConsultingFlow({ children }: { children: React.ReactNode
 
   // Scroll-end settle: never rest half-covered at a junction (Fix 26, additive).
   useJunctionSettle(wrapRef);
+  useStackSurfaceVisibility(wrapRef);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -128,7 +130,7 @@ export default function ConsultingFlow({ children }: { children: React.ReactNode
     <div ref={wrapRef} data-consulting-flow="" className="relative z-10 bg-[#050505]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px lg:block xl:left-6"
+        className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px xl:block xl:left-6"
       >
         <div
           className="absolute inset-0 bg-white/[0.07]"
