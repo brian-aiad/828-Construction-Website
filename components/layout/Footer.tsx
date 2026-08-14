@@ -51,10 +51,10 @@ export default function Footer() {
   const [emailName, emailDomain = ""] = SITE.email.split("@");
 
   return (
-    <footer className="relative flex flex-col overflow-hidden border-t border-white/16 bg-black text-white before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-px before:origin-left before:bg-[var(--color-accent)]/70 before:content-[''] min-[1180px]:h-svh min-[1180px]:min-h-[720px]" data-section="footer" data-header-dark="">
-      <section className="flex flex-col justify-end bg-black px-6 pb-12 pt-16 md:px-8 md:pb-14 md:pt-20 min-[1180px]:h-[44%] min-[1180px]:shrink-0 min-[1180px]:!px-0 min-[1180px]:pb-[clamp(2.5rem,4.2vh,3.8rem)] min-[1180px]:pt-0" data-footer-section="top-band">
+    <footer className="relative flex flex-col overflow-hidden border-t border-white/16 bg-black text-white before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-px before:origin-left before:bg-[var(--color-accent)]/70 before:content-[''] min-[1180px]:h-[calc(100svh-52px)]" data-section="footer" data-header-dark="">
+      <section className="flex flex-col justify-end bg-black px-6 pb-12 pt-16 md:px-8 md:pb-14 md:pt-20 min-[1180px]:h-[clamp(15rem,30svh,20rem)] min-[1180px]:shrink-0 min-[1180px]:justify-center min-[1180px]:!px-0 min-[1180px]:pb-[clamp(1.25rem,2vh,2rem)] min-[1180px]:pt-[clamp(1.25rem,2vh,2rem)]" data-footer-section="top-band">
         <div className="grid w-full gap-8 min-[1180px]:grid-cols-[2fr_1fr_1fr] min-[1180px]:items-end">
-          <div className="min-[1180px]:pl-[clamp(1rem,1.15vw,1.5rem)] min-[1180px]:pr-[clamp(1rem,1.4vw,2rem)]">
+          <div data-motion-reveal="left" className="min-[1180px]:pl-[clamp(1rem,1.15vw,1.5rem)] min-[1180px]:pr-[clamp(1rem,1.4vw,2rem)]">
             <h2 className="max-w-[10ch] font-display text-[clamp(2.55rem,10.5vw,3.45rem)] font-normal leading-[1.02] tracking-[0] text-white md:text-[3.65rem] min-[1180px]:max-w-[12ch] min-[1180px]:text-[clamp(2.9rem,3.25vw,4rem)]">
               Quality is the strategy.
             </h2>
@@ -77,6 +77,7 @@ export default function Footer() {
           </div>
 
           <div className="min-[1180px]:col-span-2 min-[1180px]:-translate-y-[clamp(2.2rem,4.6vh,3.4rem)] min-[1180px]:pl-0 min-[1180px]:pr-[clamp(1rem,1.4vw,2rem)]">
+            <div data-motion-reveal="right" data-motion-delay="0.08">
             <a
               href={SITE.phoneHref}
               className="relative block font-display text-[clamp(2.1rem,9vw,3rem)] font-normal leading-[1.02] tracking-[0] text-white/42 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 md:text-[3.2rem] min-[1180px]:text-[clamp(2.75rem,3.25vw,4rem)] min-[1180px]:before:hidden"
@@ -93,6 +94,7 @@ export default function Footer() {
                 <span className="block min-[1180px]:inline">@{emailDomain}</span>
               ) : null}
             </a>
+            </div>
           </div>
         </div>
       </section>
@@ -100,6 +102,7 @@ export default function Footer() {
       <section className="relative grid grid-cols-1 overflow-hidden min-[1180px]:min-h-0 min-[1180px]:flex-1 min-[1180px]:grid-cols-[2fr_1fr_1fr]" data-footer-section="panels">
         <a
           href={SITE.phoneHref}
+          data-motion-reveal="left"
           className="group relative min-h-[18rem] overflow-hidden bg-black text-white md:min-h-[26rem] min-[1180px]:h-full min-[1180px]:min-h-0"
         >
           <Image
@@ -124,7 +127,7 @@ export default function Footer() {
             charcoal nav box + warm bone serving box ("lighter", after the
             deep-maroon try read too red). Black -> charcoal -> bone steps
             keep the footer in the site's ink/cream family. */}
-        <div className="relative z-20 flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-8 text-[#141414] md:px-9 md:py-10 min-[1180px]:h-full min-[1180px]:min-h-0 min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[clamp(3rem,4vw,4.9rem)] min-[1180px]:py-[3rem]">
+        <div data-motion-reveal="up" data-motion-delay="0.06" className="relative z-20 flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-8 text-[#141414] md:px-9 md:py-10 min-[1180px]:h-full min-[1180px]:min-h-0 min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[clamp(3rem,4vw,4.9rem)] min-[1180px]:py-[3rem]">
           <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-4 min-[1180px]:flex min-[1180px]:flex-col min-[1180px]:gap-[0.78rem]">
             {FOOTER_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={panelLinkClass}>
@@ -144,7 +147,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="relative z-20 flex h-full min-h-0 flex-col overflow-hidden border-t border-black/8 bg-white px-6 pb-10 pt-9 text-[#141414] md:px-9 md:py-10 min-[1180px]:justify-start min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[clamp(3rem,4.4vw,5.4rem)] min-[1180px]:pb-[clamp(8rem,13vh,10rem)] min-[1180px]:pt-[clamp(1.75rem,4vh,3.25rem)]">
+        <div data-motion-reveal="right" data-motion-delay="0.12" className="relative z-20 flex h-full min-h-0 flex-col overflow-hidden border-t border-black/8 bg-white px-6 pb-10 pt-9 text-[#141414] md:px-9 md:py-10 min-[1180px]:justify-start min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[clamp(3rem,4.4vw,5.4rem)] min-[1180px]:pb-[clamp(8rem,13vh,10rem)] min-[1180px]:pt-[clamp(1.75rem,4vh,3.25rem)]">
           <div className="relative z-40 grid gap-7 md:grid-cols-2 min-[1180px]:block">
           <div>
             <p className={`${labelClass} text-black/52`}>Serving</p>

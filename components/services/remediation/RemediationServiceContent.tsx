@@ -267,7 +267,13 @@ function useRemediationMotion() {
       // replace the old "show everything instantly" branch. ──
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
-          gsap.to(el, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+          gsap.to(el, {
+            opacity: 1,
+            y: 0,
+            duration: isMobile ? 0.64 : 0.8,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
         })
       );
       // Fully-clipped nodes have an empty intersection rect (Fix 23) — observe
@@ -283,8 +289,9 @@ function useRemediationMotion() {
             gsap.to(el, {
               opacity: 1,
               scale: 1,
-              duration: 0.85,
+              duration: isMobile ? 0.72 : 0.85,
               ease: "power2.out",
+              overwrite: "auto",
             });
           }
         )
@@ -298,16 +305,22 @@ function useRemediationMotion() {
               opacity: 1,
               y: 0,
               scale: 1,
-              duration: 0.8,
+              duration: isMobile ? 0.68 : 0.8,
               delay: 0.06 * (i % 2),
               ease: "power3.out",
+              overwrite: "auto",
             });
           })
         );
       }
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
-          gsap.to(el, { scaleX: 1, duration: 0.9, ease: "power2.inOut" });
+          gsap.to(el, {
+            scaleX: 1,
+            duration: isMobile ? 0.7 : 0.9,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
         })
       );
       // Stacked-surface rule (About grammar): reveals INSIDE a sticky surface
@@ -320,23 +333,32 @@ function useRemediationMotion() {
           gsap.to(el, {
             y: 0,
             opacity: 1,
-            duration: 0.85,
-            delay: 0.09 * idx,
+            duration: isMobile ? 0.7 : 0.85,
+            delay: (isMobile ? 0.05 : 0.09) * idx,
             ease: "power3.out",
+            overwrite: "auto",
           });
         })
       );
       if (plateL && plateR && plateL.parentElement) {
         revealCleanups.push(
           revealOnVisible([plateL.parentElement], () => {
-            gsap.to(plateL, { x: 0, y: 0, opacity: 1, duration: 0.95, ease: "power3.out" });
+            gsap.to(plateL, {
+              x: 0,
+              y: 0,
+              opacity: 1,
+              duration: isMobile ? 0.72 : 0.95,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
             gsap.to(plateR, {
               x: 0,
               y: 0,
               opacity: 1,
-              duration: 0.95,
-              delay: 0.08,
+              duration: isMobile ? 0.72 : 0.95,
+              delay: isMobile ? 0.05 : 0.08,
               ease: "power3.out",
+              overwrite: "auto",
             });
           })
         );
@@ -344,7 +366,12 @@ function useRemediationMotion() {
       if (seam && seam.parentElement) {
         revealCleanups.push(
           revealOnVisible([seam.parentElement.parentElement ?? seam.parentElement], () => {
-            gsap.to(seam, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
+            gsap.to(seam, {
+              scaleY: 1,
+              duration: isMobile ? 0.78 : 1.2,
+              ease: "power2.inOut",
+              overwrite: "auto",
+            });
           })
         );
       }
@@ -419,6 +446,20 @@ function RemediationHero() {
       className="relative bg-black text-white"
       style={{ overflowX: "clip" }}
     >
+      <style>{`
+        @keyframes remMobileHeroIn {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 1279px) {
+          .rem-hero-line {
+            animation: remMobileHeroIn 0.72s cubic-bezier(0.16,1,0.3,1) both;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .rem-hero-line { animation: none !important; opacity: 1 !important; transform: none !important; }
+        }
+      `}</style>
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.45fr)_minmax(0,0.55fr)]">
         <div className="relative order-1 flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:px-14 lg:pb-28 lg:pt-32">
           <Link
@@ -431,7 +472,10 @@ function RemediationHero() {
             Remediation / CA License #{SITE.license}
           </span>
 
-          <h1 className="rem-hero-line mt-9 font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.4rem)]">
+          <h1
+            className="rem-hero-line mt-9 font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.4rem)]"
+            style={{ animationDelay: "0.12s" }}
+          >
             828 — creating healthier environments, one home at a time.
           </h1>
 
@@ -441,11 +485,17 @@ function RemediationHero() {
             aria-hidden="true"
           />
 
-          <p className="rem-hero-line mt-8 max-w-xl text-[15px] leading-8 text-white/62 sm:text-base">
+          <p
+            className="rem-hero-line mt-8 max-w-xl text-[15px] leading-8 text-white/62 sm:text-base"
+            style={{ animationDelay: "0.22s" }}
+          >
             {HERO_PARAGRAPH}
           </p>
 
-          <div className="rem-hero-line mt-11 flex flex-wrap gap-4">
+          <div
+            className="rem-hero-line mt-11 flex flex-wrap gap-4"
+            style={{ animationDelay: "0.32s" }}
+          >
             <a
               href={SITE.phoneHref}
               className="btn-shine btn-lift bg-white px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"
@@ -470,7 +520,6 @@ function RemediationHero() {
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
               quality={92}
-              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -520,7 +569,6 @@ function FaqCard({
             fill
             sizes="(max-width: 640px) 100vw, 33vw"
             quality={90}
-            unoptimized
             placeholder="blur"
             blurDataURL={BLUR_PLACEHOLDER}
             onError={imgError}
@@ -732,7 +780,6 @@ function RemediationApproach() {
                     fill
                     sizes="(max-width: 640px) 100vw, 50vw"
                     quality={92}
-                    unoptimized
                     placeholder="blur"
                     blurDataURL={BLUR_PLACEHOLDER}
                     onError={imgError}
@@ -762,7 +809,6 @@ function RemediationApproach() {
                       fill
                       sizes="45vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -782,7 +828,6 @@ function RemediationApproach() {
                       fill
                       sizes="45vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -848,7 +893,6 @@ function RemediationMethod() {
                     fill
                     sizes="(max-width: 1024px) 50vw, 24vw"
                     quality={92}
-                    unoptimized
                     placeholder="blur"
                     blurDataURL={BLUR_PLACEHOLDER}
                     onError={imgError}
@@ -943,7 +987,6 @@ function RemediationCta() {
                       fill
                       sizes="(max-width: 1024px) 50vw, 16vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -970,7 +1013,6 @@ function RemediationCta() {
                       fill
                       sizes="(max-width: 1024px) 50vw, 16vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}

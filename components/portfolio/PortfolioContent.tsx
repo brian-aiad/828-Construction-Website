@@ -14,7 +14,6 @@ import {
 import PortfolioFlow from "@/components/portfolio/PortfolioFlow";
 import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { AnimationController } from "@/utils/animationControl";
-import { revealOnVisible } from "@/utils/revealOnVisible";
 import { lqip } from "@/lib/image-placeholders";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -43,57 +42,7 @@ function usePortfolioMotion() {
     const root = rootRef.current;
     if (!root || !AnimationController.shouldAnimate() || window.innerWidth < 1024) return;
 
-    const revealCleanups: Array<() => void> = [];
-
     const ctx = gsap.context(() => {
-      // Content reveals: IO-decisive once-tweens only (Fix 22/25) — elements
-      // are visible in JSX; GSAP hides them here, immediately before wiring
-      // the visibility-truthful reveal.
-      const reveals = gsap.utils.toArray<HTMLElement>(".pf-reveal");
-      reveals.forEach((el) => {
-        gsap.set(el, { autoAlpha: 0, y: 26 });
-        revealCleanups.push(
-          revealOnVisible([el], () => {
-            gsap.to(el, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.9,
-              ease: "power3.out",
-              overwrite: true,
-              // Release the composited layer at rest — a leftover fractional
-              // transform leaves headings with subpixel color fringing.
-              onComplete: () => gsap.set(el, { clearProps: "transform,willChange" }),
-            });
-          })
-        );
-      });
-
-      // Photo tiles settle in with a clip wipe — decisive, observed on the
-      // unclipped parent (Fix 23), staggered by the tile's grid position.
-      const tileGroups = gsap.utils.toArray<HTMLElement>("[data-tile-group]");
-      tileGroups.forEach((group) => {
-        const tiles = Array.from(group.querySelectorAll<HTMLElement>(".pf-tile"));
-        if (!tiles.length) return;
-        tiles.forEach((tile) => {
-          gsap.set(tile, { clipPath: "inset(0% 0% 16% 0%)", y: 30, autoAlpha: 0 });
-        });
-        revealCleanups.push(
-          revealOnVisible([group], () => {
-            gsap.to(tiles, {
-              clipPath: "inset(0% 0% 0% 0%)",
-              y: 0,
-              autoAlpha: 1,
-              duration: 1.0,
-              stagger: 0.09,
-              ease: "power3.out",
-              overwrite: true,
-              onComplete: () =>
-                gsap.set(tiles, { clearProps: "transform,clipPath,willChange" }),
-            });
-          })
-        );
-      });
-
       // Signature: traveling contact strip — decorative lateral drift on
       // scrub. Content never depends on it, so a parked scrub is harmless.
       gsap.utils.toArray<HTMLElement>("[data-strip-track]").forEach((track, i) => {
@@ -151,7 +100,6 @@ function usePortfolioMotion() {
     ctxRef.current = ctx;
     return () => {
       ctxRef.current = null;
-      revealCleanups.forEach((dispose) => dispose());
       try {
         ctx.revert();
       } catch {}
@@ -188,7 +136,6 @@ function CaseTile({
     <button
       type="button"
       onClick={() => onOpen(src)}
-      data-gsap-reveal="true"
       aria-label={`View photo — ${caseData.gallery.title}`}
       className={`pf-tile group relative block w-full overflow-hidden text-left ${aspect} ${
         dark ? "bg-[#111]" : "bg-[#e8e3da]"
@@ -312,7 +259,7 @@ function CaseLedger({
 
 function CaseNumberBlock({ index, title, dark }: { index: number; title: string; dark: boolean }) {
   return (
-    <div className="pf-reveal" data-gsap-reveal="true">
+    <div>
       {/* Maroon fails contrast on the dark surfaces — white numeral with a
           maroon tick keeps the accent vocabulary without the 1.6:1 read. */}
       <span className={`inline-flex items-center gap-2 font-numbers text-[11px] font-bold ${dark ? "text-white/85" : "text-[var(--color-accent)]"}`}>
@@ -440,21 +387,25 @@ export default function PortfolioContent() {
           />
           <div className="relative z-10 mx-auto max-w-7xl">
             <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
-              <div className="flex flex-col justify-between">
+              <div
+                className="flex flex-col justify-between"
+                data-motion-reveal="left"
+                data-motion-stagger="0.1"
+              >
                 <div>
                   <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/62">
-                    Portfolio / Selected residential work
+                    Portfolio / Selected project work
                   </span>
                   <h1 className="mt-5 max-w-xl font-editorial text-[clamp(2.2rem,4.5vw,4.6rem)] leading-[0.9]">
                     Remodels, ADUs, repairs.
                   </h1>
                   <p className="mt-6 max-w-md text-sm leading-7 text-white/56">
-                    Three residences, photographed the way they were built — completely.
+                    Three projects, photographed the way they were built — completely.
                     Open any project for the full set.
                   </p>
                 </div>
 
-                <nav aria-label="Residence index" className="mt-12 lg:mt-10">
+                <nav aria-label="Project index" className="mt-12 lg:mt-10">
                   {PORTFOLIO_CASES.map((c, i) => (
                     <a
                       key={c.gallery.id}
@@ -481,14 +432,17 @@ export default function PortfolioContent() {
                 </nav>
               </div>
 
-              <div className="grid grid-cols-2 grid-rows-2 gap-3">
+              <div
+                className="grid grid-cols-2 grid-rows-2 gap-3"
+                data-motion-reveal="right"
+              >
                 <a
                   href={`#${cerritos.gallery.id}`}
                   className="group relative row-span-2 block min-h-[22rem] overflow-hidden bg-[#111] sm:min-h-[26rem]"
                 >
                   <Image
                     src={cerritos.lead}
-                    alt="Cerritos Residence master bath — glass shower enclosure and dark feature tile"
+                    alt="Cerritos bath remodel — glass shower enclosure and dark feature tile"
                     fill
                     priority
                     fetchPriority="high"
@@ -508,7 +462,7 @@ export default function PortfolioContent() {
                 >
                   <Image
                     src={elSereno.lead}
-                    alt="El Sereno Residence bath — geometric star tile and soaking tub"
+                    alt="El Sereno bath and deck project — geometric tile and outdoor living work"
                     fill
                     loading="eager"
                     quality={86}
@@ -527,7 +481,7 @@ export default function PortfolioContent() {
                 >
                   <Image
                     src={tustin.lead}
-                    alt="Tustin Residence — light blue soaking tub with glass shower surround"
+                    alt="Tustin bath refresh — light blue soaking tub with glass shower surround"
                     fill
                     loading="eager"
                     quality={86}
@@ -550,16 +504,20 @@ export default function PortfolioContent() {
           id="cerritos-residence"
           data-section="case-cerritos"
           data-header-light=""
-          className="relative scroll-mt-24 bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
+          className="relative flex min-h-svh scroll-mt-24 flex-col justify-center bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
           <div className="relative z-10 mx-auto max-w-7xl">
             <div className="grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:gap-14">
-              <div data-lead-parallax="" className="relative aspect-[4/5] overflow-hidden bg-[#e8e3da] lg:aspect-auto lg:min-h-[38rem]">
+              <div
+                data-lead-parallax=""
+                data-motion-reveal="left"
+                className="relative aspect-[4/5] overflow-hidden bg-[#e8e3da] lg:aspect-auto lg:min-h-[38rem]"
+              >
                 <Image
                   src={cerritos.lead}
-                  alt="Cerritos Residence master bath overview — frameless glass shower, dark vertical feature tile, dual marble vanity"
+                  alt="Cerritos bath remodel overview — frameless glass shower, dark vertical feature tile, dual marble vanity"
                   fill
                   loading="eager"
                   quality={86}
@@ -571,9 +529,13 @@ export default function PortfolioContent() {
                 />
               </div>
               <div className="lg:self-stretch">
-                <div className="lg:sticky lg:top-28">
+                <div
+                  className="lg:sticky lg:top-28"
+                  data-motion-reveal="right"
+                  data-motion-stagger="0.08"
+                >
                   <CaseNumberBlock index={0} title={cerritos.gallery.title} dark={false} />
-                  <div className="pf-reveal mt-8" data-gsap-reveal="true">
+                  <div className="mt-8">
                     <CaseLedger caseData={cerritos} dark={false} onOpenSet={() => openAt(0)} />
                   </div>
                 </div>
@@ -582,7 +544,11 @@ export default function PortfolioContent() {
 
             {/* Dominant first frame + closing wide keeps the grid art-directed
                 (not a uniform 3×2) and leaves no orphan cell at 390px. */}
-            <div data-tile-group="" className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-16">
+            <div
+              data-tile-group=""
+              data-motion-reveal="up"
+              className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-16"
+            >
               {cerritos.grid.map((src, i) => (
                 <CaseTile
                   key={src}
@@ -607,15 +573,19 @@ export default function PortfolioContent() {
           id="el-sereno-residence"
           data-section="case-el-sereno"
           data-header-dark=""
-          className="relative scroll-mt-24 bg-[#0a0a0a] px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-28 lg:pt-28"
+          className="relative flex min-h-svh scroll-mt-24 flex-col justify-center bg-[#0a0a0a] px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-28 lg:pt-28"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.1]" />
           <div className="relative z-10 mx-auto max-w-7xl">
-            <div data-lead-parallax="" className="relative aspect-[4/3] overflow-hidden bg-[#111] sm:aspect-[16/8] lg:aspect-[21/9]">
+            <div
+              data-lead-parallax=""
+              data-motion-reveal="up"
+              className="relative aspect-[4/3] overflow-hidden bg-[#111] sm:aspect-[16/8] lg:aspect-[21/9]"
+            >
               <Image
                 src={elSereno.lead}
-                alt="El Sereno Residence bath — geometric star-pattern tile, soaking tub, and matte black fixtures"
+                alt="El Sereno bath remodel — geometric star-pattern tile, soaking tub, and matte black fixtures"
                 fill
                 loading="eager"
                 quality={88}
@@ -630,15 +600,19 @@ export default function PortfolioContent() {
 
             <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
               <div className="lg:self-stretch">
-                <div className="lg:sticky lg:top-28">
+                <div
+                  className="lg:sticky lg:top-28"
+                  data-motion-reveal="left"
+                  data-motion-stagger="0.08"
+                >
                   <CaseNumberBlock index={1} title={elSereno.gallery.title} dark />
-                  <div className="pf-reveal mt-8" data-gsap-reveal="true">
+                  <div className="mt-8">
                     <CaseLedger caseData={elSereno} dark onOpenSet={() => openAt(1)} />
                   </div>
                 </div>
               </div>
 
-              <div>
+              <div data-motion-reveal="right">
                 {[elSereno.grid, elSereno.gridB ?? []].map((chapter, chapterIdx) =>
                   chapter.length ? (
                     <div key={chapterIdx} className={chapterIdx === 1 ? "mt-10" : ""}>
@@ -678,21 +652,28 @@ export default function PortfolioContent() {
           id="tustin-residence"
           data-section="case-tustin"
           data-header-light=""
-          className="relative scroll-mt-24 bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
+          className="relative flex min-h-svh scroll-mt-24 flex-col justify-center bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
           <div className="relative z-10 mx-auto max-w-7xl">
-            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+            <div
+              className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16"
+              data-motion-reveal="up"
+              data-motion-stagger="0.08"
+            >
               <CaseNumberBlock index={2} title={tustin.gallery.title} dark={false} />
-              <div className="pf-reveal" data-gsap-reveal="true">
+              <div>
                 <CaseLedger caseData={tustin} dark={false} onOpenSet={() => openAt(2)} />
               </div>
             </div>
 
             {/* Column groups stack at 390px — side-by-side nesting quarters the
                 cells into illegible ~90px swatches (2026-07-13 critique). */}
-            <div className="mt-12 grid gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4">
+            <div
+              className="mt-12 grid gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4"
+              data-motion-reveal="up"
+            >
               <div data-tile-group="" className="grid gap-3 lg:gap-4">
                 <CaseTile
                   src={tustin.lead}
@@ -760,7 +741,7 @@ export default function PortfolioContent() {
           <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
           <div className="relative z-10 mx-auto max-w-7xl">
             <div className="grid gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
-              <div className="pf-reveal" data-gsap-reveal="true">
+              <div data-motion-reveal="left" data-motion-stagger="0.08">
                 <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/62">
                   Next up
                 </span>
@@ -781,11 +762,14 @@ export default function PortfolioContent() {
                 </div>
               </div>
 
-              <div data-tile-group="" className="grid grid-cols-3 gap-3">
+              <div
+                data-tile-group=""
+                data-motion-reveal="right"
+                className="grid grid-cols-3 gap-3"
+              >
                 {(EXAMPLE_PROJECT.images ?? [EXAMPLE_PROJECT.image]).map((src, i) => (
                   <div
                     key={src}
-                    data-gsap-reveal="true"
                     className={`pf-tile relative overflow-hidden bg-[#111] ${
                       i === 0 ? "col-span-3 aspect-[16/8]" : "col-span-3 aspect-[16/8] sm:col-span-1 sm:aspect-[4/5]"
                     } ${i === 0 ? "" : "hidden sm:block"}`}
@@ -815,13 +799,14 @@ export default function PortfolioContent() {
         {/* ── Surface 6 · CTA ── */}
         <section
           data-section="portfolio-cta"
+          data-stack-compact=""
           data-header-light=""
-          className="relative flex min-h-svh flex-col justify-center bg-[#f5f0e9] px-6 pb-14 pt-24 lg:px-12 lg:pb-16 lg:pt-28"
+          className="relative flex min-h-[22rem] flex-col justify-center bg-[#f5f0e9] px-6 py-16 sm:min-h-[24rem] sm:py-20 lg:px-12 xl:min-h-[clamp(26rem,50svh,38rem)] xl:py-20"
           style={{ overflowX: "clip" }}
         >
           <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
           <div className="relative z-10 mx-auto grid w-full max-w-[100rem] gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12 2xl:gap-20">
-            <div className="pf-reveal" data-gsap-reveal="true">
+            <div data-motion-reveal="left" data-motion-stagger="0.08">
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/62">
                 Ready to compare notes
               </span>
@@ -829,7 +814,10 @@ export default function PortfolioContent() {
                 Ready to price the next scope?
               </h2>
             </div>
-            <div className="pf-reveal flex flex-wrap gap-3 lg:justify-end" data-gsap-reveal="true">
+            <div
+              className="flex flex-wrap gap-3 lg:justify-end"
+              data-motion-reveal="right"
+            >
               <a
                 href={SITE.phoneHref}
                 className="min-h-[44px] bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)] 2xl:min-h-16 2xl:px-10 2xl:py-5"

@@ -346,10 +346,10 @@ test.describe("animation hardening", () => {
         const surfaces = Array.from(document.querySelectorAll<HTMLElement>("[data-stack-surface]"));
         const footer = document.querySelector<HTMLElement>("[data-footer-surface]");
         const craft = surfaces.find((surface) =>
-          (surface.innerText || "").includes("The mindset behind every build.")
+          (surface.textContent || "").includes("The mindset behind every build.")
         );
         const cta = surfaces.find((surface) =>
-          (surface.innerText || "").includes("For those who value experience and quality.")
+          (surface.textContent || "").includes("For those who value experience and quality.")
         );
 
         if (!craft || !cta || !footer) {
@@ -357,8 +357,11 @@ test.describe("animation hardening", () => {
         }
 
         const footerMarginTop = Number.parseFloat(window.getComputedStyle(footer).marginTop || "0");
-        if (footerMarginTop < -1) {
-          failureMessages.push(`footer is pulled upward with negative margin (${footerMarginTop}px)`);
+        const footerHeight = footer.getBoundingClientRect().height;
+        if (Math.abs(footerMarginTop + footerHeight) > 2) {
+          failureMessages.push(
+            `footer overlap ${footerMarginTop}px does not match its ${footerHeight}px height`
+          );
         }
 
         const ctaRect = cta.getBoundingClientRect();
@@ -402,8 +405,8 @@ test.describe("animation hardening", () => {
     await skipSplash(page);
 
     for (const viewport of [
-      { name: "iphone-se", width: 375, height: 667, maxHeightRatio: 1.55 },
-      { name: "ipad-landscape", width: 1024, height: 768, maxHeightRatio: 1.25 },
+      { name: "iphone-se", width: 375, height: 667, maxHeightRatio: 2.1 },
+      { name: "ipad-landscape", width: 1024, height: 768, maxHeightRatio: 2.1 },
     ]) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });

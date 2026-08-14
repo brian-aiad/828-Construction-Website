@@ -121,7 +121,36 @@ function AboutHero() {
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section || !AnimationController.shouldAnimate()) return;
+    if (!section) return;
+
+    const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+    if (!AnimationController.shouldAnimate()) {
+      if (!isMobile || prefersReducedMotion) return;
+
+      const items = Array.from(
+        section.querySelectorAll<HTMLElement>("[data-hero-reveal]")
+      );
+      const mobileCtx = gsap.context(() => {
+        items.forEach((el, i) => {
+          gsap.set(el, { x: i < 2 ? -20 : 20, opacity: 0 });
+        });
+        gsap.to(items, {
+          x: 0,
+          opacity: 1,
+          duration: 0.68,
+          stagger: 0.07,
+          delay: 0.12,
+          ease: "power3.out",
+          overwrite: true,
+        });
+      }, sectionRef);
+
+      return () => {
+        try {
+          mobileCtx.revert();
+        } catch {}
+      };
+    }
 
     const ctx = gsap.context(() => {
       if (photoRef.current) {
@@ -208,7 +237,6 @@ function AboutHero() {
             fetchPriority="high"
             sizes="100vw"
             quality={92}
-            unoptimized
             className="object-cover"
             style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.94)" }}
           />
@@ -329,7 +357,7 @@ function OriginSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} data-section="" data-header-dark="" className="relative bg-[#050505] pb-20 pt-24 text-white lg:pb-24 lg:pt-[7.5rem] xl:flex xl:min-h-svh xl:flex-col xl:justify-center" style={{ overflowX: "clip" }}>
+    <section ref={sectionRef} data-section="" data-header-dark="" className="relative flex min-h-svh flex-col justify-center bg-[#050505] pb-20 pt-24 text-white lg:pb-24 lg:pt-[7.5rem]" style={{ overflowX: "clip" }}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(99,26,22,0.16),transparent_30%)]" />
       <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.15]" />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
@@ -340,7 +368,7 @@ function OriginSection() {
         <h2 className="sr-only">The builder profile</h2>
 
         <div className="grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7" data-motion-reveal="left">
             <div className="relative pl-7 lg:pl-9">
               <span className="absolute left-0 top-1 h-[calc(100%-0.5rem)] w-[2px] bg-white/10" aria-hidden="true">
                 <span ref={quoteLineRef} className="absolute inset-0 block bg-accent" style={{ display: "block" }} />
@@ -355,7 +383,10 @@ function OriginSection() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 lg:col-span-5">
+          <div
+            className="border-t border-white/10 lg:col-span-5"
+            data-motion-reveal="right"
+          >
             {standards.map((item, index) => (
               <div
                 key={item.number}
@@ -502,7 +533,7 @@ function CraftSection() {
       ref={sectionRef}
       data-section=""
       data-header-light=""
-      className="relative bg-white pb-20 pt-24 text-black lg:pb-24 lg:pt-[7.5rem] xl:flex xl:min-h-svh xl:flex-col xl:justify-center"
+      className="relative flex min-h-svh flex-col justify-center bg-white pb-20 pt-24 text-black lg:pb-24 lg:pt-[7.5rem]"
       style={{ overflowX: "clip" }}
     >
       <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.1]" />
@@ -517,7 +548,10 @@ function CraftSection() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-6 lg:mb-14">
+        <div
+          className="mb-12 flex flex-wrap items-end justify-between gap-6 lg:mb-14"
+          data-motion-reveal="left"
+        >
           <div>
             <p data-craft-reveal className="mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-black/42">
               <span className="h-px w-7 bg-accent" aria-hidden="true" />
@@ -529,7 +563,11 @@ function CraftSection() {
           </div>
         </div>
 
-        <div className="border-t border-black/10">
+        <div
+          className="border-t border-black/10"
+          data-motion-reveal="up"
+          data-motion-stagger="0.06"
+        >
           {craft.map((item, index) => (
             <div
               key={item.letter}
@@ -631,8 +669,9 @@ function SouthBaySection() {
     <section
       ref={sectionRef}
       data-section=""
+      data-stack-compact=""
       data-header-dark=""
-      className="relative flex min-h-[72svh] items-center bg-[#070707] py-16 text-white min-[1180px]:min-h-svh min-[1180px]:py-24"
+      className="relative flex items-center border-y border-white/10 bg-[#070707] py-16 text-white sm:py-20 xl:py-24"
       style={{ overflowX: "clip" }}
     >
       <div
@@ -656,7 +695,10 @@ function SouthBaySection() {
         {marqueeRow("92s", true)}
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-12">
+      <div
+        className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-12"
+        data-motion-reveal="right"
+      >
         <div
           data-area-copy
           className="max-w-md border border-white/10 bg-white/[0.04] p-8 backdrop-blur-md lg:ml-auto lg:p-10"
@@ -737,7 +779,6 @@ function AboutCTA() {
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             quality={92}
-            unoptimized
             className="object-cover"
             style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.92)" }}
           />
@@ -751,7 +792,7 @@ function AboutCTA() {
 
       <div className="relative flex items-center px-6 py-18 lg:min-h-svh lg:px-16 lg:py-24">
         <span ref={seamRef} className="absolute left-0 top-0 hidden h-full w-px bg-accent/60 lg:block" aria-hidden="true" />
-        <div className="max-w-lg">
+        <div className="max-w-lg" data-motion-reveal="right">
           <p data-cta-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-white/42">
             <span className="h-px w-7 bg-accent" aria-hidden="true" />
             The first conversation

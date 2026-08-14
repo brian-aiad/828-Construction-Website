@@ -207,6 +207,8 @@ function useServicesMotion() {
       gsap.set(seams, { scaleY: 0, transformOrigin: "top" });
 
       const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
+      const riseDuration = isMobile ? 0.64 : 0.8;
+      const lineDuration = isMobile ? 0.72 : 1;
 
       if (prefersReducedMotion) {
         // Reduced motion ONLY: everything readable immediately, no entrance.
@@ -228,12 +230,12 @@ function useServicesMotion() {
       // sticky-stacked surfaces (Fix 25).
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
-          gsap.to(el, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out", overwrite: "auto" });
+          gsap.to(el, { autoAlpha: 1, y: 0, duration: riseDuration, ease: "power3.out", overwrite: "auto" });
         })
       );
       revealCleanups.push(
         revealOnVisible(shifts, (el) => {
-          gsap.to(el, { y: 0, duration: 0.9, ease: "power3.out", overwrite: "auto" });
+          gsap.to(el, { y: 0, duration: isMobile ? 0.68 : 0.9, ease: "power3.out", overwrite: "auto" });
         })
       );
       revealCleanups.push(
@@ -254,12 +256,18 @@ function useServicesMotion() {
       );
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
-          gsap.to(el, { scaleX: 1, duration: 1.0, ease: "power2.inOut", overwrite: "auto" });
+          gsap.to(el, { scaleX: 1, duration: lineDuration, ease: "power2.inOut", overwrite: "auto" });
         })
       );
       revealCleanups.push(
         revealOnVisible(seams, (el) => {
-          gsap.to(el, { scaleY: 1, duration: 1.0, delay: 0.2, ease: "power2.inOut", overwrite: "auto" });
+          gsap.to(el, {
+            scaleY: 1,
+            duration: lineDuration,
+            delay: isMobile ? 0.08 : 0.2,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
         })
       );
 
@@ -371,9 +379,9 @@ function ServicesIndex() {
       <div className="lg:sticky lg:top-0 lg:h-svh lg:overflow-hidden">
         <div className="mx-auto max-w-7xl px-6 pb-16 pt-20 lg:px-12 lg:pb-0 lg:pt-[6.75rem]">
           <div className="flex items-center justify-between gap-6 border-b border-black/12 pb-6 lg:pb-7">
-            <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
+            <h1 className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
               Services / CA License #{SITE.license}
-            </span>
+            </h1>
             <span className="hidden font-labels text-[9px] uppercase tracking-[0.2em] text-black/38 sm:inline">
               Select a service
             </span>
@@ -446,7 +454,6 @@ function ServicesIndex() {
                           loading={i === 0 ? "eager" : "lazy"}
                           sizes="(max-width: 1536px) 100vw, 1280px"
                           quality={92}
-                          unoptimized
                           placeholder="blur"
                           blurDataURL={BLUR_PLACEHOLDER}
                           onError={imgError}
@@ -493,13 +500,13 @@ function VisionStatement() {
     <section
       data-section="services-vision"
       data-header-dark=""
-      className="relative flex min-h-svh flex-col justify-center bg-black text-white"
+      className="relative min-h-svh bg-black text-white"
       style={{ overflowX: "clip" }}
     >
       {/* Same 0.9fr/1.1fr split as the values section below — the center seam
           must land on the identical X so the line reads continuous while the
           surfaces stack (Brian 2026-07-10: "perfect line down the middle"). */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="grid min-h-svh grid-cols-1 grid-rows-[auto_minmax(52svh,1fr)] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:grid-rows-1">
         <div
           className="relative flex items-center px-6 py-24 lg:pr-16"
           style={{ paddingLeft: undefined }}
@@ -526,7 +533,7 @@ function VisionStatement() {
         {/* TODO(client): swap for the real "homeowner looking back at the finished
             property" photo when photography lands — Joe's preferred subject. */}
         <div
-          className="svc-clip relative aspect-[4/3] overflow-hidden lg:aspect-auto lg:h-[78vh]"
+          className="svc-clip relative min-h-[52svh] overflow-hidden lg:h-svh lg:min-h-0"
           data-gsap-reveal="true"
         >
           <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
@@ -537,7 +544,6 @@ function VisionStatement() {
               loading="lazy"
               sizes="(max-width: 1024px) 100vw, 60vw"
               quality={92}
-              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -569,6 +575,7 @@ function PrinciplesSection() {
     <section
       ref={wrapRef}
       data-section="services-principles"
+      data-flow-rail-pause=""
       data-header-dark=""
       className="motion-runway relative bg-[#0a0a0a] text-white max-xl:flex max-xl:min-h-svh max-xl:flex-col max-xl:justify-center lg:h-[calc(100svh+240vh)]"
       style={{ overflowX: "clip" }}
@@ -591,7 +598,6 @@ function PrinciplesSection() {
                 loading={i === 0 ? "eager" : "lazy"}
                 sizes="(max-width: 1024px) 100vw, 46vw"
                 quality={92}
-                unoptimized
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
                 onError={imgError}
@@ -683,16 +689,17 @@ function PrinciplesSection() {
 
 // ── Section 4 — foundational principles + the stage strip + media band ──────
 // Mimics the NS Process composition Joe showed: light surface, heading split,
-// a slim hairline strip of the six stages, then the media band. Desktop is
-// ONE viewport (Brian 2026-07-13): heading + strip keep natural height and
-// the band absorbs everything that remains, so the sentence, all six stages,
-// the photograph, and the CTA share a single screen. "The footer stays."
+// a slim hairline strip of the six stages, then the media band. This is a
+// content-height closing band rather than an artificial full-screen runway;
+// the footer still covers it through the shared sticky-surface flow.
 function ProcessSection() {
   return (
     <section
       data-section="services-process"
+      data-stack-compact=""
+      data-flow-rail-pause=""
       data-header-light=""
-      className="relative flex min-h-svh flex-col bg-[#f7f7f3] text-[#141414] lg:h-svh"
+      className="relative flex flex-col bg-[#f7f7f3] text-[#141414]"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto w-full max-w-7xl px-6 pt-24 lg:px-12 lg:pt-24">
@@ -729,8 +736,7 @@ function ProcessSection() {
         <div className="absolute bottom-0 left-0 h-px w-full bg-black/15" aria-hidden="true" />
       </div>
 
-      {/* Full-bleed media band with the start CTA — fills the rest of the
-          viewport on desktop */}
+      {/* Full-bleed media band with the start CTA. */}
       <div className="svc-clip relative h-[62vh] overflow-hidden lg:h-auto lg:min-h-[18rem] lg:flex-1" data-gsap-reveal="true" data-header-dark="">
         <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
@@ -740,7 +746,6 @@ function ProcessSection() {
             loading="lazy"
             sizes="100vw"
             quality={92}
-            unoptimized
             placeholder="blur"
             blurDataURL={BLUR_PLACEHOLDER}
             onError={imgError}

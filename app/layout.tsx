@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Space_Mono, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
@@ -12,6 +13,8 @@ import { Analytics } from "@vercel/analytics/react";
 import GoogleAnalytics from "@/components/shared/GoogleAnalytics";
 import { SITE } from "@/lib/constants";
 import ScrollRestorationReset from "@/components/system/ScrollRestorationReset";
+import SectionRevealController from "@/components/system/SectionRevealController";
+import MotionPreferences from "@/components/providers/MotionPreferences";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -84,6 +87,10 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceMono.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-black font-body">
+        <Script id="scroll-restoration-reset" strategy="beforeInteractive">
+          {"try{history.scrollRestoration='manual'}catch(e){};window.scrollTo(0,0);"}
+        </Script>
+        <MotionPreferences>
         <ScrollRestorationReset />
         {/* Skip to main content — keyboard accessibility */}
         <a href="#main-content" className="skip-link">
@@ -97,6 +104,7 @@ export default function RootLayout({
         {/* Custom cursor — hidden on touch devices via CSS */}
         <CustomCursor />
         <LenisProvider>
+          <SectionRevealController />
           <Header />
           <main id="main-content" className="flex-1">
             {children}
@@ -107,6 +115,7 @@ export default function RootLayout({
         </LenisProvider>
         {process.env.VERCEL && <Analytics />}
         <GoogleAnalytics />
+        </MotionPreferences>
       </body>
     </html>
   );

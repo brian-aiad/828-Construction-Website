@@ -302,7 +302,10 @@ function useAduMotion() {
       gsap.set(hairlines, { scaleX: 0, transformOrigin: "left" });
       gsap.set(vlines, { scaleY: 0, transformOrigin: "top" });
 
-      if (!AnimationController.shouldAnimate()) {
+      const { enabled, isMobile, prefersReducedMotion } =
+        AnimationController.getConfig();
+
+      if (prefersReducedMotion) {
         gsap.set(rises, { opacity: 1, y: 0 });
         gsap.set(clips, { clipPath: "inset(0% 0% 0% 0%)" });
         gsap.set(hairlines, { scaleX: 1 });
@@ -314,8 +317,16 @@ function useAduMotion() {
       // math. data-stagger delays cascade siblings that enter together.
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
-          const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
-          gsap.to(el, { opacity: 1, y: 0, duration: 0.85, delay, ease: "power3.out" });
+          const stagger = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
+          const delay = isMobile ? Math.min(stagger * 0.55, 0.18) : stagger;
+          gsap.to(el, {
+            opacity: 1,
+            y: 0,
+            duration: isMobile ? 0.66 : 0.85,
+            delay,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
         })
       );
       // Fully-clipped nodes have an empty intersection rect (Fix 23) — observe
@@ -327,20 +338,29 @@ function useAduMotion() {
             const el =
               (wrapper as HTMLElement).querySelector<HTMLElement>(".adu-clip") ??
               (wrapper as HTMLElement);
-            const delay = parseFloat(el.dataset.stagger ?? "0");
+            const stagger = parseFloat(el.dataset.stagger ?? "0");
+            const delay = isMobile ? Math.min(stagger * 0.55, 0.16) : stagger;
             gsap.to(el, {
               clipPath: "inset(0% 0% 0% 0%)",
-              duration: 1.1,
+              duration: isMobile ? 0.78 : 1.1,
               delay,
               ease: "power3.inOut",
+              overwrite: "auto",
             });
           }
         )
       );
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
-          const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
-          gsap.to(el, { scaleX: 1, duration: 0.9, delay, ease: "power2.inOut" });
+          const stagger = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
+          const delay = isMobile ? Math.min(stagger * 0.5, 0.16) : stagger;
+          gsap.to(el, {
+            scaleX: 1,
+            duration: isMobile ? 0.7 : 0.9,
+            delay,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
         })
       );
       revealCleanups.push(
@@ -350,10 +370,17 @@ function useAduMotion() {
             const el =
               (wrapper as HTMLElement).querySelector<HTMLElement>(".adu-vline") ??
               (wrapper as HTMLElement);
-            gsap.to(el, { scaleY: 1, duration: 1.2, ease: "power2.inOut" });
+            gsap.to(el, {
+              scaleY: 1,
+              duration: isMobile ? 0.78 : 1.2,
+              ease: "power2.inOut",
+              overwrite: "auto",
+            });
           }
         )
       );
+
+      if (!enabled) return;
 
       // Sustained scrubs (Fix 15) — initial states stay readable (Fix 22).
       parallaxImgs.forEach((el) => {
@@ -441,7 +468,6 @@ function AduHero() {
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
               quality={92}
-              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -665,7 +691,6 @@ function AduFaq() {
                       loading="lazy"
                       sizes="(max-width: 1024px) 100vw, 40vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -833,7 +858,6 @@ function AduAcronym() {
                       loading="lazy"
                       sizes="(max-width: 1024px) 0px, 40vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}

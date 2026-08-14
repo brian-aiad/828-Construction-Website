@@ -4,36 +4,34 @@ import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { EXPERIENCE_SINCE } from "@/lib/constants";
 import { AnimationController } from "@/utils/animationControl";
 import { revealOnVisible } from "@/utils/revealOnVisible";
 
-gsap.registerPlugin(ScrollTrigger);
-
 // NS-grammar about preview: dark editorial close to the page — big quiet
 // statement headline, supporting copy, then a horizontal row of real project
-// detail photographs with staggered reveal and inner parallax.
+// photographs. The frames stay still while this final surface is pinned so the
+// footer cover reads cleanly and the work remains easy to inspect.
 
 const DETAIL_IMAGES = [
   {
-    src: "/images/projects/cerritos-residence/home-preview-editorial-v3.jpg",
-    alt: "Cerritos Residence bath remodel overview with glass shower, dark feature tile, vanity, and finish details",
-    project: "Cerritos Residence",
+    src: "/images/projects/cerritos-residence/home-preview-v2.jpg",
+    alt: "Cerritos bath remodel with a frameless glass shower, dark feature tile, and marble vanity",
+    project: "Cerritos Bath Remodel",
     meta: "Bath Remodel / Cerritos, CA",
     href: "/portfolio#cerritos-residence",
   },
   {
-    src: "/images/projects/el-sereno-residence/home-preview-editorial-v3.jpg",
-    alt: "El Sereno Residence bath and outdoor living project with deck, railing, tile, and woodwork details",
-    project: "El Sereno Residence",
-    meta: "Bath Remodel / El Sereno, CA",
+    src: "/images/projects/el-sereno-residence/home-preview-v2.jpg",
+    alt: "El Sereno hillside deck with custom railing, wood decking, and outdoor dining area",
+    project: "El Sereno Bath & Deck",
+    meta: "Bath + Outdoor Living / El Sereno, CA",
     href: "/portfolio#el-sereno-residence",
   },
   {
-    src: "/images/projects/tustin-residence/home-preview-editorial-v3.jpg",
-    alt: "Tustin Residence bath refresh with blue tub, glass shower, tile work, lighting, and finish details",
-    project: "Tustin Residence",
+    src: "/images/projects/tustin-residence/home-preview-v2.jpg",
+    alt: "Tustin bath refresh with a blue soaking tub, glass surround, and herringbone tile niche",
+    project: "Tustin Bath Refresh",
     meta: "Bath Refresh / Tustin, CA",
     href: "/portfolio#tustin-residence",
   },
@@ -54,58 +52,16 @@ export default function AboutPreview() {
     const ctx = gsap.context(() => {
       const headlineLines = gsap.utils.toArray<HTMLElement>(".about-headline-line");
       const copyEls = gsap.utils.toArray<HTMLElement>(".about-copy-el");
-      const frames = gsap.utils.toArray<HTMLElement>(".about-frame");
 
       gsap.set(headlineLines, { yPercent: 110 });
       gsap.set(copyEls, { y: 20, opacity: 0 });
-      const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
-
       if (!AnimationController.shouldAnimate()) {
-        // Mobile/tablet must never sit on empty photo blocks. Keep images
-        // visible by default, then add a small entrance as each frame appears.
+        // The shared section controller owns mobile/tablet entrances. Keep
+        // child text and photography visible under rapid skipped sections.
         gsap.set(headlineLines, { yPercent: 0 });
-        gsap.set(frames, { clipPath: "inset(0%)" });
-
-        if (prefersReducedMotion || !isMobile) {
-          gsap.set(copyEls, { y: 0, opacity: 1 });
-          return;
-        }
-
-        // Mobile text entrance — y+opacity only (failsafe-resettable, Fix 18).
-        if (headlineRef.current) {
-          gsap.set(headlineRef.current, { y: 22, opacity: 0 });
-          revealCleanups.push(
-            revealOnVisible([headlineRef.current], (el) =>
-              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
-            )
-          );
-        }
-        copyEls.forEach((c) => {
-          revealCleanups.push(
-            revealOnVisible([c], (el) =>
-              gsap.to(el, { y: 0, opacity: 1, duration: 0.65, ease: "power3.out" })
-            )
-          );
-        });
-        revealCleanups.push(
-          revealOnVisible(frames, (el, i) => {
-            gsap.fromTo(
-              el,
-              { opacity: 0.001, y: 18 },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.7,
-                delay: Math.min(i, 2) * 0.06,
-                ease: "power3.out",
-              }
-            );
-          })
-        );
+        gsap.set(copyEls, { x: 0, y: 0, opacity: 1 });
         return;
       }
-
-      gsap.set(frames, { clipPath: "inset(0% 0% 14% 0%)" });
 
       revealCleanups.push(
         revealOnVisible([headlineRef.current ?? section], () => {
@@ -130,36 +86,6 @@ export default function AboutPreview() {
         })
       );
 
-      frames.forEach((frame, i) => {
-        gsap.to(frame, {
-          clipPath: "inset(0%)",
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: frame,
-            start: "top 92%",
-            end: "top 58%",
-            scrub: 1,
-          },
-        });
-
-        const inner = frame.querySelector<HTMLElement>(".about-img-inner");
-        if (inner) {
-          gsap.fromTo(
-            inner,
-            { yPercent: -6 },
-            {
-              yPercent: 6,
-              ease: "none",
-              scrollTrigger: {
-                trigger: frame,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 1.2 + i * 0.15,
-              },
-            }
-          );
-        }
-      });
     }, sectionRef);
 
     return () => {
@@ -186,7 +112,11 @@ export default function AboutPreview() {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[var(--color-accent)] opacity-70"
       />
       <div className="mx-auto flex min-h-svh max-w-[1680px] flex-col px-6 pb-10 pt-18 sm:pb-12 lg:px-10 lg:pb-12 lg:pt-[6.75rem] 2xl:px-12">
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-14">
+        <div
+          className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-14"
+          data-motion-reveal="up"
+          data-motion-stagger="0.08"
+        >
           <div className="lg:col-span-7 xl:col-span-6">
             <p className="about-copy-el mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent)] lg:mb-7">
               <span
@@ -230,7 +160,11 @@ export default function AboutPreview() {
         </div>
 
         {/* Detail photography row */}
-        <div className="mt-12 grid flex-1 grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-5 lg:mt-14 lg:items-end lg:gap-7">
+        <div
+          className="mt-12 grid flex-1 grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-5 lg:mt-14 lg:items-end lg:gap-7"
+          data-motion-reveal="up"
+          data-motion-stagger="0.08"
+        >
           {DETAIL_IMAGES.map((img) => (
             <Link
               key={img.src}
@@ -239,22 +173,19 @@ export default function AboutPreview() {
               aria-label={`View ${img.project} in the portfolio`}
             >
               <div
-                className="about-frame relative aspect-[4/5] min-h-[18rem] overflow-hidden bg-[#111] sm:aspect-[3/4] sm:min-h-0 lg:aspect-auto lg:h-[min(42svh,30rem)] xl:h-[min(45svh,34rem)]"
-                data-gsap-reveal="true"
+                className="about-frame relative aspect-[4/5] min-h-[18rem] overflow-hidden bg-[#111] sm:aspect-[3/4] sm:min-h-0 lg:aspect-auto lg:h-[min(42svh,30rem)] xl:h-[min(45svh,34rem)] [@media(min-height:1100px)]:xl:h-[min(52svh,48rem)]"
               >
-                <div className="about-img-inner absolute -inset-y-[8%] inset-x-0" style={{ willChange: "transform" }}>
-                  <Image
-                    src={img.src}
-                    alt={img.alt}
-                    fill
-                    loading="eager"
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                    quality={92}
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                    style={{ filter: "contrast(1.08) saturate(0.98) brightness(0.84)" }}
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10 opacity-70" />
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  loading="eager"
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                  quality={92}
+                  className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+                  style={{ filter: "contrast(1.04) saturate(0.98) brightness(0.94)" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/24 via-transparent to-black/5" />
               </div>
               <div
                 aria-hidden="true"

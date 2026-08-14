@@ -189,23 +189,40 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     // to top and schedule the post-mount refresh — it must NOT kill triggers here
     // because the new page's children useEffects have already run and created their
     // ScrollTriggers by the time this parent effect body executes.
-    if (window.innerWidth < 768) {
+    const resetToTop = () => {
+      // Portfolio owns valid fragment landings and reasserts them after late
+      // layout. Every path-only navigation must defeat both Next's delayed
+      // scroll handling and any target retained by the persistent Lenis
+      // instance from the departing route.
+      if (window.location.hash) return;
+      lenisRef.current?.scrollTo(0, { immediate: true });
       window.scrollTo(0, 0);
-    } else if (lenisRef.current) {
-      lenisRef.current.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo(0, 0);
-    }
+    };
+
+    resetToTop();
+    const resetFrames: number[] = [];
+    resetFrames.push(
+      requestAnimationFrame(() => {
+        resetToTop();
+        resetFrames.push(requestAnimationFrame(resetToTop));
+      })
+    );
+    const resetTimers = [120, 320].map((delay) =>
+      setTimeout(resetToTop, delay)
+    );
 
     const refreshTimer = setTimeout(() => {
       refreshMotion();
-    }, 300);
+      resetFrames.push(requestAnimationFrame(resetToTop));
+    }, 340);
 
     return () => {
       clearTimeout(refreshTimer);
+      resetFrames.forEach(cancelAnimationFrame);
+      resetTimers.forEach(clearTimeout);
       // Kill departing page's triggers in CLEANUP so they're gone before the
       // next page's children effects run and create fresh triggers.
-      window.scrollTo(0, 0);
+      resetToTop();
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, [pathname, refreshMotion]);

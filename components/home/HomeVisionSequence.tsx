@@ -101,47 +101,13 @@ export default function HomeVisionSequence({
         if (railFillEl) gsap.set(railFillEl, { scaleY: 1, transformOrigin: "top" });
         if (photoFrameRef.current) gsap.set(photoFrameRef.current, { clipPath: "inset(0%)" });
 
-        const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
-        if (prefersReducedMotion || !isMobile) {
-          gsap.set([...introEls, ...processRows, ...processHead, ...closingEls], {
-            y: 0,
-            opacity: 1,
-          });
-          return;
-        }
-
-        // Mobile text entrance — decisive IO y+opacity rises. Every hidden
-        // state is y+opacity so LenisProvider's failsafe (Fix 18) resets it if
-        // an IntersectionObserver ever misses; text is never stranded. The
-        // sticky process walk stays desktop-only (natural flow on mobile).
-        if (headlineRef.current) {
-          gsap.set(headlineRef.current, { y: 22, opacity: 0 });
-          revealCleanups.push(
-            revealOnVisible([headlineRef.current], (el) =>
-              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
-            )
-          );
-        }
-        revealCleanups.push(
-          revealOnVisible(introEls, (el, i) =>
-            gsap.to(el, { y: 0, opacity: 1, duration: 0.65, delay: i * 0.05, ease: "power3.out" })
-          )
-        );
-        revealCleanups.push(
-          revealOnVisible(processHead, (el, i) =>
-            gsap.to(el, { y: 0, opacity: 1, duration: 0.65, delay: i * 0.05, ease: "power3.out" })
-          )
-        );
-        revealCleanups.push(
-          revealOnVisible(processRows, (el) =>
-            gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" })
-          )
-        );
-        revealCleanups.push(
-          revealOnVisible(closingEls, (el) =>
-            gsap.to(el, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" })
-          )
-        );
+        // The shared section controller owns mobile/tablet entrances. Local
+        // child states remain visible under skipped sections and back-scroll.
+        gsap.set([...introEls, ...processRows, ...processHead, ...closingEls], {
+          x: 0,
+          y: 0,
+          opacity: 1,
+        });
         return;
       }
 
@@ -369,7 +335,7 @@ export default function HomeVisionSequence({
         ref={photoRef}
         data-header-dark=""
         data-header-transparent=""
-        className="relative min-h-[44rem] overflow-hidden bg-[#050505] text-white sm:min-h-[48rem] lg:h-svh lg:min-h-0"
+        className="relative min-h-[max(44rem,100svh)] overflow-hidden bg-[#050505] text-white sm:min-h-[max(48rem,100svh)] lg:h-svh"
         data-gsap-reveal="true"
       >
         <div
@@ -395,7 +361,11 @@ export default function HomeVisionSequence({
         </div>
 
         <div className="relative z-10 mx-auto flex min-h-[44rem] max-w-[1680px] flex-col justify-end px-6 pb-16 pt-24 sm:min-h-[48rem] lg:h-full lg:min-h-0 lg:px-12 lg:pb-20 lg:pt-20">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12">
+          <div
+            className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12"
+            data-motion-reveal="up"
+            data-motion-stagger="0.08"
+          >
           <div className="lg:col-span-7">
             <p className="vision-intro-el mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-white/64 lg:mb-8">
               <span
@@ -469,7 +439,10 @@ export default function HomeVisionSequence({
       >
         <div className="xl:sticky xl:top-14 xl:flex xl:h-[calc(100svh-3.5rem)] xl:flex-col xl:overflow-hidden">
         {/* Marquee — refined mono strip, hairline-bounded, pinned with the panel */}
-        <div className="border-y border-white/10 bg-[#050505] py-5" aria-hidden="true">
+        <div
+          className="overflow-hidden border-y border-white/10 bg-[#050505] py-5 xl:ml-12"
+          aria-hidden="true"
+        >
           <div
             className="home-vision-marquee flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-white/38"
             style={{ animation: "marqueeScroll 72s linear infinite" }}
@@ -488,8 +461,16 @@ export default function HomeVisionSequence({
           </div>
         </div>
         <div className="mx-auto flex w-full max-w-[1680px] flex-col px-6 pt-14 pb-16 min-[1180px]:flex-1 min-[1180px]:justify-center min-[1180px]:px-12 min-[1180px]:pb-14 min-[1180px]:pt-10">
-          <div className="grid gap-10 min-[1180px]:grid-cols-12 min-[1180px]:items-center min-[1180px]:gap-12">
-            <div className="min-[1180px]:col-span-5 min-[1180px]:max-w-[34rem]">
+          <div
+            className="grid gap-10 min-[1180px]:grid-cols-12 min-[1180px]:items-center min-[1180px]:gap-12"
+            data-motion-reveal="up"
+            data-motion-stagger="0.08"
+          >
+            <div className="relative min-[1180px]:col-span-5 min-[1180px]:flex min-[1180px]:max-w-[34rem] min-[1180px]:flex-col min-[1180px]:justify-center min-[1180px]:border-y min-[1180px]:border-white/10 min-[1180px]:py-10">
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-[-1px] hidden h-[2px] w-20 bg-[var(--color-accent)] min-[1180px]:block"
+              />
               <p className="process-head-el mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-7">
                 <span
                   aria-hidden="true"
@@ -529,7 +510,7 @@ export default function HomeVisionSequence({
                 <ol className="border-t border-white/12">
                   {PROCESS_STEPS_V2.map((step, i) => (
                     <li key={step.number} className="relative">
-                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)] sm:gap-4 min-[1180px]:grid-cols-[3.5rem_9.5rem_minmax(0,1fr)] min-[1180px]:gap-5 min-[1180px]:py-5 min-[1440px]:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto]">
+                      <div className="process-row grid grid-cols-[1.5rem_4.75rem_minmax(0,1fr)] items-center gap-3.5 py-4 sm:grid-cols-[3.25rem_9.5rem_minmax(0,1fr)] sm:gap-4 min-[1180px]:grid-cols-[3.5rem_9.5rem_minmax(0,1fr)] min-[1180px]:gap-5 min-[1180px]:py-4 2xl:grid-cols-[3.5rem_11.5rem_minmax(0,1fr)_auto] 2xl:py-5">
                         <span className="process-num font-numbers text-[11px] text-white/50 transition-colors duration-400">
                           {step.number}
                         </span>
@@ -547,7 +528,7 @@ export default function HomeVisionSequence({
                         <h4 className="process-title font-editorial text-[1.15rem] font-normal leading-tight text-white/70 transition-all duration-400 sm:text-[clamp(1.25rem,2.15vw,2.1rem)]">
                           {step.title}
                         </h4>
-                        <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 min-[1440px]:block">
+                        <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 2xl:block">
                           {step.subtitle}
                         </span>
                       </div>

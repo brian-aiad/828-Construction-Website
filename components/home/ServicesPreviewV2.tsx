@@ -57,45 +57,13 @@ export default function ServicesPreviewV2() {
       gsap.set(captions, { y: 18, opacity: 0 });
       if (introRef.current) gsap.set(introRef.current, { y: 20, opacity: 0 });
 
-      const { isMobile, prefersReducedMotion } = AnimationController.getConfig();
-
       if (!AnimationController.shouldAnimate()) {
-        // Images always resolve instantly on mobile — no image entrance.
+        // The shared section controller owns mobile/tablet entrances. Keep
+        // every child readable so a fast scroll cannot strand local IO state.
         gsap.set(headlineLines, { yPercent: 0 });
         gsap.set(frames, { clipPath: "inset(0%)" });
-
-        if (prefersReducedMotion || !isMobile) {
-          gsap.set(captions, { y: 0, opacity: 1 });
-          if (introRef.current) gsap.set(introRef.current, { y: 0, opacity: 1 });
-          return;
-        }
-
-        // Mobile text entrance: lightweight decisive IO rises. Every hidden
-        // state is y+opacity, so LenisProvider's global failsafe (Fix 18)
-        // resets it (y:0/opacity:1) if an IntersectionObserver ever misses —
-        // content can never be stranded invisible.
-        if (headlineRef.current) {
-          gsap.set(headlineRef.current, { y: 22, opacity: 0 });
-          revealCleanups.push(
-            revealOnVisible([headlineRef.current], (el) =>
-              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
-            )
-          );
-        }
-        if (introRef.current) {
-          revealCleanups.push(
-            revealOnVisible([introRef.current], (el) =>
-              gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
-            )
-          );
-        }
-        captions.forEach((cap) => {
-          revealCleanups.push(
-            revealOnVisible([cap], (el) =>
-              gsap.to(el, { y: 0, opacity: 1, duration: 0.65, ease: "power3.out" })
-            )
-          );
-        });
+        gsap.set(captions, { x: 0, y: 0, opacity: 1 });
+        if (introRef.current) gsap.set(introRef.current, { x: 0, y: 0, opacity: 1 });
         return;
       }
 
@@ -233,7 +201,11 @@ export default function ServicesPreviewV2() {
       />
       <div className="mx-auto w-full max-w-[1680px] px-5 sm:px-6 lg:px-10 2xl:px-12">
         {/* Header row — headline left, copy + link right */}
-        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
+        <div
+          className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10"
+          data-motion-reveal="up"
+          data-motion-stagger="0.08"
+        >
           <div className="lg:col-span-7">
             <h2
               ref={headlineRef}
@@ -268,7 +240,11 @@ export default function ServicesPreviewV2() {
         </div>
 
         {/* Work grid — one tall frame left, two stacked right, captions below */}
-        <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-9 lg:mt-8 lg:grid-cols-12 lg:gap-y-0">
+        <div
+          className="mt-8 grid grid-cols-1 gap-x-8 gap-y-9 lg:mt-8 lg:grid-cols-12 lg:gap-y-0"
+          data-motion-reveal="up"
+          data-motion-stagger="0.08"
+        >
           <div
             ref={(el) => {
               cardRefs.current[0] = el;
@@ -288,7 +264,6 @@ export default function ServicesPreviewV2() {
                     loading="lazy"
                     sizes="(max-width: 1024px) 100vw, 56vw"
                     quality={93}
-                    unoptimized
                     placeholder="blur"
                     blurDataURL={BLUR_PLACEHOLDER}
                     onError={imgError}
@@ -326,7 +301,6 @@ export default function ServicesPreviewV2() {
                         loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 34vw"
                         quality={93}
-                        unoptimized
                         placeholder="blur"
                         blurDataURL={BLUR_PLACEHOLDER}
                         onError={imgError}

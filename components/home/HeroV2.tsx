@@ -142,7 +142,6 @@ export default function HeroV2() {
           fetchPriority="high"
           sizes="100vw"
           quality={92}
-          unoptimized
           className="hero-kenburns object-cover"
         />
       </div>

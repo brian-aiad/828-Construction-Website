@@ -276,9 +276,10 @@ function ContactHero() {
   return (
     <section
       data-section="contact-hero"
+      data-stack-compact=""
       data-header-dark=""
       data-header-transparent=""
-      className="relative flex min-h-svh flex-col justify-between overflow-hidden bg-black text-white"
+      className="relative flex min-h-[clamp(31rem,72svh,46rem)] flex-col justify-between overflow-hidden bg-black text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="absolute inset-0">
@@ -309,7 +310,7 @@ function ContactHero() {
         </p>
       </div>
 
-      <div className="relative z-10 px-6 pb-9 pt-28 sm:pt-0 lg:px-12 lg:pb-11">
+      <div className="relative z-10 px-6 pb-12 pt-24 sm:pb-14 sm:pt-0 lg:px-12 lg:pb-16">
         <span className="font-labels text-[10px] uppercase tracking-[0.26em] text-white/62">
           Contact / 828 Construction
         </span>
@@ -336,7 +337,7 @@ function GetInTouch() {
     <section
       data-section="contact-inquiry"
       data-header-dark=""
-      className="relative overflow-hidden bg-black px-6 pb-20 pt-28 text-white lg:px-12 lg:pb-28 xl:flex xl:min-h-svh xl:flex-col xl:justify-center"
+      className="relative overflow-hidden bg-black px-6 py-20 text-white sm:py-24 lg:px-12 lg:py-28"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
@@ -440,8 +441,9 @@ function InsightsPrep() {
   return (
     <section
       data-section="contact-prep"
+      data-stack-compact=""
       data-header-light=""
-      className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-[#f7f7f3] px-6 pb-8 pt-18 text-[#141414] sm:pb-10 sm:pt-22 lg:px-12 lg:pb-20 lg:pt-28"
+      className="relative overflow-hidden bg-[#f7f7f3] px-6 py-16 text-[#141414] sm:py-20 lg:px-12 lg:py-24"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
@@ -449,14 +451,21 @@ function InsightsPrep() {
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Critical elements to include in your communication
           </span>
-          <h2 className="ct-rise mt-5 max-w-xl font-display font-normal leading-[1.14] tracking-[-0.01em] text-[clamp(1.6rem,2.7vw,2.7rem)]">
+          <h2
+            className="mt-5 max-w-xl font-display font-normal leading-[1.14] tracking-[-0.01em] text-[clamp(1.6rem,2.7vw,2.7rem)]"
+            data-motion-reveal="left"
+          >
             Your insights help us provide solutions that are thoughtfully
             tailored to your needs
           </h2>
           <div className="ct-line mt-8 h-px w-full max-w-36 origin-left bg-[var(--color-accent)]" />
         </div>
 
-        <div className="lg:pt-1">
+        <div
+          className="lg:pt-1"
+          data-motion-reveal="up"
+          data-motion-stagger="0.07"
+        >
           {prepItems.map((item, index) => {
             const active = activeIdx === index;
             return (
@@ -465,7 +474,7 @@ function InsightsPrep() {
                 ref={(el) => {
                   itemRefs.current[index] = el;
                 }}
-                className="ct-rise border-b border-black/10 py-6 first:border-t lg:py-7"
+                className="border-b border-black/10 py-5 first:border-t lg:py-6"
               >
                 <div className="flex items-baseline gap-6 lg:gap-8">
                   <span
@@ -505,8 +514,8 @@ function InsightsPrep() {
 // Joe (IMG_1127): "how we're doing on that one service page… as you scroll they
 // illuminate and a picture illuminates with it." Brian (2026-07-13): match the
 // services page's runway scrolling — the walk is deliberate, scroll-driven —
-// but do NOT copy the look. Differentiators here: shorter 150vh runway (50vh a
-// service vs 70vh), smaller titles, and the picture stage is INDENTED with a
+// but do NOT copy the look. Differentiators here: a short 84vh runway (28vh a
+// service), smaller titles, and the picture stage is INDENTED with a
 // drawing vertical maroon bar on its left edge (services: full-width stage,
 // horizontal top line). Mobile walks in natural flow (no pin).
 function useTravelIndex(
@@ -520,10 +529,17 @@ function useTravelIndex(
     const coarseTabletQuery = window.matchMedia(
       "(pointer: coarse) and (max-width: 1366px)"
     );
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
     let raf = 0;
     const measure = () => {
       raf = 0;
-      if (desktopQuery.matches && !coarseTabletQuery.matches) {
+      if (
+        desktopQuery.matches &&
+        !coarseTabletQuery.matches &&
+        !reducedMotionQuery.matches
+      ) {
         const wrap = wrapRef.current;
         if (!wrap) return;
         const runway = wrap.offsetHeight - window.innerHeight;
@@ -555,6 +571,7 @@ function useTravelIndex(
     window.addEventListener("load", onScroll, { passive: true });
     desktopQuery.addEventListener("change", onScroll);
     coarseTabletQuery.addEventListener("change", onScroll);
+    reducedMotionQuery.addEventListener("change", onScroll);
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(() => onScroll()).catch(() => {});
     }
@@ -564,6 +581,7 @@ function useTravelIndex(
       window.removeEventListener("load", onScroll);
       desktopQuery.removeEventListener("change", onScroll);
       coarseTabletQuery.removeEventListener("change", onScroll);
+      reducedMotionQuery.removeEventListener("change", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [wrapRef, rowRefs, count]);
@@ -581,11 +599,11 @@ function ServicePathRows() {
       ref={wrapRef}
       data-section="contact-paths"
       data-header-light=""
-      className="motion-runway relative bg-[#f7f7f3] text-[#141414] xl:h-[calc(100svh+150vh)]"
+      className="motion-runway relative bg-[#f7f7f3] text-[#141414] xl:h-[calc(100svh+84vh)] motion-reduce:xl:h-auto motion-reduce:xl:min-h-svh"
       style={{ overflowX: "clip" }}
     >
       {/* Deliberate walk: the panel pins while the runway scrolls (xl+). */}
-      <div className="xl:sticky xl:top-0 xl:h-svh xl:overflow-hidden">
+      <div className="xl:sticky xl:top-0 xl:h-svh xl:overflow-hidden motion-reduce:xl:relative motion-reduce:xl:h-auto motion-reduce:xl:overflow-visible">
         <div className="mx-auto max-w-7xl px-6 pb-4 pt-8 sm:pt-10 lg:px-12 lg:pt-[6.5rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Focused service paths
@@ -639,7 +657,7 @@ function ServicePathRows() {
                 <div
                   className={`grid max-xl:grid-rows-[1fr] ${
                     open ? "xl:grid-rows-[1fr]" : "xl:grid-rows-[0fr]"
-                  }`}
+                  } motion-reduce:xl:!grid-rows-[1fr]`}
                   style={{
                     transition:
                       "grid-template-rows 360ms cubic-bezier(0.16,1,0.3,1)",
@@ -654,9 +672,8 @@ function ServicePathRows() {
                         loading={i === 0 ? "eager" : "lazy"}
                         sizes="(max-width: 1536px) 100vw, 1100px"
                         quality={92}
-                        unoptimized
                         onError={imgError}
-                        className="object-cover transition-transform duration-[1600ms] ease-out"
+                        className="object-cover transition-transform duration-[1600ms] ease-out motion-reduce:!transform-none motion-reduce:!transition-none"
                         style={{
                           filter: "contrast(1.05) saturate(1.05)",
                           transform: open ? "scale(1.03)" : "scale(1.08)",

@@ -173,7 +173,7 @@ const PROJECT_MAIN_IMAGES = {
 export const PROJECTS: Project[] = [
   {
     id: 1,
-    title: "Cerritos Residence",
+    title: "Cerritos Bath Remodel",
     category: "Bath Remodel",
     location: "Cerritos, CA",
     spec: "Glass shower enclosure · Dark feature tile · Dual marble vanity · Rain + hand shower",
@@ -186,7 +186,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 2,
-    title: "El Sereno Residence",
+    title: "El Sereno Bath & Deck",
     category: "Bath Remodel",
     location: "El Sereno, CA",
     spec: "Geometric star tile · Matte black fixtures · Round wood mirror · Hillside deck + custom stairs",
@@ -199,7 +199,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 3,
-    title: "Tustin Residence",
+    title: "Tustin Bath Refresh",
     category: "Bath Remodel",
     location: "Tustin, CA",
     spec: "Tub/shower surround · Blue herringbone niche · Barn-door hardware · Wood bath tray",

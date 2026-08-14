@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FlowNode from "@/components/system/FlowNode";
@@ -8,6 +8,15 @@ import { useJunctionSettle } from "@/components/system/useJunctionSettle";
 import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
 
 gsap.registerPlugin(ScrollTrigger);
+
+function desktopStackMotionEnabled() {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(min-width: 1280px)").matches &&
+    !window.matchMedia("(pointer: coarse) and (max-width: 1366px)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
 
 type StackedSurfaceFlowProps = {
   children: React.ReactNode;
@@ -31,9 +40,10 @@ export default function StackedSurfaceFlow({
   resizeDebounceMs = 180,
 }: StackedSurfaceFlowProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<number[]>([]);
-  const [motionEnabled, setMotionEnabled] = useState(false);
+  const [motionEnabled, setMotionEnabled] = useState(desktopStackMotionEnabled);
 
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 1280px)");
@@ -64,7 +74,7 @@ export default function StackedSurfaceFlow({
   useJunctionSettle(wrapRef, settleSelector);
   useStackSurfaceVisibility(wrapRef);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const wrap = wrapRef.current;
     const line = lineRef.current;
     if (!wrap || !line) return;
@@ -93,6 +103,15 @@ export default function StackedSurfaceFlow({
           el.setAttribute("data-header-dark", "");
           el.removeAttribute("data-header-light");
         }
+
+        el.toggleAttribute(
+          "data-stack-compact",
+          el.querySelector("[data-stack-compact]") !== null
+        );
+        el.toggleAttribute(
+          "data-flow-rail-pause",
+          el.querySelector("[data-flow-rail-pause]") !== null
+        );
       });
     };
 
@@ -121,6 +140,39 @@ export default function StackedSurfaceFlow({
           return junction;
         });
       setNodes(junctions);
+
+      const rail = railRef.current;
+      if (rail) {
+        const pauseRanges = stacks.flatMap((surface, index) =>
+          surface.hasAttribute("data-flow-rail-pause")
+            ? [{
+                start: junctions[index],
+                end: index === stacks.length - 1
+                  ? wrap.offsetHeight
+                  : junctions[index] + surface.offsetHeight,
+              }]
+            : []
+        );
+
+        if (!pauseRanges.length) {
+          rail.style.maskImage = "none";
+          rail.style.webkitMaskImage = "none";
+        } else {
+          const stops = ["#000 0px"];
+          pauseRanges.forEach(({ start, end }) => {
+            stops.push(
+              `#000 ${start}px`,
+              `transparent ${start}px`,
+              `transparent ${end}px`,
+              `#000 ${end}px`
+            );
+          });
+          stops.push(`#000 ${wrap.offsetHeight}px`);
+          const mask = `linear-gradient(to bottom, ${stops.join(", ")})`;
+          rail.style.maskImage = mask;
+          rail.style.webkitMaskImage = mask;
+        }
+      }
     };
 
     let railFrame = 0;
@@ -242,6 +294,7 @@ export default function StackedSurfaceFlow({
   return (
     <div ref={wrapRef} {...{ [flowAttribute]: "" }} className={className}>
       <div
+        ref={railRef}
         data-flow-rail=""
         aria-hidden="true"
         className="pointer-events-none absolute bottom-0 top-0 left-[1.4rem] z-30 hidden w-px xl:left-6 xl:block"

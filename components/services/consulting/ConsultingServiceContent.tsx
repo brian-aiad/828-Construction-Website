@@ -231,7 +231,8 @@ function useConsultingMotion() {
       const hairlines = gsap.utils.toArray<HTMLElement>(".con-hairline");
       const parallaxImgs = gsap.utils.toArray<HTMLElement>(".con-parallax");
 
-      const { enabled, prefersReducedMotion } = AnimationController.getConfig();
+      const { enabled, isMobile, prefersReducedMotion } =
+        AnimationController.getConfig();
 
       // Reduced motion: reveal everything immediately, hide nothing (mandate).
       if (prefersReducedMotion) {
@@ -255,8 +256,16 @@ function useConsultingMotion() {
       // failsafe-tagged (data-gsap-reveal on clip wrappers), mobile-safe.
       revealCleanups.push(
         revealOnVisible(rises, (el) => {
-          const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
-          gsap.to(el, { opacity: 1, y: 0, duration: 0.85, delay, ease: "power3.out" });
+          const stagger = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
+          const delay = isMobile ? Math.min(stagger * 0.55, 0.18) : stagger;
+          gsap.to(el, {
+            opacity: 1,
+            y: 0,
+            duration: isMobile ? 0.66 : 0.85,
+            delay,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
         })
       );
       // Fully-clipped nodes never intersect (Fix 23) — observe the parent.
@@ -267,20 +276,29 @@ function useConsultingMotion() {
             const el =
               (wrapper as HTMLElement).querySelector<HTMLElement>(".con-clip") ??
               (wrapper as HTMLElement);
-            const delay = parseFloat(el.dataset.stagger ?? "0");
+            const stagger = parseFloat(el.dataset.stagger ?? "0");
+            const delay = isMobile ? Math.min(stagger * 0.55, 0.16) : stagger;
             gsap.to(el, {
               clipPath: "inset(0% 0% 0% 0%)",
-              duration: 1.1,
+              duration: isMobile ? 0.78 : 1.1,
               delay,
               ease: "power3.inOut",
+              overwrite: "auto",
             });
           }
         )
       );
       revealCleanups.push(
         revealOnVisible(hairlines, (el) => {
-          const delay = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
-          gsap.to(el, { scaleX: 1, duration: 0.9, delay, ease: "power2.inOut" });
+          const stagger = parseFloat((el as HTMLElement).dataset.stagger ?? "0");
+          const delay = isMobile ? Math.min(stagger * 0.5, 0.16) : stagger;
+          gsap.to(el, {
+            scaleX: 1,
+            duration: isMobile ? 0.7 : 0.9,
+            delay,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
         })
       );
 
@@ -325,6 +343,20 @@ function ConsultingHero() {
       className="relative bg-[#f7f7f3] text-[#141414]"
       style={{ overflowX: "clip" }}
     >
+      <style>{`
+        @keyframes conMobileHeroIn {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 1279px) {
+          .con-mobile-hero {
+            animation: conMobileHeroIn 0.72s cubic-bezier(0.16,1,0.3,1) both;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .con-mobile-hero { animation: none !important; opacity: 1 !important; transform: none !important; }
+        }
+      `}</style>
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]">
         <div className="relative flex flex-col justify-center px-6 pb-14 pt-28 sm:px-10 lg:pl-[max(3rem,calc((100vw-96rem)/2+3rem))] lg:pr-14 lg:py-28">
           <Link
@@ -333,11 +365,17 @@ function ConsultingHero() {
           >
             <span className="inline-block">Back to services</span>
           </Link>
-          <span className="mt-9 block font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
+          <span
+            className="con-mobile-hero mt-9 block font-labels text-[10px] uppercase tracking-[0.24em] text-black/65"
+            style={{ animationDelay: "0.08s" }}
+          >
             Construction Consulting / CA License #{SITE.license}
           </span>
           {/* LCP anchor: renders on first paint, no hidden initial state */}
-          <h1 className="mt-8 max-w-[13ch] font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.6rem)]">
+          <h1
+            className="con-mobile-hero mt-8 max-w-[13ch] font-display font-bold leading-[1.04] tracking-tight text-[clamp(2.2rem,4.5vw,4.6rem)]"
+            style={{ animationDelay: "0.16s" }}
+          >
             {HERO_H1}
           </h1>
           <div
@@ -345,10 +383,16 @@ function ConsultingHero() {
             style={{ opacity: 0.65 }}
             aria-hidden="true"
           />
-          <p className="mt-7 max-w-lg text-[15px] leading-8 text-black/70 sm:text-base">
+          <p
+            className="con-mobile-hero mt-7 max-w-lg text-[15px] leading-8 text-black/70 sm:text-base"
+            style={{ animationDelay: "0.24s" }}
+          >
             {HERO_PARAGRAPH}
           </p>
-          <div className="mt-10 flex flex-wrap gap-4">
+          <div
+            className="con-mobile-hero mt-10 flex flex-wrap gap-4"
+            style={{ animationDelay: "0.32s" }}
+          >
             <a
               href={SITE.phoneHref}
               className="btn-shine btn-lift bg-black px-7 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)]"
@@ -374,7 +418,6 @@ function ConsultingHero() {
               priority
               sizes="(max-width: 1024px) 100vw, 52vw"
               quality={92}
-              unoptimized
               placeholder="blur"
               blurDataURL={BLUR_PLACEHOLDER}
               onError={imgError}
@@ -457,7 +500,6 @@ function SolutionsSection() {
                       loading="lazy"
                       sizes="(max-width: 1024px) 0px, 36vw"
                       quality={92}
-                      unoptimized
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
                       onError={imgError}
@@ -486,7 +528,6 @@ function SolutionsSection() {
                   loading="lazy"
                   sizes="50vw"
                   quality={88}
-                  unoptimized
                   placeholder="blur"
                   blurDataURL={BLUR_PLACEHOLDER}
                   onError={imgError}
@@ -646,7 +687,6 @@ function QuestionsSection() {
                 loading="lazy"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 quality={92}
-                unoptimized
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
                 onError={imgError}
@@ -665,7 +705,6 @@ function QuestionsSection() {
                 loading="lazy"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 quality={92}
-                unoptimized
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
                 onError={imgError}

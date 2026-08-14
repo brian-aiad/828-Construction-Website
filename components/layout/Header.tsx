@@ -24,6 +24,8 @@ export default function Header() {
   const progressRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const desktopServicesButtonRef = useRef<HTMLAnchorElement>(null);
+  const desktopServicesMenuRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HeaderSurface>("dark-transparent");
   const pathname = usePathname();
 
@@ -256,7 +258,7 @@ export default function Header() {
               : `rgba(255,255,255,${borderAlpha})`
           }`,
         }}
-        className="fixed top-0 left-0 right-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="fixed top-0 left-0 right-0 z-[80] transition-[background-color,backdrop-filter,border-color] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
       >
         <div className="w-full px-3 sm:px-4 lg:px-8 2xl:px-10">
           <div
@@ -290,11 +292,36 @@ export default function Header() {
                       className="relative"
                       onMouseEnter={() => setServicesOpen(true)}
                       onMouseLeave={() => setServicesOpen(false)}
+                      onFocusCapture={() => setServicesOpen(true)}
+                      onBlurCapture={(event) => {
+                        if (!event.currentTarget.contains(event.relatedTarget)) {
+                          setServicesOpen(false);
+                        }
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "ArrowDown") {
+                          event.preventDefault();
+                          setServicesOpen(true);
+                          requestAnimationFrame(() => {
+                            desktopServicesMenuRef.current
+                              ?.querySelector<HTMLAnchorElement>("a[href]")
+                              ?.focus();
+                          });
+                        } else if (event.key === "Escape") {
+                          event.preventDefault();
+                          desktopServicesButtonRef.current?.focus();
+                          requestAnimationFrame(() => setServicesOpen(false));
+                        }
+                      }}
                     >
                       {/* Trigger */}
                       <Link
+                        ref={desktopServicesButtonRef}
                         href="/services"
-                        className={`font-labels text-[10px] tracking-[0.18em] uppercase transition-colors duration-200 relative flex items-center gap-1.5 ${
+                        aria-haspopup="true"
+                        aria-expanded={servicesOpen}
+                        aria-controls="desktop-services-menu"
+                        className={`relative flex min-h-11 items-center gap-1.5 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-200 ${
                           isServicesActive ? inkActive : inkBase
                         }`}
                       >
@@ -310,6 +337,8 @@ export default function Header() {
 
                       {/* Dropdown panel — pt-2 gives visual gap without breaking hover area */}
                       <div
+                        ref={desktopServicesMenuRef}
+                        id="desktop-services-menu"
                         className={`absolute top-full left-0 pt-2 w-52 transition-all duration-200 ${
                           servicesOpen ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
                         }`}
@@ -380,7 +409,7 @@ export default function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`font-labels text-[10px] tracking-[0.18em] uppercase transition-colors duration-200 relative group ${
+                    className={`group relative inline-flex min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-200 ${
                       pathname === link.href ? inkActive : inkBase
                     }`}
                   >
@@ -497,6 +526,8 @@ export default function Header() {
                         onClick={() =>
                           setMobileServicesOpen(!mobileServicesOpen)
                         }
+                        aria-expanded={mobileServicesOpen}
+                        aria-controls="mobile-services-submenu"
                         className={`w-full flex items-center justify-between py-4 border-b font-display font-bold text-3xl tracking-tight transition-colors duration-200 ${
                           isServicesActive
                             ? "text-white border-gray-700"
@@ -505,6 +536,7 @@ export default function Header() {
                       >
                         <span>{link.label}</span>
                         <span
+                          aria-hidden="true"
                           className={`font-labels text-[9px] tracking-[0.2em] uppercase transition-colors duration-200 ${
                             mobileServicesOpen
                               ? "text-[var(--color-accent-light)]"
@@ -519,6 +551,7 @@ export default function Header() {
                       <AnimatePresence>
                         {mobileServicesOpen && (
                           <motion.div
+                            id="mobile-services-submenu"
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}

@@ -12,7 +12,7 @@ export type ResidenceGallery = {
 export const RESIDENCE_GALLERIES: ResidenceGallery[] = [
   {
     id: "cerritos-residence",
-    title: "Cerritos Residence",
+    title: "Cerritos Bath Remodel",
     location: "Cerritos, CA",
     scope: "Bath Remodel",
     photos: [
@@ -57,7 +57,7 @@ export const RESIDENCE_GALLERIES: ResidenceGallery[] = [
   },
   {
     id: "el-sereno-residence",
-    title: "El Sereno Residence",
+    title: "El Sereno Bath & Deck",
     location: "El Sereno, CA",
     scope: "Bath Remodel & Outdoor Living",
     photos: [
@@ -107,7 +107,7 @@ export const RESIDENCE_GALLERIES: ResidenceGallery[] = [
   },
   {
     id: "tustin-residence",
-    title: "Tustin Residence",
+    title: "Tustin Bath Refresh",
     location: "Tustin, CA",
     scope: "Bath Refresh",
     photos: [
