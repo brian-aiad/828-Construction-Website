@@ -336,8 +336,9 @@ function GetInTouch() {
   return (
     <section
       data-section="contact-inquiry"
+      data-stack-compact=""
       data-header-dark=""
-      className="relative overflow-hidden bg-black px-6 py-20 text-white sm:py-24 lg:px-12 lg:py-28"
+      className="relative overflow-hidden bg-black px-6 py-20 text-white sm:py-24 lg:px-12 lg:py-20 xl:py-24"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
@@ -355,9 +356,9 @@ function GetInTouch() {
           </span>
         </div>
 
-        <div className="ct-line mt-10 h-px w-full origin-left bg-white/14" />
+        <div className="ct-line mt-8 h-px w-full origin-left bg-white/14" />
 
-        <div className="mt-12 grid gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-20">
+        <div className="mt-10 grid gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16">
           {/* The application path — every way a project reaches Joe. */}
           <div>
             {inquiryRows.map((row) => (
@@ -367,7 +368,7 @@ function GetInTouch() {
                 target={row.href.startsWith("http") ? "_blank" : undefined}
                 rel={row.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 data-gsap-reveal="true"
-                className="ct-ledger group block border-b border-white/10 py-7 first:border-t"
+                className="ct-ledger group block border-b border-white/10 py-6 first:border-t"
               >
                 <div className="flex items-baseline justify-between gap-6">
                   <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/46">
@@ -393,7 +394,7 @@ function GetInTouch() {
               </a>
             ))}
 
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center gap-4">
               <span className="border border-[var(--color-accent)]/60 px-4 py-2.5 font-labels text-[9px] uppercase tracking-[0.18em] text-white/72">
                 CA License #{SITE.license}
               </span>
@@ -406,9 +407,9 @@ function GetInTouch() {
           {/* Message form — visual form; backend remains on hold (CLAUDE.md). */}
           <div
             data-gsap-reveal="true"
-            className="ct-form-card border border-white/12 bg-white/[0.03] p-6 sm:p-8 lg:p-10"
+            className="ct-form-card border border-white/12 bg-white/[0.03] p-6 sm:p-8"
           >
-            <div className="mb-8 flex items-center justify-between gap-5 border-b border-white/10 pb-5">
+            <div className="mb-6 flex items-center justify-between gap-5 border-b border-white/10 pb-5">
               <div>
                 <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/42">
                   Or send the details
@@ -592,6 +593,8 @@ function ServicePathRows() {
   const wrapRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Array<HTMLElement | null>>([]);
   const activeIdx = useTravelIndex(wrapRef, rowRefs, SERVICE_PATH_ROWS.length);
+  const activeRow = SERVICE_PATH_ROWS[activeIdx];
+  const activeService = SERVICES.find((service) => service.slug === activeRow.slug)!;
 
   return (
     <>
@@ -604,7 +607,7 @@ function ServicePathRows() {
     >
       {/* Deliberate walk: the panel pins while the runway scrolls (xl+). */}
       <div className="xl:sticky xl:top-0 xl:h-svh xl:overflow-hidden motion-reduce:xl:relative motion-reduce:xl:h-auto motion-reduce:xl:overflow-visible">
-        <div className="mx-auto max-w-7xl px-6 pb-4 pt-8 sm:pt-10 lg:px-12 lg:pt-[6.5rem]">
+        <div className="mx-auto max-w-7xl px-6 pb-4 pt-16 sm:pt-20 lg:px-12 lg:pt-[6.5rem]">
           <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
             Focused service paths
           </span>
@@ -652,16 +655,8 @@ function ServicePathRows() {
                   </span>
                 </div>
 
-                {/* Desktop keeps the active-row reveal. Touch layouts keep
-                    image space reserved to avoid scroll-time layout shifts. */}
                 <div
-                  className={`grid max-xl:grid-rows-[1fr] ${
-                    open ? "xl:grid-rows-[1fr]" : "xl:grid-rows-[0fr]"
-                  } motion-reduce:xl:!grid-rows-[1fr]`}
-                  style={{
-                    transition:
-                      "grid-template-rows 360ms cubic-bezier(0.16,1,0.3,1)",
-                  }}
+                  className="contact-path-mobile-media grid grid-rows-[1fr]"
                 >
                   <div className="min-h-0 overflow-hidden">
                     <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%] xl:h-[calc(100svh-31rem)] xl:min-h-[12rem]">
@@ -704,6 +699,52 @@ function ServicePathRows() {
               </Link>
             );
           })}
+
+          {/* Fine-pointer desktop keeps one stable media slot. Changing the
+              active service now crossfades media instead of resizing ledger
+              rows, which preserves the composition without layout shift. */}
+          <Link
+            href={`/services/${activeRow.slug}`}
+            aria-label={`View ${activeService.title}`}
+            className="contact-path-desktop-stage group relative mt-5 h-[calc(100svh-31rem)] min-h-[12rem] overflow-hidden"
+          >
+            {SERVICE_PATH_ROWS.map((row, i) => {
+              const service = SERVICES.find((item) => item.slug === row.slug)!;
+              const open = activeIdx === i;
+              return (
+                <Image
+                  key={row.slug}
+                  src={row.image}
+                  alt={`${service.title} by 828 Construction`}
+                  fill
+                  loading={i === 0 ? "eager" : "lazy"}
+                  sizes="(max-width: 1536px) 100vw, 1100px"
+                  quality={92}
+                  onError={imgError}
+                  className="object-cover motion-reduce:!transform-none motion-reduce:!transition-none"
+                  style={{
+                    filter: "contrast(1.05) saturate(1.05)",
+                    opacity: open ? 1 : 0,
+                    transform: open ? "scale(1.03)" : "scale(1.08)",
+                    transition:
+                      "opacity 520ms cubic-bezier(0.16,1,0.3,1), transform 1600ms cubic-bezier(0.16,1,0.3,1)",
+                  }}
+                />
+              );
+            })}
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-6 pb-8 pt-14">
+              <p className="max-w-md text-[13px] leading-5 text-white/85">
+                {activeRow.line}
+              </p>
+              <span className="shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85">
+                View {activeService.title} →
+              </span>
+            </div>
+            <div
+              className="absolute bottom-0 left-0 top-0 w-[3px] bg-[var(--color-accent)] opacity-[0.85]"
+              aria-hidden="true"
+            />
+          </Link>
         </div>
       </div>
 

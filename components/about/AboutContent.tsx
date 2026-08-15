@@ -771,7 +771,10 @@ function AboutCTA() {
 
   return (
     <section ref={sectionRef} data-section="" data-header-dark="" data-header-transparent="" className="relative grid min-h-svh bg-black text-white lg:grid-cols-2" style={{ overflowX: "clip" }}>
-      <div className="relative min-h-[40svh] overflow-hidden lg:min-h-svh">
+      <div
+        className="relative min-h-[40svh] overflow-hidden lg:min-h-svh"
+        data-motion-reveal="left"
+      >
         <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
             src="/images/generated/about-cta-first-conversation-v2.jpg"

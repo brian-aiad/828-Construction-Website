@@ -462,8 +462,8 @@ function AduHero() {
         <div className="relative order-2 min-h-[46vh] overflow-hidden lg:order-1 lg:min-h-screen">
           <div className="adu-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/generated/adu-hero-exterior-v3.png"
-              alt="Modern detached ADU exterior with warm wood, black-framed doors, and drought-tolerant landscaping"
+              src="/images/generated/adu-hero-exterior-v4.webp"
+              alt="Completed detached South Bay ADU with warm wood, black-framed doors, and drought-tolerant landscaping"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
@@ -885,8 +885,9 @@ function AduInvitation() {
   return (
     <section
       data-section="adu-invitation"
+      data-stack-compact=""
       data-header-dark=""
-      className="relative flex min-h-svh flex-col justify-center border-t border-white/10 bg-[#0a0a0a] text-white"
+      className="relative flex flex-col border-t border-white/10 bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-[7.5rem]">

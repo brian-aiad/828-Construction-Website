@@ -12,7 +12,7 @@ export default function FooterRevealWrapper({
   return (
     <div
       data-footer-surface=""
-      className="relative z-50 bg-black shadow-[0_-30px_90px_-48px_rgba(0,0,0,0.96)]"
+      className="relative z-50 bg-black shadow-[0_-30px_90px_-48px_rgba(0,0,0,0.96),0_3px_0_#000]"
     >
       {children}
     </div>

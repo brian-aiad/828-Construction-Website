@@ -689,17 +689,16 @@ function PrinciplesSection() {
 
 // ── Section 4 — foundational principles + the stage strip + media band ──────
 // Mimics the NS Process composition Joe showed: light surface, heading split,
-// a slim hairline strip of the six stages, then the media band. This is a
-// content-height closing band rather than an artificial full-screen runway;
-// the footer still covers it through the shared sticky-surface flow.
+// a slim hairline strip of the six stages, then the media band. On desktop the
+// photograph absorbs the remaining viewport so the close stays immersive;
+// touch layouts keep the same content in natural document flow.
 function ProcessSection() {
   return (
     <section
       data-section="services-process"
-      data-stack-compact=""
       data-flow-rail-pause=""
       data-header-light=""
-      className="relative flex flex-col bg-[#f7f7f3] text-[#141414]"
+      className="relative flex flex-col bg-[#f7f7f3] text-[#141414] xl:h-svh"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto w-full max-w-7xl px-6 pt-24 lg:px-12 lg:pt-24">

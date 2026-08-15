@@ -858,11 +858,11 @@ function RemediationApproach() {
 const METHOD_PHOTOS = [
   // Swappable slots — Brian is generating a multi-photo set to drop in here.
   {
-    src: "/images/generated/remediation-method-diagnostic-v3.png",
+    src: "/images/generated/remediation-method-diagnostic-v4.webp",
     alt: "Opened wall condition before remediation repair",
   },
   {
-    src: "/images/generated/remediation-method-restoration-v3.png",
+    src: "/images/generated/remediation-method-restoration-v4.webp",
     alt: "Remediation drying equipment in a clean work area",
   },
 ];
@@ -871,8 +871,9 @@ function RemediationMethod() {
   return (
     <section
       data-section="rem-method"
+      data-stack-compact=""
       data-header-light=""
-      className="relative flex min-h-svh flex-col justify-center bg-[#f7f4f0] text-black"
+      className="relative flex flex-col bg-[#f7f4f0] text-black"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 pb-16 pt-28 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 lg:px-12 lg:pb-20 lg:pt-[7.5rem]">
@@ -891,6 +892,8 @@ function RemediationMethod() {
                     src={photo.src}
                     alt={photo.alt}
                     fill
+                    loading="eager"
+                    unoptimized={i === 1}
                     sizes="(max-width: 1024px) 50vw, 24vw"
                     quality={92}
                     placeholder="blur"
@@ -930,8 +933,9 @@ function RemediationCta() {
   return (
     <section
       data-section="rem-cta"
+      data-stack-compact=""
       data-header-dark=""
-      className="relative flex min-h-svh flex-col justify-center border-t border-white/10 bg-[#0a0a0a] text-white"
+      className="relative flex flex-col border-t border-white/10 bg-[#0a0a0a] text-white"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl px-6 pb-20 pt-24 lg:px-12 lg:py-28">

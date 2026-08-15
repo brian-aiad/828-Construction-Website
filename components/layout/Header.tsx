@@ -20,7 +20,10 @@ export default function Header() {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [surface, setSurface] = useState<HeaderSurface>("dark-transparent");
+  const [lightInk, setLightInk] = useState(false);
   const [torTime, setTorTime] = useState("");
+  const headerRef = useRef<HTMLElement>(null);
+  const lightInkRef = useRef(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -39,6 +42,11 @@ export default function Header() {
     const readSurface = (): HeaderSurface => {
       const headerHeight = window.matchMedia("(min-width: 1024px)").matches ? 52 : 48;
       const y = Math.min(window.innerHeight - 1, headerHeight - 6);
+      const footerSurface = document.querySelector<HTMLElement>("[data-footer-surface]");
+      if (footerSurface) {
+        const footerRect = footerSurface.getBoundingClientRect();
+        if (footerRect.top <= headerHeight + 1 && footerRect.bottom > 0) return "dark-solid";
+      }
       const xs = [0.16, 0.32, 0.5, 0.68, 0.84].map((pct) => window.innerWidth * pct);
       const votes: HeaderSurface[] = [];
       let center: HeaderSurface | null = null;
@@ -232,16 +240,49 @@ export default function Header() {
   // never while the (black) mobile menu overlay is open.
   const light = surface === "light-solid" && !mobileOpen;
   const transparent = surface === "dark-transparent" && !mobileOpen;
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    const commitInk = (next: boolean) => {
+      if (lightInkRef.current === next) return;
+      lightInkRef.current = next;
+      setLightInk(next);
+    };
+    if (reducedMotion) {
+      frame = requestAnimationFrame(() => commitInk(light));
+      return () => cancelAnimationFrame(frame);
+    }
+
+    const stopAt = performance.now() + 680;
+    const samplePaintedSurface = () => {
+      const header = headerRef.current;
+      if (!header) return;
+      const channels = getComputedStyle(header).backgroundColor.match(/[\d.]+/g);
+      if (channels && channels.length >= 3) {
+        const [red, green, blue] = channels.map(Number);
+        const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+        commitInk(luminance >= 116);
+      }
+      if (performance.now() < stopAt) frame = requestAnimationFrame(samplePaintedSurface);
+    };
+
+    frame = requestAnimationFrame(samplePaintedSurface);
+    return () => cancelAnimationFrame(frame);
+  }, [light]);
+
   const backgroundAlpha = light ? 0.95 : transparent ? 0.045 : 0.95;
   const blur = transparent ? 8 : 16;
   const borderAlpha = transparent ? 0.05 : 0.14;
   const progressOpacity = transparent ? 0.78 : 0.95;
-  const inkBase = light ? "text-black/60 hover:text-black" : "text-white/60 hover:text-white";
-  const inkActive = light ? "text-black" : "text-white";
+  const inkBase = lightInk ? "text-black/60 hover:text-black" : "text-white/60 hover:text-white";
+  const inkActive = lightInk ? "text-black" : "text-white";
 
   return (
     <>
       <motion.header
+        ref={headerRef}
+        data-header-surface={surface}
         initial={{ y: -72, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
@@ -258,7 +299,7 @@ export default function Header() {
               : `rgba(255,255,255,${borderAlpha})`
           }`,
         }}
-        className="fixed top-0 left-0 right-0 z-[80] transition-[background-color,backdrop-filter,border-color] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="fixed top-0 left-0 right-0 z-[80] transition-[background-color,backdrop-filter,border-color] duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0"
       >
         <div className="w-full px-3 sm:px-4 lg:px-8 2xl:px-10">
           <div
@@ -274,8 +315,8 @@ export default function Header() {
               }}
             >
               <span
-                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-[18px] tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap transition-colors duration-200 ${
-                  light ? "text-[#111]" : "text-white"
+                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-[18px] tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap ${
+                  lightInk ? "text-[#111]" : "text-white"
                 }`}
               >
                 828CONSTRUCTION
@@ -321,7 +362,7 @@ export default function Header() {
                         aria-haspopup="true"
                         aria-expanded={servicesOpen}
                         aria-controls="desktop-services-menu"
-                        className={`relative flex min-h-11 items-center gap-1.5 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-200 ${
+                        className={`relative flex min-h-11 items-center gap-1.5 font-labels text-[10px] uppercase tracking-[0.18em] ${
                           isServicesActive ? inkActive : inkBase
                         }`}
                       >
@@ -330,7 +371,7 @@ export default function Header() {
                           className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                             isServicesActive
                               ? "bg-[var(--color-accent)] scale-x-100"
-                              : `${light ? "bg-black" : "bg-white"} origin-left transition-transform duration-300 ${servicesOpen ? "scale-x-100" : "scale-x-0"}`
+                              : `${lightInk ? "bg-black" : "bg-white"} origin-left transition-transform duration-300 ${servicesOpen ? "scale-x-100" : "scale-x-0"}`
                           }`}
                         />
                       </Link>
@@ -409,7 +450,7 @@ export default function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`group relative inline-flex min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-200 ${
+                    className={`group relative inline-flex min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] ${
                       pathname === link.href ? inkActive : inkBase
                     }`}
                   >
@@ -418,7 +459,7 @@ export default function Header() {
                       className={`absolute -bottom-1 left-0 right-0 h-px transition-transform duration-300 origin-left ${
                         pathname === link.href
                           ? "bg-[var(--color-accent)] scale-x-100"
-                          : `${light ? "bg-black" : "bg-white"} scale-x-0 group-hover:scale-x-100`
+                          : `${lightInk ? "bg-black" : "bg-white"} scale-x-0 group-hover:scale-x-100`
                       }`}
                     />
                   </Link>
@@ -430,8 +471,8 @@ export default function Header() {
             <div className="hidden lg:flex items-center justify-end">
               {torTime && (
                 <span
-                  className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-200 ${
-                    light ? "text-black/60" : "text-white/30"
+                  className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap ${
+                    lightInk ? "text-black/60" : "text-white/30"
                   }`}
                 >
                   Torrance · {torTime}
@@ -443,8 +484,8 @@ export default function Header() {
             <div className="flex lg:hidden items-center gap-2 min-[390px]:gap-3 sm:gap-5">
               <a
                 href={SITE.phoneHref}
-                className={`hidden min-[390px]:inline-flex min-h-11 items-center font-numbers text-[11px] transition-colors sm:text-xs ${
-                  light ? "text-black/55 hover:text-black" : "text-gray-400 hover:text-white"
+                className={`hidden min-[390px]:inline-flex min-h-11 items-center font-numbers text-[11px] sm:text-xs ${
+                  lightInk ? "text-black/55 hover:text-black" : "text-gray-400 hover:text-white"
                 }`}
               >
                 {SITE.phone}
@@ -458,17 +499,17 @@ export default function Header() {
                 aria-controls="mobile-site-menu"
               >
                 <span
-                  className={`block h-px w-6 transition-all duration-300 origin-center ${light ? "bg-black" : "bg-white"} ${
+                  className={`block h-px w-6 transition-transform duration-300 motion-reduce:duration-0 origin-center ${lightInk ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "rotate-45 translate-y-[6px]" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px w-6 transition-all duration-300 ${light ? "bg-black" : "bg-white"} ${
+                  className={`block h-px w-6 transition-transform duration-300 motion-reduce:duration-0 ${lightInk ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "opacity-0 scale-x-0" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px w-6 transition-all duration-300 origin-center ${light ? "bg-black" : "bg-white"} ${
+                  className={`block h-px w-6 transition-transform duration-300 motion-reduce:duration-0 origin-center ${lightInk ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""
                   }`}
                 />
@@ -483,7 +524,7 @@ export default function Header() {
         <div
           ref={progressRef}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left bg-[var(--color-accent)] transition-[opacity,box-shadow] duration-200"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left bg-[var(--color-accent)] transition-[opacity,box-shadow] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0"
           style={{
             transform: "scaleX(0)",
             opacity: progressOpacity,

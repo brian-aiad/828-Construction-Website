@@ -8,7 +8,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
 import {
   PORTFOLIO_CASES,
-  EXAMPLE_PROJECT,
   PortfolioCase,
 } from "@/components/portfolio/portfolioCases.data";
 import PortfolioFlow from "@/components/portfolio/PortfolioFlow";
@@ -21,8 +20,7 @@ gsap.registerPlugin(ScrollTrigger);
 // V4 revamp (Brian, 2026-07-13): the page IS the three photographed
 // residences. Each residence gets its own dossier surface in the site's
 // stacked-surface flow; the full photo set stays reachable through the
-// per-case lightbox instead of an uncurated thumbnail wall. One clearly
-// labeled in-progress example (Redondo Beach) follows the real work.
+// per-case lightbox instead of an uncurated thumbnail wall.
 // Page signature: the traveling contact strip — a decorative row of real
 // frames drifting laterally on scrub inside each case surface.
 
@@ -547,6 +545,7 @@ export default function PortfolioContent() {
             <div
               data-tile-group=""
               data-motion-reveal="up"
+              data-motion-stagger="0.065"
               className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-16"
             >
               {cerritos.grid.map((src, i) => (
@@ -612,17 +611,25 @@ export default function PortfolioContent() {
                 </div>
               </div>
 
-              <div data-motion-reveal="right">
+              <div>
                 {[elSereno.grid, elSereno.gridB ?? []].map((chapter, chapterIdx) =>
                   chapter.length ? (
                     <div key={chapterIdx} className={chapterIdx === 1 ? "mt-10" : ""}>
-                      <div className="mb-4 flex items-center gap-3">
+                      <div
+                        className="mb-4 flex items-center gap-3"
+                        data-motion-reveal="right"
+                      >
                         <span className="h-px w-8 bg-[var(--color-accent)]/70" aria-hidden="true" />
                         <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/62">
                           {elSereno.chapterLabels?.[chapterIdx]}
                         </span>
                       </div>
-                      <div data-tile-group="" className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                      <div
+                        data-tile-group=""
+                        data-motion-reveal="up"
+                        data-motion-stagger="0.07"
+                        className="grid grid-cols-2 gap-3 md:grid-cols-3"
+                      >
                         {chapter.map((src, i) => (
                           <CaseTile
                             key={src}
@@ -673,6 +680,7 @@ export default function PortfolioContent() {
             <div
               className="mt-12 grid gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4"
               data-motion-reveal="up"
+              data-motion-stagger="0.1"
             >
               <div data-tile-group="" className="grid gap-3 lg:gap-4">
                 <CaseTile
@@ -731,72 +739,7 @@ export default function PortfolioContent() {
           </div>
         </section>
 
-        {/* ── Surface 5 · Next up: one honest in-progress example ── */}
-        <section
-          data-section="portfolio-next"
-          data-header-dark=""
-          className="relative min-h-svh bg-black px-6 pb-32 pt-24 text-white lg:flex lg:flex-col lg:justify-center lg:px-12 lg:pb-40 lg:pt-28"
-          style={{ overflowX: "clip" }}
-        >
-          <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.12]" />
-          <div className="relative z-10 mx-auto max-w-7xl">
-            <div className="grid gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
-              <div data-motion-reveal="left" data-motion-stagger="0.08">
-                <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/62">
-                  Next up
-                </span>
-                <h2 className="mt-4 font-editorial text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[0.94]">
-                  {EXAMPLE_PROJECT.title}
-                </h2>
-                <div className="mt-5 inline-flex items-center gap-2 border border-[var(--color-accent)]/55 px-3 py-2">
-                  <span className="h-1.5 w-1.5 bg-[var(--color-accent)]" aria-hidden="true" />
-                  <span className="font-labels text-[8px] uppercase tracking-[0.2em] text-white/72">
-                    In progress — photography pending
-                  </span>
-                </div>
-                <p className="mt-6 max-w-md text-sm leading-7 text-white/56">
-                  {EXAMPLE_PROJECT.description}
-                </p>
-                <div className="mt-6 border-t border-white/12 pt-4 font-labels text-[8px] uppercase leading-5 tracking-[0.16em] text-white/58">
-                  {EXAMPLE_PROJECT.spec} / {EXAMPLE_PROJECT.location}
-                </div>
-              </div>
-
-              <div
-                data-tile-group=""
-                data-motion-reveal="right"
-                className="grid grid-cols-3 gap-3"
-              >
-                {(EXAMPLE_PROJECT.images ?? [EXAMPLE_PROJECT.image]).map((src, i) => (
-                  <div
-                    key={src}
-                    className={`pf-tile relative overflow-hidden bg-[#111] ${
-                      i === 0 ? "col-span-3 aspect-[16/8]" : "col-span-3 aspect-[16/8] sm:col-span-1 sm:aspect-[4/5]"
-                    } ${i === 0 ? "" : "hidden sm:block"}`}
-                  >
-                    <Image
-                      src={src}
-                      alt={`Representative frame ${i + 1} — ${EXAMPLE_PROJECT.title} scope reference`}
-                      fill
-                      loading="lazy"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 30vw"
-                      quality={72}
-                      placeholder="blur"
-                      blurDataURL={lqip(src)}
-                      className="object-cover"
-                      style={{ filter: "contrast(1.04) saturate(1.02)" }}
-                    />
-                  </div>
-                ))}
-                <p className="col-span-3 font-labels text-[8px] uppercase leading-5 tracking-[0.18em] text-white/60">
-                  Representative frames — full documentation follows completion.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Surface 6 · CTA ── */}
+        {/* ── Surface 5 · CTA ── */}
         <section
           data-section="portfolio-cta"
           data-stack-compact=""

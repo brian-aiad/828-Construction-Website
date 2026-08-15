@@ -105,6 +105,20 @@ body {
   overscroll-behavior-x: none;
 }
 
+.contact-path-desktop-stage {
+  display: none;
+}
+
+@media (min-width: 1280px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .contact-path-mobile-media {
+    display: none;
+  }
+
+  .contact-path-desktop-stage {
+    display: block;
+  }
+}
+
 /* Tablet/mobile motion contract: below desktop-class width, or on iPad-like
    coarse-pointer screens, pages must read as natural scroll. Tailwind's lg
    utilities start at 1024px, which includes iPad landscape, so override the
