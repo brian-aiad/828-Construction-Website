@@ -5,7 +5,8 @@ import { AnimationController } from "@/utils/animationControl";
 
 export function useStackSurfaceVisibility(
   wrapRef: RefObject<HTMLElement | null>,
-  surfaceSelector = "[data-stack-surface]"
+  surfaceSelector = "[data-stack-surface]",
+  enabled = true
 ) {
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -15,6 +16,10 @@ export function useStackSurfaceVisibility(
       wrap.querySelectorAll<HTMLElement>(surfaceSelector)
     );
     if (!surfaces.length) return;
+    if (!enabled) {
+      surfaces.forEach((el) => el.removeAttribute("data-stack-covered"));
+      return;
+    }
     let frame = 0;
 
     const update = () => {
@@ -35,10 +40,10 @@ export function useStackSurfaceVisibility(
       const frontIsFlush = frontRect ? frontRect.top <= 1 : false;
 
       surfaces.forEach((el, i) => {
-        if (frontIsFlush ? frontIndex > i : frontIndex - i > 1) {
-          el.setAttribute("data-stack-covered", "true");
+        const covered = frontIsFlush ? frontIndex > i : frontIndex - i > 1;
+        if (el.hasAttribute("data-stack-covered") !== covered) {
+          el.toggleAttribute("data-stack-covered", covered);
         }
-        else el.removeAttribute("data-stack-covered");
       });
     };
     const scheduleUpdate = () => {
@@ -55,5 +60,5 @@ export function useStackSurfaceVisibility(
       window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
     };
-  }, [wrapRef, surfaceSelector]);
+  }, [enabled, wrapRef, surfaceSelector]);
 }

@@ -15,6 +15,7 @@ import { SITE } from "@/lib/constants";
 import ScrollRestorationReset from "@/components/system/ScrollRestorationReset";
 import SectionRevealController from "@/components/system/SectionRevealController";
 import MotionPreferences from "@/components/providers/MotionPreferences";
+import RouteTransitionCurtain from "@/components/system/RouteTransitionCurtain";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,14 +26,14 @@ const inter = Inter({
 const spaceMono = Space_Mono({
   variable: "--font-space-mono",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400"],
   display: "swap",
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -91,6 +92,7 @@ export default function RootLayout({
           {"try{history.scrollRestoration='manual'}catch(e){};window.scrollTo(0,0);"}
         </Script>
         <MotionPreferences>
+        <RouteTransitionCurtain />
         <ScrollRestorationReset />
         {/* Skip to main content — keyboard accessibility */}
         <a href="#main-content" className="skip-link">

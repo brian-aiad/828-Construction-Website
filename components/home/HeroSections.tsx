@@ -356,6 +356,7 @@ export default function HeroSections() {
           <span className="font-labels text-[8px] text-white/30 tracking-[0.3em] uppercase">Scroll</span>
           <div className="relative w-[1.375rem] h-[2.25rem] rounded-[0.75rem] border border-white/25">
             <div
+              data-ambient-motion=""
               className="absolute left-1/2 -translate-x-1/2 top-[0.4rem] w-[3px] h-[6px] bg-white/50 rounded-full"
               style={{ animation: "scrollWheel 1.8s ease-in-out infinite" }}
             />

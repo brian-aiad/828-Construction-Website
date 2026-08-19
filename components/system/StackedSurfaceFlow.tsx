@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FlowNode from "@/components/system/FlowNode";
@@ -9,14 +9,7 @@ import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVi
 
 gsap.registerPlugin(ScrollTrigger);
 
-function desktopStackMotionEnabled() {
-  if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia("(min-width: 1280px)").matches &&
-    !window.matchMedia("(pointer: coarse) and (max-width: 1366px)").matches &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
+type StackMotionMode = "desktop" | "touch" | "none";
 
 type StackedSurfaceFlowProps = {
   children: React.ReactNode;
@@ -33,7 +26,7 @@ export default function StackedSurfaceFlow({
   children,
   flowAttribute,
   className = "relative z-10 bg-[#050505]",
-  surfaceClassName = "relative bg-[#050505] shadow-[0_-28px_90px_-64px_rgba(0,0,0,0.85)]",
+  surfaceClassName = "relative bg-[#050505]",
   settleSelector = "[data-stack-surface]",
   darkVeilOpacity = 0.28,
   lightVeilOpacity = 0.08,
@@ -43,9 +36,9 @@ export default function StackedSurfaceFlow({
   const railRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<number[]>([]);
-  const [motionEnabled, setMotionEnabled] = useState(desktopStackMotionEnabled);
+  const [motionMode, setMotionMode] = useState<StackMotionMode>("none");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const desktop = window.matchMedia("(min-width: 1280px)");
     const coarseTablet = window.matchMedia(
       "(pointer: coarse) and (max-width: 1366px)"
@@ -54,9 +47,13 @@ export default function StackedSurfaceFlow({
       "(prefers-reduced-motion: reduce)"
     );
     const sync = () => {
-      setMotionEnabled(
-        desktop.matches && !coarseTablet.matches && !reducedMotion.matches
-      );
+      if (reducedMotion.matches) {
+        setMotionMode("none");
+      } else {
+        setMotionMode(
+          desktop.matches && !coarseTablet.matches ? "desktop" : "touch"
+        );
+      }
     };
 
     sync();
@@ -71,8 +68,9 @@ export default function StackedSurfaceFlow({
     };
   }, []);
 
-  useJunctionSettle(wrapRef, settleSelector);
-  useStackSurfaceVisibility(wrapRef);
+  const desktopMotion = motionMode === "desktop";
+  useJunctionSettle(wrapRef, settleSelector, desktopMotion);
+  useStackSurfaceVisibility(wrapRef, "[data-stack-surface]", desktopMotion);
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
@@ -117,7 +115,7 @@ export default function StackedSurfaceFlow({
 
     const applyStackTops = () => {
       stacks.forEach((el) => {
-        if (!motionEnabled) {
+        if (motionMode === "none") {
           el.style.position = "relative";
           el.style.top = "auto";
           return;
@@ -176,9 +174,47 @@ export default function StackedSurfaceFlow({
     };
 
     let railFrame = 0;
+    let lastScrollAt = 0;
+    const updateTouchCovers = () => {
+      const veilUpdates = stacks.map((surface, index) => {
+        const veil = surface.querySelector<HTMLElement>("[data-cover-veil]");
+        if (!veil) return null;
+
+        if (motionMode === "none") {
+          return { veil, opacity: "0" };
+        }
+        if (motionMode === "desktop") return null;
+
+        const next =
+          stacks[index + 1] ??
+          document.querySelector<HTMLElement>("[data-footer-surface]");
+        if (!next) {
+          return { veil, opacity: "0" };
+        }
+
+        const nextTop = next.getBoundingClientRect().top;
+        const start = window.innerHeight * 0.94;
+        const end = 48;
+        const progress = Math.min(
+          1,
+          Math.max(0, (start - nextTop) / Math.max(1, start - end))
+        );
+        const light = surface.hasAttribute("data-header-light");
+        const maxOpacity = light ? lightVeilOpacity : darkVeilOpacity * 0.78;
+        return { veil, opacity: (progress * maxOpacity).toFixed(4) };
+      });
+
+      veilUpdates.forEach((update) => {
+        if (update && update.veil.style.opacity !== update.opacity) {
+          update.veil.style.opacity = update.opacity;
+        }
+      });
+    };
+
     const updateRail = () => {
       railFrame = 0;
-      if (!motionEnabled) {
+      updateTouchCovers();
+      if (motionMode !== "desktop") {
         line.style.transform = "scaleY(0)";
         wrap.querySelectorAll<HTMLElement>("[data-flow-node]").forEach((node) =>
           node.classList.remove("flow-node-lit")
@@ -207,6 +243,10 @@ export default function StackedSurfaceFlow({
     const scheduleRail = () => {
       if (!railFrame) railFrame = requestAnimationFrame(updateRail);
     };
+    const onScroll = () => {
+      lastScrollAt = performance.now();
+      scheduleRail();
+    };
 
     applyStackTops();
     applySurfaceBackdrops();
@@ -217,32 +257,46 @@ export default function StackedSurfaceFlow({
       applyStackTops();
       applySurfaceBackdrops();
       measure();
+      observedHeights = stacks.map((el) => el.offsetHeight);
       scheduleRail();
     };
 
     const onResize = () => refresh();
     window.addEventListener("resize", onResize, { passive: true });
-    window.addEventListener("scroll", scheduleRail, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     let roTimer: ReturnType<typeof setTimeout> | undefined;
+    let observedHeights = stacks.map((el) => el.offsetHeight);
+    const refreshAfterScrollSettles = () => {
+      const idleFor = performance.now() - lastScrollAt;
+      if (idleFor < 220) {
+        roTimer = setTimeout(refreshAfterScrollSettles, 220 - idleFor);
+        return;
+      }
+      refresh();
+      try {
+        ScrollTrigger.refresh();
+      } catch {}
+    };
     const ro =
       typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(() => {
+            const nextHeights = stacks.map((el) => el.offsetHeight);
+            const geometryChanged = nextHeights.some(
+              (height, index) => Math.abs(height - observedHeights[index]) > 1
+            );
+            observedHeights = nextHeights;
+            if (!geometryChanged) return;
             clearTimeout(roTimer);
-            roTimer = setTimeout(() => {
-              refresh();
-              try {
-                ScrollTrigger.refresh();
-              } catch {}
-            }, resizeDebounceMs);
+            roTimer = setTimeout(refreshAfterScrollSettles, resizeDebounceMs);
           })
         : undefined;
     stacks.forEach((el) => ro?.observe(el));
 
-    if (!motionEnabled) {
+    if (motionMode !== "desktop") {
       return () => {
         window.removeEventListener("resize", onResize);
-        window.removeEventListener("scroll", scheduleRail);
+        window.removeEventListener("scroll", onScroll);
         if (railFrame) cancelAnimationFrame(railFrame);
         clearTimeout(roTimer);
         ro?.disconnect();
@@ -268,7 +322,7 @@ export default function StackedSurfaceFlow({
               trigger: next,
               start: "top bottom",
               end: "top top",
-              scrub: 0.9,
+              scrub: 0.65,
             },
           }
         );
@@ -279,7 +333,7 @@ export default function StackedSurfaceFlow({
 
     return () => {
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("scroll", scheduleRail);
+      window.removeEventListener("scroll", onScroll);
       if (railFrame) cancelAnimationFrame(railFrame);
       clearTimeout(roTimer);
       ro?.disconnect();
@@ -287,12 +341,17 @@ export default function StackedSurfaceFlow({
         ctx.revert();
       } catch {}
     };
-  }, [darkVeilOpacity, lightVeilOpacity, motionEnabled, resizeDebounceMs, settleSelector]);
+  }, [darkVeilOpacity, lightVeilOpacity, motionMode, resizeDebounceMs, settleSelector]);
 
   const items = React.Children.toArray(children);
 
   return (
-    <div ref={wrapRef} {...{ [flowAttribute]: "" }} className={className}>
+    <div
+      ref={wrapRef}
+      data-stack-mode={motionMode}
+      {...{ [flowAttribute]: "" }}
+      className={className}
+    >
       <div
         ref={railRef}
         data-flow-rail=""

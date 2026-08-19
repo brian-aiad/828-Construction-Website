@@ -21,10 +21,10 @@ export default function Header() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [surface, setSurface] = useState<HeaderSurface>("dark-transparent");
   const [lightInk, setLightInk] = useState(false);
-  const [torTime, setTorTime] = useState("");
   const headerRef = useRef<HTMLElement>(null);
   const lightInkRef = useRef(false);
   const progressRef = useRef<HTMLDivElement>(null);
+  const torTimeRef = useRef<HTMLSpanElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const desktopServicesButtonRef = useRef<HTMLAnchorElement>(null);
@@ -34,7 +34,7 @@ export default function Header() {
 
   useEffect(() => {
     let raf = 0;
-    let settleTimers: Array<ReturnType<typeof setTimeout>> = [];
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
 
     // The header follows the surface currently passing beneath it. Photo/hero
     // sections stay transparent at any scroll depth; black and cream sections
@@ -47,10 +47,6 @@ export default function Header() {
         const footerRect = footerSurface.getBoundingClientRect();
         if (footerRect.top <= headerHeight + 1 && footerRect.bottom > 0) return "dark-solid";
       }
-      const xs = [0.16, 0.32, 0.5, 0.68, 0.84].map((pct) => window.innerWidth * pct);
-      const votes: HeaderSurface[] = [];
-      let center: HeaderSurface | null = null;
-
       const readAtPoint = (x: number): HeaderSurface | null => {
         const stack = document.elementsFromPoint(x, y);
         for (const el of stack) {
@@ -71,28 +67,8 @@ export default function Header() {
         return null;
       };
 
-      for (const [index, x] of xs.entries()) {
-        const pointSurface = readAtPoint(x);
-        if (pointSurface) {
-          votes.push(pointSurface);
-          if (index === 2) center = pointSurface;
-        }
-      }
-
-      if (votes.length) {
-        const counts = votes.reduce<Record<HeaderSurface, number>>(
-          (acc, item) => {
-            acc[item] += 1;
-            return acc;
-          },
-          { "dark-transparent": 0, "dark-solid": 0, "light-solid": 0 }
-        );
-        const ranked = (Object.keys(counts) as HeaderSurface[]).sort(
-          (a, b) => counts[b] - counts[a]
-        );
-        if (center && counts[center] === counts[ranked[0]]) return center;
-        return ranked[0];
-      }
+      const centerSurface = readAtPoint(window.innerWidth * 0.5);
+      if (centerSurface) return centerSurface;
 
       return window.scrollY < 32 ? "dark-transparent" : "dark-solid";
     };
@@ -121,10 +97,8 @@ export default function Header() {
     };
 
     const scheduleSettledSyncs = () => {
-      settleTimers.forEach(clearTimeout);
-      settleTimers = [90, 220, 480].map((delay) =>
-        setTimeout(scheduleSync, delay)
-      );
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(scheduleSync, 220);
     };
 
     const onScroll = () => {
@@ -146,7 +120,7 @@ export default function Header() {
     });
     return () => {
       if (raf) cancelAnimationFrame(raf);
-      settleTimers.forEach(clearTimeout);
+      clearTimeout(settleTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", scheduleSync);
       mutationObserver?.disconnect();
@@ -199,13 +173,18 @@ export default function Header() {
 
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      const activeIndex = focusables.indexOf(
+        document.activeElement as HTMLElement
+      );
+      const next = event.shiftKey
+        ? activeIndex <= 0
+          ? last
+          : focusables[activeIndex - 1]
+        : activeIndex < 0 || activeIndex === focusables.length - 1
+          ? first
+          : focusables[activeIndex + 1];
+      event.preventDefault();
+      next.focus();
     };
 
     document.addEventListener("keydown", onKeyDown);
@@ -215,18 +194,18 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
-  // Live Torrance time — updates every second
+  // Keep the live clock out of React's render path while the page is scrolling.
   useEffect(() => {
     const update = () => {
-      setTorTime(
-        new Date().toLocaleTimeString("en-US", {
+      if (!torTimeRef.current) return;
+      const time = new Date().toLocaleTimeString("en-US", {
           timeZone: "America/Los_Angeles",
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
           hour12: false,
-        })
-      );
+        });
+      torTimeRef.current.textContent = `Torrance · ${time}`;
     };
     update();
     const id = setInterval(update, 1000);
@@ -254,26 +233,32 @@ export default function Header() {
       return () => cancelAnimationFrame(frame);
     }
 
-    const stopAt = performance.now() + 680;
     const samplePaintedSurface = () => {
       const header = headerRef.current;
       if (!header) return;
       const channels = getComputedStyle(header).backgroundColor.match(/[\d.]+/g);
-      if (channels && channels.length >= 3) {
-        const [red, green, blue] = channels.map(Number);
-        const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
-        commitInk(luminance >= 116);
-      }
-      if (performance.now() < stopAt) frame = requestAnimationFrame(samplePaintedSurface);
+      if (!channels || channels.length < 3) return;
+      const [red, green, blue] = channels.map(Number);
+      const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+      commitInk(luminance >= 116);
     };
-
-    frame = requestAnimationFrame(samplePaintedSurface);
-    return () => cancelAnimationFrame(frame);
+    samplePaintedSurface();
+    const sampleTimer = setInterval(samplePaintedSurface, 48);
+    const stopTimer = setTimeout(() => {
+      clearInterval(sampleTimer);
+      commitInk(light);
+    }, 680);
+    return () => {
+      clearInterval(sampleTimer);
+      clearTimeout(stopTimer);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [light]);
 
-  const backgroundAlpha = light ? 0.95 : transparent ? 0.045 : 0.95;
-  const blur = transparent ? 8 : 16;
-  const borderAlpha = transparent ? 0.05 : 0.14;
+  // Media headers retain the scene beneath them. A restrained blur softens the
+  // editorial rail at the top edge without turning the bar into a black slab.
+  const backgroundAlpha = mobileOpen ? 0.96 : light ? 0.88 : transparent ? 0.3 : 0.74;
+  const borderAlpha = transparent ? 0.1 : 0.12;
   const progressOpacity = transparent ? 0.78 : 0.95;
   const inkBase = lightInk ? "text-black/60 hover:text-black" : "text-white/60 hover:text-white";
   const inkActive = lightInk ? "text-black" : "text-white";
@@ -291,15 +276,18 @@ export default function Header() {
           backgroundColor: light
             ? `rgba(247,247,243,${backgroundAlpha})`
             : `rgba(5,5,5,${backgroundAlpha})`,
-          backdropFilter: `blur(${blur}px)`,
-          WebkitBackdropFilter: `blur(${blur}px)`,
           borderBottom: `1px solid ${
             light
               ? `rgba(0,0,0,${borderAlpha})`
               : `rgba(255,255,255,${borderAlpha})`
           }`,
+          backdropFilter: "blur(16px) saturate(1.1)",
+          WebkitBackdropFilter: "blur(16px) saturate(1.1)",
+          boxShadow: light
+            ? "0 8px 26px rgba(24,24,20,0.035)"
+            : "0 8px 28px rgba(0,0,0,0.12)",
         }}
-        className="fixed top-0 left-0 right-0 z-[80] transition-[background-color,backdrop-filter,border-color] duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0"
+        className="fixed top-0 left-0 right-0 z-[80] transition-[background-color,border-color] duration-[720ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0"
       >
         <div className="w-full px-3 sm:px-4 lg:px-8 2xl:px-10">
           <div
@@ -308,14 +296,14 @@ export default function Header() {
             {/* Logo — text wordmark, uniform weight */}
             <Link
               href="/"
-              aria-label="828 Construction"
+              aria-label="828CONSTRUCTION"
               className="flex min-h-11 shrink-0 items-center"
               onClick={() => {
                 if (pathname === "/") window.scrollTo(0, 0);
               }}
             >
               <span
-                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-[18px] tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap ${
+                className={`font-display font-semibold text-[15px] min-[390px]:text-base sm:text-[17px] lg:text-[18px] tracking-[0.085em] min-[390px]:tracking-[0.095em] lg:tracking-[0.105em] whitespace-nowrap transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
                   lightInk ? "text-[#111]" : "text-white"
                 }`}
               >
@@ -362,7 +350,7 @@ export default function Header() {
                         aria-haspopup="true"
                         aria-expanded={servicesOpen}
                         aria-controls="desktop-services-menu"
-                        className={`relative flex min-h-11 items-center gap-1.5 font-labels text-[10px] uppercase tracking-[0.18em] ${
+                        className={`relative flex min-h-11 items-center gap-1.5 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
                           isServicesActive ? inkActive : inkBase
                         }`}
                       >
@@ -380,7 +368,7 @@ export default function Header() {
                       <div
                         ref={desktopServicesMenuRef}
                         id="desktop-services-menu"
-                        className={`absolute top-full left-0 pt-2 w-52 transition-all duration-200 ${
+                        className={`absolute top-full left-0 pt-2 w-52 transition-[opacity,visibility] duration-200 ${
                           servicesOpen ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
                         }`}
                         style={{ zIndex: 60 }}
@@ -395,6 +383,7 @@ export default function Header() {
                             <div key={service.slug}>
                               <Link
                                 href={`/services/${service.slug}`}
+                                prefetch={false}
                                 className="group/item flex items-center justify-between px-4 py-3 hover:bg-white/[0.04] transition-colors duration-150"
                               >
                                 <div>
@@ -408,7 +397,7 @@ export default function Header() {
                                   >
                                     {service.title}
                                   </span>
-                                  <span className="font-labels text-[8px] text-gray-600 tracking-[0.14em] uppercase">
+                                  <span className="font-labels text-[8px] text-gray-400 tracking-[0.14em] uppercase">
                                     {service.short}
                                   </span>
                                 </div>
@@ -435,7 +424,8 @@ export default function Header() {
                         <div className="px-4 py-3 border-t border-white/[0.06]">
                           <Link
                             href="/services"
-                            className="font-labels text-[8px] text-gray-500 tracking-[0.15em] uppercase hover:text-white transition-colors"
+                            prefetch={false}
+                            className="font-labels text-[8px] text-gray-300 tracking-[0.15em] uppercase hover:text-white transition-colors"
                           >
                             All Services Overview →
                           </Link>
@@ -450,7 +440,7 @@ export default function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`group relative inline-flex min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] ${
+                    className={`group relative inline-flex min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
                       pathname === link.href ? inkActive : inkBase
                     }`}
                   >
@@ -469,22 +459,22 @@ export default function Header() {
 
             {/* Right side: location + timestamp */}
             <div className="hidden lg:flex items-center justify-end">
-              {torTime && (
-                <span
-                  className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap ${
-                    lightInk ? "text-black/60" : "text-white/30"
-                  }`}
-                >
-                  Torrance · {torTime}
-                </span>
-              )}
+              <span
+                ref={torTimeRef}
+                suppressHydrationWarning
+                className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
+                  lightInk ? "text-black/60" : "text-white/30"
+                }`}
+              >
+                Torrance
+              </span>
             </div>
 
             {/* Mobile: phone + hamburger */}
             <div className="flex lg:hidden items-center gap-2 min-[390px]:gap-3 sm:gap-5">
               <a
                 href={SITE.phoneHref}
-                className={`hidden min-[390px]:inline-flex min-h-11 items-center font-numbers text-[11px] sm:text-xs ${
+                className={`hidden min-[390px]:inline-flex min-h-11 items-center font-numbers text-[11px] transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 sm:text-xs ${
                   lightInk ? "text-black/55 hover:text-black" : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -499,17 +489,17 @@ export default function Header() {
                 aria-controls="mobile-site-menu"
               >
                 <span
-                  className={`block h-px w-6 transition-transform duration-300 motion-reduce:duration-0 origin-center ${lightInk ? "bg-black" : "bg-white"} ${
+                  className={`block h-px w-6 origin-center transition-[background-color,transform] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${lightInk ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "rotate-45 translate-y-[6px]" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px w-6 transition-transform duration-300 motion-reduce:duration-0 ${lightInk ? "bg-black" : "bg-white"} ${
+                  className={`block h-px w-6 transition-[background-color,opacity,transform] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${lightInk ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "opacity-0 scale-x-0" : ""
                   }`}
                 />
                 <span
-                  className={`block h-px w-6 transition-transform duration-300 motion-reduce:duration-0 origin-center ${lightInk ? "bg-black" : "bg-white"} ${
+                  className={`block h-px w-6 origin-center transition-[background-color,transform] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${lightInk ? "bg-black" : "bg-white"} ${
                     mobileOpen ? "-rotate-45 -translate-y-[6px]" : ""
                   }`}
                 />
@@ -529,8 +519,8 @@ export default function Header() {
             transform: "scaleX(0)",
             opacity: progressOpacity,
             boxShadow: transparent
-              ? "0 0 14px rgba(184,115,51,0.5)"
-              : "0 0 8px rgba(184,115,51,0.32)",
+              ? "0 0 14px rgba(135,39,32,0.5)"
+              : "0 0 8px rgba(99,26,22,0.32)",
             willChange: "transform",
           }}
         />
@@ -603,12 +593,13 @@ export default function Header() {
                               {/* Services overview */}
                               <Link
                                 href="/services"
+                                prefetch={false}
                                 className="relative flex items-center justify-between py-3 border-b border-white/[0.04] before:absolute before:inset-x-0 before:-top-0.5 before:bottom-0 before:content-['']"
                               >
-                                <span className="font-labels text-[11px] text-gray-500 tracking-[0.18em] uppercase">
+                                <span className="font-labels text-[11px] text-gray-300 tracking-[0.18em] uppercase">
                                   All Services
                                 </span>
-                                <span className="font-labels text-[9px] text-gray-500 tracking-[0.1em] uppercase">
+                                <span className="font-labels text-[9px] text-gray-300 tracking-[0.1em] uppercase">
                                   →
                                 </span>
                               </Link>
@@ -616,6 +607,7 @@ export default function Header() {
                                 <Link
                                   key={service.slug}
                                   href={`/services/${service.slug}`}
+                                  prefetch={false}
                                   className={`flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0 transition-colors duration-150 ${
                                     pathname === `/services/${service.slug}`
                                       ? "text-[var(--color-accent-light)]"
@@ -625,7 +617,7 @@ export default function Header() {
                                   <span className="font-display font-bold text-lg tracking-tight">
                                     {service.title}
                                   </span>
-                                  <span className="font-labels text-[8px] text-gray-500 tracking-[0.15em] uppercase">
+                                  <span className="font-labels text-[8px] text-gray-300 tracking-[0.15em] uppercase">
                                     {service.short}
                                   </span>
                                 </Link>
@@ -651,6 +643,7 @@ export default function Header() {
                   >
                     <Link
                       href={link.href}
+                      prefetch={false}
                       className={`block py-4 border-b font-display font-bold text-3xl tracking-tight transition-colors duration-200 ${
                         pathname === link.href
                           ? "text-white border-gray-700"

@@ -161,7 +161,7 @@ function AboutHero() {
             scale: 1,
             yPercent: -4,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: 1.1 },
+            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true },
           }
         );
       }
@@ -174,7 +174,7 @@ function AboutHero() {
           {
             xPercent: -1.2,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: 1.4 },
+            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true },
           }
         );
       }
@@ -204,7 +204,7 @@ function AboutHero() {
           {
             scaleX: 1,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: 1 },
+            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true },
           }
         );
       }
@@ -230,14 +230,14 @@ function AboutHero() {
       <div className="absolute inset-0 overflow-hidden">
         <div ref={photoRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           <Image
-            src="/images/generated/about-hero-quality-luxury-v5.jpg"
-            alt="Premium residential construction workspace with framing, plans, and material samples"
+            src="/images/generated/about-hero-quality-luxury-v6.webp"
+            alt="Residential construction planning table with architectural plans, framing, and a steel stair"
             fill
             priority
             fetchPriority="high"
             sizes="100vw"
             quality={92}
-            className="object-cover"
+            className="object-cover object-[62%_center] sm:object-center"
             style={{ filter: "contrast(1.06) saturate(1.02) brightness(0.94)" }}
           />
         </div>
@@ -252,8 +252,8 @@ function AboutHero() {
       </div>
 
       {/* Dossier — floating glass panel, one continuous composition */}
-      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-start px-6 pb-16 pt-48 sm:pt-52 lg:px-12 lg:pt-[16rem]">
-        <div className="w-full max-w-[25.5rem] border border-white/12 bg-black/60 p-6 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.85)] backdrop-blur-xl sm:p-7 lg:max-w-[26rem] lg:p-8">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[71.875rem] items-start px-6 pb-14 pt-28 sm:pt-32 lg:px-12 lg:pb-16 lg:pt-[8.25rem] 2xl:max-w-[105rem]">
+        <div className="w-full max-w-[24.5rem] border border-white/14 bg-[#070707]/88 p-6 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.9)] backdrop-blur-sm sm:p-7 lg:p-8 2xl:max-w-[26rem]">
         <div>
           <p data-hero-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
             <span className="h-px w-7 bg-accent" aria-hidden="true" />
@@ -298,8 +298,13 @@ function AboutHero() {
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-[6.7rem] z-[5] select-none whitespace-nowrap text-center font-editorial text-[1.45rem] font-bold uppercase leading-none text-white/[0.085] sm:top-[6.25rem] sm:text-[3.6rem] lg:top-[6.2rem] lg:text-[5.35rem] xl:text-[6.15rem] 2xl:text-[7rem]"
-        style={{ letterSpacing: "0.05em", willChange: "transform" }}
+        className="pointer-events-none absolute inset-x-0 top-[5.25rem] z-[5] select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.2] sm:top-[5.1rem] lg:top-[5.5rem]"
+        style={{
+          fontSize: "clamp(2rem, 8.6vw, 12rem)",
+          letterSpacing: "0.035em",
+          textShadow: "0 2px 24px rgb(0 0 0 / 0.42)",
+          willChange: "transform",
+        }}
       >
         828 Construction
       </div>
@@ -313,16 +318,67 @@ function AboutHero() {
 function OriginSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const quoteLineRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const founderRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  useReveal(sectionRef, "[data-origin-reveal]", "top 76%");
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section || !AnimationController.shouldAnimate()) return;
+    if (!section) return;
 
-    let rowsDispose = () => {};
+    const revealCleanups: Array<() => void> = [];
     const ctx = gsap.context(() => {
+      if (!AnimationController.shouldAnimate()) return;
+
+      const label = labelRef.current;
+      const founder = founderRef.current;
+      const rows = rowRefs.current.filter((row): row is HTMLDivElement => !!row);
+
+      if (label) gsap.set(label, { autoAlpha: 0, x: -20 });
+      if (founder) gsap.set(founder, { autoAlpha: 0, x: -30 });
+      gsap.set(rows, { autoAlpha: 0, x: 32 });
+
+      if (label) {
+        revealCleanups.push(
+          revealOnVisible([label], (_el, _index, immediate) => {
+            gsap.to(label, {
+              autoAlpha: 1,
+              x: 0,
+              duration: immediate ? 0 : 0.62,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          })
+        );
+      }
+
+      if (founder) {
+        revealCleanups.push(
+          revealOnVisible([founder], (_el, _index, immediate) => {
+            gsap.to(founder, {
+              autoAlpha: 1,
+              x: 0,
+              duration: immediate ? 0 : 0.82,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          })
+        );
+      }
+
+      revealCleanups.push(
+        revealOnVisible(rows, (row, index, immediate) => {
+          gsap.to(row, {
+            autoAlpha: 1,
+            x: 0,
+            duration: immediate ? 0 : 0.72,
+            delay: immediate ? 0 : Math.min(index, 2) * 0.09,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
+        })
+      );
+
       // The maroon quote rule draws down alongside the founder statement.
       if (quoteLineRef.current) {
         gsap.fromTo(
@@ -331,25 +387,15 @@ function OriginSection() {
           {
             scaleY: 1,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top 78%", end: "top 30%", scrub: 1 },
+            scrollTrigger: { trigger: section, start: "top 78%", end: "top 30%", scrub: true },
           }
         );
       }
 
-      // Standards rows are content-critical, so use decisive per-row IO reveals
-      // instead of scrubbed triggers that can park at partial opacity.
-      const rows = rowRefs.current.filter((r): r is HTMLDivElement => !!r);
-      rows.forEach((row) => {
-        row.setAttribute("data-gsap-reveal", "true");
-        gsap.set(row, { y: 24, opacity: 0 });
-      });
-      rowsDispose = revealOnVisible(rows, (row) => {
-        gsap.to(row, { y: 0, opacity: 1, duration: 0.8, ease: "power2.out", overwrite: true });
-      });
     }, sectionRef);
 
     return () => {
-      rowsDispose();
+      revealCleanups.forEach((dispose) => dispose());
       try {
         ctx.revert();
       } catch {}
@@ -361,19 +407,19 @@ function OriginSection() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_12%,rgba(99,26,22,0.16),transparent_30%)]" />
       <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.15]" />
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-        <p data-origin-reveal className="mb-10 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-white/40 lg:mb-12">
+        <p ref={labelRef} data-gsap-reveal="true" className="mb-10 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-white/40 lg:mb-12">
           <span className="h-px w-7 bg-accent" aria-hidden="true" />
           The builder profile
         </p>
         <h2 className="sr-only">The builder profile</h2>
 
         <div className="grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
-          <div className="lg:col-span-7" data-motion-reveal="left">
-            <div className="relative pl-7 lg:pl-9">
+          <div className="lg:col-span-7">
+            <div ref={founderRef} data-gsap-reveal="true" className="relative pl-7 lg:pl-9">
               <span className="absolute left-0 top-1 h-[calc(100%-0.5rem)] w-[2px] bg-white/10" aria-hidden="true">
                 <span ref={quoteLineRef} className="absolute inset-0 block bg-accent" style={{ display: "block" }} />
               </span>
-              <p data-origin-reveal className="font-editorial text-[clamp(1.4rem,2vw,1.9rem)] font-light leading-[1.34] text-white/88">
+              <p className="font-editorial text-[clamp(1.4rem,2vw,1.9rem)] font-light leading-[1.34] text-white/88">
                 828 Construction is guided by a founder with over two decades of
                 hands-on experience in residential construction. This depth of
                 knowledge — built from working directly alongside skilled
@@ -385,7 +431,6 @@ function OriginSection() {
 
           <div
             className="border-t border-white/10 lg:col-span-5"
-            data-motion-reveal="right"
           >
             {standards.map((item, index) => (
               <div
@@ -393,6 +438,7 @@ function OriginSection() {
                 ref={(el) => {
                   rowRefs.current[index] = el;
                 }}
+                data-gsap-reveal="true"
                 className="grid gap-3 border-b border-white/10 py-6 sm:grid-cols-[3.2rem_1fr] sm:gap-5 lg:py-7"
               >
                 <span className="font-numbers text-[12px]" style={{ color: "var(--color-accent-light)" }}>
@@ -421,8 +467,6 @@ function CraftSection() {
   const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const restRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
-  useReveal(sectionRef, "[data-craft-reveal]", "top 80%");
-
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -430,8 +474,7 @@ function CraftSection() {
     // Word-completion uses rect-based IO reveals that play once and always
     // finish. Words are visible by default with no JS; GSAP hides them only
     // here, gated, and failsafes force-reveal stuck rows.
-    let io: IntersectionObserver | null = null;
-    let sweepTimer: ReturnType<typeof setInterval> | null = null;
+    let rowsDispose = () => {};
 
     const ctx = gsap.context(() => {
       if (!AnimationController.shouldAnimate()) {
@@ -448,13 +491,13 @@ function CraftSection() {
           {
             xPercent: -10,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.5 },
+            scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true },
           }
         );
       }
 
       const revealed = new Set<number>();
-      const reveal = (index: number) => {
+      const reveal = (index: number, immediate = false) => {
         if (revealed.has(index)) return;
         revealed.add(index);
         const rest = restRefs.current[index];
@@ -465,9 +508,9 @@ function CraftSection() {
           gsap.to(rest, {
             xPercent: 0,
             opacity: 1,
-            // Brian (2026-07-13): the completions ran too quick to be seen
-            // while scrolling — long, even glide instead of a front-loaded pop.
-            duration: 1.7,
+            // Keep the completion readable without letting it trail behind a
+            // quick desktop scroll into the next row.
+            duration: immediate ? 0 : 1.15,
             ease: "power2.out",
             overwrite: true,
             // Clear the raster-layer hint once the slide finishes — a permanent
@@ -477,7 +520,14 @@ function CraftSection() {
           });
         }
         if (body) {
-          gsap.to(body, { y: 0, opacity: 1, duration: 1.2, delay: 0.35, ease: "power2.out", overwrite: true });
+          gsap.to(body, {
+            y: 0,
+            opacity: 1,
+            duration: immediate ? 0 : 0.85,
+            delay: immediate ? 0 : 0.12,
+            ease: "power2.out",
+            overwrite: true,
+          });
         }
         if (letter) letter.style.color = "#a3342b";
       };
@@ -491,37 +541,19 @@ function CraftSection() {
         if (body) gsap.set(body, { y: 18, opacity: 0 });
       });
 
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const index = rowRefs.current.indexOf(entry.target as HTMLDivElement);
-            io?.unobserve(entry.target);
-            if (index >= 0) reveal(index);
-          });
+      const rows = rowRefs.current.filter((row): row is HTMLDivElement => !!row);
+      rowsDispose = revealOnVisible(
+        rows,
+        (row, _index, immediate) => {
+          const index = rowRefs.current.indexOf(row as HTMLDivElement);
+          if (index >= 0) reveal(index, immediate);
         },
         { rootMargin: "0px 0px -20% 0px", threshold: 0.05 }
       );
-      rowRefs.current.forEach((row) => row && io?.observe(row));
-
-      // Failsafe sweep: any row already inside the viewport (mid-page refresh,
-      // fling-past, missed IO tick) gets force-revealed within a second.
-      sweepTimer = setInterval(() => {
-        rowRefs.current.forEach((row, index) => {
-          if (!row || revealed.has(index)) return;
-          const r = row.getBoundingClientRect();
-          if (r.top < window.innerHeight * 0.98 && r.bottom > 0) reveal(index);
-        });
-        if (revealed.size === rowRefs.current.length && sweepTimer) {
-          clearInterval(sweepTimer);
-          sweepTimer = null;
-        }
-      }, 900);
     }, sectionRef);
 
     return () => {
-      io?.disconnect();
-      if (sweepTimer) clearInterval(sweepTimer);
+      rowsDispose();
       try {
         ctx.revert();
       } catch {}
@@ -553,11 +585,11 @@ function CraftSection() {
           data-motion-reveal="left"
         >
           <div>
-            <p data-craft-reveal className="mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-black/42">
+            <p className="mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.28em] text-black/42">
               <span className="h-px w-7 bg-accent" aria-hidden="true" />
               Method
             </p>
-            <h2 data-craft-reveal className="font-editorial text-[clamp(1.9rem,2.6vw,2.5rem)] font-light leading-[1.05]">
+            <h2 className="font-editorial text-[clamp(1.9rem,2.6vw,2.5rem)] font-light leading-[1.05]">
               The mindset behind every build.
             </h2>
           </div>
@@ -628,7 +660,7 @@ function SouthBaySection() {
         gsap.to(compassRef.current, {
           rotate: 22,
           ease: "none",
-          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.5 },
+          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true },
         });
       }
     }, sectionRef);
@@ -640,13 +672,16 @@ function SouthBaySection() {
     };
   }, []);
 
-  const marqueeRow = (duration: string, reverse = false) => (
+  const marqueeRow = (duration: string, reverse = false, animate = true) => (
     <div className="overflow-hidden" aria-hidden="true">
       <div
+        data-ambient-motion={animate ? "" : undefined}
         className="about-area-marquee flex w-max items-center whitespace-nowrap"
         style={{
-          animation: `marqueeScroll ${duration} linear infinite`,
+          animation: animate ? `marqueeScroll ${duration} linear infinite` : "none",
           animationDirection: reverse ? "reverse" : "normal",
+          transform: animate ? undefined : "translate3d(-18%, 0, 0)",
+          willChange: animate ? "transform" : "auto",
         }}
       >
         {[0, 1].map((copy) => (
@@ -690,9 +725,11 @@ function SouthBaySection() {
       </div>
 
       {/* Joe (IMG_1024): cities rolling across the screen — the horizon layer. */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 flex -translate-y-1/2 flex-col gap-4 min-[1180px]:gap-9">
-        {marqueeRow("74s")}
-        {marqueeRow("92s", true)}
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2">
+        <div className="flex flex-col gap-4 min-[1180px]:gap-9" data-motion-reveal="left">
+          {marqueeRow("74s", false, false)}
+          {marqueeRow("92s", true, false)}
+        </div>
       </div>
 
       <div
@@ -745,7 +782,7 @@ function AboutCTA() {
           {
             scale: 1,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1.1 },
+            scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true },
           }
         );
       }
@@ -756,7 +793,7 @@ function AboutCTA() {
           {
             scaleY: 1,
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top 78%", end: "top 20%", scrub: 1 },
+            scrollTrigger: { trigger: section, start: "top 78%", end: "top 20%", scrub: true },
           }
         );
       }

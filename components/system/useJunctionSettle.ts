@@ -42,7 +42,7 @@ import { useEffect, type RefObject } from "react";
 // - MIN_DIST skips micro-settles (also makes every landing terminal).
 
 const MARGIN = 32; // px from a clean edge that still counts as "resting clean"
-const IDLE_MS = 140; // stillness window that marks a genuine scroll-end
+const IDLE_MS = 160; // stillness window that marks a genuine scroll-end
 const MAX_ROUNDS = 3; // one gesture = one settle + bounded overlap corrections
 const MIN_DIST = 4; // px — skip micro-glides
 const SCROLL_KEYS = new Set([
@@ -68,10 +68,12 @@ type LenisHandle = {
 
 export function useJunctionSettle(
   wrapRef: RefObject<HTMLElement | null>,
-  surfaceSelector = "[data-stack-surface]"
+  surfaceSelector = "[data-stack-surface]",
+  enabled = true
 ) {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!enabled) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const desktopQuery = window.matchMedia("(min-width: 1280px)");
     const coarseTabletQuery = window.matchMedia("(pointer: coarse) and (max-width: 1366px)");
@@ -168,7 +170,7 @@ export function useJunctionSettle(
       cancelled = false;
       armed = false; // one settle per user gesture; re-arm on next input
       const dist = Math.abs(target - window.scrollY);
-      const durationMs = Math.min(620, Math.max(260, dist * 0.9));
+      const durationMs = Math.min(520, Math.max(240, dist * 0.72));
       const lenis = (window as unknown as { __lenis828?: LenisHandle })
         .__lenis828;
       if (lenis) {
@@ -275,6 +277,7 @@ export function useJunctionSettle(
       }
       lastY = y;
       if (settling) return; // our own glide must not re-trigger idle checks
+      if (!armed) return;
       scheduleIdleCheck();
     };
 
@@ -303,5 +306,5 @@ export function useJunctionSettle(
       window.removeEventListener("pointerdown", arm);
       window.removeEventListener("keydown", onKeydown);
     };
-  }, [wrapRef, surfaceSelector]);
+  }, [enabled, wrapRef, surfaceSelector]);
 }

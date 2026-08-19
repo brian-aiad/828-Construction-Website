@@ -35,6 +35,17 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
+    const compactIntro =
+      window.matchMedia("(max-width: 1279px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches;
+    if (compactIntro) {
+      try {
+        window.sessionStorage.setItem("828:splash-seen", "1");
+      } catch {}
+      const frame = requestAnimationFrame(() => setDismissed(true));
+      return () => cancelAnimationFrame(frame);
+    }
+
     try {
       if (window.sessionStorage.getItem("828:splash-seen") === "1") {
         const frame = requestAnimationFrame(() => setDismissed(true));
@@ -58,7 +69,7 @@ export default function SplashScreen() {
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       gsap.set(splash, { opacity: 1 });
-      gsap.to(splash, { opacity: 0, duration: 0.4, delay: 1.1, onComplete: dismiss });
+      gsap.to(splash, { opacity: 0, duration: 0.12, delay: 0.08, onComplete: dismiss });
       return;
     }
 
@@ -75,51 +86,51 @@ export default function SplashScreen() {
     tl.to(pChars, {
       yPercent: 0,
       opacity: 1,
-      stagger: { each: 0.045, from: "start" },
-      duration: 0.72,
+      stagger: { each: 0.025, from: "start" },
+      duration: 0.42,
       ease: "power3.out",
-    }, 0.12);
+    }, 0.08);
 
     // "CONSTRUCTION" follows
     tl.to(sChars, {
       yPercent: 0,
       opacity: 1,
-      stagger: { each: 0.02, from: "start" },
-      duration: 0.68,
+      stagger: { each: 0.012, from: "start" },
+      duration: 0.42,
       ease: "power3.out",
-    }, 0.24);
+    }, 0.14);
 
     // maroon underline draws left-to-right
-    tl.to(underline, { scaleX: 1, opacity: 1, duration: 0.48, ease: "power3.out" }, 0.9);
+    tl.to(underline, { scaleX: 1, opacity: 1, duration: 0.28, ease: "power3.out" }, 0.52);
 
     // tagline fades in quietly during hold
-    tl.to(tagline, { opacity: 1, y: 0, duration: 0.38, ease: "power2.out" }, 1.18);
+    tl.to(tagline, { opacity: 1, y: 0, duration: 0.24, ease: "power2.out" }, 0.66);
 
     // hold — the mark sits briefly, then clears fast enough for repeat visits to feel direct
-    tl.to({}, { duration: 0.34 }, 1.46);
+    tl.to({}, { duration: 0.12 }, 0.84);
 
     // exit — tagline fades first
-    tl.to(tagline, { opacity: 0, duration: 0.2, ease: "sine.in" }, 1.9);
+    tl.to(tagline, { opacity: 0, duration: 0.12, ease: "sine.in" }, 0.98);
 
     // chars drift upward and dissolve
     tl.to(allChars, {
       yPercent: -18,
       opacity: 0,
-      stagger: { each: 0.012, from: "start" },
-      duration: 0.34,
+      stagger: { each: 0.006, from: "start" },
+      duration: 0.22,
       ease: "power2.inOut",
-    }, 1.94);
+    }, 1);
 
     // underline retracts
-    tl.to(underline, { scaleX: 0, opacity: 0, duration: 0.24, ease: "power3.inOut" }, 1.96);
+    tl.to(underline, { scaleX: 0, opacity: 0, duration: 0.18, ease: "power3.inOut" }, 1.02);
 
     // curtain clears
     tl.to(splash, {
       opacity: 0,
-      duration: 0.42,
+      duration: 0.28,
       ease: "power2.inOut",
       onComplete: dismiss,
-    }, 2.2);
+    }, 1.12);
 
     return () => {
       document.body.style.overflow = "";

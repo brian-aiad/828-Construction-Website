@@ -130,7 +130,7 @@ export default function Footer() {
         <div data-motion-reveal="up" data-motion-delay="0.06" className="relative z-20 flex flex-col border-t border-black/8 bg-[#ECEBE7] px-6 py-8 text-[#141414] md:px-9 md:py-10 min-[1180px]:h-full min-[1180px]:min-h-0 min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-t-0 min-[1180px]:px-[clamp(3rem,4vw,4.9rem)] min-[1180px]:py-[3rem]">
           <nav aria-label="Footer navigation" className="mt-0 grid grid-cols-2 gap-x-8 gap-y-4 min-[1180px]:flex min-[1180px]:flex-col min-[1180px]:gap-[0.78rem]">
             {FOOTER_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className={panelLinkClass}>
+              <Link key={link.href} href={link.href} prefetch={false} className={panelLinkClass}>
                 {link.label}
                 <Underline />
               </Link>

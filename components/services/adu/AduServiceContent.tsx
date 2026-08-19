@@ -57,11 +57,11 @@ const FAQS = [
 // interleaved with photo cells in a checkerboard.
 const FAQ_PHOTOS = [
   {
-    src: "/images/generated/adu-faq-interior-v3.png",
+    src: "/images/generated/adu-faq-interior-v3.webp",
     alt: "Finished compact ADU interior with warm kitchen and living area",
   },
   {
-    src: "/images/generated/adu-faq-garage-conversion-v3.png",
+    src: "/images/generated/adu-faq-garage-conversion-v3.webp",
     alt: "Garage conversion ADU by 828 Construction",
   },
 ];
@@ -501,23 +501,23 @@ function AduHero() {
           <div className="mt-9 flex flex-col items-stretch gap-6 sm:flex-row sm:gap-8">
             {/* Joe: "the phrase built with intent, but running downwards" */}
             <h1
-              className="hidden font-display font-bold leading-none tracking-tight text-[clamp(2.6rem,4.5vw,4.4rem)] sm:block"
-              style={{ writingMode: "vertical-rl" }}
+              aria-label={HERO_PHRASE}
+              className="font-display text-[2.75rem] font-bold leading-[0.95] tracking-tight sm:text-[clamp(2.6rem,4.5vw,4.4rem)] sm:leading-none sm:[writing-mode:vertical-rl]"
             >
-              {HERO_PHRASE.split("").map((ch, i) => (
-                <span
-                  key={i}
-                  className="adu-letter inline-block"
-                  style={{
-                    animation: `aduLetterIn 0.6s cubic-bezier(0.16,1,0.3,1) ${0.15 + i * 0.045}s both`,
-                  }}
-                >
-                  {ch === " " ? " " : ch}
-                </span>
-              ))}
-            </h1>
-            <h1 className="font-display text-[2.75rem] font-bold leading-[0.95] tracking-tight sm:hidden">
-              {HERO_PHRASE}
+              <span className="sm:hidden" aria-hidden="true">{HERO_PHRASE}</span>
+              <span className="hidden sm:contents" aria-hidden="true">
+                {HERO_PHRASE.split("").map((ch, i) => (
+                  <span
+                    key={i}
+                    className="adu-letter inline-block"
+                    style={{
+                      animation: `aduLetterIn 0.6s cubic-bezier(0.16,1,0.3,1) ${0.15 + i * 0.045}s both`,
+                    }}
+                  >
+                    {ch === " " ? " " : ch}
+                  </span>
+                ))}
+              </span>
             </h1>
             <div className="relative h-px w-full shrink-0 self-stretch bg-white/12 sm:h-auto sm:w-[2px]" aria-hidden="true">
               <div className="adu-vline absolute inset-0 bg-[var(--color-accent-light)]" style={{ opacity: 0.9 }} />
@@ -552,6 +552,7 @@ function AduHero() {
               </span>
               <span className="relative block h-10 w-px overflow-hidden bg-white/15">
                 <span
+                  data-ambient-motion=""
                   className="adu-cue-line absolute inset-0 bg-white/70"
                   style={{ animation: "aduCueDrop 2.2s cubic-bezier(0.65,0,0.35,1) 1.4s infinite" }}
                 />
@@ -717,15 +718,15 @@ function AduFaq() {
 // ── Section 3 — what ADU means to 828 (acronym values + watermark drift) ────
 const ACRONYM_PHOTOS = [
   {
-    src: "/images/generated/adu-acronym-aligned-v3.png",
+    src: "/images/generated/adu-acronym-aligned-v3.webp",
     alt: "Contractor and homeowner reviewing a completed ADU exterior together",
   },
   {
-    src: "/images/generated/adu-acronym-dedicated-v3.png",
+    src: "/images/generated/adu-acronym-dedicated-v3.webp",
     alt: "ADU interior finish detail checked carefully with a level",
   },
   {
-    src: "/images/generated/adu-acronym-understanding-v3.png",
+    src: "/images/generated/adu-acronym-understanding-v3.webp",
     alt: "Contractor guiding a homeowner through organized ADU framing in progress",
   },
 ];

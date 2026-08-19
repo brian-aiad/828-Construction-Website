@@ -52,6 +52,7 @@ export default function HomeMarquee() {
       aria-hidden="true"
     >
       <div
+        data-ambient-motion=""
         className="flex"
         style={{
           // reversed direction via animation: marqueeScroll with direction reverse

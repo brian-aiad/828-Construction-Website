@@ -48,7 +48,7 @@ export default function PrecisionOverlay({
             strokeOpacity={i % 4 === 0 ? 0.46 : 0.24}
           />
         ))}
-        <g className="precision-overlay-needle" style={{ transformOrigin: "438px 488px", animation: "precisionNeedle 7s ease-in-out infinite alternate" }}>
+        <g data-ambient-motion="" className="precision-overlay-needle" style={{ transformOrigin: "438px 488px", animation: "precisionNeedle 7s ease-in-out infinite alternate" }}>
           <line x1="438" y1="488" x2="642" y2="172" stroke="currentColor" strokeOpacity="0.62" strokeWidth="1.5" />
           <line x1="438" y1="488" x2="316" y2="194" stroke="currentColor" strokeOpacity="0.34" />
           <circle cx="438" cy="488" r="9" stroke="currentColor" strokeOpacity="0.56" />

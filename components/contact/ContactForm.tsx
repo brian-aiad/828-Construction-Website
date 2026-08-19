@@ -248,7 +248,7 @@ export default function ContactForm() {
           className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
         >
           Email{" "}
-          <span className="text-gray-600 normal-case tracking-normal font-body text-xs">
+          <span className="text-gray-400 normal-case tracking-normal font-body text-xs">
             - optional
           </span>
         </label>
@@ -368,11 +368,11 @@ export default function ContactForm() {
         )}
       </button>
 
-      <p className="text-[10px] text-gray-600 text-center font-labels tracking-wide">
+      <p className="text-[10px] text-gray-400 text-center font-labels tracking-wide">
         Typically respond within 24 hours / For urgent work, call{" "}
         <a
           href={SITE.phoneHref}
-          className="text-gray-500 hover:text-[var(--color-accent)] transition-colors"
+          className="text-white/85 underline decoration-white/35 underline-offset-4 transition-colors hover:text-white"
         >
           {SITE.phone}
         </a>

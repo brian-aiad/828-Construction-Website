@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
@@ -11,18 +13,19 @@ import {
   PortfolioCase,
 } from "@/components/portfolio/portfolioCases.data";
 import PortfolioFlow from "@/components/portfolio/PortfolioFlow";
-import SectionMotionBackdrop from "@/components/system/SectionMotionBackdrop";
 import { AnimationController } from "@/utils/animationControl";
 import { lqip } from "@/lib/image-placeholders";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// V4 revamp (Brian, 2026-07-13): the page IS the three photographed
-// residences. Each residence gets its own dossier surface in the site's
-// stacked-surface flow; the full photo set stays reachable through the
-// per-case lightbox instead of an uncurated thumbnail wall.
-// Page signature: the traveling contact strip — a decorative row of real
-// frames drifting laterally on scrub inside each case surface.
+const ProjectInspectionViewer = dynamic(
+  () => import("@/components/portfolio/ProjectInspectionViewer"),
+  { ssr: false }
+);
+
+// Each photographed project has its own art-directed case study. The shared
+// field-documentation language keeps the page cohesive without reducing the
+// three projects to one repeated template.
 
 type LightboxState = { c: number; p: number } | null;
 
@@ -41,21 +44,26 @@ function usePortfolioMotion() {
     if (!root || !AnimationController.shouldAnimate() || window.innerWidth < 1024) return;
 
     const ctx = gsap.context(() => {
-      // Signature: traveling contact strip — decorative lateral drift on
-      // scrub. Content never depends on it, so a parked scrub is harmless.
+      // The working-frame strips drift like contact sheets passing across an
+      // inspection table. The track is decorative and uses transforms only.
       gsap.utils.toArray<HTMLElement>("[data-strip-track]").forEach((track, i) => {
-        const dir = i % 2 === 0 ? 1 : -1;
+        const direction = i % 2 === 0 ? 1 : -1;
         gsap.fromTo(
           track,
-          { xPercent: dir * 7 },
+          { xPercent: direction * 4 },
           {
-            xPercent: dir * -7,
+            xPercent: direction * -4,
+            force3D: true,
             ease: "none",
             scrollTrigger: {
               trigger: track,
               start: "top bottom",
               end: "bottom top",
-              scrub: 1.4,
+              scrub: 1.1,
+              onEnter: () => gsap.set(track, { willChange: "transform" }),
+              onEnterBack: () => gsap.set(track, { willChange: "transform" }),
+              onLeave: () => gsap.set(track, { willChange: "auto" }),
+              onLeaveBack: () => gsap.set(track, { willChange: "auto" }),
             },
           }
         );
@@ -114,7 +122,7 @@ function CaseTile({
   dark,
   aspect = "aspect-[4/5]",
   sizes,
-  eager = false,
+  lead = false,
   onOpen,
 }: {
   src: string;
@@ -123,7 +131,7 @@ function CaseTile({
   dark: boolean;
   aspect?: string;
   sizes: string;
-  eager?: boolean;
+  lead?: boolean;
   onOpen: (src: string) => void;
 }) {
   const fallbackTone = dark
@@ -133,6 +141,7 @@ function CaseTile({
   return (
     <button
       type="button"
+      data-lead-parallax={lead ? "" : undefined}
       onClick={() => onOpen(src)}
       aria-label={`View photo — ${caseData.gallery.title}`}
       className={`pf-tile group relative block w-full overflow-hidden text-left ${aspect} ${
@@ -148,13 +157,12 @@ function CaseTile({
         src={src}
         alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${index + 1}`}
         fill
-        loading={eager ? "eager" : "lazy"}
+        loading="lazy"
         sizes={sizes}
         quality={82}
         placeholder="blur"
         blurDataURL={lqip(src)}
         className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
-        style={{ filter: "contrast(1.04) saturate(1.04)" }}
       />
       <span
         aria-hidden="true"
@@ -164,19 +172,29 @@ function CaseTile({
   );
 }
 
-// Traveling contact strip — the page's signature. Decorative duplicates of
-// real frames on a scrub-drifting track; never interactive, never content.
-function ContactStrip({ photos, title, dark }: { photos: string[]; title: string; dark: boolean }) {
+function ContactStrip({
+  photos,
+  title,
+  dark,
+}: {
+  photos: string[];
+  title: string;
+  dark: boolean;
+}) {
   return (
-    <div aria-hidden="true" className="pointer-events-none mt-14 overflow-hidden lg:mt-20">
+    <div
+      aria-hidden="true"
+      data-motion-reveal="up"
+      className="pointer-events-none mt-12 overflow-hidden lg:mt-16"
+    >
       <div
         data-strip-track=""
-        className="flex w-full gap-3 lg:w-[112%] lg:-ml-[6%] lg:gap-4"
+        className="flex w-[108%] -ml-[4%] gap-3 lg:gap-4"
       >
         {photos.map((src) => (
           <div
             key={src}
-            className={`relative h-32 flex-1 overflow-hidden sm:h-44 lg:h-56 ${
+            className={`relative h-28 min-w-0 flex-1 overflow-hidden sm:h-40 lg:h-52 ${
               dark ? "bg-[#111]" : "bg-[#e8e3da]"
             }`}
           >
@@ -185,17 +203,21 @@ function ContactStrip({ photos, title, dark }: { photos: string[]; title: string
               alt=""
               fill
               loading="lazy"
-              sizes="(max-width: 1024px) 33vw, 40vw"
+              decoding="async"
+              sizes="(max-width: 1024px) 36vw, 34vw"
               quality={62}
               placeholder="blur"
               blurDataURL={lqip(src)}
               className="object-cover"
-              style={{ filter: "contrast(1.04) saturate(1.02)" }}
             />
           </div>
         ))}
       </div>
-      <div className={`mt-3 font-labels text-[8px] uppercase tracking-[0.2em] ${dark ? "text-white/58" : "text-black/58"}`}>
+      <div
+        className={`mt-3 font-labels text-[8px] uppercase tracking-[0.2em] ${
+          dark ? "text-white/58" : "text-black/58"
+        }`}
+      >
         {title} / working frames
       </div>
     </div>
@@ -277,94 +299,128 @@ function CaseNumberBlock({ index, title, dark }: { index: number; title: string;
 
 export default function PortfolioContent() {
   const [lightbox, setLightbox] = useState<LightboxState>(null);
+  const lightboxOpenRef = useRef(false);
+  const [heroPreview, setHeroPreview] = useState<number | null>(null);
   const rootRef = usePortfolioMotion();
 
   // Deep-link landing (home cards → /portfolio#<residence>): jump instantly
   // to the anchored case, re-asserting across the browser fragment scroll,
-  // the Lenis mount reset, and late layout. A real scroll gesture aborts.
+  // the Lenis mount reset, hash-only navigation, and late layout. A real
+  // scroll gesture aborts the current landing routine.
   useEffect(() => {
-    const id = window.location.hash.replace("#", "");
-    if (!PORTFOLIO_CASES.some((c) => c.gallery.id === id)) return;
-    let aborted = false;
-    const abort = () => {
-      aborted = true;
-    };
-    window.addEventListener("wheel", abort, { passive: true, once: true });
-    window.addEventListener("touchmove", abort, { passive: true, once: true });
-    const jump = () => {
-      if (aborted) return;
-      const el = document.getElementById(id);
-      if (!el) return;
-      const y = el.getBoundingClientRect().top + window.scrollY - 96;
-      const root = document.documentElement;
-      const prev = root.style.scrollBehavior;
-      root.style.scrollBehavior = "auto";
-      window.scrollTo(0, Math.max(0, y));
-      root.style.scrollBehavior = prev;
-    };
-    const raf = window.requestAnimationFrame(jump);
-    const timers = [120, 350, 700, 1100].map((ms) => setTimeout(jump, ms));
-    return () => {
-      window.cancelAnimationFrame(raf);
-      timers.forEach(clearTimeout);
-      window.removeEventListener("wheel", abort);
-      window.removeEventListener("touchmove", abort);
-    };
-  }, []);
+    let stopLanding: (() => void) | null = null;
 
-  const close = useCallback(() => setLightbox(null), []);
-  const step = useCallback((dir: number) => {
-    setLightbox((cur) => {
-      if (!cur) return cur;
-      const set = PORTFOLIO_CASES[cur.c].gallery.photos;
-      return { c: cur.c, p: (cur.p + dir + set.length) % set.length };
-    });
-  }, []);
+    const beginLanding = () => {
+      const id = window.location.hash.replace("#", "");
+      if (!PORTFOLIO_CASES.some((c) => c.gallery.id === id)) return () => {};
 
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const returnFocusRef = useRef<HTMLElement | null>(null);
-  const lightboxOpen = lightbox !== null;
+      let aborted = false;
+      let layoutFrame = 0;
+      let layoutObserver: ResizeObserver | null = null;
+      const abort = () => {
+        aborted = true;
+        layoutObserver?.disconnect();
+      };
+      const jump = () => {
+        if (aborted) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        const stack = el.closest<HTMLElement>("[data-stack-surface]");
+        const flow = stack?.parentElement;
+        const surfaces = flow
+          ? Array.from(flow.children).filter(
+              (child): child is HTMLElement =>
+                child instanceof HTMLElement && child.hasAttribute("data-stack-surface")
+            )
+          : [];
+        const stackIndex = stack ? surfaces.indexOf(stack) : -1;
+        const stableStackTop = stackIndex >= 0
+          ? surfaces
+              .slice(0, stackIndex)
+              .reduce((top, surface) => top + surface.offsetHeight, 0)
+          : 0;
+        const y = stack && flow && stackIndex >= 0
+          ? flow.getBoundingClientRect().top + window.scrollY + stableStackTop
+          : el.getBoundingClientRect().top + window.scrollY;
+        const root = document.documentElement;
+        const prev = root.style.scrollBehavior;
+        root.style.scrollBehavior = "auto";
+        const lenis = (window as unknown as {
+          __lenis828?: { scrollTo: (target: number, options: { immediate: boolean }) => void };
+        }).__lenis828;
+        lenis?.scrollTo(Math.max(0, y), { immediate: true });
+        window.scrollTo(0, Math.max(0, y));
+        root.style.scrollBehavior = prev;
+      };
 
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    // aria-modal alone doesn't stop keyboard users falling behind the
-    // overlay: move focus in on open, cycle Tab inside, restore on close.
-    returnFocusRef.current = document.activeElement as HTMLElement | null;
-    dialogRef.current
-      ?.querySelector<HTMLElement>('[aria-label="Close photo viewer"]')
-      ?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-      else if (e.key === "ArrowRight") step(1);
-      else if (e.key === "ArrowLeft") step(-1);
-      else if (e.key === "Tab") {
-        const focusables = dialogRef.current?.querySelectorAll<HTMLElement>("button");
-        if (!focusables?.length) return;
-        const list = Array.from(focusables);
-        const idx = list.indexOf(document.activeElement as HTMLElement);
-        const next = e.shiftKey
-          ? list[(idx - 1 + list.length) % list.length]
-          : list[(idx + 1) % list.length];
-        e.preventDefault();
-        next.focus();
+      window.addEventListener("wheel", abort, { passive: true, once: true });
+      window.addEventListener("touchmove", abort, { passive: true, once: true });
+      const raf = window.requestAnimationFrame(jump);
+      const timers = [120, 350, 700, 1100, 1800, 3000, 4800].map((ms) =>
+        setTimeout(jump, ms)
+      );
+      const observedSurfaces = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-portfolio-flow] > [data-stack-surface]")
+      );
+      if (typeof ResizeObserver !== "undefined" && observedSurfaces.length) {
+        layoutObserver = new ResizeObserver(() => {
+          if (aborted || layoutFrame) return;
+          layoutFrame = window.requestAnimationFrame(() => {
+            layoutFrame = 0;
+            jump();
+          });
+        });
+        observedSurfaces.forEach((surface) => layoutObserver?.observe(surface));
       }
+      const onLoad = () => jump();
+      window.addEventListener("load", onLoad, { once: true });
+      document.fonts?.ready.then(jump).catch(() => {});
+
+      return () => {
+        aborted = true;
+        window.cancelAnimationFrame(raf);
+        if (layoutFrame) window.cancelAnimationFrame(layoutFrame);
+        timers.forEach(clearTimeout);
+        layoutObserver?.disconnect();
+        window.removeEventListener("load", onLoad);
+        window.removeEventListener("wheel", abort);
+        window.removeEventListener("touchmove", abort);
+      };
     };
-    window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    const onHashChange = () => {
+      stopLanding?.();
+      stopLanding = beginLanding();
+    };
+    stopLanding = beginLanding();
+    window.addEventListener("hashchange", onHashChange);
     return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-      returnFocusRef.current?.focus?.();
-      returnFocusRef.current = null;
+      window.removeEventListener("hashchange", onHashChange);
+      stopLanding?.();
     };
-  }, [lightboxOpen, close, step]);
+  }, []);
+
+  const close = useCallback(() => {
+    lightboxOpenRef.current = false;
+    setLightbox(null);
+  }, []);
 
   const openAt = useCallback((c: number, src?: string) => {
     const photos = PORTFOLIO_CASES[c].gallery.photos;
     const p = src ? Math.max(0, photos.indexOf(src)) : 0;
+    lightboxOpenRef.current = true;
     setLightbox({ c, p });
   }, []);
+
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !lightboxOpenRef.current) return;
+      event.preventDefault();
+      close();
+    };
+    window.addEventListener("keydown", closeOnEscape, true);
+    return () => window.removeEventListener("keydown", closeOnEscape, true);
+  }, [close]);
 
   const active = lightbox ? PORTFOLIO_CASES[lightbox.c] : null;
   const [cerritos, elSereno, tustin] = PORTFOLIO_CASES;
@@ -372,158 +428,152 @@ export default function PortfolioContent() {
   return (
     <div ref={rootRef} className="bg-[#f5f0e9] text-black">
       <PortfolioFlow>
-        {/* ── Surface 1 · Hero: statement + residence index + real triptych ── */}
+        {/* ── Surface 1 · Hero: editorial ledger + project triptych ── */}
         <section
           data-section="portfolio-hero"
           data-header-dark=""
-          className="relative min-h-svh bg-black px-6 pb-16 pt-28 text-white lg:flex lg:flex-col lg:justify-center lg:px-12 lg:pb-20 lg:pt-32"
+          className="relative min-h-[max(100svh,46rem)] bg-black px-6 pb-16 pt-28 text-white lg:flex lg:min-h-svh lg:flex-col lg:justify-center lg:px-12 lg:pb-20 lg:pt-32"
           style={{ overflowX: "clip" }}
         >
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_76%_12%,rgba(99,26,22,0.16),transparent_30%)]"
-            aria-hidden="true"
-          />
-          <div className="relative z-10 mx-auto max-w-7xl">
-            <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
-              <div
-                className="flex flex-col justify-between"
-                data-motion-reveal="left"
-                data-motion-stagger="0.1"
-              >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_12%,rgba(99,26,22,0.16),transparent_30%)]" aria-hidden="true" />
+          <div className="relative z-10 mx-auto w-full max-w-[100rem]">
+            <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch lg:gap-12 2xl:gap-20">
+              <div className="flex flex-col justify-between" data-motion-reveal="left" data-motion-stagger="0.1">
                 <div>
                   <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/62">
                     Portfolio / Selected project work
                   </span>
-                  <h1 className="mt-5 max-w-xl font-editorial text-[clamp(2.2rem,4.5vw,4.6rem)] leading-[0.9]">
+                  <h1 className="mt-5 max-w-xl font-editorial text-[clamp(2.75rem,5.2vw,5.4rem)] leading-[0.9]">
                     Remodels, ADUs, repairs.
                   </h1>
                   <p className="mt-6 max-w-md text-sm leading-7 text-white/56">
                     Three projects, photographed the way they were built — completely.
                     Open any project for the full set.
                   </p>
+                  <a
+                    href={`#${cerritos.gallery.id}`}
+                    aria-label={`View ${cerritos.gallery.title}`}
+                    className="mt-7 inline-flex h-12 w-12 items-center justify-center border border-white/32 text-white transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white lg:hidden"
+                  >
+                    <ArrowDown aria-hidden="true" className="h-5 w-5 animate-bounce stroke-[1.5] motion-reduce:animate-none" />
+                  </a>
                 </div>
 
-                <nav aria-label="Project index" className="mt-12 lg:mt-10">
-                  {PORTFOLIO_CASES.map((c, i) => (
-                    <a
-                      key={c.gallery.id}
-                      href={`#${c.gallery.id}`}
-                      className="group grid min-h-[44px] grid-cols-[2.6rem_1fr_auto] items-baseline gap-4 border-t border-white/12 py-4 transition-colors hover:bg-white/[0.03]"
-                    >
-                      <span className="font-numbers text-sm font-bold text-white/28 transition-colors group-hover:text-[var(--color-accent)]">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span>
-                        <span className="block font-editorial text-[clamp(1.25rem,1.9vw,1.9rem)] leading-tight text-white/86 transition-colors group-hover:text-white">
-                          {c.gallery.title}
+                <nav
+                  aria-label="Project index"
+                  className="mt-10 lg:mt-8"
+                  onMouseLeave={() => setHeroPreview(null)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setHeroPreview(null);
+                  }}
+                >
+                  {PORTFOLIO_CASES.map((c, i) => {
+                    const selected = heroPreview === i;
+                    return (
+                      <a
+                        key={c.gallery.id}
+                        href={`#${c.gallery.id}`}
+                        onMouseEnter={() => setHeroPreview(i)}
+                        onFocus={() => setHeroPreview(i)}
+                        className={`group relative grid min-h-[4.75rem] grid-cols-[2.6rem_minmax(0,1fr)_auto] items-center gap-4 border-t border-white/12 py-3.5 transition-colors hover:bg-white/[0.045] focus-visible:bg-white/[0.045] ${selected ? "bg-white/[0.035]" : ""}`}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={`absolute inset-y-0 left-0 w-px origin-center bg-[var(--color-accent)] transition-transform duration-300 ${selected ? "scale-y-100" : "scale-y-0"}`}
+                        />
+                        <span className={`font-numbers text-sm font-bold transition-colors ${selected ? "text-[var(--color-accent)]" : "text-white/28"}`}>
+                          {String(i + 1).padStart(2, "0")}
                         </span>
-                        <span className="mt-1 block font-labels text-[8px] uppercase leading-4 tracking-[0.16em] text-white/56">
-                          {c.gallery.scope} / {c.project.location}
+                        <span className="min-w-0">
+                          <span className={`block truncate font-editorial text-[clamp(1.2rem,1.8vw,1.8rem)] leading-tight transition-colors ${selected ? "text-white" : "text-white/82"}`}>
+                            {c.gallery.title}
+                          </span>
+                          <span className="mt-1 block truncate font-labels text-[8px] uppercase leading-4 tracking-[0.16em] text-white/48">
+                            {c.gallery.scope} / {c.project.location}
+                          </span>
                         </span>
-                      </span>
-                      <span className="hidden font-numbers text-[10px] text-white/60 sm:block">
-                        {c.gallery.photos.length} photos
-                      </span>
-                    </a>
-                  ))}
+                        <span className="hidden font-numbers text-[10px] text-white/52 sm:block">
+                          {c.gallery.photos.length} photos
+                        </span>
+                      </a>
+                    );
+                  })}
                   <div className="draw-line h-px bg-[var(--color-accent)]/55" />
                 </nav>
               </div>
 
               <div
-                className="grid grid-cols-2 grid-rows-2 gap-3"
+                className="grid min-h-[24rem] grid-cols-2 grid-rows-2 gap-3 sm:min-h-[32rem] lg:min-h-[min(68svh,48rem)]"
                 data-motion-reveal="right"
+                onMouseLeave={() => setHeroPreview(null)}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) setHeroPreview(null);
+                }}
               >
-                <a
-                  href={`#${cerritos.gallery.id}`}
-                  className="group relative row-span-2 block min-h-[22rem] overflow-hidden bg-[#111] sm:min-h-[26rem]"
-                >
-                  <Image
-                    src={cerritos.lead}
-                    alt="Cerritos bath remodel — glass shower enclosure and dark feature tile"
-                    fill
-                    priority
-                    fetchPriority="high"
-                    quality={90}
-                    sizes="(max-width: 1024px) 50vw, 30vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-                    style={{ filter: "contrast(1.04) saturate(1.05)" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
-                    Cerritos, CA
-                  </span>
-                </a>
-                <a
-                  href={`#${elSereno.gallery.id}`}
-                  className="group relative block overflow-hidden bg-[#111]"
-                >
-                  <Image
-                    src={elSereno.lead}
-                    alt="El Sereno bath and deck project — geometric tile and outdoor living work"
-                    fill
-                    loading="eager"
-                    quality={86}
-                    sizes="(max-width: 1024px) 50vw, 28vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-                    style={{ filter: "contrast(1.04) saturate(1.05)" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
-                    El Sereno, CA
-                  </span>
-                </a>
-                <a
-                  href={`#${tustin.gallery.id}`}
-                  className="group relative block overflow-hidden bg-[#111]"
-                >
-                  <Image
-                    src={tustin.lead}
-                    alt="Tustin bath refresh — light blue soaking tub with glass shower surround"
-                    fill
-                    loading="eager"
-                    quality={86}
-                    sizes="(max-width: 1024px) 50vw, 28vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-                    style={{ filter: "contrast(1.04) saturate(1.05)" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
-                    Tustin, CA
-                  </span>
-                </a>
+                {[cerritos, elSereno, tustin].map((c, i) => (
+                  <a
+                    key={c.gallery.id}
+                    href={`#${c.gallery.id}`}
+                    onMouseEnter={() => setHeroPreview(i)}
+                    onFocus={() => setHeroPreview(i)}
+                    className={`group relative block overflow-hidden bg-[#111] transition-opacity duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] ${i === 0 ? "row-span-2" : ""} ${heroPreview === null || heroPreview === i ? "opacity-100" : "opacity-45"}`}
+                  >
+                    <Image
+                      src={c.lead}
+                      alt={`${c.gallery.title} — ${c.gallery.scope}`}
+                      fill
+                      priority={i === 0}
+                      fetchPriority={i === 0 ? "high" : "auto"}
+                      quality={i === 0 ? 90 : 86}
+                      sizes={i === 0 ? "(max-width: 1024px) 50vw, 30vw" : "(max-width: 1024px) 50vw, 28vw"}
+                      placeholder="blur"
+                      blurDataURL={lqip(c.lead)}
+                      className={`object-cover transition-transform duration-700 group-hover:scale-[1.035] group-focus-visible:scale-[1.035] motion-reduce:transition-none ${i === 1 ? "object-[50%_62%]" : i === 2 ? "object-[50%_45%]" : ""}`}
+                    />
+                    <span className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" aria-hidden="true" />
+                    <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
+                      {c.project.location}
+                    </span>
+                    <span className={`absolute inset-x-0 bottom-0 h-px origin-left bg-[var(--color-accent)] transition-transform duration-500 ${heroPreview === i ? "scale-x-100" : "scale-x-0"}`} aria-hidden="true" />
+                  </a>
+                ))}
               </div>
             </div>
           </div>
+
+          <a
+            href={`#${cerritos.gallery.id}`}
+            aria-label={`View ${cerritos.gallery.title}`}
+            className="absolute bottom-5 left-1/2 z-20 hidden h-12 w-12 -translate-x-1/2 items-center justify-center border border-white/36 bg-black/42 text-white backdrop-blur-sm transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white lg:flex"
+          >
+            <ArrowDown aria-hidden="true" className="h-5 w-5 animate-bounce stroke-[1.5] motion-reduce:animate-none" />
+          </a>
         </section>
 
-        {/* ── Surface 2 · Cerritos: lead-left, sticky dossier right ── */}
+        {/* Cerritos: architectural split, lead image left and dossier right. */}
         <section
-          id="cerritos-residence"
+          id={cerritos.gallery.id}
           data-section="case-cerritos"
           data-header-light=""
-          className="relative flex min-h-svh scroll-mt-24 flex-col justify-center bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
+          className="relative flex min-h-svh scroll-mt-[49px] flex-col justify-center bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28 xl:scroll-mt-[52px]"
           style={{ overflowX: "clip" }}
         >
-          <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
-          <div className="relative z-10 mx-auto max-w-7xl">
-            <div className="grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:gap-14">
+          <div className="relative z-10 mx-auto w-full max-w-[100rem]">
+            <div className="grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:items-start lg:gap-14 2xl:gap-20">
               <div
                 data-lead-parallax=""
                 data-motion-reveal="left"
-                className="relative aspect-[4/5] overflow-hidden bg-[#e8e3da] lg:aspect-auto lg:min-h-[38rem]"
+                className="relative aspect-[4/5] overflow-hidden bg-[#e8e3da] sm:aspect-[5/4] lg:aspect-auto lg:min-h-[min(68svh,48rem)]"
               >
                 <Image
                   src={cerritos.lead}
                   alt="Cerritos bath remodel overview — frameless glass shower, dark vertical feature tile, dual marble vanity"
                   fill
-                  loading="eager"
                   quality={86}
                   sizes="(max-width: 1024px) 100vw, 54vw"
                   placeholder="blur"
                   blurDataURL={lqip(cerritos.lead)}
                   className="object-cover"
-                  style={{ filter: "contrast(1.04) saturate(1.05)" }}
                 />
               </div>
               <div className="lg:self-stretch">
@@ -540,25 +590,22 @@ export default function PortfolioContent() {
               </div>
             </div>
 
-            {/* Dominant first frame + closing wide keeps the grid art-directed
-                (not a uniform 3×2) and leaves no orphan cell at 390px. */}
             <div
               data-tile-group=""
               data-motion-reveal="up"
               data-motion-stagger="0.065"
-              className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-16"
+              className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-3 lg:mt-14 lg:gap-4"
             >
-              {cerritos.grid.map((src, i) => (
+              {cerritos.grid.map((src, index) => (
                 <CaseTile
                   key={src}
                   src={src}
                   caseData={cerritos}
-                  index={i}
+                  index={index}
                   dark={false}
-                  aspect={i === 0 ? "col-span-2 aspect-[8/5]" : "aspect-[4/5]"}
-                  sizes={i === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 50vw, 33vw"}
-                  eager={i < 3}
-                  onOpen={(s) => openAt(0, s)}
+                  aspect={index === 0 ? "col-span-2 aspect-[8/5]" : "aspect-[4/5]"}
+                  sizes={index === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 50vw, 33vw"}
+                  onOpen={(src) => openAt(0, src)}
                 />
               ))}
             </div>
@@ -567,16 +614,15 @@ export default function PortfolioContent() {
           </div>
         </section>
 
-        {/* ── Surface 3 · El Sereno: full-bleed lead, two-chapter grid ── */}
+        {/* El Sereno: cinematic lead followed by separate bath/deck chapters. */}
         <section
-          id="el-sereno-residence"
+          id={elSereno.gallery.id}
           data-section="case-el-sereno"
           data-header-dark=""
-          className="relative flex min-h-svh scroll-mt-24 flex-col justify-center bg-[#0a0a0a] px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-28 lg:pt-28"
+          className="relative flex min-h-svh scroll-mt-[49px] flex-col justify-center bg-[#0a0a0a] px-6 pb-20 pt-24 text-white lg:px-12 lg:pb-28 lg:pt-28 xl:scroll-mt-[52px]"
           style={{ overflowX: "clip" }}
         >
-          <SectionMotionBackdrop tone="light" density="quiet" className="opacity-[0.1]" />
-          <div className="relative z-10 mx-auto max-w-7xl">
+          <div className="relative z-10 mx-auto w-full max-w-[100rem]">
             <div
               data-lead-parallax=""
               data-motion-reveal="up"
@@ -586,61 +632,49 @@ export default function PortfolioContent() {
                 src={elSereno.lead}
                 alt="El Sereno bath remodel — geometric star-pattern tile, soaking tub, and matte black fixtures"
                 fill
-                loading="eager"
                 quality={88}
-                sizes="(max-width: 1280px) 100vw, 1216px"
+                sizes="(max-width: 1600px) 100vw, 1600px"
                 placeholder="blur"
                 blurDataURL={lqip(elSereno.lead)}
-                className="object-cover"
-                style={{ filter: "contrast(1.04) saturate(1.05)", objectPosition: "50% 68%" }}
+                className="object-cover object-[50%_68%]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-transparent to-transparent" />
             </div>
 
-            <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14">
-              <div className="lg:self-stretch">
-                <div
-                  className="lg:sticky lg:top-28"
-                  data-motion-reveal="left"
-                  data-motion-stagger="0.08"
-                >
-                  <CaseNumberBlock index={1} title={elSereno.gallery.title} dark />
-                  <div className="mt-8">
-                    <CaseLedger caseData={elSereno} dark onOpenSet={() => openAt(1)} />
-                  </div>
+            <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-16">
+              <div className="lg:sticky lg:top-28" data-motion-reveal="left" data-motion-stagger="0.08">
+                <CaseNumberBlock index={1} title={elSereno.gallery.title} dark />
+                <div className="mt-8">
+                  <CaseLedger caseData={elSereno} dark onOpenSet={() => openAt(1)} />
                 </div>
               </div>
 
               <div>
-                {[elSereno.grid, elSereno.gridB ?? []].map((chapter, chapterIdx) =>
+                {[elSereno.grid, elSereno.gridB ?? []].map((chapter, chapterIndex) =>
                   chapter.length ? (
-                    <div key={chapterIdx} className={chapterIdx === 1 ? "mt-10" : ""}>
-                      <div
-                        className="mb-4 flex items-center gap-3"
-                        data-motion-reveal="right"
-                      >
+                    <div key={chapterIndex} className={chapterIndex === 1 ? "mt-10" : ""}>
+                      <div className="mb-4 flex items-center gap-3" data-motion-reveal="right">
                         <span className="h-px w-8 bg-[var(--color-accent)]/70" aria-hidden="true" />
                         <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/62">
-                          {elSereno.chapterLabels?.[chapterIdx]}
+                          {elSereno.chapterLabels?.[chapterIndex]}
                         </span>
                       </div>
                       <div
                         data-tile-group=""
                         data-motion-reveal="up"
                         data-motion-stagger="0.07"
-                        className="grid grid-cols-2 gap-3 md:grid-cols-3"
+                        className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:gap-4"
                       >
-                        {chapter.map((src, i) => (
+                        {chapter.map((src, index) => (
                           <CaseTile
                             key={src}
                             src={src}
                             caseData={elSereno}
-                            index={i}
+                            index={chapterIndex * chapter.length + index}
                             dark
-                            aspect={i === 0 ? "aspect-[4/5] col-span-2 md:col-span-1" : "aspect-[4/5]"}
+                            aspect={index === 0 ? "col-span-2 aspect-[4/5] md:col-span-1" : "aspect-[4/5]"}
                             sizes="(max-width: 768px) 50vw, 20vw"
-                            eager={chapterIdx === 0 && i < 3}
-                            onOpen={(s) => openAt(1, s)}
+                            onOpen={(src) => openAt(1, src)}
                           />
                         ))}
                       </div>
@@ -654,72 +688,61 @@ export default function PortfolioContent() {
           </div>
         </section>
 
-        {/* ── Surface 4 · Tustin: dossier bar + offset grid ── */}
+        {/* Tustin: specification bar above an offset, two-column mosaic. */}
         <section
-          id="tustin-residence"
+          id={tustin.gallery.id}
           data-section="case-tustin"
           data-header-light=""
-          className="relative flex min-h-svh scroll-mt-24 flex-col justify-center bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28"
+          className="relative flex min-h-svh scroll-mt-[49px] flex-col justify-center bg-[#f5f0e9] px-6 pb-20 pt-24 lg:px-12 lg:pb-28 lg:pt-28 xl:scroll-mt-[52px]"
           style={{ overflowX: "clip" }}
         >
-          <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
-          <div className="relative z-10 mx-auto max-w-7xl">
-            <div
-              className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16"
-              data-motion-reveal="up"
-              data-motion-stagger="0.08"
-            >
-              <CaseNumberBlock index={2} title={tustin.gallery.title} dark={false} />
-              <div>
+          <div className="relative z-10 mx-auto w-full max-w-[100rem]">
+            <div className="grid gap-9 lg:grid-cols-[0.88fr_1.12fr] lg:items-start lg:gap-16">
+              <div data-motion-reveal="left">
+                <CaseNumberBlock index={2} title={tustin.gallery.title} dark={false} />
+              </div>
+              <div data-motion-reveal="right" data-motion-stagger="0.08">
                 <CaseLedger caseData={tustin} dark={false} onOpenSet={() => openAt(2)} />
               </div>
             </div>
 
-            {/* Column groups stack at 390px — side-by-side nesting quarters the
-                cells into illegible ~90px swatches (2026-07-13 critique). */}
-            <div
-              className="mt-12 grid gap-3 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-4"
-              data-motion-reveal="up"
-              data-motion-stagger="0.1"
-            >
-              <div data-tile-group="" className="grid gap-3 lg:gap-4">
+            <div className="mt-10 grid gap-3 lg:mt-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-start lg:gap-4">
+              <div data-tile-group="" data-motion-reveal="left" data-motion-stagger="0.08" className="grid gap-3 lg:gap-4">
                 <CaseTile
                   src={tustin.lead}
                   caseData={tustin}
                   index={0}
                   dark={false}
+                  lead
                   aspect="aspect-[4/3]"
-                  sizes="(max-width: 1024px) 50vw, 44vw"
-                  eager
-                  onOpen={(s) => openAt(2, s)}
+                  sizes="(max-width: 1024px) 100vw, 44vw"
+                  onOpen={(src) => openAt(2, src)}
                 />
                 <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                  {tustin.grid.slice(0, 2).map((src, i) => (
+                  {tustin.grid.slice(0, 2).map((src, index) => (
                     <CaseTile
                       key={src}
                       src={src}
                       caseData={tustin}
-                      index={i + 1}
+                      index={index + 1}
                       dark={false}
-                      sizes="(max-width: 1024px) 25vw, 22vw"
-                      eager={i === 0}
-                      onOpen={(s) => openAt(2, s)}
+                      sizes="(max-width: 1024px) 50vw, 22vw"
+                      onOpen={(src) => openAt(2, src)}
                     />
                   ))}
                 </div>
               </div>
-              <div data-tile-group="" className="grid gap-3 lg:mt-20 lg:gap-4">
+              <div data-tile-group="" data-motion-reveal="right" data-motion-stagger="0.08" className="grid gap-3 lg:mt-16 lg:gap-4">
                 <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                  {tustin.grid.slice(2, 4).map((src, i) => (
+                  {tustin.grid.slice(2, 4).map((src, index) => (
                     <CaseTile
                       key={src}
                       src={src}
                       caseData={tustin}
-                      index={i + 3}
+                      index={index + 3}
                       dark={false}
-                      sizes="(max-width: 1024px) 25vw, 18vw"
-                      eager={i === 0}
-                      onOpen={(s) => openAt(2, s)}
+                      sizes="(max-width: 1024px) 50vw, 18vw"
+                      onOpen={(src) => openAt(2, src)}
                     />
                   ))}
                 </div>
@@ -729,8 +752,8 @@ export default function PortfolioContent() {
                   index={5}
                   dark={false}
                   aspect="aspect-[4/3]"
-                  sizes="(max-width: 1024px) 50vw, 36vw"
-                  onOpen={(s) => openAt(2, s)}
+                  sizes="(max-width: 1024px) 100vw, 36vw"
+                  onOpen={(src) => openAt(2, src)}
                 />
               </div>
             </div>
@@ -747,7 +770,6 @@ export default function PortfolioContent() {
           className="relative flex min-h-[22rem] flex-col justify-center bg-[#f5f0e9] px-6 py-16 sm:min-h-[24rem] sm:py-20 lg:px-12 xl:min-h-[clamp(26rem,50svh,38rem)] xl:py-20"
           style={{ overflowX: "clip" }}
         >
-          <SectionMotionBackdrop tone="dark" density="quiet" className="opacity-[0.08]" />
           <div className="relative z-10 mx-auto grid w-full max-w-[100rem] gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12 2xl:gap-20">
             <div data-motion-reveal="left" data-motion-stagger="0.08">
               <span className="font-labels text-[10px] uppercase tracking-[0.22em] text-black/62">
@@ -778,64 +800,16 @@ export default function PortfolioContent() {
         </section>
       </PortfolioFlow>
 
-      {/* Per-case lightbox — full photo set, arrows/Esc/backdrop/scroll-lock */}
+      {/* Project inspection viewer: swipe/zoom stage plus a bounded contact rail. */}
       {active && lightbox && (
-        <div
-          ref={dialogRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${active.gallery.title} photo viewer`}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/92 p-4 lg:p-10"
-          onClick={close}
-        >
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Close photo viewer"
-            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center border border-white/25 font-labels text-lg text-white/80 transition-colors hover:border-white hover:text-white lg:right-8 lg:top-8"
-          >
-            ×
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              step(-1);
-            }}
-            aria-label="Previous photo"
-            className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-white/20 font-labels text-white/70 transition-colors hover:border-white hover:text-white lg:left-8"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              step(1);
-            }}
-            aria-label="Next photo"
-            className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-white/20 font-labels text-white/70 transition-colors hover:border-white hover:text-white lg:right-8"
-          >
-            ›
-          </button>
-          <div className="relative h-full w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
-            <Image
-              key={active.gallery.photos[lightbox.p]}
-              src={active.gallery.photos[lightbox.p]}
-              alt={`${active.gallery.title} — ${active.gallery.scope}, photo ${lightbox.p + 1} of ${active.gallery.photos.length}`}
-              fill
-              sizes="100vw"
-              quality={82}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <p className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 font-labels text-[10px] uppercase tracking-[0.2em] text-white/70">
-            {active.gallery.title}
-            <span className="mx-2 text-white/35">/</span>
-            {String(lightbox.p + 1).padStart(2, "0")} — {String(active.gallery.photos.length).padStart(2, "0")}
-          </p>
-        </div>
+        <ProjectInspectionViewer
+          caseData={active}
+          initialIndex={lightbox.p}
+          onIndexChange={(p) =>
+            setLightbox((current) => (current ? { ...current, p } : current))
+          }
+          onClose={close}
+        />
       )}
     </div>
   );

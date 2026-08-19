@@ -55,15 +55,15 @@ const FAQS = [
 // approach / Build philosophy").
 const FAQ_PHOTOS = [
   {
-    src: "/images/generated/remediation-faq-cause-moisture-v3.png",
+    src: "/images/generated/remediation-faq-cause-moisture-v3.webp",
     alt: "Moisture intrusion inspection at an opened residential wall section",
   },
   {
-    src: "/images/generated/remediation-faq-containment-v3.png",
+    src: "/images/generated/remediation-faq-containment-v3.webp",
     alt: "Clean remediation containment setup with air filtration equipment",
   },
   {
-    src: "/images/generated/remediation-faq-air-quality-v3.png",
+    src: "/images/generated/remediation-faq-air-quality-v3.webp",
     alt: "Air quality and moisture control equipment in a clean residential remediation area",
   },
 ] as const;
@@ -77,22 +77,22 @@ const APPROACH = [
 
 const APPROACH_PHOTOS = [
   {
-    src: "/images/generated/remediation-step-initial-call-v3.png",
+    src: "/images/generated/remediation-step-initial-call-v3.webp",
     alt: "Initial remediation call setup with project notes, plans, and phone",
     label: "Initial call",
   },
   {
-    src: "/images/generated/remediation-step-visual-testing-v3.png",
+    src: "/images/generated/remediation-step-visual-testing-v3.webp",
     alt: "Moisture testing at an opened residential wall during remediation inspection",
     label: "Visual inspection / Testing",
   },
   {
-    src: "/images/generated/remediation-step-scope-work-v3.png",
+    src: "/images/generated/remediation-step-scope-work-v3.webp",
     alt: "Remediation scope of work documents, floor plans, and marked project photos",
     label: "Remediation / Scope of work",
   },
   {
-    src: "/images/generated/remediation-step-reconstruction-v3.png",
+    src: "/images/generated/remediation-step-reconstruction-v3.webp",
     alt: "Clean residential rebuild with new drywall after remediation",
     label: "Build back / Reconstruction",
   },
@@ -113,13 +113,13 @@ const EQUIPMENT = [
   {
     model: "Flair E8",
     role: "Air filtration",
-    src: "/images/generated/remediation-equipment-air-filtration-v3.png",
+    src: "/images/generated/remediation-equipment-air-filtration-v3.webp",
     alt: "Portable air filtration equipment in a clean remediation workspace",
   },
   {
     model: "277 MR",
     role: "Moisture control",
-    src: "/images/generated/remediation-equipment-moisture-control-v3.png",
+    src: "/images/generated/remediation-equipment-moisture-control-v3.webp",
     alt: "Professional moisture control equipment in a contained remediation workspace",
   },
 ];
@@ -514,7 +514,7 @@ function RemediationHero() {
         <div className="rem-hero-media relative order-2 min-h-[46vh] overflow-hidden lg:min-h-screen">
           <div className="rem-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/generated/remediation-hero-controlled-work-v3.png"
+              src="/images/generated/remediation-hero-controlled-work-v3.webp"
               alt="Controlled remediation work area with exposed framing and drying equipment"
               fill
               priority
@@ -639,6 +639,7 @@ function RemediationFaq() {
           the real headings live in the cards below). */}
       <div className="overflow-hidden border-b border-black/[0.06] py-6" aria-hidden="true">
         <div
+          data-ambient-motion=""
           className="flex w-max items-center"
           style={{ animation: "marqueeScroll 58s linear infinite" }}
         >

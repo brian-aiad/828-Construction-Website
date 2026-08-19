@@ -36,11 +36,20 @@ export default function CustomCursor() {
     ring.style.opacity = "0";
     copper.style.opacity = "0";
 
-    let rafId: number;
+    let rafId = 0;
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
     let ringX = 0, ringY = 0;
     let copperX = 0, copperY = 0;
     let curX = 0, curY = 0;
     let hasPointer = false;
+
+    const hideCursor = () => {
+      clearTimeout(idleTimer);
+      hasPointer = false;
+      dot.style.opacity = "0";
+      ring.style.opacity = "0";
+      copper.style.opacity = "0";
+    };
 
     const handleMove = (e: MouseEvent) => {
       curX = e.clientX;
@@ -56,6 +65,9 @@ export default function CustomCursor() {
         copper.style.opacity = "0.5";
       }
       dot.style.transform = `translate(${curX}px, ${curY}px)`;
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(hideCursor, 900);
+      if (!rafId) rafId = requestAnimationFrame(animate);
     };
 
     const animate = () => {
@@ -69,6 +81,17 @@ export default function CustomCursor() {
       copperY += (curY - copperY) * 0.09;
       copper.style.transform = `translate(${copperX}px, ${copperY}px)`;
 
+      const ringSettled = Math.abs(curX - ringX) < 0.1 && Math.abs(curY - ringY) < 0.1;
+      const copperSettled =
+        Math.abs(curX - copperX) < 0.1 && Math.abs(curY - copperY) < 0.1;
+      if (ringSettled && copperSettled) {
+        ringX = copperX = curX;
+        ringY = copperY = curY;
+        ring.style.transform = `translate(${curX}px, ${curY}px)`;
+        copper.style.transform = `translate(${curX}px, ${curY}px)`;
+        rafId = 0;
+        return;
+      }
       rafId = requestAnimationFrame(animate);
     };
 
@@ -103,7 +126,8 @@ export default function CustomCursor() {
     };
 
     window.addEventListener("mousemove", handleMove, { passive: true });
-    rafId = requestAnimationFrame(animate);
+    window.addEventListener("scroll", hideCursor, { passive: true });
+    document.addEventListener("mouseleave", hideCursor);
 
     const isInteractiveTarget = (target: EventTarget | null) =>
       target instanceof Element && Boolean(target.closest("a, button, [role='button'], input, select, textarea, [data-cursor-grow]"));
@@ -141,7 +165,10 @@ export default function CustomCursor() {
     return () => {
       document.body.classList.remove("has-custom-cursor");
       window.removeEventListener("mousemove", handleMove);
-      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", hideCursor);
+      document.removeEventListener("mouseleave", hideCursor);
+      clearTimeout(idleTimer);
+      if (rafId) cancelAnimationFrame(rafId);
       document.removeEventListener("pointerover", handlePointerOver);
       document.removeEventListener("pointerout", handlePointerOut);
     };
@@ -164,6 +191,7 @@ export default function CustomCursor() {
           marginLeft: -4, marginTop: -4,
           borderRadius: "50%",
           background: "#fff",
+          willChange: "transform, opacity",
         }}
       />
 
@@ -182,6 +210,7 @@ export default function CustomCursor() {
           borderRadius: "50%",
           background: "var(--color-accent)",
           opacity: 0.5,
+          willChange: "transform, opacity",
         }}
       />
 
@@ -200,6 +229,7 @@ export default function CustomCursor() {
           borderRadius: "50%",
           border: "1.5px solid rgba(255,255,255,0.65)",
           transition: "width 0.25s ease, height 0.25s ease, margin 0.25s ease, border-color 0.25s ease, opacity 0.25s ease",
+          willChange: "transform, opacity",
         }}
       />
     </>

@@ -354,6 +354,7 @@ function DetailStrip({ slug }: { slug: string }) {
       aria-hidden="true"
     >
       <div
+        data-ambient-motion=""
         className="flex whitespace-nowrap"
         style={{ width: "max-content", animation: "marqueeScroll 18s linear infinite" }}
       >

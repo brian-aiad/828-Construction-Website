@@ -323,6 +323,7 @@ export default function HomeVisionSequence({
       data-section={part === "intro" ? "vision" : "vision-process"}
       data-header-dark=""
       {...(part === "intro" ? { "data-header-transparent": "" } : {})}
+      {...(part === "process" ? { "data-flow-rail-pause": "" } : {})}
       className={`relative text-white ${part === "intro" ? "bg-[#050505]" : "bg-[#0a0a0a]"}`}
     >
       {part === "intro" && (
@@ -346,7 +347,7 @@ export default function HomeVisionSequence({
         >
           <div ref={photoInnerRef} className="absolute -inset-y-[10%] inset-x-0" style={{ willChange: "transform" }}>
             <Image
-              src="/images/generated/home-vision-fireplace-work-v2.png"
+              src="/images/generated/home-vision-fireplace-work-v2.webp"
               alt=""
               fill
               loading="lazy"
@@ -440,16 +441,17 @@ export default function HomeVisionSequence({
         <div className="xl:sticky xl:top-14 xl:flex xl:h-[calc(100svh-3.5rem)] xl:flex-col xl:overflow-hidden">
         {/* Marquee — refined mono strip, hairline-bounded, pinned with the panel */}
         <div
-          className="overflow-hidden border-y border-white/10 bg-[#050505] py-5 xl:ml-12"
+          className="flex h-14 w-full items-center overflow-hidden border-y border-white/10 bg-[#050505]"
           aria-hidden="true"
         >
           <div
-            className="home-vision-marquee flex w-max gap-10 whitespace-nowrap font-labels text-[11px] uppercase tracking-[0.3em] text-white/38"
+            data-ambient-motion=""
+            className="home-vision-marquee flex h-full w-max items-center gap-10 whitespace-nowrap font-labels text-[11px] uppercase leading-none tracking-[0.3em] text-white/64"
             style={{ animation: "marqueeScroll 72s linear infinite" }}
           >
             {[...marquee, ...marquee, ...marquee, ...marquee].map((item, i) => (
-              <span key={`${item}-${i}`} className="flex items-center gap-10">
-                <span style={i % 5 === 2 ? { color: "var(--color-accent)" } : undefined}>
+              <span key={`${item}-${i}`} className="flex h-full items-center gap-10">
+                <span style={i % 5 === 2 ? { color: "#D08A84" } : undefined}>
                   {item}
                 </span>
                 <span
@@ -466,10 +468,10 @@ export default function HomeVisionSequence({
             data-motion-reveal="up"
             data-motion-stagger="0.08"
           >
-            <div className="relative min-[1180px]:col-span-5 min-[1180px]:flex min-[1180px]:max-w-[34rem] min-[1180px]:flex-col min-[1180px]:justify-center min-[1180px]:border-y min-[1180px]:border-white/10 min-[1180px]:py-10">
+            <div className="relative min-[1180px]:col-span-5 min-[1180px]:flex min-[1180px]:max-w-[34rem] min-[1180px]:flex-col min-[1180px]:justify-center min-[1180px]:border-l min-[1180px]:border-white/12 min-[1180px]:py-2 min-[1180px]:pl-9">
               <span
                 aria-hidden="true"
-                className="absolute left-0 top-[-1px] hidden h-[2px] w-20 bg-[var(--color-accent)] min-[1180px]:block"
+                className="absolute left-[-1px] top-0 hidden h-20 w-[2px] bg-[var(--color-accent)] min-[1180px]:block"
               />
               <p className="process-head-el mb-5 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.26em] text-[var(--color-accent-light)] lg:mb-7">
                 <span
@@ -521,11 +523,11 @@ export default function HomeVisionSequence({
                             fill
                             sizes="(max-width: 640px) 128px, (max-width: 1024px) 152px, 184px"
                             quality={92}
-                            className="object-cover opacity-90 transition-all duration-500"
+                            className="object-cover opacity-90 transition-[transform,opacity] duration-500"
                             style={{ filter: "contrast(1.06) saturate(1.08)" }}
                           />
                         </div>
-                        <h4 className="process-title font-editorial text-[1.15rem] font-normal leading-tight text-white/70 transition-all duration-400 sm:text-[clamp(1.25rem,2.15vw,2.1rem)]">
+                        <h4 className="process-title font-editorial text-[1.15rem] font-normal leading-tight text-white/70 transition-[color,transform] duration-400 sm:text-[clamp(1.25rem,2.15vw,2.1rem)]">
                           {step.title}
                         </h4>
                         <span className="process-sub hidden font-labels text-[9px] uppercase tracking-[0.2em] text-white/48 transition-colors duration-400 2xl:block">
@@ -541,7 +543,7 @@ export default function HomeVisionSequence({
           </div>
 
           {/* Section footnote */}
-          <p className="vision-closing-el mt-8 border-t border-white/10 pt-4 font-labels text-[9px] uppercase tracking-[0.22em] text-white/35 lg:mt-10">
+          <p className="vision-closing-el mt-8 border-t border-white/10 pt-4 font-labels text-[9px] uppercase tracking-[0.22em] text-white/62 lg:mt-10">
             {SITE.address.city}, CA / South Bay / CA #{SITE.license}
           </p>
         </div>

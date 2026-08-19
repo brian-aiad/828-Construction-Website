@@ -229,25 +229,41 @@ function useServicesMotion() {
       // reveal children. Decisive `gsap.to` (no scrub) always completes inside
       // sticky-stacked surfaces (Fix 25).
       revealCleanups.push(
-        revealOnVisible(rises, (el) => {
-          gsap.to(el, { autoAlpha: 1, y: 0, duration: riseDuration, ease: "power3.out", overwrite: "auto" });
+        revealOnVisible(rises, (el, _index, immediate) => {
+          const stagger = Math.min(
+            Number.parseFloat((el as HTMLElement).dataset.stagger ?? "0") || 0,
+            isMobile ? 0.16 : 0.22
+          );
+          gsap.to(el, {
+            autoAlpha: 1,
+            y: 0,
+            duration: immediate ? 0 : riseDuration,
+            delay: immediate ? 0 : stagger,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
         })
       );
       revealCleanups.push(
-        revealOnVisible(shifts, (el) => {
-          gsap.to(el, { y: 0, duration: isMobile ? 0.68 : 0.9, ease: "power3.out", overwrite: "auto" });
+        revealOnVisible(shifts, (el, _index, immediate) => {
+          gsap.to(el, {
+            y: 0,
+            duration: immediate ? 0 : isMobile ? 0.68 : 0.9,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
         })
       );
       revealCleanups.push(
         revealOnVisible(
           clips.map((el) => el.parentElement ?? el),
-          (wrapper) => {
+          (wrapper, _index, immediate) => {
             const el =
               (wrapper as HTMLElement).querySelector<HTMLElement>(".svc-clip") ??
               (wrapper as HTMLElement);
             gsap.to(el, {
               clipPath: "inset(0% 0% 0% 0%)",
-              duration: isMobile ? 0.9 : 1.15,
+              duration: immediate ? 0 : isMobile ? 0.9 : 1.15,
               ease: "power3.inOut",
               overwrite: "auto",
             });
@@ -255,16 +271,21 @@ function useServicesMotion() {
         )
       );
       revealCleanups.push(
-        revealOnVisible(hairlines, (el) => {
-          gsap.to(el, { scaleX: 1, duration: lineDuration, ease: "power2.inOut", overwrite: "auto" });
+        revealOnVisible(hairlines, (el, _index, immediate) => {
+          gsap.to(el, {
+            scaleX: 1,
+            duration: immediate ? 0 : lineDuration,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
         })
       );
       revealCleanups.push(
-        revealOnVisible(seams, (el) => {
+        revealOnVisible(seams, (el, _index, immediate) => {
           gsap.to(el, {
             scaleY: 1,
-            duration: lineDuration,
-            delay: isMobile ? 0.08 : 0.2,
+            duration: immediate ? 0 : lineDuration,
+            delay: immediate ? 0 : isMobile ? 0.08 : 0.2,
             ease: "power2.inOut",
             overwrite: "auto",
           });
@@ -396,7 +417,6 @@ function ServicesIndex() {
                 <Link
                   key={row.slug}
                   href={`/services/${row.slug}`}
-                  aria-label={`View ${service.title}`}
                   className="group block border-b border-black/12"
                 >
                   <div
@@ -419,7 +439,7 @@ function ServicesIndex() {
                     >
                       {String(i + 1).padStart(2, "0")} / {service.short}
                       <span
-                        className={`ml-3 inline-block transition-all duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
+                        className={`ml-3 inline-block transition-[color,transform] duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
                           open
                             ? "translate-x-0 text-[var(--color-accent)]"
                             : "-translate-x-1"
@@ -654,7 +674,7 @@ function PrinciplesSection() {
                   <div className="flex items-start gap-4">
                     <span
                       className={`font-numbers text-[19px] font-bold leading-6 transition-colors duration-500 ${
-                        active ? "text-[var(--color-accent-light)]" : "text-white/55"
+                        active ? "text-white/90" : "text-white/55"
                       }`}
                       aria-hidden="true"
                     >
@@ -722,7 +742,11 @@ function ProcessSection() {
         <div className="svc-hairline absolute left-0 top-0 h-px w-full bg-black/15" aria-hidden="true" />
         <ol className="grid grid-cols-2 gap-x-4 gap-y-6 px-6 py-6 lg:grid-cols-3 lg:gap-y-6 lg:px-12 lg:py-5 xl:flex xl:items-baseline xl:justify-between xl:gap-0">
           {STAGES.map((stage, i) => (
-            <li key={stage} className="lg:flex lg:items-baseline lg:gap-2.5 lg:whitespace-nowrap">
+            <li
+              key={stage}
+              className="svc-rise lg:flex lg:items-baseline lg:gap-2.5 lg:whitespace-nowrap"
+              data-stagger={String(Math.min(i * 0.055, 0.22))}
+            >
               <span className="font-numbers text-[11px] text-[var(--color-accent)]" aria-hidden="true">
                 {String(i + 1).padStart(2, "0")}
               </span>
@@ -739,10 +763,11 @@ function ProcessSection() {
       <div className="svc-clip relative h-[62vh] overflow-hidden lg:h-auto lg:min-h-[18rem] lg:flex-1" data-gsap-reveal="true" data-header-dark="">
         <div className="svc-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
           <Image
-            src="/images/generated/services-process-vision-build-v3.png"
+            src="/images/generated/services-process-vision-build-v3.webp"
             alt="Clean residential construction framing progressing toward a finished vision"
             fill
             loading="lazy"
+            unoptimized
             sizes="100vw"
             quality={92}
             placeholder="blur"
@@ -756,16 +781,16 @@ function ProcessSection() {
         <div className="absolute inset-x-0 bottom-0 px-6 pb-10 lg:px-12 lg:pb-14">
           <div className="mx-auto flex max-w-7xl flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="font-display font-light leading-[1.2] text-white text-[clamp(1.5rem,2.5vw,2.4rem)]">
+              <p className="svc-rise font-display font-light leading-[1.2] text-white text-[clamp(1.5rem,2.5vw,2.4rem)]" data-stagger="0.08">
                 Committed to bringing your vision to life.
               </p>
               <div
-                className="mt-5 h-px w-20 bg-[var(--color-accent)]"
+                className="svc-hairline mt-5 h-px w-20 bg-[var(--color-accent)]"
                 style={{ opacity: 0.7 }}
                 aria-hidden="true"
               />
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="svc-rise flex flex-wrap gap-4" data-stagger="0.16">
               <Link
                 href="/contact"
                 className="btn-shine btn-lift bg-white px-8 py-4 font-labels text-[10px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white"

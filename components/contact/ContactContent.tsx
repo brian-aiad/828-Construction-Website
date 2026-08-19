@@ -67,17 +67,17 @@ const inquiryRows = [
 const SERVICE_PATH_ROWS = [
   {
     slug: "adu",
-    image: "/images/generated/contact-path-adu-v2.png",
+    image: "/images/generated/contact-path-adu-v2.webp",
     line: "New living space, permitted and built to hold value.",
   },
   {
     slug: "remediation",
-    image: "/images/generated/contact-path-remediation-v2.png",
+    image: "/images/generated/contact-path-remediation-v2.webp",
     line: "Find the cause, open only what matters, rebuild correctly.",
   },
   {
     slug: "consulting",
-    image: "/images/generated/contact-path-consulting-v2.png",
+    image: "/images/generated/contact-path-consulting-v2.webp",
     line: "Decide before you spend. Scope, risk, cost, and next moves.",
   },
 ];
@@ -159,19 +159,37 @@ function useContactMotion() {
       const rises = gsap.utils.toArray<HTMLElement>(".ct-rise");
       if (!reduced) {
         revealCleanups.push(
-          revealOnVisible(rises, (el) => {
+          revealOnVisible(rises, (el, _index, immediate) => {
+            const delay = immediate
+              ? 0
+              : Math.min(
+                  0.22,
+                  Number.parseFloat((el as HTMLElement).dataset.stagger || "0") || 0
+                );
             if (touchFlow) {
               gsap.fromTo(
                 el,
                 { opacity: 0.001, y: 16 },
-                { opacity: 1, y: 0, duration: 0.62, ease: "power3.out" }
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: immediate ? 0 : 0.62,
+                  delay,
+                  ease: "power3.out",
+                }
               );
               return;
             }
             gsap.fromTo(
               el,
               { autoAlpha: 0, y: 26 },
-              { autoAlpha: 1, y: 0, duration: 0.85, ease: "power3.out" }
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: immediate ? 0 : 0.85,
+                delay,
+                ease: "power3.out",
+              }
             );
           })
         );
@@ -256,6 +274,30 @@ function useContactMotion() {
         );
       }
 
+      const heroMedia = root.querySelector<HTMLElement>(".ct-hero-img");
+      const heroSection = heroMedia?.closest<HTMLElement>("[data-section='contact-hero']");
+      if (!reduced && heroMedia && heroSection) {
+        gsap.fromTo(
+          heroMedia,
+          { scale: 1.035, yPercent: -1 },
+          {
+            scale: 1.075,
+            yPercent: 3,
+            ease: "none",
+            scrollTrigger: {
+              trigger: heroSection,
+              start: "top top",
+              end: "bottom top",
+              scrub: 1.15,
+              onEnter: () => gsap.set(heroMedia, { willChange: "transform" }),
+              onEnterBack: () => gsap.set(heroMedia, { willChange: "transform" }),
+              onLeave: () => gsap.set(heroMedia, { willChange: "auto" }),
+              onLeaveBack: () => gsap.set(heroMedia, { willChange: "auto" }),
+            },
+          }
+        );
+      }
+
     }, rootRef);
 
     ctxRef.current = ctx;
@@ -311,18 +353,18 @@ function ContactHero() {
       </div>
 
       <div className="relative z-10 px-6 pb-12 pt-24 sm:pb-14 sm:pt-0 lg:px-12 lg:pb-16">
-        <span className="font-labels text-[10px] uppercase tracking-[0.26em] text-white/62">
+        <span className="ct-rise block font-labels text-[10px] uppercase tracking-[0.26em] text-white/62">
           Contact / 828 Construction
         </span>
-        <h1 className="mt-4 max-w-3xl font-display font-normal leading-[1.04] tracking-[-0.01em] text-[clamp(2rem,3.8vw,3.8rem)]">
+        <h1 className="ct-rise mt-4 max-w-3xl font-display font-normal leading-[1.04] tracking-[-0.01em] text-[clamp(2rem,3.8vw,3.8rem)]" data-stagger="0.06">
           Building lasting partnerships.
         </h1>
         <div className="ct-line mt-5 h-px w-full max-w-36 origin-left bg-[var(--color-accent)]" />
-        <p className="mt-4 max-w-md text-sm leading-7 text-white/76 sm:hidden">
+        <p className="ct-rise mt-4 max-w-md text-sm leading-7 text-white/76 sm:hidden" data-stagger="0.11">
           Our journey begins with active listening, where each conversation
           begins the foundation of shaping your vision.
         </p>
-        <p className="mt-4 max-w-md text-sm leading-7 text-white/72">
+        <p className="ct-rise mt-4 max-w-md text-sm leading-7 text-white/72" data-stagger="0.14">
           Forging exceptional partnership defined by artistry and enduring
           values
         </p>
@@ -375,7 +417,7 @@ function GetInTouch() {
                     {row.label}
                   </span>
                   <span
-                    className="h-px w-8 bg-[var(--color-accent)]/70 transition-all duration-300 group-hover:w-14"
+                    className="h-px w-14 origin-left scale-x-[0.5714] bg-[var(--color-accent)]/70 transition-transform duration-300 group-hover:scale-x-100"
                     aria-hidden="true"
                   />
                 </div>
@@ -411,7 +453,7 @@ function GetInTouch() {
           >
             <div className="mb-6 flex items-center justify-between gap-5 border-b border-white/10 pb-5">
               <div>
-                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/42">
+                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/62">
                   Or send the details
                 </span>
                 <h3 className="mt-2 font-display text-2xl font-normal leading-none text-white">
@@ -449,7 +491,7 @@ function InsightsPrep() {
     >
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
         <div>
-          <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
+          <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/60">
             Critical elements to include in your communication
           </span>
           <h2
@@ -602,149 +644,149 @@ function ServicePathRows() {
       ref={wrapRef}
       data-section="contact-paths"
       data-header-light=""
-      className="motion-runway relative bg-[#f7f7f3] text-[#141414] xl:h-[calc(100svh+84vh)] motion-reduce:xl:h-auto motion-reduce:xl:min-h-svh"
+      className="motion-runway relative bg-[#f7f7f3] text-[#141414] xl:h-[calc(100svh+96vh)] motion-reduce:xl:h-auto motion-reduce:xl:min-h-svh"
       style={{ overflowX: "clip" }}
     >
       {/* Deliberate walk: the panel pins while the runway scrolls (xl+). */}
       <div className="xl:sticky xl:top-0 xl:h-svh xl:overflow-hidden motion-reduce:xl:relative motion-reduce:xl:h-auto motion-reduce:xl:overflow-visible">
-        <div className="mx-auto max-w-7xl px-6 pb-4 pt-16 sm:pt-20 lg:px-12 lg:pt-[6.5rem]">
-          <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/54">
+        <div className="mx-auto flex h-full max-w-7xl flex-col justify-center px-6 py-16 sm:py-20 lg:px-12 xl:py-[clamp(5.5rem,9svh,8rem)]">
+          <span className="ct-rise block font-labels text-[10px] uppercase tracking-[0.24em] text-black/60">
             Focused service paths
           </span>
 
-          <div className="mt-6 h-px w-full bg-black/12" aria-hidden="true" />
-          {SERVICE_PATH_ROWS.map((row, i) => {
-            const service = SERVICES.find((s) => s.slug === row.slug)!;
-            const open = activeIdx === i;
-            return (
-              <Link
-                key={row.slug}
-                href={`/services/${row.slug}`}
-                aria-label={`View ${service.title}`}
-                className="group block border-b border-black/12"
-              >
-                <div
-                  ref={(el) => {
-                    rowRefs.current[i] = el;
-                  }}
-                  className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4"
-                >
-                  <span
-                    className={`font-display font-normal leading-[1.02] tracking-tight transition-colors duration-300 text-[clamp(1.9rem,3.9vw,3.5rem)] ${
-                      open ? "text-[#141414]" : "text-black/[0.46]"
-                    }`}
+          <div className="mt-6 xl:grid xl:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] xl:items-center xl:gap-[clamp(2.5rem,4vw,4.75rem)]">
+            <div className="min-w-0">
+              <div className="h-px w-full bg-black/12" aria-hidden="true" />
+              {SERVICE_PATH_ROWS.map((row, i) => {
+                const service = SERVICES.find((s) => s.slug === row.slug)!;
+                const open = activeIdx === i;
+                return (
+                  <Link
+                    key={row.slug}
+                    href={`/services/${row.slug}`}
+                    className="group block border-b border-black/12"
                   >
-                    {service.title}
-                  </span>
-                  <span
-                    className={`font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
-                      open ? "text-black/75" : "text-black/60"
-                    }`}
-                  >
-                    {String(i + 1).padStart(2, "0")} / {service.short}
-                    <span
-                      className={`ml-3 inline-block transition-all duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
-                        open
-                          ? "translate-x-0 text-[var(--color-accent)]"
-                          : "-translate-x-1"
-                      }`}
-                      aria-hidden="true"
+                    <div
+                      ref={(el) => {
+                        rowRefs.current[i] = el;
+                      }}
+                      className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4 xl:py-7"
                     >
-                      →
-                    </span>
-                  </span>
-                </div>
-
-                <div
-                  className="contact-path-mobile-media grid grid-rows-[1fr]"
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%] xl:h-[calc(100svh-31rem)] xl:min-h-[12rem]">
-                      <Image
-                        src={row.image}
-                        alt={`${service.title} by 828 Construction`}
-                        fill
-                        loading={i === 0 ? "eager" : "lazy"}
-                        sizes="(max-width: 1536px) 100vw, 1100px"
-                        quality={92}
-                        onError={imgError}
-                        className="object-cover transition-transform duration-[1600ms] ease-out motion-reduce:!transform-none motion-reduce:!transition-none"
-                        style={{
-                          filter: "contrast(1.05) saturate(1.05)",
-                          transform: open ? "scale(1.03)" : "scale(1.08)",
-                        }}
-                      />
-                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-5 pt-14 lg:px-6 lg:pb-8">
-                        <p className="max-w-md text-[13px] leading-5 text-white/85">
-                          {row.line}
-                        </p>
-                        <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
-                          View {service.title} →
+                      <span
+                        className={`font-display text-[clamp(1.9rem,3.9vw,3.5rem)] font-normal leading-[1.02] tracking-tight transition-[color,transform] duration-500 ease-out xl:text-[clamp(2rem,2.65vw,3rem)] ${
+                          open
+                            ? "translate-x-0 text-[#141414] xl:translate-x-2"
+                            : "translate-x-0 text-black/[0.46]"
+                        }`}
+                      >
+                        {service.title}
+                      </span>
+                      <span
+                        className={`font-labels text-[9px] uppercase tracking-[0.16em] transition-colors duration-300 ${
+                          open ? "text-black/75" : "text-black/60"
+                        }`}
+                      >
+                        {String(i + 1).padStart(2, "0")} / {service.short}
+                        <span
+                          className={`ml-3 inline-block transition-[color,transform] duration-300 group-hover:translate-x-0 group-hover:text-[var(--color-accent)] ${
+                            open
+                              ? "translate-x-0 text-[var(--color-accent)]"
+                              : "-translate-x-1"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          →
                         </span>
-                      </div>
-                      <div
-                        className="absolute bottom-0 left-0 top-0 w-[3px] bg-[var(--color-accent)]"
-                        style={{
-                          transform: open ? "scaleY(1)" : "scaleY(0)",
-                          transformOrigin: "top",
-                          opacity: 0.85,
-                          transition:
-                            "transform 900ms cubic-bezier(0.16,1,0.3,1) 150ms",
-                        }}
+                      </span>
+                      <span
+                        className="absolute inset-x-0 bottom-[-1px] h-px origin-left bg-[var(--color-accent)] transition-transform duration-700 ease-out motion-reduce:!transition-none"
+                        style={{ transform: open ? "scaleX(1)" : "scaleX(0)" }}
                         aria-hidden="true"
                       />
                     </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
 
-          {/* Fine-pointer desktop keeps one stable media slot. Changing the
-              active service now crossfades media instead of resizing ledger
-              rows, which preserves the composition without layout shift. */}
-          <Link
-            href={`/services/${activeRow.slug}`}
-            aria-label={`View ${activeService.title}`}
-            className="contact-path-desktop-stage group relative mt-5 h-[calc(100svh-31rem)] min-h-[12rem] overflow-hidden"
-          >
-            {SERVICE_PATH_ROWS.map((row, i) => {
-              const service = SERVICES.find((item) => item.slug === row.slug)!;
-              const open = activeIdx === i;
-              return (
-                <Image
-                  key={row.slug}
-                  src={row.image}
-                  alt={`${service.title} by 828 Construction`}
-                  fill
-                  loading={i === 0 ? "eager" : "lazy"}
-                  sizes="(max-width: 1536px) 100vw, 1100px"
-                  quality={92}
-                  onError={imgError}
-                  className="object-cover motion-reduce:!transform-none motion-reduce:!transition-none"
-                  style={{
-                    filter: "contrast(1.05) saturate(1.05)",
-                    opacity: open ? 1 : 0,
-                    transform: open ? "scale(1.03)" : "scale(1.08)",
-                    transition:
-                      "opacity 520ms cubic-bezier(0.16,1,0.3,1), transform 1600ms cubic-bezier(0.16,1,0.3,1)",
-                  }}
-                />
-              );
-            })}
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-6 pb-8 pt-14">
-              <p className="max-w-md text-[13px] leading-5 text-white/85">
-                {activeRow.line}
-              </p>
-              <span className="shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85">
-                View {activeService.title} →
-              </span>
+                    <div className="contact-path-mobile-media grid grid-rows-[1fr]">
+                      <div className="min-h-0 overflow-hidden">
+                        <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%]">
+                          <Image
+                            src={row.image}
+                            alt={`${service.title} by 828 Construction`}
+                            fill
+                            loading={i === 0 ? "eager" : "lazy"}
+                            sizes="(max-width: 1279px) 100vw, 1px"
+                            quality={92}
+                            onError={imgError}
+                            className="object-cover transition-transform duration-[1600ms] ease-out motion-reduce:!transform-none motion-reduce:!transition-none"
+                            style={{
+                              filter: "contrast(1.05) saturate(1.05)",
+                              transform: open ? "scale(1.03)" : "scale(1.08)",
+                            }}
+                          />
+                          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-5 pb-5 pt-14 lg:px-6 lg:pb-8">
+                            <p className="max-w-md text-[13px] leading-5 text-white/85">
+                              {row.line}
+                            </p>
+                            <span className="hidden shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85 sm:inline">
+                              View {service.title} →
+                            </span>
+                          </div>
+                          <div
+                            className="absolute bottom-0 left-0 top-0 w-[3px] origin-top bg-[var(--color-accent)] opacity-[0.85] transition-transform duration-700 ease-out motion-reduce:!transition-none"
+                            style={{ transform: open ? "scaleY(1)" : "scaleY(0)" }}
+                            aria-hidden="true"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-            <div
-              className="absolute bottom-0 left-0 top-0 w-[3px] bg-[var(--color-accent)] opacity-[0.85]"
-              aria-hidden="true"
-            />
-          </Link>
+
+            {/* Fine-pointer desktop keeps one stable media slot. Changing the
+                active service crossfades media instead of resizing ledger rows. */}
+            <Link
+              href={`/services/${activeRow.slug}`}
+              className="contact-path-desktop-stage group relative h-[clamp(28rem,64svh,48rem)] overflow-hidden"
+            >
+              {SERVICE_PATH_ROWS.map((row, i) => {
+                const service = SERVICES.find((item) => item.slug === row.slug)!;
+                const open = activeIdx === i;
+                return (
+                  <Image
+                    key={row.slug}
+                    src={row.image}
+                    alt={`${service.title} by 828 Construction`}
+                    fill
+                    loading={i === 0 ? "eager" : "lazy"}
+                    sizes="(min-width: 1280px) 50vw, 1px"
+                    quality={92}
+                    onError={imgError}
+                    className="object-cover motion-reduce:!transform-none motion-reduce:!transition-none"
+                    style={{
+                      filter: "contrast(1.05) saturate(1.05)",
+                      opacity: open ? 1 : 0,
+                      transform: open ? "scale(1.03)" : "scale(1.08)",
+                      transition:
+                        "opacity 620ms cubic-bezier(0.16,1,0.3,1), transform 1600ms cubic-bezier(0.16,1,0.3,1)",
+                    }}
+                  />
+                );
+              })}
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 bg-gradient-to-t from-black/62 to-transparent px-6 pb-8 pt-20">
+                <p className="max-w-md text-[13px] leading-5 text-white/85">
+                  {activeRow.line}
+                </p>
+                <span className="shrink-0 font-labels text-[9px] uppercase tracking-[0.2em] text-white/85">
+                  View {activeService.title} →
+                </span>
+              </div>
+              <div
+                className="absolute bottom-0 left-0 top-0 w-[3px] bg-[var(--color-accent)] opacity-[0.85]"
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -758,7 +800,7 @@ function ServicePathRows() {
         <div className="ct-rise border border-black/10 bg-white/55">
           <div className="grid gap-x-10 gap-y-6 px-6 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-10">
             <div>
-              <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/54">
+              <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-black/60">
                 Service area
               </span>
               <h3 className="mt-3 font-display text-[clamp(1.4rem,2.4vw,2.2rem)] font-normal leading-none">
@@ -788,7 +830,7 @@ function ServicePathRows() {
                   </span>
                 ))}
               </div>
-              <p className="mt-5 font-labels text-[9px] uppercase tracking-[0.18em] text-black/46">
+              <p className="mt-5 font-labels text-[9px] uppercase tracking-[0.18em] text-black/62">
                 CA License #{SITE.license} / Est. 2004
               </p>
             </div>

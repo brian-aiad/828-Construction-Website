@@ -231,10 +231,11 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     if (!smoothScrollEnabled) return;
 
     const lenis = new Lenis({
-      duration: 1.35,
+      duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 0.88,
+      wheelMultiplier: 1,
+      stopInertiaOnNavigate: true,
     });
 
     lenisRef.current = lenis;

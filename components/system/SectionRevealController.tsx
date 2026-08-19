@@ -33,11 +33,9 @@ export default function SectionRevealController() {
 
   useLayoutEffect(() => {
     const roots = Array.from(document.querySelectorAll<HTMLElement>(SELECTOR));
-    if (!roots.length) return;
-
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const distance = window.innerWidth < 768 ? 24 : window.innerWidth < 1280 ? 30 : 40;
-    const duration = window.innerWidth < 768 ? 0.72 : 0.82;
+    const distance = window.innerWidth < 768 ? 20 : window.innerWidth < 1280 ? 26 : 34;
+    const duration = window.innerWidth < 768 ? 0.64 : window.innerWidth < 1280 ? 0.7 : 0.76;
     const units: RevealUnit[] = roots.map((trigger) => {
       const stagger = numberFromDataset(trigger.dataset.motionStagger);
       const children = stagger > 0
@@ -58,6 +56,29 @@ export default function SectionRevealController() {
     });
 
     const allTargets = units.flatMap((unit) => unit.targets);
+    const ambientTargets = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        ".hero-kenburns, .animate-brand-marquee, [data-ambient-motion]"
+      )
+    );
+    const ambientObserver = typeof IntersectionObserver === "undefined"
+      ? null
+      : new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              entry.target.toggleAttribute("data-ambient-paused", !entry.isIntersecting);
+            });
+          },
+          { rootMargin: "120px 0px" }
+        );
+    if (ambientObserver) {
+      ambientTargets.forEach((target) => {
+        target.setAttribute("data-ambient-paused", "");
+        ambientObserver.observe(target);
+      });
+    }
+
+    let remaining = units.length;
     const activeTweens = new Set<gsap.core.Tween>();
     const ctx = gsap.context(() => {
       if (reducedMotion.matches) {
@@ -66,6 +87,7 @@ export default function SectionRevealController() {
           unit.revealed = true;
           unit.trigger.setAttribute("data-motion-revealed", "true");
         });
+        remaining = 0;
         return;
       }
 
@@ -79,8 +101,6 @@ export default function SectionRevealController() {
         gsap.set(unit.targets, {
           opacity: 0,
           ...from,
-          willChange: "transform, opacity",
-          force3D: true,
         });
       });
     }, document.body);
@@ -88,6 +108,7 @@ export default function SectionRevealController() {
     const reveal = (unit: RevealUnit, immediate = false) => {
       if (unit.revealed) return;
       unit.revealed = true;
+      remaining = Math.max(0, remaining - 1);
       unit.trigger.setAttribute("data-motion-revealed", "true");
 
       if (immediate || reducedMotion.matches) {
@@ -100,6 +121,7 @@ export default function SectionRevealController() {
         return;
       }
 
+      gsap.set(unit.targets, { willChange: "transform, opacity" });
       const tween = gsap.to(unit.targets, {
         opacity: 1,
         x: 0,
@@ -107,7 +129,8 @@ export default function SectionRevealController() {
         duration,
         delay: unit.delay,
         stagger: unit.stagger,
-        ease: "power3.out",
+        ease: "power2.out",
+        force3D: true,
         overwrite: "auto",
         onComplete: () => {
           activeTweens.delete(tween);
@@ -133,41 +156,84 @@ export default function SectionRevealController() {
       else if (state.inBand) reveal(unit);
     });
 
+    let lastScrollY = window.scrollY;
+    let lastEventY = window.scrollY;
+    let velocityWindowStartedAt = performance.now();
+    let velocityWindowStartedY = window.scrollY;
+    let jumpUntil = 0;
+    const noteScrollVelocity = () => {
+      const now = performance.now();
+      const currentY = window.scrollY;
+      const directJump = Math.abs(currentY - lastEventY) > window.innerHeight * 0.55;
+      lastEventY = currentY;
+      if (now - velocityWindowStartedAt > 240) {
+        velocityWindowStartedAt = now;
+        velocityWindowStartedY = currentY;
+      }
+      if (
+        directJump ||
+        Math.abs(currentY - velocityWindowStartedY) > window.innerHeight * 0.65
+      ) {
+        jumpUntil = now + 360;
+        activeTweens.forEach((tween) => tween.totalProgress(1));
+      }
+    };
+    const recentlyJumped = () => performance.now() < jumpUntil;
     const observer = typeof IntersectionObserver === "undefined"
       ? null
       : new IntersectionObserver(
           (entries) => {
+            const jumped =
+              recentlyJumped() ||
+              Math.abs(window.scrollY - lastScrollY) > window.innerHeight * 1.25;
             entries.forEach((entry) => {
               if (!entry.isIntersecting) return;
-              const unit = units.find((candidate) => candidate.trigger === entry.target);
+              const unit = unitByTrigger.get(entry.target);
               if (!unit) return;
-              reveal(unit);
+              reveal(unit, jumped);
               observer?.unobserve(unit.trigger);
             });
+            lastScrollY = window.scrollY;
           },
           { threshold: 0.04, rootMargin: "0px 0px -9% 0px" }
         );
+
+    const unitByTrigger = new Map<Element, RevealUnit>(
+      units.map((unit) => [unit.trigger, unit])
+    );
 
     units.forEach((unit) => {
       if (!unit.revealed) observer?.observe(unit.trigger);
     });
 
     let frame = 0;
-    let lastScrollY = window.scrollY;
     const inspect = () => {
       frame = 0;
       const movingDown = window.scrollY >= lastScrollY;
+      const jumped =
+        recentlyJumped() ||
+        Math.abs(window.scrollY - lastScrollY) > window.innerHeight * 1.25;
       lastScrollY = window.scrollY;
       units.forEach((unit) => {
         if (unit.revealed) return;
         const state = viewportBand(unit);
-        if (state.inBand) reveal(unit);
+        if (state.inBand) reveal(unit, jumped);
         else if (movingDown && state.passed) reveal(unit, true);
       });
     };
     const scheduleInspect = () => {
-      if (!frame) frame = requestAnimationFrame(inspect);
+      if (remaining > 0 && !frame) frame = requestAnimationFrame(inspect);
     };
+    const onScroll = () => {
+      noteScrollVelocity();
+      scheduleInspect();
+    };
+    // WebKit can commit an immediate Lenis/deep-link jump without dispatching
+    // a native scroll event. A few bounded probes cover that path and late
+    // image geometry without leaving a polling loop alive during reading.
+    const probeTimers = [240, 700, 1400, 2800].map((delay) =>
+      window.setTimeout(scheduleInspect, delay)
+    );
     const onFocusIn = (event: FocusEvent) => {
       const target = event.target instanceof Element
         ? event.target.closest<HTMLElement>(SELECTOR)
@@ -182,19 +248,24 @@ export default function SectionRevealController() {
       units.forEach((unit) => reveal(unit, true));
     };
 
-    window.addEventListener("scroll", scheduleInspect, { passive: true });
-    window.addEventListener("resize", scheduleInspect, { passive: true });
+    if (remaining > 0) {
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", scheduleInspect, { passive: true });
+    }
     document.addEventListener("focusin", onFocusIn);
     reducedMotion.addEventListener("change", finishForReducedMotion);
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      probeTimers.forEach(clearTimeout);
       observer?.disconnect();
-      window.removeEventListener("scroll", scheduleInspect);
+      ambientObserver?.disconnect();
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", scheduleInspect);
       document.removeEventListener("focusin", onFocusIn);
       reducedMotion.removeEventListener("change", finishForReducedMotion);
       units.forEach((unit) => unit.trigger.removeAttribute("data-motion-revealed"));
+      ambientTargets.forEach((target) => target.removeAttribute("data-ambient-paused"));
       activeTweens.forEach((tween) => tween.kill());
       gsap.set(allTargets, { clearProps: "transform,opacity,willChange" });
       try {

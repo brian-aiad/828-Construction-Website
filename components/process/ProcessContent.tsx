@@ -225,6 +225,7 @@ function ProcessStrip() {
       aria-hidden="true"
     >
       <div
+        data-ambient-motion=""
         className="flex gap-12 items-center"
         style={{ animation: "marqueeScroll 32s linear infinite", width: "max-content" }}
       >

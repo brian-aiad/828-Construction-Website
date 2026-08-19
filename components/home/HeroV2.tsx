@@ -40,14 +40,12 @@ export default function HeroV2() {
         scrollHintRef.current,
       ].filter(Boolean) as HTMLElement[];
 
-      gsap.set(lines, { yPercent: 110 });
-      gsap.set(metaEls, { y: 14, opacity: 0 });
-
       if (!AnimationController.shouldAnimate()) {
-        gsap.set(lines, { yPercent: 0 });
-        gsap.set(metaEls, { y: 0, opacity: 1 });
         return;
       }
+
+      gsap.set(lines, { yPercent: 110 });
+      gsap.set(metaEls, { y: 14, opacity: 0 });
 
       // Entry — line-by-line mask reveal, then metadata
       gsap.to(lines, {
@@ -135,13 +133,13 @@ export default function HeroV2() {
     >
       <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
         <Image
-          src="/images/generated/home-hero-bluehour-adu-v2.png"
+          src="/images/generated/home-hero-bluehour-adu-v2.webp"
           alt="Modern South Bay ADU with warm interior lighting at blue hour"
           fill
           priority
           fetchPriority="high"
           sizes="100vw"
-          quality={92}
+          quality={86}
           className="hero-kenburns object-cover"
         />
       </div>

@@ -52,7 +52,7 @@ const BENEFIT_PHOTOS = [
     label: "Early detection",
   },
   {
-    src: "/images/generated/services-consulting-table-v2.png",
+    src: "/images/generated/services-consulting-table-v2.webp",
     alt: "Construction plans and material samples arranged for consulting problem solving",
     label: "Creative solution",
   },
@@ -67,7 +67,7 @@ const BENEFIT_PHOTOS = [
     label: "Structure assessment",
   },
   {
-    src: "/images/generated/consulting-hero-advisory-table-v3.png",
+    src: "/images/generated/consulting-hero-advisory-table-v3.webp",
     alt: "Organized consulting table with plans and material samples in a finished home",
     label: "Peace of mind",
   },
@@ -88,11 +88,11 @@ const CTA_HEADLINE = "Engineered solutions tailored to your project";
 
 const FAQ_PHOTOS = [
   {
-    src: "/images/generated/consulting-question-inspection-v3.png",
+    src: "/images/generated/consulting-question-inspection-v3.webp",
     alt: "Construction consultant inspecting an opened residential wall condition",
   },
   {
-    src: "/images/generated/consulting-question-plans-budget-v3.png",
+    src: "/images/generated/consulting-question-plans-budget-v3.webp",
     alt: "Construction plans, budget documents, and material samples reviewed during consulting",
   },
 ];
@@ -412,7 +412,7 @@ function ConsultingHero() {
         <div className="relative min-h-[48vh] overflow-hidden lg:min-h-screen">
           <div className="con-parallax absolute inset-x-0" style={{ top: "-7.5%", height: "115%" }}>
             <Image
-              src="/images/generated/consulting-hero-advisory-table-v3.png"
+              src="/images/generated/consulting-hero-advisory-table-v3.webp"
               alt="Consulting session over construction plans and material samples"
               fill
               priority

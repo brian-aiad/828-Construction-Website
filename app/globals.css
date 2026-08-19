@@ -331,6 +331,13 @@ textarea {
   will-change: transform;
 }
 
+.hero-kenburns[data-ambient-paused],
+.animate-brand-marquee[data-ambient-paused],
+[data-ambient-motion][data-ambient-paused] {
+  animation-play-state: paused;
+  will-change: auto;
+}
+
 @keyframes brand-marquee-scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -865,6 +872,66 @@ html.lenis body {
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Persistent route curtain: one compositor layer for every navigation. */
+[data-route-curtain] {
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+[data-route-curtain][data-phase="covered"] {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+[data-route-curtain][data-phase="covering"] {
+  opacity: 1;
+  transform-origin: bottom;
+  transform: scaleY(1);
+  transition: transform 260ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+[data-route-curtain][data-phase="revealing"] {
+  transform-origin: top;
+  animation: routeCurtainReveal 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-route-curtain][data-phase] {
+  will-change: transform;
+}
+
+[data-route-curtain] > span {
+  transform: scaleX(0);
+}
+
+@media (max-width: 1279px), (pointer: coarse) {
+  .splash-screen {
+    display: none !important;
+  }
+}
+
+[data-route-curtain][data-phase="revealing"] > span {
+  animation: routeHairlineReveal 420ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes routeCurtainReveal {
+  from { opacity: 1; transform: scaleY(1); }
+  to { opacity: 1; transform: scaleY(0); }
+}
+
+@keyframes routeHairlineReveal {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-route-curtain],
+  [data-route-curtain] > span {
+    animation: none !important;
+    opacity: 0 !important;
+    transform: none !important;
+  }
 }
 
 /* Flow pages render a 100svh footer runway while their final surface is sticky.

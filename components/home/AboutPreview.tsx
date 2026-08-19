@@ -179,9 +179,8 @@ export default function AboutPreview() {
                   src={img.src}
                   alt={img.alt}
                   fill
-                  loading="eager"
-                  sizes="(max-width: 640px) 100vw, 33vw"
-                  quality={92}
+                  sizes="(max-width: 640px) calc(100vw - 48px), 33vw"
+                  quality={82}
                   className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
                   style={{ filter: "contrast(1.04) saturate(0.98) brightness(0.94)" }}
                 />

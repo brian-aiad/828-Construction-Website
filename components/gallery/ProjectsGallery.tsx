@@ -523,6 +523,7 @@ function ProjectsStrip() {
       aria-hidden="true"
     >
       <div
+        data-ambient-motion=""
         className="flex gap-12 items-center"
         style={{ animation: "marqueeScroll 30s linear infinite", width: "max-content" }}
       >
