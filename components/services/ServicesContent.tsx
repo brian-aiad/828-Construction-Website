@@ -472,6 +472,7 @@ function ServicesIndex() {
                           alt={`${service.title} by 828 Construction`}
                           fill
                           loading={i === 0 ? "eager" : "lazy"}
+                          fetchPriority={i === 0 ? "high" : "auto"}
                           sizes="(max-width: 1536px) 100vw, 1280px"
                           quality={92}
                           placeholder="blur"
@@ -767,7 +768,6 @@ function ProcessSection() {
             alt="Clean residential construction framing progressing toward a finished vision"
             fill
             loading="lazy"
-            unoptimized
             sizes="100vw"
             quality={92}
             placeholder="blur"

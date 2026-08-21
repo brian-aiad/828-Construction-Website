@@ -518,6 +518,7 @@ function RemediationHero() {
               alt="Controlled remediation work area with exposed framing and drying equipment"
               fill
               priority
+              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 55vw"
               quality={92}
               placeholder="blur"
@@ -894,7 +895,6 @@ function RemediationMethod() {
                     alt={photo.alt}
                     fill
                     loading="eager"
-                    unoptimized={i === 1}
                     sizes="(max-width: 1024px) 50vw, 24vw"
                     quality={92}
                     placeholder="blur"

@@ -13,6 +13,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ContactForm from "@/components/contact/ContactForm";
 import ContactFlow from "@/components/contact/ContactFlow";
+import ProtectedEmailLink from "@/components/shared/ProtectedEmailLink";
 import { revealOnVisible } from "@/utils/revealOnVisible";
 import { SERVICE_AREAS, SERVICES, SITE } from "@/lib/constants";
 
@@ -36,7 +37,17 @@ const prepItems = [
   "Timeline and decision deadline",
 ];
 
-const inquiryRows = [
+type InquiryRow = {
+  label: string;
+  value: string;
+  detail: string;
+  numbers: boolean;
+} & (
+  | { href: string; protectedEmail?: false }
+  | { protectedEmail: true; href?: never }
+);
+
+const inquiryRows: InquiryRow[] = [
   {
     label: "Call",
     value: formatPhone(SITE.phone),
@@ -46,8 +57,8 @@ const inquiryRows = [
   },
   {
     label: "Email",
-    value: SITE.email,
-    href: `mailto:${SITE.email}`,
+    value: "Email our team",
+    protectedEmail: true,
     detail: "Useful when you already have photos, plans, or documents.",
     numbers: false,
   },
@@ -151,6 +162,9 @@ function useContactMotion() {
     const ctx = gsap.context(() => {
       const desktopSlide = window.matchMedia("(min-width: 1024px)").matches;
       const touchFlow = !desktopSlide;
+      const desktopParallax = window.matchMedia(
+        "(min-width: 1280px) and (pointer: fine)"
+      ).matches;
 
       // One-shot rises — IO-driven on every viewport (Fixes 15/22). Initial
       // states set here, never in JSX (Fix 14). Inside ContactFlow's sticky
@@ -276,7 +290,7 @@ function useContactMotion() {
 
       const heroMedia = root.querySelector<HTMLElement>(".ct-hero-img");
       const heroSection = heroMedia?.closest<HTMLElement>("[data-section='contact-hero']");
-      if (!reduced && heroMedia && heroSection) {
+      if (!reduced && desktopParallax && heroMedia && heroSection) {
         gsap.fromTo(
           heroMedia,
           { scale: 1.035, yPercent: -1 },
@@ -325,7 +339,7 @@ function ContactHero() {
       style={{ overflowX: "clip" }}
     >
       <div className="absolute inset-0">
-        <div className="ct-hero-img absolute inset-0 will-change-transform">
+        <div className="ct-hero-img absolute inset-0">
           <Image
             src="/images/contact/contact-hero.jpg"
             alt="Residential architecture detail at dusk"
@@ -403,15 +417,9 @@ function GetInTouch() {
         <div className="mt-10 grid gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16">
           {/* The application path — every way a project reaches Joe. */}
           <div>
-            {inquiryRows.map((row) => (
-              <a
-                key={row.label}
-                href={row.href}
-                target={row.href.startsWith("http") ? "_blank" : undefined}
-                rel={row.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                data-gsap-reveal="true"
-                className="ct-ledger group block border-b border-white/10 py-6 first:border-t"
-              >
+            {inquiryRows.map((row) => {
+              const content = (
+                <>
                 <div className="flex items-baseline justify-between gap-6">
                   <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/46">
                     {row.label}
@@ -433,8 +441,37 @@ function GetInTouch() {
                 <p className="mt-3 max-w-md text-sm leading-6 text-white/56">
                   {row.detail}
                 </p>
-              </a>
-            ))}
+                </>
+              );
+              const className =
+                "ct-ledger group block w-full border-0 border-b border-white/10 bg-transparent py-6 text-left first:border-t";
+
+              if (row.protectedEmail) {
+                return (
+                  <ProtectedEmailLink
+                    key={row.label}
+                    data-gsap-reveal="true"
+                    className={`${className} cursor-pointer`}
+                  >
+                    {content}
+                  </ProtectedEmailLink>
+                );
+              }
+
+              const href = row.href;
+              return (
+                <a
+                  key={row.label}
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  data-gsap-reveal="true"
+                  className={className}
+                >
+                  {content}
+                </a>
+              );
+            })}
 
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <span className="border border-[var(--color-accent)]/60 px-4 py-2.5 font-labels text-[9px] uppercase tracking-[0.18em] text-white/72">
@@ -712,7 +749,6 @@ function ServicePathRows() {
                             src={row.image}
                             alt={`${service.title} by 828 Construction`}
                             fill
-                            loading={i === 0 ? "eager" : "lazy"}
                             sizes="(max-width: 1279px) 100vw, 1px"
                             quality={92}
                             onError={imgError}
@@ -758,7 +794,6 @@ function ServicePathRows() {
                     src={row.image}
                     alt={`${service.title} by 828 Construction`}
                     fill
-                    loading={i === 0 ? "eager" : "lazy"}
                     sizes="(min-width: 1280px) 50vw, 1px"
                     quality={92}
                     onError={imgError}

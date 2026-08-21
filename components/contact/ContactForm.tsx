@@ -67,6 +67,8 @@ export default function ContactForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const submittingRef = useRef(false);
+  const submissionIdRef = useRef("");
+  const submissionFingerprintRef = useRef("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,6 +83,12 @@ export default function ContactForm() {
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       website: (form.elements.namedItem("website") as HTMLInputElement).value,
     };
+    const fingerprint = JSON.stringify(data);
+    if (submissionFingerprintRef.current !== fingerprint) {
+      submissionFingerprintRef.current = fingerprint;
+      submissionIdRef.current = crypto.randomUUID();
+    }
+    data.submissionId = submissionIdRef.current;
 
     const errors = validate(data);
     if (Object.keys(errors).length > 0) {
@@ -196,6 +204,7 @@ export default function ContactForm() {
             name="name"
             type="text"
             required
+            maxLength={120}
             autoComplete="name"
             aria-invalid={!!fieldErrors.name || undefined}
             aria-describedby={fieldErrors.name ? "cf-name-err" : undefined}
@@ -224,6 +233,7 @@ export default function ContactForm() {
             name="phone"
             type="tel"
             required
+            maxLength={40}
             autoComplete="tel"
             aria-invalid={!!fieldErrors.phone || undefined}
             aria-describedby={fieldErrors.phone ? "cf-phone-err" : undefined}
@@ -256,6 +266,7 @@ export default function ContactForm() {
           id="cf-email"
           name="email"
           type="email"
+          maxLength={160}
           autoComplete="email"
           aria-invalid={!!fieldErrors.email || undefined}
           aria-describedby={fieldErrors.email ? "cf-email-err" : undefined}
@@ -322,6 +333,7 @@ export default function ContactForm() {
           id="cf-message"
           name="message"
           required
+          maxLength={4000}
           rows={6}
           aria-invalid={!!fieldErrors.message || undefined}
           aria-describedby={fieldErrors.message ? "cf-message-err" : undefined}

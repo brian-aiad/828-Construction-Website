@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { SITE } from "@/lib/constants";
 import JsonLd from "@/components/shared/JsonLd";
 import AduServiceContent from "@/components/services/adu/AduServiceContent";
+import {
+  breadcrumbJsonLd,
+  businessProviderJsonLd,
+  SEARCH_ROBOTS,
+  socialMetadata,
+} from "@/lib/seo";
+
+const title = "ADU Builder Torrance | Accessory Dwelling Units";
+const description =
+  "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. 20+ years experience. CA License #1141119. Free consultation.";
 
 export const metadata: Metadata = {
-  title: "ADU Builder Torrance | Accessory Dwelling Units",
-  description:
-    "Expert ADU construction in Torrance and South Bay. Design, permits, and full builds for accessory dwelling units. 20+ years experience. CA License #1141119. Free consultation.",
+  title,
+  description,
   keywords: [
     "ADU builder Torrance",
     "accessory dwelling unit Torrance",
@@ -17,29 +26,29 @@ export const metadata: Metadata = {
     "junior ADU California",
   ],
   alternates: { canonical: `${SITE.url}/services/adu` },
+  robots: SEARCH_ROBOTS,
+  ...socialMetadata({
+    title,
+    description,
+    path: "/services/adu",
+    image: "/images/generated/adu-hero-exterior-v4.webp",
+    imageAlt: "Completed South Bay accessory dwelling unit",
+  }),
 };
 
 const serviceJsonLd = {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": `${SITE.url}/services/adu#service`,
   name: "ADU Construction - Torrance, CA",
+  serviceType: "Accessory Dwelling Unit construction",
   description:
     "Accessory Dwelling Unit construction in Torrance and South Bay. Design coordination, permits, and full builds.",
-  provider: {
-    "@type": "GeneralContractor",
-    name: SITE.name,
-    telephone: "+12138282388",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: SITE.address.street,
-      addressLocality: SITE.address.city,
-      addressRegion: SITE.address.state,
-      postalCode: SITE.address.zip,
-      addressCountry: "US",
-    },
-  },
+  provider: businessProviderJsonLd(),
   areaServed: SITE.serviceArea,
   url: `${SITE.url}/services/adu`,
+  mainEntityOfPage: `${SITE.url}/services/adu`,
+  image: `${SITE.url}/images/generated/adu-hero-exterior-v4.webp`,
 };
 
 const faqJsonLd = {
@@ -64,7 +73,7 @@ const faqJsonLd = {
     },
     {
       "@type": "Question",
-      name: "How long does it take to build an ADU in Torrance?",
+      name: "How long does it take to build an ADU?",
       acceptedAnswer: {
         "@type": "Answer",
         text: "A typical ADU takes 6–12 months from initial consultation to completion, including design, permitting, and construction.",
@@ -81,11 +90,18 @@ const faqJsonLd = {
   ],
 };
 
+const breadcrumbs = breadcrumbJsonLd([
+  { name: "Home", path: "" },
+  { name: "Services", path: "/services" },
+  { name: "ADU Construction", path: "/services/adu" },
+]);
+
 export default function AduPage() {
   return (
     <>
       <JsonLd data={serviceJsonLd} />
       <JsonLd data={faqJsonLd} />
+      <JsonLd data={breadcrumbs} />
       <AduServiceContent />
     </>
   );

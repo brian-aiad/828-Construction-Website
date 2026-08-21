@@ -3,15 +3,14 @@ import { SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | 828 Construction",
-  robots: { index: false },
+  title: "Page Not Found",
 };
 
 export default function NotFound() {
   return (
-    <main
+    <section
       className="min-h-screen bg-black flex items-center justify-center px-6"
-      id="main-content"
+      aria-labelledby="not-found-title"
     >
       <div className="text-center max-w-xl">
 
@@ -35,6 +34,7 @@ export default function NotFound() {
         </p>
 
         <h1
+          id="not-found-title"
           className="font-display font-bold text-white tracking-tight leading-tight mb-4"
           style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}
         >
@@ -65,6 +65,6 @@ export default function NotFound() {
           CA License #{SITE.license} · {SITE.address.city}, {SITE.address.state}
         </p>
       </div>
-    </main>
+    </section>
   );
 }

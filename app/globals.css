@@ -321,14 +321,20 @@ textarea {
   }
 }
 
-/* Hero photo — slow perpetual drift beneath the scroll scrub (living image) */
+/* Hero photo — keep the touch render stable; desktop adds a quiet ambient drift. */
 @keyframes heroKenBurns {
   from { transform: scale(1.02) translateY(0); }
   to   { transform: scale(1.075) translateY(-1.2%); }
 }
 .hero-kenburns {
-  animation: heroKenBurns 26s ease-in-out infinite alternate;
-  will-change: transform;
+  transform: scale(1.02);
+}
+
+@media (min-width: 1280px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-kenburns {
+    animation: heroKenBurns 26s ease-in-out infinite alternate;
+    will-change: transform;
+  }
 }
 
 .hero-kenburns[data-ambient-paused],

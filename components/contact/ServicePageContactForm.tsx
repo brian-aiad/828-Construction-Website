@@ -33,13 +33,15 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
   const [state, setState] = useState<FormState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const submittingRef = useRef(false);
+  const submissionIdRef = useRef("");
+  const submissionFingerprintRef = useRef("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submittingRef.current) return;
 
     const form = e.currentTarget;
-    const data = {
+    const formData = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value.trim(),
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim(),
       email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
@@ -48,6 +50,12 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       website: (form.elements.namedItem("website") as HTMLInputElement).value,
     };
+    const fingerprint = JSON.stringify(formData);
+    if (submissionFingerprintRef.current !== fingerprint) {
+      submissionFingerprintRef.current = fingerprint;
+      submissionIdRef.current = crypto.randomUUID();
+    }
+    const data = { ...formData, submissionId: submissionIdRef.current };
 
     submittingRef.current = true;
     setState("loading");
@@ -112,6 +120,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             name="name"
             type="text"
             required
+            maxLength={120}
             autoComplete="name"
             className={inputClass}
             placeholder="John Smith"
@@ -126,6 +135,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             name="phone"
             type="tel"
             required
+            maxLength={40}
             autoComplete="tel"
             className={inputClass}
             placeholder="(310) 555-0000"
@@ -142,6 +152,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             id="sp-email"
             name="email"
             type="email"
+            maxLength={160}
             autoComplete="email"
             className={inputClass}
             placeholder="john@example.com"
@@ -156,6 +167,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             id="sp-address"
             name="address"
             type="text"
+            maxLength={240}
             autoComplete="street-address"
             className={inputClass}
             placeholder="123 Main St, Torrance"
@@ -170,6 +182,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
           id="sp-message"
           name="message"
           required
+          maxLength={4000}
           rows={4}
           className={`${inputClass} resize-none`}
           placeholder="Timeline, scope, and any specific concerns…"

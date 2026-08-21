@@ -111,6 +111,12 @@ export function revealOnVisible(
     probeTimers.forEach(clearTimeout);
     io?.disconnect();
     window.removeEventListener("scroll", onScroll);
+    // Observer callbacks run after the surrounding gsap.context() has been
+    // created, so their entrance tweens are not owned by that context. Kill
+    // interrupted tweens explicitly on route changes; merely clearing this
+    // Set leaves GSAP retaining the detached page tree until its global
+    // timeline releases those animations.
+    entranceAnimations.forEach((animation) => animation.kill());
     entranceAnimations.clear();
   };
 }

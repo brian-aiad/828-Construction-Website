@@ -112,7 +112,10 @@ async function runDevice(browser, device, reducedMotion = false) {
   page.on("requestfailed", (request) => {
     const errorText = request.failure()?.errorText || "failed";
     const url = request.url();
-    const isImage = /\.(png|jpe?g|webp|gif|svg|avif)(\?|$)/i.test(url) || url.includes("/images/");
+    const isImage =
+      /\.(png|jpe?g|webp|gif|svg|avif)(\?|$)/i.test(url) ||
+      url.includes("/images/") ||
+      url.includes("/_next/image?");
     if (errorText === "net::ERR_ABORTED" && isImage) return;
     result.requestFailures.push(`${errorText} ${url}`);
   });

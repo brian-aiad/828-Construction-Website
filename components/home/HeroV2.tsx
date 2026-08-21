@@ -31,10 +31,8 @@ export default function HeroV2() {
 
     const ctx = gsap.context(() => {
       const lines = gsap.utils.toArray<HTMLElement>(".hero-line-inner");
-      const support = section.querySelector<HTMLElement>(".hero-support");
       const metaEls = [
         eyebrowRef.current,
-        support,
         ctaRef.current,
         licenseRef.current,
         scrollHintRef.current,
@@ -45,7 +43,9 @@ export default function HeroV2() {
       }
 
       gsap.set(lines, { yPercent: 110 });
-      gsap.set(metaEls, { y: 14, opacity: 0 });
+      // Keep hero copy paint-eligible for LCP while retaining a restrained
+      // fade/translate entrance. Fully transparent LCP text delays the metric.
+      gsap.set(metaEls, { y: 14, opacity: 0.72 });
 
       // Entry — line-by-line mask reveal, then metadata
       gsap.to(lines, {

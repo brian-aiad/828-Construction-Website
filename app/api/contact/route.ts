@@ -1,15 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SITE } from "@/lib/constants";
+import {
+  buildCustomerEmail,
+  buildOwnerEmail,
+  type RenderedEmail,
+} from "@/lib/contactEmail";
 
 // ── In-memory rate limiter (5 requests per 10 minutes per IP) ────────────────
 const rateMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 5;
 const WINDOW_MS = 10 * 60 * 1000;
+const MAX_RATE_ENTRIES = 10_000;
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
   const entry = rateMap.get(ip);
   if (!entry || now > entry.resetAt) {
+    if (rateMap.size >= MAX_RATE_ENTRIES) {
+      for (const [key, value] of rateMap) {
+        if (now > value.resetAt) rateMap.delete(key);
+      }
+      while (rateMap.size >= MAX_RATE_ENTRIES) {
+        const oldest = rateMap.keys().next().value;
+        if (typeof oldest !== "string") break;
+        rateMap.delete(oldest);
+      }
+    }
     rateMap.set(ip, { count: 1, resetAt: now + WINDOW_MS });
     return true;
   }
@@ -20,14 +36,24 @@ function checkRateLimit(ip: string): boolean {
 
 const VALID_SERVICES = ["ADU Construction", "Remediation", "Consulting", "Not sure"];
 const MAX_BODY_BYTES = 20_000;
+const SUBMISSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const METHOD_HEADERS = {
+  Allow: "POST, OPTIONS",
+  "Cache-Control": "no-store",
+};
 
-function escapeHtml(value: string) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+function methodNotAllowed() {
+  return new NextResponse(null, { status: 405, headers: METHOD_HEADERS });
+}
+
+export const GET = methodNotAllowed;
+export const HEAD = methodNotAllowed;
+export const PUT = methodNotAllowed;
+export const PATCH = methodNotAllowed;
+export const DELETE = methodNotAllowed;
+
+export function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: METHOD_HEADERS });
 }
 
 function normalizePhoneHref(value: string) {
@@ -35,8 +61,59 @@ function normalizePhoneHref(value: string) {
   return digits.startsWith("+") ? digits : `+1${digits.replace(/^1/, "")}`;
 }
 
+function brandedFrom(value: string) {
+  return value.includes("<") ? value : `${SITE.name} <${value}>`;
+}
+
+async function sendEmail({
+  apiKey,
+  from,
+  to,
+  replyTo,
+  email,
+  idempotencyKey,
+}: {
+  apiKey: string;
+  from: string;
+  to: string;
+  replyTo?: string;
+  email: RenderedEmail;
+  idempotencyKey: string;
+}) {
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        reply_to: replyTo,
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    const responseBody = await response.json().catch(() => ({}));
+    return { ok: response.ok, status: response.status, body: responseBody };
+  } catch (error) {
+    return { ok: false, status: 0, body: { error: String(error) } };
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    if (!request.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+      return NextResponse.json(
+        { error: "Please submit the form using the website." },
+        { status: 415 }
+      );
+    }
+
     const contentLength = Number(request.headers.get("content-length") || "0");
     if (contentLength > MAX_BODY_BYTES) {
       return NextResponse.json(
@@ -57,8 +134,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { name, phone, email, address, service, message, website } = body;
+    const rawBody = await request.text();
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Message is too large. Please shorten it or call us directly." },
+        { status: 413 }
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(rawBody);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
+      body = parsed as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: "Invalid form submission." }, { status: 400 });
+    }
+    const { name, phone, email, address, service, message, website, submissionId } = body;
 
     // Honeypot check — bots fill this field, humans don't see it
     if (website && String(website).trim().length > 0) {
@@ -79,7 +171,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Sanitize
-    const sanitize = (str: string, max = 2000) =>
+    const sanitize = (str: unknown, max = 2000) =>
       String(str)
         .replace(/[\u0000-\u001F\u007F]/g, " ")
         .replace(/\s+/g, " ")
@@ -92,20 +184,16 @@ export async function POST(request: NextRequest) {
     const safeAddress = sanitize(address || "", 240);
     const safeService = sanitize(service, 60);
     const safeMessage = String(message).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, " ").trim().slice(0, 4000);
+    const safeSubmissionId = SUBMISSION_ID.test(String(submissionId || ""))
+      ? String(submissionId)
+      : crypto.randomUUID();
+    const reference = `828-${safeSubmissionId.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
     const submittedAt = new Date().toLocaleString("en-US", {
       timeZone: "America/Los_Angeles",
       dateStyle: "medium",
       timeStyle: "short",
     });
 
-    const htmlName = escapeHtml(safeName);
-    const htmlPhone = escapeHtml(safePhone);
-    const htmlEmail = escapeHtml(safeEmail);
-    const htmlAddress = escapeHtml(safeAddress);
-    const htmlService = escapeHtml(safeService);
-    const htmlMessage = escapeHtml(safeMessage).replace(/\n/g, "<br />");
-    const htmlSubmittedAt = escapeHtml(submittedAt);
-    const htmlIp = escapeHtml(ip);
     const phoneHref = normalizePhoneHref(safePhone);
 
     const apiKey = process.env.RESEND_API_KEY;
@@ -124,96 +212,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const row = (label: string, value: string) => `
-      <tr>
-        <td style="padding:14px 0;border-bottom:1px solid #e7e2df;width:132px;color:#7b7470;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;vertical-align:top;">${label}</td>
-        <td style="padding:14px 0;border-bottom:1px solid #e7e2df;color:#151515;font-size:16px;line-height:1.45;vertical-align:top;">${value}</td>
-      </tr>`;
-
-    const emailHtml = `
-      <div style="margin:0;padding:0;background:#f4f1ed;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f4f1ed;">
-          <tr>
-            <td align="center" style="padding:28px 14px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;border-collapse:collapse;background:#ffffff;border:1px solid #e4ded9;">
-                <tr>
-                  <td style="background:#050505;padding:28px 30px 24px;border-bottom:3px solid #631A16;">
-                    <div style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;">828 Construction</div>
-                    <div style="margin-top:10px;color:#b98b82;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;">New website inquiry / ${htmlService}</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:28px 30px 8px;font-family:Arial,Helvetica,sans-serif;">
-                    <div style="font-size:13px;letter-spacing:1.8px;text-transform:uppercase;color:#631A16;font-weight:700;">Priority Contact</div>
-                    <h1 style="margin:8px 0 4px;color:#111111;font-size:28px;line-height:1.15;font-weight:700;">${htmlName}</h1>
-                    <p style="margin:0;color:#6b6460;font-size:14px;line-height:1.6;">Submitted ${htmlSubmittedAt} PT from ${htmlIp}</p>
-                    <div style="margin-top:20px;">
-                      <a href="tel:${phoneHref}" style="display:inline-block;background:#631A16;color:#ffffff;text-decoration:none;padding:13px 18px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Call ${htmlPhone}</a>
-                      ${safeEmail ? `<a href="mailto:${htmlEmail}" style="display:inline-block;margin-left:8px;border:1px solid #d6ccc6;color:#111111;text-decoration:none;padding:12px 18px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Reply by Email</a>` : ""}
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:10px 30px 24px;font-family:Arial,Helvetica,sans-serif;">
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-                      ${row("Name", htmlName)}
-                      ${row("Phone", `<a href="tel:${phoneHref}" style="color:#111111;text-decoration:underline;">${htmlPhone}</a>`)}
-                      ${safeEmail ? row("Email", `<a href="mailto:${htmlEmail}" style="color:#111111;text-decoration:underline;">${htmlEmail}</a>`) : ""}
-                      ${safeAddress ? row("Address", htmlAddress) : ""}
-                      ${row("Service", htmlService)}
-                    </table>
-                    <div style="margin-top:24px;">
-                      <div style="margin-bottom:10px;color:#7b7470;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;">Project Notes</div>
-                      <div style="background:#f7f5f2;border-left:3px solid #631A16;padding:18px 20px;color:#171717;font-size:15px;line-height:1.7;">${htmlMessage}</div>
-                    </div>
-                    <p style="margin:24px 0 0;color:#8a817c;font-size:12px;line-height:1.6;">This lead came from ${escapeHtml(SITE.url)}. Reply directly to the email address above when available, or use the phone call button.</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </div>
-    `;
-
-    const emailText = [
-      "828 Construction - New Website Inquiry",
-      "",
-      `Service: ${safeService}`,
-      `Name: ${safeName}`,
-      `Phone: ${safePhone}`,
-      safeEmail ? `Email: ${safeEmail}` : "",
-      safeAddress ? `Address: ${safeAddress}` : "",
-      `Submitted: ${submittedAt} PT`,
-      `IP: ${ip}`,
-      "",
-      "Project Notes:",
-      safeMessage,
-    ].filter(Boolean).join("\n");
-
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [toEmail],
-        reply_to: safeEmail || undefined,
-        subject: `828 Construction: ${safeService} inquiry from ${safeName}`,
-        html: emailHtml,
-        text: emailText,
-      }),
+    const details = {
+      name: safeName,
+      phone: safePhone,
+      email: safeEmail,
+      address: safeAddress,
+      service: safeService,
+      message: safeMessage,
+      submittedAt,
+      reference,
+      phoneHref,
+    };
+    const sender = brandedFrom(fromEmail);
+    const ownerRequest = sendEmail({
+      apiKey,
+      from: sender,
+      to: toEmail,
+      replyTo: safeEmail || undefined,
+      email: buildOwnerEmail(details),
+      idempotencyKey: `contact-owner/${safeSubmissionId}`,
     });
+    const confirmationRequest = safeEmail
+      ? sendEmail({
+          apiKey,
+          from: sender,
+          to: safeEmail,
+          replyTo: toEmail,
+          email: buildCustomerEmail(details),
+          idempotencyKey: `contact-confirmation/${safeSubmissionId}`,
+        })
+      : Promise.resolve(null);
+    const [ownerResult, confirmationResult] = await Promise.all([
+      ownerRequest,
+      confirmationRequest,
+    ]);
 
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      console.error("Resend error:", errBody);
+    if (!ownerResult.ok) {
+      console.error("Resend owner notification error:", ownerResult);
       return NextResponse.json(
         { error: "Failed to send email. Please call us directly." },
         { status: 500 }
       );
+    }
+    if (confirmationResult && !confirmationResult.ok) {
+      // The lead is safely delivered even if a customer mailbox rejects its
+      // acknowledgment. Do not ask the customer to submit the lead again.
+      console.error("Resend customer confirmation error:", confirmationResult);
     }
 
     return NextResponse.json({ ok: true });

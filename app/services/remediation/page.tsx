@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { SITE } from "@/lib/constants";
 import JsonLd from "@/components/shared/JsonLd";
 import RemediationServiceContent from "@/components/services/remediation/RemediationServiceContent";
+import {
+  breadcrumbJsonLd,
+  businessProviderJsonLd,
+  SEARCH_ROBOTS,
+  socialMetadata,
+} from "@/lib/seo";
+
+const title = "Construction Remediation Torrance | Mold & Structural Repair";
+const description =
+  "Expert remediation services in Torrance: mold remediation, foundation repair, structural damage, and building defect correction. 20+ years experience. CA License #1141119.";
 
 export const metadata: Metadata = {
-  title: "Construction Remediation Torrance | Mold & Structural Repair",
-  description:
-    "Expert remediation services in Torrance: mold remediation, foundation repair, structural damage, and building defect correction. 20+ years experience. CA License #1141119.",
+  title,
+  description,
   keywords: [
     "remediation contractor Torrance",
     "mold remediation Torrance",
@@ -17,30 +26,36 @@ export const metadata: Metadata = {
     "construction defect correction",
   ],
   alternates: { canonical: `${SITE.url}/services/remediation` },
+  robots: SEARCH_ROBOTS,
+  ...socialMetadata({
+    title,
+    description,
+    path: "/services/remediation",
+    image: "/images/generated/remediation-hero-controlled-work-v3.webp",
+    imageAlt: "Controlled residential remediation work area",
+  }),
 };
 
 const serviceJsonLd = {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": `${SITE.url}/services/remediation#service`,
   name: "Remediation Services - Torrance, CA",
+  serviceType: "Construction remediation and restoration",
   description:
     "Mold remediation, structural repair, and environmental restoration in Torrance and South Bay. Diagnostic-first approach.",
-  provider: {
-    "@type": "GeneralContractor",
-    name: SITE.name,
-    telephone: "+12138282388",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: SITE.address.street,
-      addressLocality: SITE.address.city,
-      addressRegion: SITE.address.state,
-      postalCode: SITE.address.zip,
-      addressCountry: "US",
-    },
-  },
+  provider: businessProviderJsonLd(),
   areaServed: SITE.serviceArea,
   url: `${SITE.url}/services/remediation`,
+  mainEntityOfPage: `${SITE.url}/services/remediation`,
+  image: `${SITE.url}/images/generated/remediation-hero-controlled-work-v3.webp`,
 };
+
+const breadcrumbs = breadcrumbJsonLd([
+  { name: "Home", path: "" },
+  { name: "Services", path: "/services" },
+  { name: "Remediation", path: "/services/remediation" },
+]);
 
 const faqJsonLd = {
   "@context": "https://schema.org",
@@ -78,6 +93,7 @@ export default function RemediationPage() {
     <>
       <JsonLd data={serviceJsonLd} />
       <JsonLd data={faqJsonLd} />
+      <JsonLd data={breadcrumbs} />
       <RemediationServiceContent />
     </>
   );

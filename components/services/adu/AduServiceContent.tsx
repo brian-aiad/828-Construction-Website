@@ -466,6 +466,7 @@ function AduHero() {
               alt="Completed detached South Bay ADU with warm wood, black-framed doors, and drought-tolerant landscaping"
               fill
               priority
+              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 55vw"
               quality={92}
               placeholder="blur"

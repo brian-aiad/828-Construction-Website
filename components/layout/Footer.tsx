@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SITE, SERVICES } from "@/lib/constants";
 import BrandMarqueeBottom from "@/components/footer/BrandMarqueeBottom";
 import { SOCIAL_LINKS } from "@/components/footer/SocialIcons";
+import ProtectedEmailLink from "@/components/shared/ProtectedEmailLink";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -48,7 +49,6 @@ export default function Footer() {
   const year = new Date().getFullYear();
   const formattedPhone = formatPhone(SITE.phone);
   const streetLine = SITE.address.street.replace(" STE", ", STE");
-  const [emailName, emailDomain = ""] = SITE.email.split("@");
 
   return (
     <footer className="relative flex flex-col overflow-hidden border-t border-white/16 bg-black text-white before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-px before:origin-left before:bg-[var(--color-accent)]/70 before:content-[''] min-[1180px]:h-[calc(100svh-52px)]" data-section="footer" data-header-dark="">
@@ -84,16 +84,12 @@ export default function Footer() {
             >
               {formattedPhone}
             </a>
-            <a
-              href={`mailto:${SITE.email}`}
+            <ProtectedEmailLink
               data-footer-email=""
-              className="relative mt-4 block max-w-full font-display text-[clamp(1.45rem,6.2vw,2.1rem)] font-normal leading-[1.08] tracking-[0] text-white/36 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 md:text-[2.55rem] min-[1180px]:mt-4 min-[1180px]:max-w-[min(44rem,100%)] min-[1180px]:whitespace-nowrap min-[1180px]:text-[clamp(2.2rem,2.65vw,3.25rem)] min-[1180px]:before:hidden"
+              className="relative mt-4 block max-w-full cursor-pointer border-0 bg-transparent p-0 text-left font-display text-[clamp(1.45rem,6.2vw,2.1rem)] font-normal leading-[1.08] tracking-[0] text-white/36 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/62 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 md:text-[2.55rem] min-[1180px]:mt-4 min-[1180px]:max-w-[min(44rem,100%)] min-[1180px]:whitespace-nowrap min-[1180px]:text-[clamp(2.2rem,2.65vw,3.25rem)] min-[1180px]:before:hidden"
             >
-              <span className="block min-[1180px]:inline">{emailName}</span>
-              {emailDomain ? (
-                <span className="block min-[1180px]:inline">@{emailDomain}</span>
-              ) : null}
-            </a>
+              Email our team
+            </ProtectedEmailLink>
             </div>
           </div>
         </div>
@@ -109,7 +105,6 @@ export default function Footer() {
             src="/images/generated/footer-consultation-cta.webp"
             alt="Builder-client consultation reviewing residential construction plans"
             fill
-            loading="eager"
             sizes="(max-width: 1024px) 100vw, 33vw"
             className="object-cover transition duration-700 group-hover:scale-105"
             style={{ filter: "contrast(1.04) saturate(0.96) brightness(0.92)" }}

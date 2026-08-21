@@ -58,10 +58,23 @@ export const metadata: Metadata = {
     description: SITE.description,
     url: SITE.url,
     siteName: SITE.name,
+    images: [
+      {
+        url: "/images/generated/home-hero-bluehour-adu-v2.webp",
+        width: 1535,
+        height: 1024,
+        alt: "Modern South Bay ADU built by 828 Construction",
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: "summary_large_image",
+    title: "828 Construction — Built with Intent. Not by Accident.",
+    description: SITE.description,
+    images: ["/images/generated/home-hero-bluehour-adu-v2.webp"],
+  },
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

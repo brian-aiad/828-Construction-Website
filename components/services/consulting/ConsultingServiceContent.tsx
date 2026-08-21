@@ -416,6 +416,7 @@ function ConsultingHero() {
               alt="Consulting session over construction plans and material samples"
               fill
               priority
+              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 52vw"
               quality={92}
               placeholder="blur"
