@@ -5,6 +5,7 @@ export const SITE = {
     "25+ years of building science expertise. Specializing in ADU construction, remediation, and consulting in Torrance and South Bay, CA.",
   phone: "213-828-2388",
   phoneHref: "tel:+12138282388",
+  email: "828constructionca@gmail.com",
   address: {
     street: "21223 Hawthorne Boulevard STE B 1087",
     city: "Torrance",

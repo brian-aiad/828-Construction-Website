@@ -252,37 +252,37 @@ function AboutHero() {
       </div>
 
       {/* Dossier — floating glass panel, one continuous composition */}
-      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[71.875rem] items-start px-6 pb-14 pt-28 sm:pt-32 lg:px-12 lg:pb-16 lg:pt-[8.25rem] 2xl:max-w-[105rem]">
-        <div className="w-full max-w-[24.5rem] border border-white/14 bg-[#070707]/88 p-6 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.9)] backdrop-blur-sm sm:p-7 lg:p-8 2xl:max-w-[26rem]">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[71.875rem] items-start px-6 pb-10 pt-32 sm:pt-36 lg:px-12 lg:pb-10 lg:pt-[11.75rem] 2xl:max-w-[105rem]">
+        <div className="w-full max-w-[24.5rem] border border-white/14 bg-[#070707]/88 p-6 shadow-[0_34px_90px_-42px_rgba(0,0,0,0.9)] backdrop-blur-sm 2xl:max-w-[26rem]">
         <div>
-          <p data-hero-reveal className="mb-6 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
+          <p data-hero-reveal className="mb-4 flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.3em] text-white/48">
             <span className="h-px w-7 bg-accent" aria-hidden="true" />
             About / 828 Construction
           </p>
-          <h1 data-hero-reveal className="max-w-md font-editorial text-[clamp(2.4rem,3.4vw,3.6rem)] font-semibold leading-[0.98]">
+          <h1 data-hero-reveal className="max-w-md font-editorial text-[clamp(2.25rem,3.1vw,3.25rem)] font-semibold leading-[0.98]">
             Where quality meets quiet luxury.
           </h1>
-          <p data-hero-reveal className="mt-6 max-w-sm text-[clamp(1rem,1.15vw,1.12rem)] leading-relaxed text-white/64">
+          <p data-hero-reveal className="mt-4 max-w-sm text-[clamp(0.95rem,1.05vw,1.05rem)] leading-relaxed text-white/64">
             Every home is shaped by decades of hands-on experience and building
             science, ensuring exceptional quality and performance.
           </p>
         </div>
 
-        <div data-hero-reveal className="mt-9">
+        <div data-hero-reveal className="mt-6">
           {proofStats.map((stat, i) => (
             <div
               key={stat.label}
               ref={(el) => {
                 statRefs.current[i] = el;
               }}
-              className="relative flex items-baseline justify-between py-3.5"
+              className="relative flex items-baseline justify-between py-2.5"
             >
               <span data-stat-line className="absolute inset-x-0 top-0 h-px bg-white/12" aria-hidden="true" />
               <span className="font-labels text-[9px] uppercase tracking-[0.24em] text-white/40">{stat.label}</span>
               <span className="font-numbers text-sm text-white/90">{stat.value}</span>
             </div>
           ))}
-          <div className="relative flex flex-wrap gap-x-7 gap-y-3 pt-5">
+          <div className="relative flex flex-wrap gap-x-6 gap-y-2 pt-4">
             <span data-stat-line className="absolute inset-x-0 top-0 h-px bg-white/12" aria-hidden="true" />
             {["Plans before promises", "Field-built judgment", "South Bay residential"].map((item) => (
               <span key={item} className="flex items-center gap-2.5">
@@ -298,9 +298,9 @@ function AboutHero() {
       <div
         ref={wordmarkRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-[5.25rem] z-[5] select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.2] sm:top-[5.1rem] lg:top-[5.5rem]"
+        className="pointer-events-none absolute inset-x-0 top-[5.25rem] z-[5] select-none whitespace-nowrap text-center font-editorial font-bold uppercase leading-none text-white/[0.22] sm:top-[5.1rem] lg:top-[5.5rem]"
         style={{
-          fontSize: "clamp(2rem, 8.6vw, 12rem)",
+          fontSize: "clamp(2rem, 7vw, 7rem)",
           letterSpacing: "0.035em",
           textShadow: "0 2px 24px rgb(0 0 0 / 0.42)",
           willChange: "transform",
@@ -658,7 +658,8 @@ function SouthBaySection() {
     const ctx = gsap.context(() => {
       if (compassRef.current) {
         gsap.to(compassRef.current, {
-          rotate: 22,
+          rotate: 72,
+          transformOrigin: "50% 50%",
           ease: "none",
           scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true },
         });
@@ -672,16 +673,15 @@ function SouthBaySection() {
     };
   }, []);
 
-  const marqueeRow = (duration: string, reverse = false, animate = true) => (
+  const marqueeRow = (duration: string, reverse = false) => (
     <div className="overflow-hidden" aria-hidden="true">
       <div
-        data-ambient-motion={animate ? "" : undefined}
+        data-ambient-motion=""
         className="about-area-marquee flex w-max items-center whitespace-nowrap"
         style={{
-          animation: animate ? `marqueeScroll ${duration} linear infinite` : "none",
+          animation: `marqueeScroll ${duration} linear infinite`,
           animationDirection: reverse ? "reverse" : "normal",
-          transform: animate ? undefined : "translate3d(-18%, 0, 0)",
-          willChange: animate ? "transform" : "auto",
+          willChange: "transform",
         }}
       >
         {[0, 1].map((copy) => (
@@ -727,8 +727,8 @@ function SouthBaySection() {
       {/* Joe (IMG_1024): cities rolling across the screen — the horizon layer. */}
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 -translate-y-1/2">
         <div className="flex flex-col gap-4 min-[1180px]:gap-9" data-motion-reveal="left">
-          {marqueeRow("74s", false, false)}
-          {marqueeRow("92s", true, false)}
+          {marqueeRow("74s")}
+          {marqueeRow("92s", true)}
         </div>
       </div>
 

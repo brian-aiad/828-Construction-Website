@@ -98,7 +98,7 @@ async function sendEmail({
       }),
       signal: AbortSignal.timeout(10_000),
     });
-    const responseBody = await response.json().catch(() => ({}));
+    const responseBody = (await response.json().catch(() => ({}))) as Record<string, unknown>;
     return { ok: response.ok, status: response.status, body: responseBody };
   } catch (error) {
     return { ok: false, status: 0, body: { error: String(error) } };
@@ -196,15 +196,26 @@ export async function POST(request: NextRequest) {
 
     const phoneHref = normalizePhoneHref(safePhone);
 
-    const apiKey = process.env.RESEND_API_KEY;
-    const toEmail = process.env.CONTACT_EMAIL;
-    const fromEmail = process.env.CONTACT_FROM_EMAIL;
+    const apiKey = process.env.RESEND_API_KEY?.trim();
+    const configuredToEmail = process.env.CONTACT_EMAIL?.trim();
+    // The public site email is the canonical owner inbox. Keeping the
+    // recipient in source prevents a stale or misspelled deployment variable
+    // from silently sending customer leads somewhere else.
+    const toEmail = SITE.email;
+    const fromEmail =
+      process.env.CONTACT_FROM_EMAIL?.trim() ||
+      "828 Construction <website@updates.828constructions.com>";
 
-    if (!apiKey || !toEmail || !fromEmail) {
+    if (configuredToEmail && configuredToEmail.toLowerCase() !== toEmail.toLowerCase()) {
+      console.warn("Contact recipient override does not match the canonical site email.", {
+        reference,
+      });
+    }
+
+    if (!apiKey) {
       console.error("Contact email environment is not fully configured.", {
         hasApiKey: Boolean(apiKey),
-        hasContactEmail: Boolean(toEmail),
-        hasFromEmail: Boolean(fromEmail),
+        reference,
       });
       return NextResponse.json(
         { error: "Contact form is not configured. Please call us directly." },
@@ -260,7 +271,16 @@ export async function POST(request: NextRequest) {
       console.error("Resend customer confirmation error:", confirmationResult);
     }
 
-    return NextResponse.json({ ok: true });
+    const ownerMessageId =
+      typeof ownerResult.body.id === "string" ? ownerResult.body.id : "unavailable";
+    console.info("Contact owner notification accepted.", {
+      reference,
+      providerMessageId: ownerMessageId,
+      confirmationRequested: Boolean(safeEmail),
+      confirmationAccepted: confirmationResult?.ok ?? null,
+    });
+
+    return NextResponse.json({ ok: true, reference });
   } catch (err) {
     console.error("Contact route error:", err);
     return NextResponse.json(

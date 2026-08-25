@@ -184,7 +184,7 @@ body {
 
   [data-footer-email] {
     white-space: normal !important;
-    font-size: clamp(2rem, 3.45vw, 2.55rem) !important;
+    font-size: clamp(1.2rem, 5.6vw, 2rem) !important;
     line-height: 1.1 !important;
   }
 
@@ -194,6 +194,12 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .about-area-marquee {
+    animation: none !important;
+    transform: translate3d(-12vw, 0, 0) !important;
+    will-change: auto !important;
+  }
+
   [data-gsap-reveal],
   [data-motion-reveal],
   [data-motion-reveal][data-motion-stagger] > * {

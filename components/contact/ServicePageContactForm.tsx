@@ -8,6 +8,20 @@ interface Props {
 }
 
 type FormState = "idle" | "loading" | "success" | "error";
+type FieldErrors = Partial<Record<"name" | "phone" | "email" | "message", string>>;
+
+function validate(data: Record<string, string>): FieldErrors {
+  const errors: FieldErrors = {};
+  if (data.name.trim().length < 2) errors.name = "Full name required";
+  if (!/^\+?[\d\s\-(). ]{7,}$/.test(data.phone)) errors.phone = "Valid phone number required";
+  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.email = "Enter a valid email address";
+  }
+  if (data.message.trim().length < 20) {
+    errors.message = "Please describe your project (min 20 characters)";
+  }
+  return errors;
+}
 
 function CheckmarkSVG() {
   return (
@@ -32,6 +46,9 @@ function CheckmarkSVG() {
 export default function ServicePageContactForm({ serviceTitle }: Props) {
   const [state, setState] = useState<FormState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [validationMsg, setValidationMsg] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [successReference, setSuccessReference] = useState("");
   const submittingRef = useRef(false);
   const submissionIdRef = useRef("");
   const submissionFingerprintRef = useRef("");
@@ -50,6 +67,20 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       website: (form.elements.namedItem("website") as HTMLInputElement).value,
     };
+    const errors = validate(formData);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setValidationMsg("Please complete the highlighted required fields before sending.");
+      const firstInvalidName = ["name", "phone", "email", "message"].find(
+        (field) => errors[field as keyof FieldErrors]
+      );
+      if (firstInvalidName) {
+        (form.elements.namedItem(firstInvalidName) as HTMLElement | null)?.focus();
+      }
+      return;
+    }
+    setFieldErrors({});
+    setValidationMsg("");
     const fingerprint = JSON.stringify(formData);
     if (submissionFingerprintRef.current !== fingerprint) {
       submissionFingerprintRef.current = fingerprint;
@@ -67,11 +98,23 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        errors?: FieldErrors;
+        reference?: string;
+      };
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
         if (res.status === 429) throw new Error("Too many requests. Please try again shortly.");
+        if (body.errors) {
+          setFieldErrors(body.errors);
+          setValidationMsg("Please correct the highlighted fields before sending again.");
+          setState("idle");
+          submittingRef.current = false;
+          return;
+        }
         throw new Error(body.error || "Something went wrong");
       }
+      setSuccessReference(body.reference || "");
       setState("success");
     } catch (err) {
       setState("error");
@@ -94,6 +137,11 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
         <p className="text-gray-400 leading-relaxed max-w-sm text-sm">
           Joe will review your {serviceTitle.toLowerCase()} inquiry and get back to you within 24 hours.
         </p>
+        {successReference && (
+          <p className="mt-5 font-labels text-[9px] uppercase tracking-[0.18em] text-white/48">
+            Confirmation {successReference}
+          </p>
+        )}
       </div>
     );
   }
@@ -104,11 +152,17 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
     "block font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase mb-2";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8" aria-label="Service inquiry form">
+    <form onSubmit={handleSubmit} noValidate className="space-y-8" aria-label="Service inquiry form">
       {/* Honeypot */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}>
         <input name="website" type="text" autoComplete="off" tabIndex={-1} />
       </div>
+
+      {validationMsg && (
+        <div role="alert" className="border border-amber-300/35 bg-amber-950/20 px-4 py-3 text-sm leading-6 text-amber-100">
+          {validationMsg}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
         <div>
@@ -122,9 +176,12 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             required
             maxLength={120}
             autoComplete="name"
-            className={inputClass}
+            aria-invalid={!!fieldErrors.name || undefined}
+            aria-describedby={fieldErrors.name ? "sp-name-err" : undefined}
+            className={`${inputClass} ${fieldErrors.name ? "border-red-400/70" : ""}`}
             placeholder="John Smith"
           />
+          {fieldErrors.name && <p id="sp-name-err" role="alert" className="mt-2 text-[10px] text-red-400">{fieldErrors.name}</p>}
         </div>
         <div>
           <label htmlFor="sp-phone" className={labelClass}>
@@ -137,9 +194,12 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             required
             maxLength={40}
             autoComplete="tel"
-            className={inputClass}
+            aria-invalid={!!fieldErrors.phone || undefined}
+            aria-describedby={fieldErrors.phone ? "sp-phone-err" : undefined}
+            className={`${inputClass} ${fieldErrors.phone ? "border-red-400/70" : ""}`}
             placeholder="(310) 555-0000"
           />
+          {fieldErrors.phone && <p id="sp-phone-err" role="alert" className="mt-2 text-[10px] text-red-400">{fieldErrors.phone}</p>}
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
@@ -154,9 +214,12 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
             type="email"
             maxLength={160}
             autoComplete="email"
-            className={inputClass}
+            aria-invalid={!!fieldErrors.email || undefined}
+            aria-describedby={fieldErrors.email ? "sp-email-err" : undefined}
+            className={`${inputClass} ${fieldErrors.email ? "border-red-400/70" : ""}`}
             placeholder="john@example.com"
           />
+          {fieldErrors.email && <p id="sp-email-err" role="alert" className="mt-2 text-[10px] text-red-400">{fieldErrors.email}</p>}
         </div>
         <div>
           <label htmlFor="sp-address" className={labelClass}>
@@ -184,9 +247,12 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
           required
           maxLength={4000}
           rows={4}
-          className={`${inputClass} resize-none`}
+          aria-invalid={!!fieldErrors.message || undefined}
+          aria-describedby={fieldErrors.message ? "sp-message-err" : undefined}
+          className={`${inputClass} resize-none ${fieldErrors.message ? "border-red-400/70" : ""}`}
           placeholder="Timeline, scope, and any specific concerns…"
         />
+        {fieldErrors.message && <p id="sp-message-err" role="alert" className="mt-2 text-[10px] text-red-400">{fieldErrors.message}</p>}
       </div>
 
       {state === "error" && (

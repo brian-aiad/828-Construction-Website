@@ -65,6 +65,8 @@ function Spinner() {
 export default function ContactForm() {
   const [state, setState] = useState<FormState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [validationMsg, setValidationMsg] = useState("");
+  const [successReference, setSuccessReference] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const submittingRef = useRef(false);
   const submissionIdRef = useRef("");
@@ -93,17 +95,19 @@ export default function ContactForm() {
     const errors = validate(data);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      setValidationMsg("Please complete the highlighted required fields before sending.");
+      setState("idle");
       const firstInvalidName = ["name", "phone", "email", "service", "message"].find(
         (field) => errors[field as keyof FieldErrors]
       );
       if (firstInvalidName) {
         const firstField = form.elements.namedItem(firstInvalidName) as HTMLElement | null;
-        firstField?.scrollIntoView({ block: "center", behavior: "smooth" });
-        window.setTimeout(() => firstField?.focus({ preventScroll: true }), 220);
+        firstField?.focus({ preventScroll: false });
       }
       return;
     }
     setFieldErrors({});
+    setValidationMsg("");
 
     submittingRef.current = true;
     setState("loading");
@@ -116,11 +120,17 @@ export default function ContactForm() {
         body: JSON.stringify(data),
       });
 
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        errors?: FieldErrors;
+        reference?: string;
+      };
+
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
         if (res.status === 429) throw new Error("Too many requests. Please try again in a few minutes or call us directly.");
         if (body.errors) {
           setFieldErrors(body.errors);
+          setValidationMsg("Please correct the highlighted fields before sending again.");
           setState("idle");
           submittingRef.current = false;
           return;
@@ -128,6 +138,7 @@ export default function ContactForm() {
         throw new Error(body.error || "Something went wrong");
       }
 
+      setSuccessReference(body.reference || "");
       setState("success");
     } catch (err) {
       setState("error");
@@ -162,6 +173,11 @@ export default function ContactForm() {
           </a>{" "}
           directly.
         </p>
+        {successReference && (
+          <p className="mt-5 font-labels text-[9px] uppercase tracking-[0.18em] text-white/48">
+            Confirmation {successReference}
+          </p>
+        )}
       </div>
     );
   }
@@ -190,6 +206,15 @@ export default function ContactForm() {
           tabIndex={-1}
         />
       </div>
+
+      {validationMsg && (
+        <div
+          role="alert"
+          className="border border-amber-300/35 bg-amber-950/20 px-4 py-3 text-sm leading-6 text-amber-100"
+        >
+          {validationMsg}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>

@@ -12,6 +12,8 @@ export type PortfolioCase = {
   project: Project;
   gallery: ResidenceGallery;
   lead: string;
+  /** Art-directed real project photograph matched to the hero tile crop. */
+  heroImage: string;
   /** Primary curated grid (chapter one for dual-scope projects) */
   grid: string[];
   /** Second chapter (El Sereno outdoor living) */
@@ -51,6 +53,12 @@ const SELECTS: Record<
   },
 };
 
+const HERO_IMAGES: Record<string, string> = {
+  "cerritos-residence": "/images/projects/cerritos-residence/03-2077.jpg",
+  "el-sereno-residence": "/images/projects/el-sereno-residence/home-preview-v2.jpg",
+  "tustin-residence": "/images/projects/tustin-residence/17-2010.jpg",
+};
+
 export const PORTFOLIO_CASES: PortfolioCase[] = RESIDENCE_GALLERIES.map((gallery) => {
   const sel = SELECTS[gallery.id];
   const project = PROJECTS.find((p) => p.id === sel.projectId)!;
@@ -58,6 +66,7 @@ export const PORTFOLIO_CASES: PortfolioCase[] = RESIDENCE_GALLERIES.map((gallery
     project,
     gallery,
     lead: gallery.photos[sel.lead],
+    heroImage: HERO_IMAGES[gallery.id],
     grid: sel.grid.map((i) => gallery.photos[i]),
     gridB: sel.gridB?.map((i) => gallery.photos[i]),
     chapterLabels: sel.chapterLabels,

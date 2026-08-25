@@ -13,7 +13,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ContactForm from "@/components/contact/ContactForm";
 import ContactFlow from "@/components/contact/ContactFlow";
-import ProtectedEmailLink from "@/components/shared/ProtectedEmailLink";
 import { revealOnVisible } from "@/utils/revealOnVisible";
 import { SERVICE_AREAS, SERVICES, SITE } from "@/lib/constants";
 
@@ -42,10 +41,8 @@ type InquiryRow = {
   value: string;
   detail: string;
   numbers: boolean;
-} & (
-  | { href: string; protectedEmail?: false }
-  | { protectedEmail: true; href?: never }
-);
+  href: string;
+};
 
 const inquiryRows: InquiryRow[] = [
   {
@@ -57,8 +54,8 @@ const inquiryRows: InquiryRow[] = [
   },
   {
     label: "Email",
-    value: "Email our team",
-    protectedEmail: true,
+    value: SITE.email,
+    href: `mailto:${SITE.email}`,
     detail: "Useful when you already have photos, plans, or documents.",
     numbers: false,
   },
@@ -445,18 +442,6 @@ function GetInTouch() {
               );
               const className =
                 "ct-ledger group block w-full border-0 border-b border-white/10 bg-transparent py-6 text-left first:border-t";
-
-              if (row.protectedEmail) {
-                return (
-                  <ProtectedEmailLink
-                    key={row.label}
-                    data-gsap-reveal="true"
-                    className={`${className} cursor-pointer`}
-                  >
-                    {content}
-                  </ProtectedEmailLink>
-                );
-              }
 
               const href = row.href;
               return (

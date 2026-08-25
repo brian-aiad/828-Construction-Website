@@ -521,18 +521,18 @@ export default function PortfolioContent() {
                     className={`group relative block overflow-hidden bg-[#111] transition-opacity duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] ${i === 0 ? "row-span-2" : ""} ${heroPreview === null || heroPreview === i ? "opacity-100" : "opacity-45"}`}
                   >
                     <Image
-                      src={c.lead}
+                      src={c.heroImage}
                       alt={`${c.gallery.title} — ${c.gallery.scope}`}
                       fill
                       priority={i === 0}
                       fetchPriority={i === 0 ? "high" : "auto"}
-                      quality={i === 0 ? 90 : 86}
+                      quality={94}
                       sizes={i === 0 ? "(max-width: 1024px) 50vw, 30vw" : "(max-width: 1024px) 50vw, 28vw"}
                       placeholder="blur"
-                      blurDataURL={lqip(c.lead)}
-                      className={`object-cover transition-transform duration-700 group-hover:scale-[1.035] group-focus-visible:scale-[1.035] motion-reduce:transition-none ${i === 1 ? "object-[50%_62%]" : i === 2 ? "object-[50%_45%]" : ""}`}
+                      blurDataURL={lqip(c.heroImage)}
+                      className={`object-cover transition-transform duration-700 group-hover:scale-[1.025] group-focus-visible:scale-[1.025] motion-reduce:transition-none ${i === 0 ? "object-center" : i === 1 ? "object-[50%_58%]" : "object-[50%_54%]"}`}
                     />
-                    <span className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" aria-hidden="true" />
+                    <span className="absolute inset-0 bg-gradient-to-t from-black/64 via-transparent to-black/5" aria-hidden="true" />
                     <span className="absolute bottom-4 left-4 font-labels text-[8px] uppercase tracking-[0.2em] text-white/88">
                       {c.project.location}
                     </span>
