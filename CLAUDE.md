@@ -34,18 +34,18 @@ The V2 brief lives at `docs/828_CLIENT_BRIEF_V2.md`. Read it before any page-lev
 - About should feel like a documentary/editorial profile: different section pacing, different reveal logic, and more proof-led composition.
 - If an image reads as generic or AI-like, replace it with a better-fitting asset or crop rather than repeating the same visual trick.
 
-### Git & deploy policy (LOCKED — June 2026, Brian's explicit instruction)
-- **NEVER push to `main` unless Brian explicitly says "push to main."** Pushing `main` auto-deploys to the LIVE site 828constructions.com via Vercel git integration.
-- **"Commit and push" (or just "push") means: update the CLIENT PREVIEW, not the live site.** Concretely: commit on the `ns-preview` branch, push that branch to GitHub, then redeploy the separate Vercel project `828-ns-preview` (CLI: sync working tree to a clean copy excluding node_modules/.next/.git/.claude-work/research/"joes pics"/chatpics/docx, then `npx vercel deploy --yes --scope aiadcollc` from that copy). Client preview URL: https://828-ns-preview.vercel.app
-- The `828-ns-preview` Vercel project is NOT git-connected and has no custom domain — it can never affect 828constructions.com.
-- Work happens on the `ns-preview` branch, not `main`.
+### Git & deploy policy (LOCKED — August 2026, Brian's explicit instruction)
+- This is a production-only repository. The only deployment branch is `main`.
+- Pushing `main` auto-deploys the official site, https://828constructions.com, through the Vercel project `828-construction-website`.
+- Never push or deploy without Brian explicitly asking to push, publish, deploy, or make the work live.
+- Retired staging branches and projects must not be recreated.
 
 ### Standing rules
-- **OVERRIDE - production-only push policy (Brian, 2026-07-13):** Preview/staging is parked. Do not push to, deploy, or otherwise touch `ns-preview` / `828-ns-preview` unless Brian explicitly re-enables preview. "Commit and push", "push", "make it live", or "push to 828construction(s).com" means commit current work and push to `main` only.
-- **Keep the dev server running (Brian, 2026-07-08):** At session start, check `http://localhost:3001` and start `npm run dev` (background) if it's down — Brian watches changes live there while work happens. Leave it running when the session ends.
+- **Production-only push policy:** "Commit and push", "push", "make it live", or "push to 828construction(s).com" means commit current work and push to `main` only.
+- **Keep the dev server running (Brian, 2026-07-08):** At session start, verify that `http://localhost:3001` is the actual 828 site, not merely that the port responds. Start `npm run dev` in the background if it is free. If another project owns port 3001, leave it untouched, run 828 on `http://localhost:3011`, and report the fallback URL. Leave the 828 server running when the session ends.
 - **Dual-machine workflow:** Brian works on this repo from BOTH a Windows desktop PC (`C:\Users\kingt\Desktop\828_website`) and a Mac laptop, syncing through GitHub (`brian-aiad/828_Construction_Website`). At the START of every session: `git fetch` and fast-forward if behind before doing any work. At the END of any session that changed files: commit and push so the other machine picks it up. Never leave finished work sitting uncommitted — it strands the other machine on stale files.
-- **Deploy environments (verbiage):** Two Vercel projects point at this repo. **Production** ("prod", "the live site") = `828constructions.com` — Vercel project `828-construction-website`, deploys from `main`. **Preview** ("staging", "the test site") = `https://828-ns-preview.vercel.app` — Vercel project `828-ns-preview`, deploys from the `ns-preview` branch. Flow: build on `ns-preview` → push → verify at the preview URL → when approved, merge `ns-preview` into `main` and push ("promote to production"). Never experiment directly on `main`.
-- **Local dev URL:** Always use `http://localhost:3001` for this repo. `npm run dev` is pinned to `next dev -p 3001`. Port `3000` belongs to another local app and must not be used to judge 828.
+- **Deploy environment:** The single official environment is `828constructions.com` — Vercel project `828-construction-website`, deployed from `main`. Validate changes locally and pass `npm run preflight:full` before every production push.
+- **Local dev URL:** Prefer `http://localhost:3001` for this repo. `npm run dev` is pinned to `next dev -p 3001`; when that port belongs to another local app, use `npx next dev -p 3011` and verify the 828 page identity before judging changes. Port `3000` also belongs to another local app.
 - All factual data traces to `lib/constants.ts`.
 - Production build only for verification (port 4000).
 - Chrome DevTools MCP for animation/scroll verification — Playwright is functional only.

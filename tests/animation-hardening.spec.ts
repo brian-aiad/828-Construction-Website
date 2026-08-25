@@ -400,6 +400,151 @@ test.describe("animation hardening", () => {
     expect(failures, failures.join("\n")).toHaveLength(0);
   });
 
+  test("@cursor always keeps a visible pointer fallback", async ({ page }) => {
+    test.setTimeout(45_000);
+    await page.setViewportSize({ width: 900, height: 800 });
+    await skipSplash(page);
+    await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+    await settle(page, 700);
+
+    const finePointer = await page.evaluate(() =>
+      window.matchMedia("(pointer: fine)").matches
+    );
+    test.skip(!finePointer, "Custom cursor is intentionally disabled on touch pointers");
+
+    const fallback = await page.evaluate(() => ({
+      bodyCursor: window.getComputedStyle(document.body).cursor,
+      customActive: document.body.classList.contains("has-custom-cursor"),
+      customDisplays: Array.from(
+        document.querySelectorAll<HTMLElement>("[data-custom-cursor]")
+      ).map((element) => window.getComputedStyle(element).display),
+    }));
+
+    expect(fallback.bodyCursor).not.toBe("none");
+    expect(fallback.customActive).toBe(false);
+    expect(fallback.customDisplays.every((display) => display === "none")).toBe(true);
+
+    await page.setViewportSize({ width: 1100, height: 800 });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await settle(page, 700);
+    await page.mouse.move(720, 450);
+    await page.waitForTimeout(120);
+
+    const active = await page.evaluate(() => ({
+      bodyCursor: window.getComputedStyle(document.body).cursor,
+      customActive: document.body.classList.contains("has-custom-cursor"),
+      opacities: Array.from(
+        document.querySelectorAll<HTMLElement>("[data-custom-cursor]")
+      ).map((element) => Number(window.getComputedStyle(element).opacity)),
+    }));
+
+    expect(active.bodyCursor).toBe("none");
+    expect(active.customActive).toBe(true);
+    expect(active.opacities.some((opacity) => opacity >= 0.5)).toBe(true);
+
+    await page.mouse.wheel(0, 900);
+    await page.waitForTimeout(250);
+    const afterScroll = await page.evaluate(() => ({
+      customActive: document.body.classList.contains("has-custom-cursor"),
+      visible: Array.from(
+        document.querySelectorAll<HTMLElement>("[data-custom-cursor]")
+      ).some((element) => Number(window.getComputedStyle(element).opacity) >= 0.5),
+    }));
+    expect(afterScroll.customActive).toBe(true);
+    expect(afterScroll.visible).toBe(true);
+  });
+
+  test("@snap fine-pointer desktops settle half-covered sections", async ({ page }) => {
+    test.setTimeout(60_000);
+    await skipSplash(page);
+
+    for (const viewport of [
+      { width: 1100, height: 800 },
+      { width: 1440, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+      await settle(page, 900);
+
+      const finePointer = await page.evaluate(() =>
+        window.matchMedia("(pointer: fine)").matches
+      );
+      test.skip(!finePointer, "Section settling is intentionally disabled on touch pointers");
+
+      const prepared = await page.evaluate(() => {
+        const flow = document.querySelector<HTMLElement>("[data-stack-mode]");
+        const surfaces = Array.from(
+          flow?.querySelectorAll<HTMLElement>("[data-stack-surface]") ?? []
+        );
+        const incoming = surfaces[1];
+        if (!flow || !incoming) return { mode: null, top: -1 };
+        document.documentElement.style.setProperty(
+          "scroll-behavior",
+          "auto",
+          "important"
+        );
+        const target =
+          window.scrollY +
+          incoming.getBoundingClientRect().top -
+          window.innerHeight * 0.35;
+        const lenis = (window as unknown as {
+          __lenis828?: { scrollTo: (y: number, options: { immediate: boolean }) => void };
+        }).__lenis828;
+        if (lenis) lenis.scrollTo(target, { immediate: true });
+        else window.scrollTo(0, target);
+        return {
+          mode: flow.dataset.stackMode ?? null,
+          top: incoming.getBoundingClientRect().top,
+        };
+      });
+      await page.waitForTimeout(250);
+      const before = await page.evaluate(() =>
+        document
+          .querySelectorAll<HTMLElement>("[data-stack-surface]")[1]
+          ?.getBoundingClientRect().top ?? -1
+      );
+
+      expect(prepared.mode).toBe("desktop");
+      expect(before).toBeGreaterThan(viewport.height * 0.2);
+      expect(before).toBeLessThan(viewport.height * 0.5);
+
+      await page.mouse.wheel(0, 12);
+      await page.waitForTimeout(1600);
+      const after = await page.evaluate(() =>
+        document
+          .querySelectorAll<HTMLElement>("[data-stack-surface]")[1]
+          ?.getBoundingClientRect().top ?? -1
+      );
+      expect(Math.abs(after)).toBeLessThanOrEqual(2);
+    }
+  });
+
+  test("updated 828 favicon assets are linked and available", async ({ page, request }) => {
+    await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+    const href = await page
+      .locator('link[rel="icon"][sizes="32x32"]')
+      .getAttribute("href");
+
+    expect(href).toContain("/favicon-32x32.png?v=20260824");
+    const response = await request.get(new URL(href!, BASE).toString());
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("image/png");
+  });
+
+  test("@portfolio photo tiles keep compact-desktop button geometry clipped", async ({ page }) => {
+    await page.setViewportSize({ width: 1180, height: 820 });
+    await skipSplash(page);
+    await page.goto(`${BASE}/portfolio`, { waitUntil: "domcontentloaded" });
+    await settle(page, 900);
+
+    const overflowingTiles = await page.evaluate(() =>
+      Array.from(document.querySelectorAll<HTMLElement>(".pf-tile"))
+        .filter((tile) => tile.scrollWidth > tile.clientWidth + 3)
+        .map((tile) => tile.getAttribute("aria-label") || "unlabelled tile")
+    );
+    expect(overflowingTiles, overflowingTiles.join("\n")).toHaveLength(0);
+  });
+
   test("footer stays compact on phone and tablet", async ({ page }) => {
     test.setTimeout(60_000);
     await skipSplash(page);

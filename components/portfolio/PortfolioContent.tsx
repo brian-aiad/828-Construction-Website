@@ -153,17 +153,19 @@ function CaseTile({
         aria-hidden="true"
         className={`absolute inset-x-4 top-4 h-px ${dark ? "bg-white/12" : "bg-black/10"}`}
       />
-      <Image
-        src={src}
-        alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${index + 1}`}
-        fill
-        loading="lazy"
-        sizes={sizes}
-        quality={82}
-        placeholder="blur"
-        blurDataURL={lqip(src)}
-        className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
-      />
+      <span className="absolute inset-0 overflow-hidden">
+        <Image
+          src={src}
+          alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${index + 1}`}
+          fill
+          loading="lazy"
+          sizes={sizes}
+          quality={82}
+          placeholder="blur"
+          blurDataURL={lqip(src)}
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
+        />
+      </span>
       <span
         aria-hidden="true"
         className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 bg-[var(--color-accent)] transition-transform duration-500 group-hover:scale-x-100"

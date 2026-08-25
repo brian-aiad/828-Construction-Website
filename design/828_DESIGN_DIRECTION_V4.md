@@ -57,7 +57,7 @@ a standard section-by-section template.
   resolve every "this here" against frames before writing the change doc.
 - Then: apply verbiage EXACTLY → reorganize sections under this V4 direction →
   functional-qa both viewports → preflight:full → Lighthouse (prod, desktop
-  preset) → commit ns-preview → `npx vercel deploy --prod --yes --scope
-  aiadcollc` from `C:\Users\kingt\.828-ns-preview-deploy` (robocopy /MIR sync
-  first) → client reviews at https://828-ns-preview.vercel.app.
-- NEVER push `main` unless Brian says "push to main" / "promote to production".
+  preset) → commit `main` → push `origin/main` → wait for the Vercel project
+  `828-construction-website` to become Ready → verify https://828constructions.com.
+- NEVER push `main` unless Brian explicitly asks to push, deploy, publish, or
+  make the work live.

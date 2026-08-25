@@ -6,6 +6,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FlowNode from "@/components/system/FlowNode";
 import { useJunctionSettle } from "@/components/system/useJunctionSettle";
 import { useStackSurfaceVisibility } from "@/components/system/useStackSurfaceVisibility";
+import {
+  COARSE_TABLET_QUERY,
+  DESKTOP_MOTION_QUERY,
+} from "@/utils/animationControl";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,10 +43,8 @@ export default function StackedSurfaceFlow({
   const [motionMode, setMotionMode] = useState<StackMotionMode>("none");
 
   useLayoutEffect(() => {
-    const desktop = window.matchMedia("(min-width: 1280px)");
-    const coarseTablet = window.matchMedia(
-      "(pointer: coarse) and (max-width: 1366px)"
-    );
+    const desktop = window.matchMedia(DESKTOP_MOTION_QUERY);
+    const coarseTablet = window.matchMedia(COARSE_TABLET_QUERY);
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     );

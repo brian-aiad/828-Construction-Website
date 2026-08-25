@@ -4,8 +4,9 @@ import { useEffect, useRef } from "react";
 import { AnimationController } from "@/utils/animationControl";
 
 // Custom cursor: main dot (mixBlendMode:difference) + lagging ring + copper trail.
-// Ring turns copper and expands on image hover — white ring on link/button hover.
-// Hidden on touch devices via AnimationController.shouldAnimate() gate.
+// The native cursor remains active until the custom cursor has received a real
+// mouse position and is visibly ready. This prevents a cursor-less page when
+// motion is disabled, the viewport is narrow, or hydration is still settling.
 
 export default function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
@@ -13,21 +14,19 @@ export default function CustomCursor() {
   const copperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Apply custom cursor class to body on pointer-fine devices (before animation gate)
-    if (window.matchMedia("(pointer: fine)").matches) {
-      document.body.classList.add("has-custom-cursor");
-    }
-
-    if (!AnimationController.shouldAnimate()) {
-      return () => {
-        document.body.classList.remove("has-custom-cursor");
-      };
-    }
+    document.body.classList.remove("has-custom-cursor");
+    if (
+      !window.matchMedia("(pointer: fine)").matches ||
+      !AnimationController.shouldAnimate()
+    ) return;
 
     const dot = dotRef.current;
     const ring = ringRef.current;
     const copper = copperRef.current;
-    if (!dot || !ring || !copper) return;
+    if (!dot || !ring || !copper) {
+      document.body.classList.remove("has-custom-cursor");
+      return;
+    }
 
     dot.style.display = "block";
     ring.style.display = "block";
@@ -37,18 +36,17 @@ export default function CustomCursor() {
     copper.style.opacity = "0";
 
     let rafId = 0;
-    let idleTimer: ReturnType<typeof setTimeout> | undefined;
     let ringX = 0, ringY = 0;
     let copperX = 0, copperY = 0;
     let curX = 0, curY = 0;
     let hasPointer = false;
 
     const hideCursor = () => {
-      clearTimeout(idleTimer);
       hasPointer = false;
       dot.style.opacity = "0";
       ring.style.opacity = "0";
       copper.style.opacity = "0";
+      document.body.classList.remove("has-custom-cursor");
     };
 
     const handleMove = (e: MouseEvent) => {
@@ -63,10 +61,9 @@ export default function CustomCursor() {
         dot.style.opacity = "1";
         ring.style.opacity = "1";
         copper.style.opacity = "0.5";
+        document.body.classList.add("has-custom-cursor");
       }
       dot.style.transform = `translate(${curX}px, ${curY}px)`;
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(hideCursor, 900);
       if (!rafId) rafId = requestAnimationFrame(animate);
     };
 
@@ -95,23 +92,23 @@ export default function CustomCursor() {
       rafId = requestAnimationFrame(animate);
     };
 
-    // Default: white ring (upgraded 32→36px)
+    // The maroon ring remains legible on both the white and black surfaces.
     const resetRing = () => {
       ring.style.width = "36px";
       ring.style.height = "36px";
       ring.style.marginLeft = "-18px";
       ring.style.marginTop = "-18px";
-      ring.style.borderColor = "rgba(255,255,255,0.65)";
+      ring.style.borderColor = "rgba(123,45,38,0.95)";
       ring.style.opacity = hasPointer ? "1" : "0";
     };
 
-    // Hover over links/buttons: ring grows (upgraded 44→64px)
+    // Hover over links/buttons: ring grows.
     const onInteractive = () => {
       ring.style.width = "64px";
       ring.style.height = "64px";
       ring.style.marginLeft = "-32px";
       ring.style.marginTop = "-32px";
-      ring.style.borderColor = "rgba(255,255,255,0.9)";
+      ring.style.borderColor = "rgba(123,45,38,1)";
       ring.style.opacity = hasPointer ? "1" : "0";
     };
 
@@ -126,7 +123,6 @@ export default function CustomCursor() {
     };
 
     window.addEventListener("mousemove", handleMove, { passive: true });
-    window.addEventListener("scroll", hideCursor, { passive: true });
     document.addEventListener("mouseleave", hideCursor);
 
     const isInteractiveTarget = (target: EventTarget | null) =>
@@ -165,9 +161,7 @@ export default function CustomCursor() {
     return () => {
       document.body.classList.remove("has-custom-cursor");
       window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("scroll", hideCursor);
       document.removeEventListener("mouseleave", hideCursor);
-      clearTimeout(idleTimer);
       if (rafId) cancelAnimationFrame(rafId);
       document.removeEventListener("pointerover", handlePointerOver);
       document.removeEventListener("pointerout", handlePointerOut);
@@ -179,6 +173,7 @@ export default function CustomCursor() {
       {/* Main dot — mixBlendMode:difference (white on dark, black on light) */}
       <div
         ref={dotRef}
+        data-custom-cursor="dot"
         aria-hidden="true"
         style={{
           display: "none",
@@ -198,6 +193,7 @@ export default function CustomCursor() {
       {/* Copper trail dot — subtle warmth, trails behind cursor */}
       <div
         ref={copperRef}
+        data-custom-cursor="trail"
         aria-hidden="true"
         style={{
           display: "none",
@@ -217,6 +213,7 @@ export default function CustomCursor() {
       {/* Lagging ring — transitions to copper on image hover (upgraded 32→36px base) */}
       <div
         ref={ringRef}
+        data-custom-cursor="ring"
         aria-hidden="true"
         style={{
           display: "none",
@@ -227,7 +224,7 @@ export default function CustomCursor() {
           width: 36, height: 36,
           marginLeft: -18, marginTop: -18,
           borderRadius: "50%",
-          border: "1.5px solid rgba(255,255,255,0.65)",
+          border: "1.5px solid rgba(123,45,38,0.95)",
           transition: "width 0.25s ease, height 0.25s ease, margin 0.25s ease, border-color 0.25s ease, opacity 0.25s ease",
           willChange: "transform, opacity",
         }}

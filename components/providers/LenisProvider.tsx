@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  COARSE_TABLET_QUERY,
+  DESKTOP_MOTION_QUERY,
+} from "@/utils/animationControl";
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.config({ nullTargetWarn: false });
@@ -104,10 +108,8 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
   const [smoothScrollEnabled, setSmoothScrollEnabled] = useState(false);
 
   useEffect(() => {
-    const desktop = window.matchMedia("(min-width: 1280px)");
-    const coarseTablet = window.matchMedia(
-      "(pointer: coarse) and (max-width: 1366px)"
-    );
+    const desktop = window.matchMedia(DESKTOP_MOTION_QUERY);
+    const coarseTablet = window.matchMedia(COARSE_TABLET_QUERY);
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     );

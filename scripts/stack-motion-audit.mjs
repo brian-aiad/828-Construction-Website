@@ -28,7 +28,7 @@ const hasTouch = pointerValue === "touch";
 const reducedMotion = motionValue === "reduced";
 const expectedMode = reducedMotion
   ? "none"
-  : width >= 1280 && !(hasTouch && width <= 1366)
+  : width >= 1024 && !(hasTouch && width <= 1366)
     ? "desktop"
     : "touch";
 

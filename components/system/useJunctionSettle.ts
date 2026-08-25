@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
+import {
+  COARSE_TABLET_QUERY,
+  DESKTOP_MOTION_QUERY,
+} from "@/utils/animationControl";
 
 // Junction snap-settle for stacked-surface flows (Brian, 2026-07-10; PATTERNS
 // Fix 26). The cover transitions look clean in motion, but a scroll that STOPS
@@ -75,8 +79,8 @@ export function useJunctionSettle(
     if (typeof window === "undefined") return;
     if (!enabled) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const desktopQuery = window.matchMedia("(min-width: 1280px)");
-    const coarseTabletQuery = window.matchMedia("(pointer: coarse) and (max-width: 1366px)");
+    const desktopQuery = window.matchMedia(DESKTOP_MOTION_QUERY);
+    const coarseTabletQuery = window.matchMedia(COARSE_TABLET_QUERY);
     const shouldSettle = () => desktopQuery.matches && !coarseTabletQuery.matches;
 
     let armed = false; // true only after genuine user input

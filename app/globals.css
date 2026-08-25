@@ -90,7 +90,7 @@ html {
      and black surfaces. Maroon is reserved for hover so the edge chrome
      doesn't compete with the plumb rail / header progress hairline. */
   scrollbar-width: thin;
-  scrollbar-color: rgba(122, 116, 110, 0.55) transparent;
+  scrollbar-color: rgba(123, 45, 38, 0.82) rgba(127, 127, 127, 0.14);
   overflow-x: clip;
   text-rendering: optimizeLegibility;
 }
@@ -123,7 +123,7 @@ body {
    coarse-pointer screens, pages must read as natural scroll. Tailwind's lg
    utilities start at 1024px, which includes iPad landscape, so override the
    sticky/viewport/clip pieces there while leaving desktop motion untouched. */
-@media (max-width: 1279px), (pointer: coarse) and (max-width: 1366px) {
+@media (max-width: 1023px), (pointer: coarse) and (max-width: 1366px) {
   .lg\:sticky,
   .xl\:sticky {
     position: relative !important;
@@ -205,7 +205,7 @@ body {
   }
 }
 
-@media (min-width: 1280px) and (pointer: fine) {
+@media (min-width: 1024px) and (pointer: fine) {
   [data-stack-surface]:not([data-stack-compact]) {
     min-height: 100svh;
   }
@@ -587,17 +587,10 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* ── Custom cursor — desktop only ────────────────────────────────────────── */
-@media (pointer: fine) {
-  *,
-  *::before,
-  *::after {
-    cursor: none !important;
-  }
-}
-/* Hide cursor elements on touch devices */
+/* The native cursor is hidden only after CustomCursor is visibly active. */
+/* Hide cursor elements on touch devices. */
 @media (pointer: coarse) {
-  [aria-hidden="true"][style*="border-radius: 50%"] {
+  [data-custom-cursor] {
     display: none;
   }
 }
@@ -857,22 +850,22 @@ html.lenis body {
    Maroon appears only on hover/drag — brand accent without competing with
    the plumb rail or the header progress hairline. */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(127, 127, 127, 0.14);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(122, 116, 110, 0.55);
-  border: 3px solid transparent;
+  background: rgba(123, 45, 38, 0.82);
+  border: 2px solid transparent;
   border-radius: 9999px;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover,
 ::-webkit-scrollbar-thumb:active {
   background: var(--color-accent);
-  border: 3px solid transparent;
+  border: 2px solid transparent;
   border-radius: 9999px;
   background-clip: padding-box;
 }

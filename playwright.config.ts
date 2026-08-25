@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const externalBaseURL = process.env.TEST_BASE_URL;
+const baseURL = externalBaseURL || "http://localhost:3001";
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -9,7 +12,7 @@ export default defineConfig({
   reporter: "html",
 
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -37,10 +40,12 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3001",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: externalBaseURL
+    ? undefined
+    : {
+        command: "npm run dev",
+        url: "http://localhost:3001",
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 });

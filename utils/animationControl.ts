@@ -1,7 +1,7 @@
 /**
  * AnimationController
  * Three-layer detection:
- *   1. Screen width < 1280 → mobile/tablet (no scroll-hijacking)
+ *   1. Screen width < 1024 → compact layout (no scroll-hijacking)
  *   2. Coarse pointer at <= 1366px → iPad/tablet class (normal scroll)
  *   3. prefers-reduced-motion → user preference
  *
@@ -9,6 +9,9 @@
  * Windows laptops report touch support while users operate them as desktop
  * machines. Pointer media queries are a better signal for tablet ergonomics.
  */
+export const DESKTOP_MOTION_QUERY = "(min-width: 1024px)";
+export const COARSE_TABLET_QUERY = "(pointer: coarse) and (max-width: 1366px)";
+
 export class AnimationController {
   private static _instance: AnimationController | null = null;
 
@@ -21,8 +24,8 @@ export class AnimationController {
   private constructor() {
     if (typeof window === "undefined") return;
 
-    this._desktopQuery = window.matchMedia("(min-width: 1280px)");
-    this._coarseTabletQuery = window.matchMedia("(pointer: coarse) and (max-width: 1366px)");
+    this._desktopQuery = window.matchMedia(DESKTOP_MOTION_QUERY);
+    this._coarseTabletQuery = window.matchMedia(COARSE_TABLET_QUERY);
     this._reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     this._syncFromMedia();
 
@@ -37,7 +40,7 @@ export class AnimationController {
   };
 
   private _syncFromMedia() {
-    const isDesktopWidth = this._desktopQuery?.matches ?? window.innerWidth >= 1280;
+    const isDesktopWidth = this._desktopQuery?.matches ?? window.innerWidth >= 1024;
     const isCoarseTablet = this._coarseTabletQuery?.matches ?? false;
     this._isMobile = !isDesktopWidth || isCoarseTablet;
     this._prefersReducedMotion = this._reducedMotionQuery?.matches ?? false;
