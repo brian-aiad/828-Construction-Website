@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:3001/",
+  "url": "http://localhost:3001",
   "viewport": {
     "width": 390,
     "height": 844
@@ -36,12 +36,12 @@
   "motionDensity": {
     "gsapStyledElements": 80,
     "gsapTransforms": 55,
-    "gsapOpacityLt1": 62,
-    "totalElements": 520,
+    "gsapOpacityLt1": 64,
+    "totalElements": 521,
     "movementRatio": 0.154,
     "threshold": ">= 5 GSAP-styled elements",
     "motionDensityPass": true
   },
-  "totalHeight": 7521,
+  "totalHeight": 7573,
   "PASS": true
 }
