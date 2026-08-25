@@ -85,6 +85,10 @@ export default function StackedSurfaceFlow({
 
     const applySurfaceBackdrops = () => {
       stacks.forEach((el) => {
+        el.toggleAttribute(
+          "data-stack-static",
+          el.querySelector("[data-stack-static]") !== null
+        );
         const childSurface =
           el.querySelector<HTMLElement>("[data-header-light], [data-header-dark]") ??
           el.firstElementChild as HTMLElement | null;
@@ -117,7 +121,13 @@ export default function StackedSurfaceFlow({
 
     const applyStackTops = () => {
       stacks.forEach((el) => {
-        if (motionMode === "none") {
+        // Dense interactive surfaces must stay in normal document flow. A
+        // later sticky sibling can otherwise cover a visible form control and
+        // intercept its pointer events before the user can focus it.
+        const staticSurface =
+          el.hasAttribute("data-stack-static") ||
+          el.querySelector("[data-stack-static]") !== null;
+        if (motionMode === "none" || staticSurface) {
           el.style.position = "relative";
           el.style.top = "auto";
           return;

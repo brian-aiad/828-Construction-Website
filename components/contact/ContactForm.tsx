@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { SERVICES, SITE } from "@/lib/constants";
+import { useContactSubmission } from "@/components/contact/useContactSubmission";
 
 type FormState = "idle" | "loading" | "success" | "error";
 type FieldErrors = Partial<Record<"name" | "phone" | "email" | "service" | "message", string>>;
@@ -69,8 +70,7 @@ export default function ContactForm() {
   const [successReference, setSuccessReference] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const submittingRef = useRef(false);
-  const submissionIdRef = useRef("");
-  const submissionFingerprintRef = useRef("");
+  const submitContact = useContactSubmission();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -85,13 +85,6 @@ export default function ContactForm() {
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       website: (form.elements.namedItem("website") as HTMLInputElement).value,
     };
-    const fingerprint = JSON.stringify(data);
-    if (submissionFingerprintRef.current !== fingerprint) {
-      submissionFingerprintRef.current = fingerprint;
-      submissionIdRef.current = crypto.randomUUID();
-    }
-    data.submissionId = submissionIdRef.current;
-
     const errors = validate(data);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -114,22 +107,12 @@ export default function ContactForm() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const body = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        errors?: FieldErrors;
-        reference?: string;
-      };
+      const { response: res, body } = await submitContact(data);
 
       if (!res.ok) {
         if (res.status === 429) throw new Error("Too many requests. Please try again in a few minutes or call us directly.");
         if (body.errors) {
-          setFieldErrors(body.errors);
+          setFieldErrors(body.errors as FieldErrors);
           setValidationMsg("Please correct the highlighted fields before sending again.");
           setState("idle");
           submittingRef.current = false;

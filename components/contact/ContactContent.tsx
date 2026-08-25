@@ -390,6 +390,7 @@ function GetInTouch() {
     <section
       data-section="contact-inquiry"
       data-stack-compact=""
+      data-stack-static=""
       data-header-dark=""
       className="relative overflow-hidden bg-black px-6 py-20 text-white sm:py-24 lg:px-12 lg:py-20 xl:py-24"
       style={{ overflowX: "clip" }}

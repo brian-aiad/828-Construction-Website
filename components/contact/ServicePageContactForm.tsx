@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { SITE } from "@/lib/constants";
+import { useContactSubmission } from "@/components/contact/useContactSubmission";
 
 interface Props {
   serviceTitle: string;
@@ -50,8 +51,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [successReference, setSuccessReference] = useState("");
   const submittingRef = useRef(false);
-  const submissionIdRef = useRef("");
-  const submissionFingerprintRef = useRef("");
+  const submitContact = useContactSubmission();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,32 +81,16 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
     }
     setFieldErrors({});
     setValidationMsg("");
-    const fingerprint = JSON.stringify(formData);
-    if (submissionFingerprintRef.current !== fingerprint) {
-      submissionFingerprintRef.current = fingerprint;
-      submissionIdRef.current = crypto.randomUUID();
-    }
-    const data = { ...formData, submissionId: submissionIdRef.current };
-
     submittingRef.current = true;
     setState("loading");
     setErrorMsg("");
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const body = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        errors?: FieldErrors;
-        reference?: string;
-      };
+      const { response: res, body } = await submitContact(formData);
       if (!res.ok) {
         if (res.status === 429) throw new Error("Too many requests. Please try again shortly.");
         if (body.errors) {
-          setFieldErrors(body.errors);
+          setFieldErrors(body.errors as FieldErrors);
           setValidationMsg("Please correct the highlighted fields before sending again.");
           setState("idle");
           submittingRef.current = false;

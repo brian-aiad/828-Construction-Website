@@ -37,7 +37,6 @@ function escapeHtml(value: string) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
 function paragraph(value: string) {
   return escapeHtml(value).replace(/\n/g, "<br />");
 }
@@ -161,71 +160,3 @@ export function buildOwnerEmail(details: ContactEmailDetails): RenderedEmail {
   };
 }
 
-export function buildCustomerEmail(details: ContactEmailDetails): RenderedEmail {
-  const firstName = details.name.trim().split(/\s+/)[0] || details.name;
-  const service = escapeHtml(details.service);
-  const submittedAt = escapeHtml(details.submittedAt);
-  const reference = escapeHtml(details.reference);
-
-  const body = `
-    <p style="margin:0;max-width:560px;color:#5f5955;font-size:15px;line-height:1.75;">Your project details reached 828 Construction. Joe will review the scope and follow up within 24 hours.</p>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:24px;border-collapse:collapse;background:#f7f5f2;border:1px solid ${palette.line};">
-      <tr>
-        <td style="padding:18px 20px;border-bottom:1px solid ${palette.line};">
-          <div style="color:${palette.muted};font-size:9px;line-height:1.4;letter-spacing:1.5px;text-transform:uppercase;">Project type</div>
-          <div style="margin-top:5px;color:${palette.text};font-size:16px;line-height:1.4;">${service}</div>
-        </td>
-        <td style="padding:18px 20px;border-bottom:1px solid ${palette.line};">
-          <div style="color:${palette.muted};font-size:9px;line-height:1.4;letter-spacing:1.5px;text-transform:uppercase;">Reference</div>
-          <div style="margin-top:5px;color:${palette.text};font-size:16px;line-height:1.4;">${reference}</div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" style="padding:18px 20px;color:${palette.text};font-size:14px;line-height:1.7;">${paragraph(details.message)}</td>
-      </tr>
-    </table>
-    <div style="margin-top:24px;border-top:1px solid ${palette.line};">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">
-        <tr>
-          <td width="42" style="padding:17px 0;border-bottom:1px solid ${palette.line};color:${palette.accent};font-size:11px;vertical-align:top;">01</td>
-          <td style="padding:17px 0;border-bottom:1px solid ${palette.line};color:${palette.text};font-size:14px;line-height:1.5;">Review the project scope and property context.</td>
-        </tr>
-        <tr>
-          <td width="42" style="padding:17px 0;border-bottom:1px solid ${palette.line};color:${palette.accent};font-size:11px;vertical-align:top;">02</td>
-          <td style="padding:17px 0;border-bottom:1px solid ${palette.line};color:${palette.text};font-size:14px;line-height:1.5;">Follow up directly to clarify priorities and next steps.</td>
-        </tr>
-      </table>
-    </div>
-    <p style="margin:22px 0 0;color:${palette.muted};font-size:11px;line-height:1.65;">Received ${submittedAt} PT. For urgent work, call ${escapeHtml(SITE.phone)}.</p>
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:18px;border-collapse:collapse;">
-      <tr>
-        <td style="padding:0 8px 8px 0;"><a href="${SITE.phoneHref}" style="display:inline-block;background:${palette.accent};color:${palette.white};padding:13px 18px;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:1.4px;text-decoration:none;text-transform:uppercase;">Call 828 Construction</a></td>
-        <td style="padding:0 0 8px;"><a href="${SITE.url}" style="display:inline-block;border:1px solid #cfc7c2;color:${palette.text};padding:12px 18px;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:1.4px;text-decoration:none;text-transform:uppercase;">View the website</a></td>
-      </tr>
-    </table>`;
-
-  return {
-    subject: "We received your project inquiry | 828 Construction",
-    html: emailShell({
-      preheader: `Your ${details.service} inquiry has been received.`,
-      label: "Inquiry received",
-      title: `Thank you, ${firstName}.`,
-      body,
-    }),
-    text: [
-      `Thank you, ${firstName}.`,
-      "",
-      "Your project details reached 828 Construction. Joe will review the scope and follow up within 24 hours.",
-      "",
-      `Project type: ${details.service}`,
-      `Reference: ${details.reference}`,
-      `Received: ${details.submittedAt} PT`,
-      "",
-      "Project notes:",
-      details.message,
-      "",
-      `Urgent work: ${SITE.phone}`,
-      SITE.url,
-    ].join("\n"),
-  };
-}
