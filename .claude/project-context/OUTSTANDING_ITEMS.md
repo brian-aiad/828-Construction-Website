@@ -48,11 +48,7 @@ _Add todos here. Remove when done. Date all entries._
 - Real project photography — ADU at-night hero (Joe was sending via text during V2 call), photographer shots mid-May
 - Joe portrait/headshot for About story section
 - Equipment photos (Flair E8 + F277 MR) for Remediation page
-- Resend API key (`RESEND_API_KEY` in `.env.local`) — contact form currently logs to console
 - Google Business Profile link
-- Domain confirmation (828constructions.com)
-- Email prefix confirmation (`inquire@828constructions.com` is the default pending Joe's OK)
-- Contact form is ON HOLD — do not build until email/DNS/Resend are set up
 
 ## Next Prompts in Queue (from Terminal Prompt Index)
 

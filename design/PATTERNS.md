@@ -993,6 +993,40 @@ all indices must be lit-while-visible). Both viewports.
 
 ---
 
+### Fix 28 — Third-party bot scoring blocks legitimate contact submissions
+
+**Symptom:** A real customer completes the contact form in a normal browser but
+receives “Automated submission blocked. Please use the form in your browser.”
+The request never reaches validation or the email provider.
+
+**Root cause:** A third-party browser-classification result was treated as an
+authoritative hard gate. False positives are unavoidable when browser privacy
+settings, extensions, network filtering, or classification heuristics differ
+from the vendor's expected environment. On a lead form, that turns an
+anti-spam signal into a customer-facing outage.
+
+**Fix:** Never hard-reject a contact lead solely from proprietary bot scoring.
+The 828 form uses deterministic first-party controls instead:
+
+1. same-origin and `Sec-Fetch-Site` enforcement;
+2. HMAC-signed, short-lived challenges with a minimum completion time;
+3. a silent honeypot;
+4. bounded request size plus strict field and spam-pattern validation;
+5. per-IP throttling;
+6. owner-only delivery; and
+7. deterministic provider idempotency so retries cannot duplicate email.
+
+The BotID client, Next wrapper, server check, and package dependency were all
+removed together. Removing only the visible error or ignoring the server
+result would leave unnecessary scripts and a future regression path.
+
+**Regression rule:** contact API tests must include a legitimate browser-style
+submission with no vendor-specific classification header and assert one owner
+delivery. Abuse tests must separately prove cross-site, missing/tampered
+challenge, honeypot, invalid content, throttling, and duplicate suppression.
+
+---
+
 ---
 
 ### Pattern: Full-screen footer cover (site-wide, 2026-07-13)

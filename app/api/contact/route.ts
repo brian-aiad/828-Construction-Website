@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkBotId } from "botid/server";
 import { SITE } from "@/lib/constants";
 import { buildOwnerEmail, type RenderedEmail } from "@/lib/contactEmail";
 import {
@@ -241,24 +240,6 @@ export async function POST(request: NextRequest) {
         { error: "Please submit the form using the official website." },
         403
       );
-    }
-
-    // Vercel BotID Basic is an invisible, first-party browser integrity check.
-    // Local development intentionally bypasses it so the form and regression
-    // suite remain usable without Vercel's production edge context.
-    if (process.env.NODE_ENV === "production") {
-      const verification = await checkBotId({
-        advancedOptions: { checkLevel: "basic" },
-      });
-      if (verification.isBot) {
-        return json(
-          {
-            error: "Automated submission blocked. Please use the form in your browser.",
-            code: "bot_detected",
-          },
-          403
-        );
-      }
     }
 
     if (!request.headers.get("content-type")?.toLowerCase().includes("application/json")) {

@@ -2,6 +2,18 @@
 
 _Update this file after every session. It's loaded by memory at session start._
 
+## Contact delivery false-positive incident — fixed (2026-08-25)
+
+Production Vercel BotID misclassified a legitimate customer browser and
+returned 403 before normal form validation. BotID was removed from the client,
+Next configuration, server route, and dependencies. The form remains protected
+by signed short-lived challenges, same-origin enforcement, honeypot handling,
+bounded and sanitized validation, five-per-ten-minute IP throttling, owner-only
+delivery, provider retry handling, and deterministic Resend idempotency. A
+permanent seven-profile regression matrix now proves Chrome, Safari, Firefox,
+Edge, iPhone, privacy, and embedded-browser submissions do not require
+proprietary classification headers.
+
 ## Services Index V3.2 — Traveling picture + bulletproof pinned walk (2026-07-09)
 
 Brian's IMG_1075 clarifications executed: NO side plate — ADU / Remediation /

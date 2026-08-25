@@ -56,14 +56,21 @@ function requestFor(
     fetchSite?: string;
     contentType?: string;
     contentLength?: string;
+    userAgent?: string;
+    omitFetchSite?: boolean;
   } = {}
 ) {
   const headers = new Headers({
     "Content-Type": options.contentType || "application/json",
     Origin: options.origin || SITE.url,
-    "Sec-Fetch-Site": options.fetchSite || "same-origin",
+    "User-Agent":
+      options.userAgent ||
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36",
     "X-Forwarded-For": options.ip || `198.51.100.${ipCounter++}`,
   });
+  if (!options.omitFetchSite) {
+    headers.set("Sec-Fetch-Site", options.fetchSite || "same-origin");
+  }
   if (options.contentLength) headers.set("Content-Length", options.contentLength);
   return new NextRequest(`${SITE.url}/api/contact`, {
     method: "POST",
@@ -167,6 +174,72 @@ test("a valid lead sends exactly one owner email and never relays mail to the vi
   assert.equal(calls[0].body.reply_to, "customer@example.com");
   assert.notDeepEqual(calls[0].body.to, ["customer@example.com"]);
   assert.match(calls[0].headers.get("idempotency-key") || "", /^contact-owner\/[a-f0-9]{64}$/);
+});
+
+test("legitimate customer browser matrix never requires vendor bot-classification headers", async () => {
+  const calls = installProviderMock();
+  const profiles = [
+    {
+      label: "Chrome on Windows",
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36",
+    },
+    {
+      label: "Safari on macOS",
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.6 Safari/605.1.15",
+    },
+    {
+      label: "Firefox on Windows",
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0",
+    },
+    {
+      label: "Edge on Windows",
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36 Edg/140.0",
+    },
+    {
+      label: "Mobile Safari on iPhone",
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 Version/18.6 Mobile/15E148 Safari/604.1",
+    },
+    {
+      label: "privacy browser without Sec-Fetch-Site",
+      userAgent: "Mozilla/5.0 PrivacyBrowser/1.0",
+      omitFetchSite: true,
+    },
+    {
+      label: "same-origin embedded browser",
+      userAgent: "Mozilla/5.0 AppleWebKit/537.36 Mobile",
+      fetchSite: "none",
+    },
+  ];
+
+  const responses = await Promise.all(
+    profiles.map(async (profile, index) => {
+      const request = requestFor(
+        validBody({
+          name: `Customer Browser ${index + 1}`,
+          message: `Legitimate ${profile.label} construction inquiry with enough project detail.`,
+        }),
+        profile
+      );
+      assert.equal(request.headers.has("x-is-human"), false, profile.label);
+      return contactRoute.POST(request);
+    })
+  );
+
+  assert.deepEqual(
+    responses.map((response) => response.status),
+    profiles.map(() => 200)
+  );
+  for (const response of responses) {
+    const body = await responseJson(response);
+    assert.match(String(body.reference), /^828-[A-F0-9]{8}$/);
+  }
+  assert.equal(calls.length, profiles.length);
+  assert.ok(calls.every((call) => JSON.stringify(call.body.to) === JSON.stringify([SITE.email])));
 });
 
 test("duplicate payload retries have identical references, provider payloads, and idempotency keys", async () => {

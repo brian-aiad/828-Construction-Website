@@ -2,6 +2,16 @@
 
 _Append entries here newest-first. Date all entries._
 
+## 2026-08-25 — Contact form false-positive hard block removed
+
+- Removed Vercel BotID after a real browser was incorrectly classified as an
+  automated submission and blocked before validation.
+- Preserved signed challenges, same-origin checks, honeypot, strict validation,
+  per-IP throttling, owner-only delivery, retry handling, and Resend idempotency.
+- Added a permanent seven-profile customer matrix covering Chrome, Safari,
+  Firefox, Edge, iPhone, privacy, and embedded-browser requests without
+  vendor-specific bot-classification headers.
+
 ## 2026-07-14 — SITE EXCELLENCE PASS: mobile + reveals + stress hardening (7 agents)
 
 - Brian's "biggest edit": every page amazing on every screen, every animation
