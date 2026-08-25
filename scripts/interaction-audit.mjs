@@ -121,6 +121,10 @@ async function runDevice(browser, device, reducedMotion = false) {
       url.includes("/images/") ||
       url.includes("/_next/image?");
     if (errorText === "net::ERR_ABORTED" && isImage) return;
+    // Cloudflare injects this optional telemetry beacon on the official domain.
+    // Rapid route changes legitimately cancel it; it is not a site resource or
+    // a customer-facing request failure.
+    if (errorText === "net::ERR_ABORTED" && url.includes("/cdn-cgi/rum")) return;
     result.requestFailures.push(`${errorText} ${url}`);
   });
 
