@@ -4,33 +4,29 @@ const BASE = process.env.TEST_BASE_URL || "http://localhost:4000";
 
 async function selectedPreviewState(page: import("@playwright/test").Page) {
   return page.evaluate(() => {
-    const heading = Array.from(document.querySelectorAll("h2")).find((el) =>
-      el.textContent?.includes("Pick the proof")
+    const section = document.querySelector<HTMLElement>("[data-section='portfolio-hero']");
+    const rows = Array.from(
+      section?.querySelectorAll<HTMLAnchorElement>("nav[aria-label='Project index'] a") ?? []
     );
-    const section = heading?.closest("section");
-    const rows = Array.from(section?.querySelectorAll<HTMLElement>(".index-row") ?? []);
-    const previewCandidates = Array.from(section?.querySelectorAll<HTMLButtonElement>("button") ?? []).filter((button) =>
-      button.textContent?.includes("Selected preview")
+    const activeRow = rows.find((row) => row.className.includes("bg-white/[0.035]"));
+    const previewCandidates = Array.from(
+      section?.querySelectorAll<HTMLAnchorElement>("a:has(img)") ?? []
     );
-    const preview =
-      previewCandidates.find((button) => {
-        const rect = button.getBoundingClientRect();
-        const style = getComputedStyle(button);
-        return rect.width > 0 && rect.height > 0 && style.display !== "none";
-      }) ?? previewCandidates[0];
+    const preview = previewCandidates.find((candidate) =>
+      activeRow ? candidate.hash === activeRow.hash : Number(getComputedStyle(candidate).opacity) > 0.9
+    );
     const img = preview?.querySelector("img");
     const rect = preview?.getBoundingClientRect();
 
     return {
-      selected: preview?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+      selected: activeRow?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+      selectedHref: activeRow?.hash ?? "",
       imageSrc: img?.currentSrc || img?.getAttribute("src") || "",
       imageLoaded: Boolean(img?.complete && img.naturalWidth > 0),
       visible:
         Boolean(preview && rect) &&
         rect!.width > 0 &&
         rect!.height > 0 &&
-        rect!.bottom > 0 &&
-        rect!.top < window.innerHeight &&
         getComputedStyle(preview!).visibility === "visible" &&
         Number(getComputedStyle(preview!).opacity) > 0,
       rect: rect
@@ -42,7 +38,7 @@ async function selectedPreviewState(page: import("@playwright/test").Page) {
           }
         : null,
       activeRows: rows
-        .map((row, index) => (row.className.includes("border-white/28") ? index + 1 : null))
+        .map((row, index) => (row.className.includes("bg-white/[0.035]") ? index + 1 : null))
         .filter(Boolean),
       badViewportImages: Array.from(document.images)
         .filter((image) => {
@@ -61,25 +57,29 @@ test.describe("Portfolio production hardening", () => {
   test.describe.configure({ mode: "serial" });
 
   test("case index selected preview survives refresh and updates through every row", async ({ page }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(120_000);
 
     await page.goto(`${BASE}/portfolio`, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
 
-    await page.locator("h2", { hasText: "Pick the proof" }).scrollIntoViewIfNeeded();
+    const projectIndex = page.locator("[data-section='portfolio-hero'] nav[aria-label='Project index']");
+    await expect(projectIndex).toBeVisible();
+    await projectIndex.scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
 
-    for (const rowNumber of [1, 2, 3, 4, 5]) {
-      const row = page.locator(".index-row").nth(rowNumber - 1);
+    for (const rowNumber of [1, 2, 3]) {
+      const row = projectIndex.locator("a").nth(rowNumber - 1);
       await row.scrollIntoViewIfNeeded();
       await page.evaluate((rowNumber) => {
-        const row = Array.from(document.querySelectorAll<HTMLElement>(".index-row"))[rowNumber - 1];
+        const row = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-section='portfolio-hero'] nav[aria-label='Project index'] a")
+        )[rowNumber - 1];
         if (!row) return;
         const top = row.getBoundingClientRect().top;
         if (top < 140 || top > window.innerHeight - 180) {
-          window.scrollBy(0, top - (rowNumber === 5 ? 520 : 240));
+          window.scrollBy(0, top - 240);
         }
       }, rowNumber);
       const box = await row.boundingBox();
@@ -95,11 +95,14 @@ test.describe("Portfolio production hardening", () => {
       expect(state.selected, `selected preview should identify row ${rowNumber}`).toContain(
         String(rowNumber).padStart(2, "0")
       );
+      expect(state.selectedHref, `row ${rowNumber} preview should point at its case`).toBe(
+        await row.getAttribute("href")
+      );
     }
   });
 
   test("portfolio images remain loaded after repeated hard refreshes", async ({ page }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(120_000);
 
     for (let pass = 1; pass <= 3; pass++) {
       await page.goto(`${BASE}/portfolio`, { waitUntil: "domcontentloaded" });

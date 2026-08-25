@@ -13,7 +13,7 @@
  * only reveal when scrolled into view — these are NOT flagged by this test.
  * The scroll-reveal test below verifies below-fold elements do reveal on scroll.
  */
-import { test, expect, Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 
 const BASE = process.env.TEST_BASE_URL || "http://localhost:3000";
 
@@ -116,11 +116,41 @@ async function clientNavigate(page: Page, toPath: string) {
     return;
   }
   // Main nav link — click directly
-  const link = page.locator(`a[href="${toPath}"]`).first();
-  if ((await link.count()) > 0) {
-    await link.click();
-  } else {
+  const inViewportLink = async (): Promise<Locator | null> => {
+    const links = page.locator(`a[href="${toPath}"]`);
+    const viewport = page.viewportSize();
+    for (let index = 0; index < await links.count(); index++) {
+      const candidate = links.nth(index);
+      const box = await candidate.boundingBox();
+      if (
+        await candidate.isVisible() &&
+        box &&
+        viewport &&
+        box.x < viewport.width &&
+        box.x + box.width > 0 &&
+        box.y < viewport.height &&
+        box.y + box.height > 0
+      ) {
+        return candidate;
+      }
+    }
+    return null;
+  };
+
+  let visibleLink = await inViewportLink();
+  if (!visibleLink) {
+    const menuButton = page.locator("button[aria-label*='menu' i], button[aria-controls*='nav' i]").first();
+    if (await menuButton.isVisible().catch(() => false)) {
+      await menuButton.click();
+      await page.waitForTimeout(350);
+      visibleLink = await inViewportLink();
+    }
+  }
+
+  if (!visibleLink) {
     await page.goto(BASE + toPath, { waitUntil: "domcontentloaded" });
+  } else {
+    await visibleLink.click({ timeout: 8_000 });
   }
 }
 

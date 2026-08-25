@@ -82,7 +82,11 @@ async function testMobileMenu(page, result, deviceName) {
 }
 
 async function testContactForm(page, result, deviceName) {
-  await page.goto(new URL("/contact", baseUrl).toString(), { waitUntil: "networkidle" });
+  if (new URL(page.url()).pathname !== "/contact") {
+    await page.goto(new URL("/contact", baseUrl).toString(), { waitUntil: "networkidle" });
+  } else {
+    await page.waitForLoadState("networkidle");
+  }
   await page.locator("form[aria-label='Contact form']").scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   await page.getByRole("button", { name: /send message/i }).click();

@@ -403,7 +403,7 @@ function ServicesIndex() {
             <h1 className="font-labels text-[10px] uppercase tracking-[0.24em] text-black/65">
               Services / CA License #{SITE.license}
             </h1>
-            <span className="hidden font-labels text-[9px] uppercase tracking-[0.2em] text-black/38 sm:inline">
+            <span className="hidden font-labels text-[9px] uppercase tracking-[0.2em] text-black/56 sm:inline">
               Select a service
             </span>
           </div>

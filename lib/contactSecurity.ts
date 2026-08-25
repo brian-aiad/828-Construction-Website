@@ -5,7 +5,7 @@ export const CONTACT_CHALLENGE_MAX_AGE_MS = 2 * 60 * 60 * 1000;
 export const CONTACT_DEDUP_WINDOW_MS = 10 * 60 * 1000;
 
 const TOKEN_VERSION = "v1";
-const SIGNATURE_BYTES = 32;
+const SIGNATURE_CHARACTERS = 43;
 
 type ChallengeFailureCode =
   | "challenge_missing"
@@ -74,10 +74,10 @@ export function verifyContactChallenge(
   }
 
   const payload = `${TOKEN_VERSION}.${timestamp}.${nonce}`;
-  const expected = Buffer.from(signatureFor(payload, secret), "base64url");
-  const supplied = Buffer.from(suppliedSignature, "base64url");
+  const expected = Buffer.from(signatureFor(payload, secret), "ascii");
+  const supplied = Buffer.from(suppliedSignature, "ascii");
   if (
-    expected.length !== SIGNATURE_BYTES ||
+    expected.length !== SIGNATURE_CHARACTERS ||
     supplied.length !== expected.length ||
     !timingSafeEqual(expected, supplied)
   ) {

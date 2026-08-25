@@ -83,6 +83,12 @@ async function auditRoute(context, route) {
         positions: uniqueValues(surfaces.map((surface) =>
           getComputedStyle(surface).position
         )),
+        surfacePositions: surfaces.map((surface) => ({
+          position: getComputedStyle(surface).position,
+          staticSurface:
+            surface.hasAttribute("data-stack-static") ||
+            surface.querySelector("[data-stack-static]") !== null,
+        })),
         runway: document.querySelector("[data-footer-runway]")
           ?.getBoundingClientRect().height || 0,
       };
@@ -94,8 +100,12 @@ async function auditRoute(context, route) {
     if (!initial.count) failures.push("no stack surfaces");
     if (initial.mode !== expectedMode) failures.push(`mode ${initial.mode}`);
     if (initial.overflow > 1) failures.push(`overflow ${initial.overflow}`);
-    const expectedPosition = expectedMode === "none" ? "relative" : "sticky";
-    if (initial.positions.some((position) => position !== expectedPosition)) {
+    const invalidPositions = initial.surfacePositions.filter((surface) => {
+      const expectedPosition =
+        expectedMode === "none" || surface.staticSurface ? "relative" : "sticky";
+      return surface.position !== expectedPosition;
+    });
+    if (invalidPositions.length) {
       failures.push(`positions ${initial.positions.join(",")}`);
     }
     if (expectedMode === "touch" && initial.runway > 1) {

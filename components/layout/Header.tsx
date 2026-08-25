@@ -463,7 +463,7 @@ export default function Header() {
                 ref={torTimeRef}
                 suppressHydrationWarning
                 className={`font-labels text-[9px] tracking-[0.14em] uppercase whitespace-nowrap transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
-                  lightInk ? "text-black/60" : "text-white/30"
+                  lightInk ? "text-black/60" : "text-white/50"
                 }`}
               >
                 Torrance

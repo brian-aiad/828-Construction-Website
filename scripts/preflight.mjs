@@ -390,7 +390,10 @@ async function main() {
     // Brief pause to let any orphaned build workers notice the missing .next and exit
     await sleep(500);
     try {
-      execSync('npx next build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=3072' } });
+      // Use the repository build command so type generation, TypeScript, the
+      // production build, and every post-build integrity audit are all part of
+      // the deployment gate.
+      execSync('npm run build', { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=3072' } });
       console.log('      ✅ Build succeeded');
     } catch {
       console.error('      ❌ Build FAILED — stopping preflight');
