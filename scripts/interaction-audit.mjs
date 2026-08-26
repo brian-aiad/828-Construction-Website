@@ -89,12 +89,12 @@ async function testContactForm(page, result, deviceName) {
   }
   await page.locator("form[aria-label='Contact form']").scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
-  await page.getByRole("button", { name: /send message/i }).click();
+  await page.getByRole("button", { name: /send project details/i }).click();
   await page.waitForTimeout(350);
   const alerts = await page.locator("[role='alert']").count();
   if (alerts < 3) fail(result, `${deviceName}: contact form did not show field validation alerts`);
   const focused = await page.evaluate(() => document.activeElement?.getAttribute("name"));
-  if (focused !== "name") fail(result, `${deviceName}: invalid form did not focus first required field`);
+  if (focused !== "service") fail(result, `${deviceName}: invalid form did not focus the first required field`);
   await page.screenshot({ path: join(outDir, "screenshots", `${deviceName}-contact-errors.png`), fullPage: false });
 }
 

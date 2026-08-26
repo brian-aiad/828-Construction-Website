@@ -174,6 +174,26 @@ test("a valid lead sends exactly one owner email and never relays mail to the vi
   assert.equal(calls[0].body.reply_to, "customer@example.com");
   assert.notDeepEqual(calls[0].body.to, ["customer@example.com"]);
   assert.match(calls[0].headers.get("idempotency-key") || "", /^contact-owner\/[a-f0-9]{64}$/);
+  assert.match(String(calls[0].body.html), /Reply to Form/);
+  assert.match(String(calls[0].body.html), /inbox Reply action is already addressed/);
+});
+
+test("CONTACT_EMAIL routes leads to the configured owner inbox", async () => {
+  const originalRecipient = process.env.CONTACT_EMAIL;
+  process.env.CONTACT_EMAIL = "project-inbox@example.com";
+  try {
+    const calls = installProviderMock();
+    const response = await contactRoute.POST(
+      requestFor(validBody({ message: "A configured recipient test with enough unique project detail." }))
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0].body.to, ["project-inbox@example.com"]);
+    assert.equal(calls[0].body.reply_to, "customer@example.com");
+  } finally {
+    process.env.CONTACT_EMAIL = originalRecipient;
+  }
 });
 
 test("legitimate customer browser matrix never requires vendor bot-classification headers", async () => {

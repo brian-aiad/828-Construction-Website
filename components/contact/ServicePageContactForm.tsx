@@ -29,13 +29,13 @@ function CheckmarkSVG() {
     <svg viewBox="0 0 52 52" className="w-14 h-14 mx-auto" fill="none" aria-hidden="true">
       <circle
         cx="26" cy="26" r="23"
-        stroke="#B87333" strokeWidth="2"
+        stroke="var(--color-accent)" strokeWidth="2"
         strokeDasharray="145" strokeDashoffset="145"
         style={{ animation: "drawCircle 0.55s ease forwards" }}
       />
       <polyline
         points="14,26 23,35 38,18"
-        stroke="#B87333" strokeWidth="2.5"
+        stroke="var(--color-accent)" strokeWidth="2.5"
         strokeLinecap="round" strokeLinejoin="round"
         strokeDasharray="36" strokeDashoffset="36"
         style={{ animation: "drawCheck 0.4s ease forwards 0.45s" }}
@@ -131,7 +131,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
   }
 
   const inputClass =
-    "w-full bg-transparent border-b border-white/20 px-0 py-3 text-white text-sm placeholder-white/30 focus:outline-none focus:border-[#B87333] transition-colors duration-200";
+    "w-full bg-transparent border-b border-white/20 px-0 py-3 text-white text-sm placeholder-white/30 focus:outline-none focus:border-[var(--color-accent)] transition-colors duration-200";
   const labelClass =
     "block font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase mb-2";
 
@@ -151,7 +151,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
         <div>
           <label htmlFor="sp-name" className={labelClass}>
-            Full Name <span className="text-[#B87333]">*</span>
+            Full Name <span className="text-[var(--color-accent)]">*</span>
           </label>
           <input
             id="sp-name"
@@ -169,7 +169,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
         </div>
         <div>
           <label htmlFor="sp-phone" className={labelClass}>
-            Phone <span className="text-[#B87333]">*</span>
+            Phone <span className="text-[var(--color-accent)]">*</span>
           </label>
           <input
             id="sp-phone"
@@ -190,7 +190,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
         <div>
           <label htmlFor="sp-email" className={labelClass}>
             Email{" "}
-            <span className="text-gray-600 normal-case tracking-normal">— optional</span>
+            <span className="text-gray-500 normal-case tracking-normal">— add for one-click replies</span>
           </label>
           <input
             id="sp-email"
@@ -223,7 +223,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
       </div>
       <div>
         <label htmlFor="sp-message" className={labelClass}>
-          Project Description <span className="text-[#B87333]">*</span>
+          Project Description <span className="text-[var(--color-accent)]">*</span>
         </label>
         <textarea
           id="sp-message"
@@ -248,7 +248,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
       <button
         type="submit"
         disabled={state === "loading"}
-        className="w-full border border-[#B87333] text-white py-4 font-labels text-[10px] tracking-[0.22em] uppercase hover:bg-[#B87333] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-center gap-2"
+        className="w-full border border-[var(--color-accent)] text-white py-4 font-labels text-[10px] tracking-[0.22em] uppercase hover:bg-[var(--color-accent)] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-center gap-2"
       >
         {state === "loading" ? (
           <>
@@ -265,7 +265,7 @@ export default function ServicePageContactForm({ serviceTitle }: Props) {
 
       <p className="font-labels text-[9px] text-gray-500 tracking-[0.12em] text-center">
         We respond personally within 24 hours · Or call{" "}
-        <a href={SITE.phoneHref} className="text-gray-400 hover:text-[#B87333] transition-colors">
+        <a href={SITE.phoneHref} className="text-gray-400 hover:text-[var(--color-accent)] transition-colors">
           {SITE.phone}
         </a>
       </p>

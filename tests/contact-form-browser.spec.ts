@@ -21,7 +21,7 @@ async function fillMainForm(page: Page) {
   await page.locator("#cf-name").fill("Browser Regression Customer");
   await page.locator("#cf-phone").fill("(310) 555-0182");
   await page.locator("#cf-email").fill("browser.regression@example.com");
-  await page.locator("#cf-service").selectOption("ADU Construction");
+  await page.getByRole("radio", { name: /ADU Build or convert space/i }).check();
   await page
     .locator("#cf-message")
     .fill("Browser regression inquiry with enough detail to verify the complete form flow.");
@@ -50,22 +50,28 @@ test.describe("contact form browser hardening", () => {
     await page.goto("/contact", { waitUntil: "domcontentloaded" });
     await waitForFormHydration(challengeRequests);
 
-    const submit = page.getByRole("button", { name: /send message/i });
+    const submit = page.getByRole("button", { name: /send project details/i });
     await submit.click();
     await expect(
-      page.getByText("Please complete the highlighted required fields before sending.")
+      page.getByText("A few details still need your attention.")
     ).toBeVisible();
-    await expect(page.locator("#cf-name")).toBeFocused();
+    await expect(page.getByRole("radio", { name: /ADU Build or convert space/i })).toBeFocused();
     expect(postCount).toBe(0);
 
     await fillMainForm(page);
+    await expect(page.getByRole("progressbar", { name: "Project brief completeness" })).toHaveAttribute(
+      "aria-valuenow",
+      "4"
+    );
     await submit.evaluate((button: HTMLButtonElement) => {
       button.click();
       button.click();
     });
 
-    await expect(page.getByRole("heading", { name: "Message Received" })).toBeVisible();
-    await expect(page.getByText("Confirmation 828-BROWSER")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Your project details are in Joe’s inbox." })
+    ).toBeVisible();
+    await expect(page.getByText("Ref. 828-BROWSER")).toBeVisible();
     expect(postCount).toBe(1);
   });
 
@@ -96,9 +102,9 @@ test.describe("contact form browser hardening", () => {
     await page.goto("/contact", { waitUntil: "domcontentloaded" });
     await waitForFormHydration(challengeRequests);
     await fillMainForm(page);
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project details/i }).click();
 
-    await expect(page.getByText("Confirmation 828-RETRIED")).toBeVisible();
+    await expect(page.getByText("Ref. 828-RETRIED")).toBeVisible();
     expect(postCount).toBe(2);
     expect(challengeRequests()).toBeGreaterThanOrEqual(2);
   });
@@ -125,12 +131,12 @@ test.describe("contact form browser hardening", () => {
     await page.goto("/contact", { waitUntil: "domcontentloaded" });
     await waitForFormHydration(challengeRequests);
     await fillMainForm(page);
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project details/i }).click();
     await expect(page.getByText(/too many requests/i)).toBeVisible();
     await expect(page.getByRole("link", { name: "213-828-2388" }).last()).toBeVisible();
 
     status = 503;
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project details/i }).click();
     await expect(page.getByText(/failed to send email/i)).toBeVisible();
     await expect(page.locator("body")).toBeVisible();
   });
@@ -150,9 +156,9 @@ test.describe("contact form browser hardening", () => {
     await page.goto("/contact", { waitUntil: "domcontentloaded" });
     await waitForFormHydration(challengeRequests);
     await fillMainForm(page);
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project details/i }).click();
 
-    await expect(page.getByText("Confirmation 828-MOBILE")).toBeVisible();
+    await expect(page.getByText("Ref. 828-MOBILE")).toBeVisible();
     const widths = await page.evaluate(() => ({
       scroll: document.documentElement.scrollWidth,
       client: document.documentElement.clientWidth,

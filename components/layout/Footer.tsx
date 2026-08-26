@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE, SERVICES } from "@/lib/constants";
 import BrandMarqueeBottom from "@/components/footer/BrandMarqueeBottom";
-import { SOCIAL_LINKS } from "@/components/footer/SocialIcons";
+import { ACTIVE_SOCIAL_LINKS } from "@/components/footer/SocialIcons";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -58,21 +58,23 @@ export default function Footer() {
               Quality is the strategy.
             </h2>
 
-            <ul className="-ml-2 mt-8 flex items-center gap-5 min-[1180px]:mt-8 min-[1180px]:gap-5" aria-label="Social links">
-              {SOCIAL_LINKS.map((social) => (
-                <li key={social.label}>
-                  <a
-                    href={social.href}
-                    aria-label={social.label}
-                    target={social.href === "#" ? undefined : "_blank"}
-                    rel={social.href === "#" ? undefined : "noopener noreferrer"}
-                    className="group relative flex h-10 w-10 items-center justify-center text-white/42 transition-colors before:absolute before:-inset-0.5 before:content-[''] hover:text-white/72"
-                  >
-                    <span className="h-6 w-6">{social.icon}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {ACTIVE_SOCIAL_LINKS.length > 0 && (
+              <ul className="-ml-2 mt-8 flex items-center gap-5 min-[1180px]:mt-8 min-[1180px]:gap-5" aria-label="Social links">
+                {ACTIVE_SOCIAL_LINKS.map((social) => (
+                  <li key={social.label}>
+                    <a
+                      href={social.href}
+                      aria-label={social.label}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative flex h-10 w-10 items-center justify-center text-white/42 transition-colors before:absolute before:-inset-0.5 before:content-[''] hover:text-white/72"
+                    >
+                      <span className="h-6 w-6">{social.icon}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="min-[1180px]:col-span-2 min-[1180px]:-translate-y-[clamp(2.2rem,4.6vh,3.4rem)] min-[1180px]:pl-0 min-[1180px]:pr-[clamp(1rem,1.4vw,2rem)]">

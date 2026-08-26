@@ -1,65 +1,55 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { SERVICES, SITE } from "@/lib/constants";
+import { useRef, useState } from "react";
+import { SITE } from "@/lib/constants";
 import { useContactSubmission } from "@/components/contact/useContactSubmission";
 
 type FormState = "idle" | "loading" | "success" | "error";
-type FieldErrors = Partial<Record<"name" | "phone" | "email" | "service" | "message", string>>;
+type FieldName = "name" | "phone" | "email" | "service" | "message";
+type FieldErrors = Partial<Record<FieldName, string>>;
+
+const projectChoices = [
+  { value: "ADU Construction", title: "ADU", detail: "Build or convert space" },
+  { value: "Remediation", title: "Remediation", detail: "Diagnose and repair" },
+  { value: "Consulting", title: "Consulting", detail: "Get expert direction" },
+  { value: "Not sure", title: "Not sure yet", detail: "Help me choose" },
+] as const;
 
 function validate(data: Record<string, string>): FieldErrors {
   const errors: FieldErrors = {};
-  if (!data.name || data.name.trim().length < 2) errors.name = "Full name required";
-  if (!data.phone || !/^\+?[\d\s\-(). ]{7,}$/.test(data.phone)) errors.phone = "Valid phone number required";
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Enter a valid email address";
-  if (!data.service) errors.service = "Please select a service";
-  if (!data.message || data.message.trim().length < 20) errors.message = "Please describe your project (min 20 characters)";
+  if (data.name.trim().length < 2) errors.name = "Enter your name.";
+  if (!/^\+?[\d\s\-(). ]{7,}$/.test(data.phone)) {
+    errors.phone = "Enter a phone number we can reach.";
+  }
+  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.email = "Enter a valid email address.";
+  }
+  if (!data.service) errors.service = "Choose the closest project type.";
+  if (data.message.trim().length < 20) {
+    errors.message = "Add a little more detail (at least 20 characters).";
+  }
   return errors;
-}
-
-function CheckmarkSVG() {
-  return (
-    <svg
-      viewBox="0 0 52 52"
-      className="w-16 h-16 mx-auto"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle
-        cx="26"
-        cy="26"
-        r="23"
-        stroke="var(--color-accent)"
-        strokeWidth="2"
-        strokeDasharray="145"
-        strokeDashoffset="145"
-        style={{ animation: "drawCircle 0.55s ease forwards" }}
-      />
-      <polyline
-        points="14,26 23,35 38,18"
-        stroke="var(--color-accent)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="36"
-        strokeDashoffset="36"
-        style={{ animation: "drawCheck 0.4s ease forwards 0.45s" }}
-      />
-    </svg>
-  );
 }
 
 function Spinner() {
   return (
-    <svg
-      className="w-4 h-4 animate-spin inline-block mr-2"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
       <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
+  );
+}
+
+function SuccessMark() {
+  return (
+    <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-accent)] text-white">
+      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" aria-hidden="true">
+        <path d="m6 12.5 3.7 3.7L18.5 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-[#d7d0c7] bg-[#f2efe9] font-numbers text-[8px] font-bold text-[#171717]">
+        828
+      </span>
+    </div>
   );
 }
 
@@ -68,99 +58,130 @@ export default function ContactForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [validationMsg, setValidationMsg] = useState("");
   const [successReference, setSuccessReference] = useState("");
+  const [successEmail, setSuccessEmail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [completedEssentials, setCompletedEssentials] = useState(0);
   const submittingRef = useRef(false);
   const submitContact = useContactSubmission();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (submittingRef.current) return;
-
-    const form = e.currentTarget;
-    const data: Record<string, string> = {
+  function readForm(form: HTMLFormElement) {
+    return {
       name: (form.elements.namedItem("name") as HTMLInputElement).value.trim(),
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim(),
       email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
-      service: (form.elements.namedItem("service") as HTMLSelectElement).value,
+      service: (form.elements.namedItem("service") as RadioNodeList | null)?.value || "",
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       website: (form.elements.namedItem("website") as HTMLInputElement).value,
     };
+  }
+
+  function updateProgress(form: HTMLFormElement) {
+    const data = readForm(form);
+    const complete = [
+      Boolean(data.service),
+      data.name.length >= 2,
+      data.phone.replace(/\D/g, "").length >= 7,
+      data.message.length >= 20,
+    ].filter(Boolean).length;
+    setCompletedEssentials(complete);
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (submittingRef.current) return;
+
+    const form = event.currentTarget;
+    const data = readForm(form);
     const errors = validate(data);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setValidationMsg("Please complete the highlighted required fields before sending.");
+      setValidationMsg("A few details still need your attention.");
       setState("idle");
-      const firstInvalidName = ["name", "phone", "email", "service", "message"].find(
-        (field) => errors[field as keyof FieldErrors]
+      const firstInvalidName = ["service", "name", "phone", "email", "message"].find(
+        (field) => errors[field as FieldName]
       );
-      if (firstInvalidName) {
-        const firstField = form.elements.namedItem(firstInvalidName) as HTMLElement | null;
-        firstField?.focus({ preventScroll: false });
+      if (firstInvalidName === "service") {
+        form.querySelector<HTMLInputElement>('input[name="service"]')?.focus();
+      } else if (firstInvalidName) {
+        (form.elements.namedItem(firstInvalidName) as HTMLElement | null)?.focus();
       }
       return;
     }
+
     setFieldErrors({});
     setValidationMsg("");
-
     submittingRef.current = true;
     setState("loading");
     setErrorMsg("");
 
     try {
-      const { response: res, body } = await submitContact(data);
+      const { response, body } = await submitContact(data);
 
-      if (!res.ok) {
-        if (res.status === 429) throw new Error("Too many requests. Please try again in a few minutes or call us directly.");
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error("Too many requests came through at once. Try again in a few minutes or call us now.");
+        }
         if (body.errors) {
           setFieldErrors(body.errors as FieldErrors);
-          setValidationMsg("Please correct the highlighted fields before sending again.");
+          setValidationMsg("Check the highlighted details and send again.");
           setState("idle");
           submittingRef.current = false;
           return;
         }
-        throw new Error(body.error || "Something went wrong");
+        throw new Error(body.error || "Your details could not be sent.");
       }
 
       setSuccessReference(body.reference || "");
+      setSuccessEmail(data.email);
       setState("success");
-    } catch (err) {
+    } catch (error) {
       setState("error");
-      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please call us directly.");
+      setErrorMsg(
+        error instanceof Error
+          ? error.message
+          : "Your details could not be sent. Call us directly and we’ll help."
+      );
     } finally {
       submittingRef.current = false;
     }
   }
 
-  const inputBase = "w-full bg-transparent border text-white px-4 py-3.5 text-sm focus:outline-none transition-colors duration-[240ms] placeholder:text-white/25 focus:[border-color:var(--color-accent)]";
-  const inputClass = (field: keyof FieldErrors) =>
-    `${inputBase} ${fieldErrors[field] ? "border-red-400/60" : "border-white/20"}`;
+  const labelClass =
+    "mb-2.5 block font-labels text-[9px] font-medium uppercase tracking-[0.2em] text-[#665f5a]";
+  const inputBase =
+    "min-h-12 w-full rounded-none border bg-white/55 px-4 py-3 text-[15px] text-[#171717] outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-[#7c746e]/55 focus:border-[var(--color-accent)] focus:bg-white focus:ring-2 focus:ring-[var(--color-accent)]/12";
+  const inputClass = (field: FieldName) =>
+    `${inputBase} ${fieldErrors[field] ? "border-[#a1372f] ring-2 ring-[#a1372f]/10" : "border-[#cbc3bb]"}`;
 
   if (state === "success") {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-6 text-center min-h-[420px]">
-        <CheckmarkSVG />
-        <h3
-          className="font-display font-bold text-white mt-8 mb-4 tracking-tight"
-          style={{ fontSize: "clamp(1.4rem, 3vw, 1.8rem)" }}
-        >
-          Message Received
+      <div className="flex min-h-[31rem] flex-col justify-center py-8 sm:py-12" role="status" aria-live="polite">
+        <SuccessMark />
+        <p className="mt-8 font-labels text-[9px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+          Delivered to 828 Construction
+        </p>
+        <h3 className="mt-3 max-w-md font-display text-[clamp(1.9rem,4vw,2.65rem)] font-normal leading-[1.04] tracking-[-0.02em] text-[#171717]">
+          Your project details are in Joe’s inbox.
         </h3>
-        <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-          Joe will review your details and respond within 24 hours. For urgent
-          work, call{" "}
+        <p className="mt-5 max-w-md text-sm leading-7 text-[#625b56]">
+          Expect a personal response within 24 hours.
+          {successEmail
+            ? " The email notification is already set so Joe can reply directly to you."
+            : " Joe will reach you at the phone number you shared."}
+        </p>
+        <div className="mt-7 flex flex-wrap items-center gap-3">
           <a
             href={SITE.phoneHref}
-            className="text-[var(--color-accent)] hover:text-white transition-colors"
+            className="inline-flex min-h-11 items-center justify-center bg-[#171717] px-5 font-labels text-[9px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
-            {SITE.phone}
-          </a>{" "}
-          directly.
-        </p>
-        {successReference && (
-          <p className="mt-5 font-labels text-[9px] uppercase tracking-[0.18em] text-white/48">
-            Confirmation {successReference}
-          </p>
-        )}
+            Call about this project
+          </a>
+          {successReference && (
+            <span className="font-numbers text-[10px] uppercase tracking-[0.12em] text-[#665f5a]">
+              Ref. {successReference}
+            </span>
+          )}
+        </div>
       </div>
     );
   }
@@ -168,235 +189,201 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
+      onInput={(event) => updateProgress(event.currentTarget)}
+      onChange={(event) => updateProgress(event.currentTarget)}
       noValidate
-      className="space-y-6"
+      className="space-y-8"
       aria-label="Contact form"
     >
-      {/* Honeypot: traps bots, invisible to real users. */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: "-9999px",
-          opacity: 0,
-          pointerEvents: "none",
-        }}
-      >
-        <input
-          name="website"
-          type="text"
-          autoComplete="off"
-          tabIndex={-1}
-        />
+      <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] opacity-0">
+        <input name="website" type="text" autoComplete="off" tabIndex={-1} />
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-[#665f5a]">
+            Brief completeness
+          </span>
+          <span className="font-numbers text-[10px] font-bold text-[#171717]" aria-live="polite">
+            {completedEssentials}/4
+          </span>
+        </div>
+        <div
+          className="mt-3 h-[3px] overflow-hidden bg-[#d7d0c7]"
+          role="progressbar"
+          aria-label="Project brief completeness"
+          aria-valuemin={0}
+          aria-valuemax={4}
+          aria-valuenow={completedEssentials}
+        >
+          <span
+            className="block h-full bg-[var(--color-accent)] transition-[width] duration-300 motion-reduce:transition-none"
+            style={{ width: `${completedEssentials * 25}%` }}
+          />
+        </div>
       </div>
 
       {validationMsg && (
-        <div
-          role="alert"
-          className="border border-amber-300/35 bg-amber-950/20 px-4 py-3 text-sm leading-6 text-amber-100"
-        >
+        <div role="alert" className="border-l-2 border-[#9f3f36] bg-[#9f3f36]/7 px-4 py-3 text-sm leading-6 text-[#722b25]">
           {validationMsg}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div>
-          <label
-            htmlFor="cf-name"
-            className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
-          >
-            Full Name <span className="text-[var(--color-accent)]">*</span>
-          </label>
-          <input
-            id="cf-name"
-            name="name"
-            type="text"
-            required
-            maxLength={120}
-            autoComplete="name"
-            aria-invalid={!!fieldErrors.name || undefined}
-            aria-describedby={fieldErrors.name ? "cf-name-err" : undefined}
-            className={inputClass("name")}
-            placeholder="John Smith"
-          />
-          {fieldErrors.name && (
-            <p
-              id="cf-name-err"
-              role="alert"
-              className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
-            >
-              {fieldErrors.name}
-            </p>
-          )}
+      <fieldset>
+        <legend className={labelClass}>
+          What do you need? <span className="text-[var(--color-accent)]">*</span>
+        </legend>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {projectChoices.map((choice) => {
+            const id = `cf-service-${choice.value.toLowerCase().replace(/\s+/g, "-")}`;
+            return (
+              <div key={choice.value} className="relative">
+                <input
+                  id={id}
+                  className="peer absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0"
+                  type="radio"
+                  name="service"
+                  value={choice.value}
+                  aria-describedby={fieldErrors.service ? "cf-service-err" : undefined}
+                />
+                <label
+                  htmlFor={id}
+                  className="pointer-events-none flex min-h-[5.5rem] flex-col justify-between border border-[#cbc3bb] bg-white/45 p-3 transition-[border-color,background-color,color,box-shadow] duration-200 peer-hover:border-[#8f857e] peer-hover:bg-white peer-checked:border-[var(--color-accent)] peer-checked:bg-[var(--color-accent)] peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]"
+                >
+                  <span className="font-display text-[15px] leading-tight">{choice.title}</span>
+                  <span className="mt-2 text-[10px] leading-4 text-current opacity-60">
+                    {choice.detail}
+                  </span>
+                </label>
+              </div>
+            );
+          })}
         </div>
-        <div>
-          <label
-            htmlFor="cf-phone"
-            className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
-          >
-            Phone <span className="text-[var(--color-accent)]">*</span>
-          </label>
-          <input
-            id="cf-phone"
-            name="phone"
-            type="tel"
-            required
-            maxLength={40}
-            autoComplete="tel"
-            aria-invalid={!!fieldErrors.phone || undefined}
-            aria-describedby={fieldErrors.phone ? "cf-phone-err" : undefined}
-            className={inputClass("phone")}
-            placeholder="(310) 555-0000"
-          />
-          {fieldErrors.phone && (
-            <p
-              id="cf-phone-err"
-              role="alert"
-              className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
-            >
-              {fieldErrors.phone}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <label
-          htmlFor="cf-email"
-          className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
-        >
-          Email{" "}
-          <span className="text-gray-400 normal-case tracking-normal font-body text-xs">
-            - optional
-          </span>
-        </label>
-        <input
-          id="cf-email"
-          name="email"
-          type="email"
-          maxLength={160}
-          autoComplete="email"
-          aria-invalid={!!fieldErrors.email || undefined}
-          aria-describedby={fieldErrors.email ? "cf-email-err" : undefined}
-          className={inputClass("email")}
-          placeholder="john@example.com"
-        />
-        {fieldErrors.email && (
-          <p
-            id="cf-email-err"
-            role="alert"
-            className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
-          >
-            {fieldErrors.email}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="cf-service"
-          className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
-        >
-          Project Type <span className="text-[var(--color-accent)]">*</span>
-        </label>
-        <select
-          id="cf-service"
-          name="service"
-          required
-          aria-invalid={!!fieldErrors.service || undefined}
-          aria-describedby={fieldErrors.service ? "cf-service-err" : undefined}
-          className={`${inputClass("service")} bg-[#0a0a0a] cursor-pointer`}
-        >
-          <option value="" className="bg-[#0a0a0a]">
-            Choose project type *
-          </option>
-          {SERVICES.map((s) => (
-            <option key={s.slug} value={s.title} className="bg-[#0a0a0a]">
-              {s.title}
-            </option>
-          ))}
-          <option value="Not sure" className="bg-[#0a0a0a]">
-            Not sure yet
-          </option>
-        </select>
         {fieldErrors.service && (
-          <p
-            id="cf-service-err"
-            role="alert"
-            className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
-          >
+          <p id="cf-service-err" role="alert" className="mt-2 text-xs text-[#8d332c]">
             {fieldErrors.service}
           </p>
         )}
+      </fieldset>
+
+      <div className="border-t border-[#d7d0c7] pt-7">
+        <div className="mb-5 flex items-baseline justify-between gap-4">
+          <h4 className="font-display text-xl font-normal text-[#171717]">How should Joe reach you?</h4>
+          <span className="hidden font-labels text-[8px] uppercase tracking-[0.16em] text-[#665f5a] sm:block">
+            No sales list. Ever.
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="cf-name" className={labelClass}>
+              Your name <span className="text-[var(--color-accent)]">*</span>
+            </label>
+            <input
+              id="cf-name"
+              name="name"
+              type="text"
+              required
+              maxLength={120}
+              autoComplete="name"
+              aria-invalid={!!fieldErrors.name || undefined}
+              aria-describedby={fieldErrors.name ? "cf-name-err" : undefined}
+              className={inputClass("name")}
+              placeholder="Name"
+            />
+            {fieldErrors.name && <p id="cf-name-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.name}</p>}
+          </div>
+          <div>
+            <label htmlFor="cf-phone" className={labelClass}>
+              Phone <span className="text-[var(--color-accent)]">*</span>
+            </label>
+            <input
+              id="cf-phone"
+              name="phone"
+              type="tel"
+              required
+              maxLength={40}
+              autoComplete="tel"
+              inputMode="tel"
+              aria-invalid={!!fieldErrors.phone || undefined}
+              aria-describedby={fieldErrors.phone ? "cf-phone-err" : undefined}
+              className={inputClass("phone")}
+              placeholder="(310) 555-0000"
+            />
+            {fieldErrors.phone && <p id="cf-phone-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.phone}</p>}
+          </div>
+        </div>
+        <div className="mt-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <label htmlFor="cf-email" className={labelClass}>
+              Email <span className="normal-case tracking-normal text-[#665f5a]">— optional</span>
+            </label>
+            <span className="mb-2.5 text-[10px] text-[#665f5a]">Add it for one-click email replies</span>
+          </div>
+          <input
+            id="cf-email"
+            name="email"
+            type="email"
+            maxLength={160}
+            autoComplete="email"
+            inputMode="email"
+            aria-invalid={!!fieldErrors.email || undefined}
+            aria-describedby={fieldErrors.email ? "cf-email-err" : "cf-email-help"}
+            className={inputClass("email")}
+            placeholder="you@example.com"
+          />
+          <p id="cf-email-help" className="sr-only">If provided, the inbox notification is configured so Joe can reply directly to this address.</p>
+          {fieldErrors.email && <p id="cf-email-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.email}</p>}
+        </div>
       </div>
 
-      <div>
-        <label
-          htmlFor="cf-message"
-          className="font-labels text-[9px] text-gray-400 tracking-[0.22em] uppercase block mb-3"
-        >
-          Project Description <span className="text-[var(--color-accent)]">*</span>
-        </label>
+      <div className="border-t border-[#d7d0c7] pt-7">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <label htmlFor="cf-message" className="font-display text-xl font-normal text-[#171717]">
+            What are you planning or trying to fix?
+          </label>
+          <span className="font-labels text-[8px] uppercase tracking-[0.15em] text-[#665f5a]">A sentence or two is enough</span>
+        </div>
         <textarea
           id="cf-message"
           name="message"
           required
           maxLength={4000}
-          rows={6}
+          rows={5}
           aria-invalid={!!fieldErrors.message || undefined}
-          aria-describedby={fieldErrors.message ? "cf-message-err" : undefined}
-          className={`${inputClass("message")} resize-none`}
-          placeholder="Location, scope, timeline, and any specific concerns..."
+          aria-describedby={fieldErrors.message ? "cf-message-err" : "cf-message-help"}
+          className={`${inputClass("message")} min-h-36 resize-y leading-6`}
+          placeholder="For example: We’re considering a detached ADU in Torrance and want to understand feasibility, budget, and timing."
         />
-        {fieldErrors.message && (
-          <p
-            id="cf-message-err"
-            role="alert"
-            className="mt-2 text-red-400 text-[10px] font-labels tracking-wide"
-          >
-            {fieldErrors.message}
-          </p>
-        )}
+        <p id="cf-message-help" className="mt-2 text-[11px] leading-5 text-[#665f5a]">
+          Helpful: city, current condition, timing, and the decision you need to make.
+        </p>
+        {fieldErrors.message && <p id="cf-message-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.message}</p>}
       </div>
 
       {state === "error" && (
-        <div
-          role="alert"
-          className="border border-red-400/40 bg-red-950/20 px-4 py-3 text-sm text-red-300"
-        >
-          {errorMsg}
+        <div role="alert" className="border border-[#9f3f36]/35 bg-[#9f3f36]/7 px-4 py-3 text-sm leading-6 text-[#722b25]">
+          {errorMsg}{" "}
+          <a href={SITE.phoneHref} className="font-medium underline underline-offset-4">Call {SITE.phone}</a>.
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={state === "loading"}
-        className="w-full bg-white text-black py-4 font-labels text-[10px] tracking-[0.18em] uppercase hover:bg-[var(--color-accent)] hover:text-white transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed group flex items-center justify-center"
-      >
-        {state === "loading" ? (
-          <>
-            <Spinner />
-            Sending...
-          </>
-        ) : (
-          <>
-            Send Message
-            <span className="ml-2 transition-transform duration-200 group-hover:translate-x-1">
-              →
-            </span>
-          </>
-        )}
-      </button>
-
-      <p className="text-[10px] text-gray-400 text-center font-labels tracking-wide">
-        Typically respond within 24 hours / For urgent work, call{" "}
-        <a
-          href={SITE.phoneHref}
-          className="text-white/85 underline decoration-white/35 underline-offset-4 transition-colors hover:text-white"
+      <div>
+        <button
+          type="submit"
+          disabled={state === "loading"}
+          className="group flex min-h-14 w-full items-center justify-between bg-[#171717] px-5 text-white transition-colors duration-200 hover:bg-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-55"
         >
-          {SITE.phone}
-        </a>
-      </p>
+          <span className="flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.18em]">
+            {state === "loading" && <Spinner />}
+            {state === "loading" ? "Sending securely…" : "Send project details"}
+          </span>
+          <span className="font-numbers text-lg transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none">→</span>
+        </button>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] leading-5 text-[#665f5a]">
+          <span>Sent directly to 828 Construction</span>
+          <span>Personal response within 24 hours</span>
+        </div>
+      </div>
     </form>
   );
 }

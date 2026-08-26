@@ -469,24 +469,28 @@ function GetInTouch() {
             </div>
           </div>
 
-          {/* Message form — visual form; backend remains on hold (CLAUDE.md). */}
+          {/* Project brief — a concise, working path into Joe's inbox. */}
           <div
             data-gsap-reveal="true"
-            className="ct-form-card border border-white/12 bg-white/[0.03] p-6 sm:p-8"
+            className="ct-form-card relative overflow-hidden border border-white/18 bg-[#f2efe9] p-6 text-[#171717] shadow-[0_28px_80px_rgba(0,0,0,0.32)] sm:p-8 lg:p-10"
           >
-            <div className="mb-6 flex items-center justify-between gap-5 border-b border-white/10 pb-5">
+            <div className="absolute inset-x-0 top-0 h-1 bg-[var(--color-accent)]" aria-hidden="true" />
+            <div className="mb-8 flex items-start justify-between gap-5 border-b border-[#d7d0c7] pb-7">
               <div>
-                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/62">
-                  Or send the details
+                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+                  Project brief / Start here
                 </span>
-                <h3 className="mt-2 font-display text-2xl font-normal leading-none text-white">
-                  Start here.
+                <h3 className="mt-3 max-w-md font-display text-[clamp(1.65rem,3vw,2.35rem)] font-normal leading-[1.05] tracking-[-0.02em] text-[#171717]">
+                  Tell us what you’re planning.
                 </h3>
+                <p className="mt-3 max-w-md text-sm leading-6 text-[#6d655f]">
+                  Four essentials are enough to start a useful conversation.
+                </p>
               </div>
-              <span
-                className="h-2 w-2 rounded-full bg-[var(--color-accent)]"
-                aria-hidden="true"
-              />
+              <div className="hidden shrink-0 text-right sm:block">
+                <span className="block font-numbers text-2xl font-bold leading-none text-[#171717]">02</span>
+                <span className="mt-2 block font-labels text-[8px] uppercase tracking-[0.16em] text-[#665f5a]">Minutes, typically</span>
+              </div>
             </div>
             <ContactForm />
           </div>

@@ -361,15 +361,19 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.RESEND_API_KEY?.trim();
     const configuredToEmail = process.env.CONTACT_EMAIL?.trim();
-    const toEmail = SITE.email;
+    const toEmail = configuredToEmail || SITE.email;
     const fromEmail =
       process.env.CONTACT_FROM_EMAIL?.trim() ||
       "828 Construction <website@updates.828constructions.com>";
 
-    if (configuredToEmail && configuredToEmail.toLowerCase() !== toEmail.toLowerCase()) {
-      console.warn("Contact recipient override does not match the canonical site email.", {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
+      console.error("Contact recipient email is invalid.", {
         reference: identity.reference,
       });
+      return json(
+        { error: "Contact form is not configured. Please call us directly." },
+        500
+      );
     }
     if (!apiKey) {
       console.error("Contact email environment is not fully configured.", {

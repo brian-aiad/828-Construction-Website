@@ -115,13 +115,21 @@ export function buildOwnerEmail(details: ContactEmailDetails): RenderedEmail {
   const submittedAt = escapeHtml(details.submittedAt);
   const reference = escapeHtml(details.reference);
   const emailHref = encodeURIComponent(details.email);
+  const firstName = details.name.trim().split(/\s+/)[0] || "there";
+  const replyHref = escapeHtml(
+    `mailto:${emailHref}?subject=${encodeURIComponent(
+      `Re: ${details.service} inquiry (${details.reference})`
+    )}&body=${encodeURIComponent(
+      `Hi ${firstName},\n\nThanks for reaching out to 828 Construction.\n\n`
+    )}`
+  );
 
   const body = `
     <p style="margin:0;color:${palette.muted};font-size:13px;line-height:1.65;">Submitted ${submittedAt} PT&nbsp;&nbsp;/&nbsp;&nbsp;Reference ${reference}</p>
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:22px;border-collapse:collapse;">
       <tr>
         <td style="padding:0 8px 8px 0;"><a href="tel:${details.phoneHref}" style="display:inline-block;background:${palette.accent};color:${palette.white};padding:13px 18px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:1.4px;text-decoration:none;text-transform:uppercase;">Call ${phone}</a></td>
-        ${details.email ? `<td style="padding:0 0 8px;"><a href="mailto:${emailHref}" style="display:inline-block;border:1px solid #cfc7c2;color:${palette.text};padding:12px 18px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:1.4px;text-decoration:none;text-transform:uppercase;">Reply by email</a></td>` : ""}
+        ${details.email ? `<td style="padding:0 0 8px;"><a href="${replyHref}" style="display:inline-block;border:1px solid #cfc7c2;color:${palette.text};padding:12px 18px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:1.4px;text-decoration:none;text-transform:uppercase;">Reply to ${escapeHtml(firstName)}</a></td>` : ""}
       </tr>
     </table>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:12px;border-collapse:collapse;">
@@ -133,7 +141,7 @@ export function buildOwnerEmail(details: ContactEmailDetails): RenderedEmail {
     </table>
     <div style="margin-top:24px;color:${palette.muted};font-size:10px;line-height:1.4;letter-spacing:1.6px;text-transform:uppercase;">Project notes</div>
     <div style="margin-top:10px;padding:18px 20px;background:#f7f5f2;border-left:3px solid ${palette.accent};color:${palette.text};font-size:15px;line-height:1.72;">${paragraph(details.message)}</div>
-    <p style="margin:22px 0 0;color:#8a817c;font-size:11px;line-height:1.65;">Website lead from ${SITE.url}. Use the contact actions above to follow up.</p>`;
+    <p style="margin:22px 0 0;color:#8a817c;font-size:11px;line-height:1.65;">Website lead from ${SITE.url}. ${details.email ? `Your inbox Reply action is already addressed to ${email}.` : "Use the phone action above to follow up."}</p>`;
 
   return {
     subject: `828 Construction: ${details.service} inquiry from ${details.name}`,
@@ -159,4 +167,3 @@ export function buildOwnerEmail(details: ContactEmailDetails): RenderedEmail {
     ].filter(Boolean).join("\n"),
   };
 }
-

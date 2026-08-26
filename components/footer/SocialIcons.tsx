@@ -28,10 +28,14 @@ export const SOCIAL_LINKS = [
   },
 ];
 
+export const ACTIVE_SOCIAL_LINKS = SOCIAL_LINKS.filter(
+  (social) => social.href !== "#"
+);
+
 export default function SocialIcons() {
   return (
     <ul className="flex flex-row gap-3 md:flex-col md:gap-4">
-      {SOCIAL_LINKS.map((social) => (
+      {ACTIVE_SOCIAL_LINKS.map((social) => (
         <li key={social.label}>
           <a
             href={social.href}

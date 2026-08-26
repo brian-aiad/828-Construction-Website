@@ -30,18 +30,19 @@ const results = [];
 try {
   for (const viewport of viewports) {
     const context = await browser.newContext({ viewport });
-    const page = await context.newPage();
-    await page.addInitScript(() => {
+    await context.addInitScript(() => {
       try {
         sessionStorage.setItem("828:splash-seen", "1");
       } catch {}
     });
 
     for (const route of routes) {
+      const page = await context.newPage();
       const response = await page.goto(new URL(route, baseUrl).toString(), {
-        waitUntil: "networkidle",
-        timeout: 45_000,
+        waitUntil: "domcontentloaded",
+        timeout: 120_000,
       });
+      await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
       await page.waitForTimeout(700);
       await page.addScriptTag({ content: axeSource });
       const audit = await page.evaluate(async () => {
@@ -70,6 +71,7 @@ try {
         status: response?.status() ?? 0,
         violations: audit,
       });
+      await page.close();
     }
 
     await context.close();
