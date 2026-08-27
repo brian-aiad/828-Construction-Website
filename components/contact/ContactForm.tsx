@@ -46,7 +46,7 @@ function SuccessMark() {
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" aria-hidden="true">
         <path d="m6 12.5 3.7 3.7L18.5 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-[#d7d0c7] bg-[#f2efe9] font-numbers text-[8px] font-bold text-[#171717]">
+      <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white/30 bg-[#171717] font-numbers text-[8px] font-bold text-white">
         828
       </span>
     </div>
@@ -147,23 +147,23 @@ export default function ContactForm() {
   }
 
   const labelClass =
-    "mb-2.5 block font-labels text-[9px] font-medium uppercase tracking-[0.2em] text-[#665f5a]";
+    "mb-2.5 block font-labels text-[9px] font-medium uppercase tracking-[0.2em] text-white/62";
   const inputBase =
-    "min-h-12 w-full rounded-none border bg-white/55 px-4 py-3 text-[15px] text-[#171717] outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-[#7c746e]/55 focus:border-[var(--color-accent)] focus:bg-white focus:ring-2 focus:ring-[var(--color-accent)]/12";
+    "min-h-12 w-full rounded-none border bg-[#151515] px-4 py-3 text-base text-[#f6f4f0] outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-white/46 hover:border-[#77726d] focus:border-[var(--color-accent)] focus:bg-[#191919] focus:ring-2 focus:ring-[var(--color-accent)]/30";
   const inputClass = (field: FieldName) =>
-    `${inputBase} ${fieldErrors[field] ? "border-[#a1372f] ring-2 ring-[#a1372f]/10" : "border-[#cbc3bb]"}`;
+    `${inputBase} ${fieldErrors[field] ? "border-[#ff9289] ring-2 ring-[#ff9289]/20" : "border-[#66615d]"}`;
 
   if (state === "success") {
     return (
-      <div className="flex min-h-[31rem] flex-col justify-center py-8 sm:py-12" role="status" aria-live="polite">
+      <div className="flex min-h-[28rem] flex-col justify-center py-8 sm:min-h-[31rem] sm:py-12" role="status" aria-live="polite">
         <SuccessMark />
         <p className="mt-8 font-labels text-[9px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
           Delivered to 828 Construction
         </p>
-        <h3 className="mt-3 max-w-md font-display text-[clamp(1.9rem,4vw,2.65rem)] font-normal leading-[1.04] tracking-[-0.02em] text-[#171717]">
+        <h3 className="mt-3 max-w-md font-display text-[clamp(1.9rem,4vw,2.65rem)] font-normal leading-[1.04] tracking-[-0.02em] text-white">
           Your project details are in Joe’s inbox.
         </h3>
-        <p className="mt-5 max-w-md text-sm leading-7 text-[#625b56]">
+        <p className="mt-5 max-w-md text-sm leading-7 text-white/66">
           Expect a personal response within 24 hours.
           {successEmail
             ? " The email notification is already set so Joe can reply directly to you."
@@ -172,12 +172,12 @@ export default function ContactForm() {
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <a
             href={SITE.phoneHref}
-            className="inline-flex min-h-11 items-center justify-center bg-[#171717] px-5 font-labels text-[9px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="inline-flex min-h-11 items-center justify-center bg-white px-5 font-labels text-[9px] uppercase tracking-[0.18em] text-black transition-colors hover:bg-[var(--color-accent)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Call about this project
           </a>
           {successReference && (
-            <span className="font-numbers text-[10px] uppercase tracking-[0.12em] text-[#665f5a]">
+            <span className="font-numbers text-[10px] uppercase tracking-[0.12em] text-white/62">
               Ref. {successReference}
             </span>
           )}
@@ -192,7 +192,7 @@ export default function ContactForm() {
       onInput={(event) => updateProgress(event.currentTarget)}
       onChange={(event) => updateProgress(event.currentTarget)}
       noValidate
-      className="space-y-8"
+      className="space-y-6 sm:space-y-8"
       aria-label="Contact form"
     >
       <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] opacity-0">
@@ -201,15 +201,15 @@ export default function ContactForm() {
 
       <div>
         <div className="flex items-center justify-between gap-4">
-          <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-[#665f5a]">
+          <span className="font-labels text-[9px] uppercase tracking-[0.18em] text-white/62">
             Brief completeness
           </span>
-          <span className="font-numbers text-[10px] font-bold text-[#171717]" aria-live="polite">
+          <span className="font-numbers text-[10px] font-bold text-white" aria-live="polite">
             {completedEssentials}/4
           </span>
         </div>
         <div
-          className="mt-3 h-[3px] overflow-hidden bg-[#d7d0c7]"
+          className="mt-3 h-[3px] overflow-hidden bg-white/18"
           role="progressbar"
           aria-label="Project brief completeness"
           aria-valuemin={0}
@@ -224,7 +224,7 @@ export default function ContactForm() {
       </div>
 
       {validationMsg && (
-        <div role="alert" className="border-l-2 border-[#9f3f36] bg-[#9f3f36]/7 px-4 py-3 text-sm leading-6 text-[#722b25]">
+        <div role="alert" className="border-l-2 border-[#ff9289] bg-[#7f2924]/24 px-4 py-3 text-sm leading-6 text-[#ffd4d0]">
           {validationMsg}
         </div>
       )}
@@ -248,7 +248,7 @@ export default function ContactForm() {
                 />
                 <label
                   htmlFor={id}
-                  className="pointer-events-none flex min-h-[5.5rem] flex-col justify-between border border-[#cbc3bb] bg-white/45 p-3 transition-[border-color,background-color,color,box-shadow] duration-200 peer-hover:border-[#8f857e] peer-hover:bg-white peer-checked:border-[var(--color-accent)] peer-checked:bg-[var(--color-accent)] peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent)]"
+                  className="pointer-events-none flex min-h-[5.25rem] flex-col justify-between border border-[#66615d] bg-[#151515] p-3 text-white transition-[border-color,background-color,color,box-shadow] duration-200 peer-hover:border-[#8c8782] peer-hover:bg-[#1b1b1b] peer-checked:border-[var(--color-accent)] peer-checked:bg-[var(--color-accent)] peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-white"
                 >
                   <span className="font-display text-[15px] leading-tight">{choice.title}</span>
                   <span className="mt-2 text-[10px] leading-4 text-current opacity-60">
@@ -260,16 +260,16 @@ export default function ContactForm() {
           })}
         </div>
         {fieldErrors.service && (
-          <p id="cf-service-err" role="alert" className="mt-2 text-xs text-[#8d332c]">
+          <p id="cf-service-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">
             {fieldErrors.service}
           </p>
         )}
       </fieldset>
 
-      <div className="border-t border-[#d7d0c7] pt-7">
+      <div className="border-t border-white/14 pt-6 sm:pt-7">
         <div className="mb-5 flex items-baseline justify-between gap-4">
-          <h4 className="font-display text-xl font-normal text-[#171717]">How should Joe reach you?</h4>
-          <span className="hidden font-labels text-[8px] uppercase tracking-[0.16em] text-[#665f5a] sm:block">
+          <h4 className="font-display text-xl font-normal text-white">How should Joe reach you?</h4>
+          <span className="hidden font-labels text-[8px] uppercase tracking-[0.16em] text-white/58 sm:block">
             No sales list. Ever.
           </span>
         </div>
@@ -290,7 +290,7 @@ export default function ContactForm() {
               className={inputClass("name")}
               placeholder="Name"
             />
-            {fieldErrors.name && <p id="cf-name-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.name}</p>}
+            {fieldErrors.name && <p id="cf-name-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.name}</p>}
           </div>
           <div>
             <label htmlFor="cf-phone" className={labelClass}>
@@ -309,15 +309,15 @@ export default function ContactForm() {
               className={inputClass("phone")}
               placeholder="(310) 555-0000"
             />
-            {fieldErrors.phone && <p id="cf-phone-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.phone}</p>}
+            {fieldErrors.phone && <p id="cf-phone-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.phone}</p>}
           </div>
         </div>
         <div className="mt-5">
           <div className="flex items-baseline justify-between gap-3">
             <label htmlFor="cf-email" className={labelClass}>
-              Email <span className="normal-case tracking-normal text-[#665f5a]">— optional</span>
+              Email <span className="normal-case tracking-normal text-white/58">— optional</span>
             </label>
-            <span className="mb-2.5 text-[10px] text-[#665f5a]">Add it for one-click email replies</span>
+            <span className="mb-2.5 text-[10px] text-white/58">Add it for one-click email replies</span>
           </div>
           <input
             id="cf-email"
@@ -332,16 +332,16 @@ export default function ContactForm() {
             placeholder="you@example.com"
           />
           <p id="cf-email-help" className="sr-only">If provided, the inbox notification is configured so Joe can reply directly to this address.</p>
-          {fieldErrors.email && <p id="cf-email-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.email}</p>}
+          {fieldErrors.email && <p id="cf-email-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.email}</p>}
         </div>
       </div>
 
-      <div className="border-t border-[#d7d0c7] pt-7">
+      <div className="border-t border-white/14 pt-6 sm:pt-7">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <label htmlFor="cf-message" className="font-display text-xl font-normal text-[#171717]">
+          <label htmlFor="cf-message" className="font-display text-xl font-normal text-white">
             What are you planning or trying to fix?
           </label>
-          <span className="font-labels text-[8px] uppercase tracking-[0.15em] text-[#665f5a]">A sentence or two is enough</span>
+          <span className="font-labels text-[8px] uppercase tracking-[0.15em] text-white/58">A sentence or two is enough</span>
         </div>
         <textarea
           id="cf-message"
@@ -351,17 +351,17 @@ export default function ContactForm() {
           rows={5}
           aria-invalid={!!fieldErrors.message || undefined}
           aria-describedby={fieldErrors.message ? "cf-message-err" : "cf-message-help"}
-          className={`${inputClass("message")} min-h-36 resize-y leading-6`}
+          className={`${inputClass("message")} min-h-32 resize-y leading-6 sm:min-h-36`}
           placeholder="For example: We’re considering a detached ADU in Torrance and want to understand feasibility, budget, and timing."
         />
-        <p id="cf-message-help" className="mt-2 text-[11px] leading-5 text-[#665f5a]">
+        <p id="cf-message-help" className="mt-2 text-[11px] leading-5 text-white/60">
           Helpful: city, current condition, timing, and the decision you need to make.
         </p>
-        {fieldErrors.message && <p id="cf-message-err" role="alert" className="mt-2 text-xs text-[#8d332c]">{fieldErrors.message}</p>}
+        {fieldErrors.message && <p id="cf-message-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.message}</p>}
       </div>
 
       {state === "error" && (
-        <div role="alert" className="border border-[#9f3f36]/35 bg-[#9f3f36]/7 px-4 py-3 text-sm leading-6 text-[#722b25]">
+        <div role="alert" className="border border-[#ff9289]/45 bg-[#7f2924]/24 px-4 py-3 text-sm leading-6 text-[#ffd4d0]">
           {errorMsg}{" "}
           <a href={SITE.phoneHref} className="font-medium underline underline-offset-4">Call {SITE.phone}</a>.
         </div>
@@ -371,7 +371,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={state === "loading"}
-          className="group flex min-h-14 w-full items-center justify-between bg-[#171717] px-5 text-white transition-colors duration-200 hover:bg-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-55"
+          className="group flex min-h-14 w-full items-center justify-between bg-white px-5 text-black transition-colors duration-200 hover:bg-[var(--color-accent)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-55"
         >
           <span className="flex items-center gap-3 font-labels text-[10px] uppercase tracking-[0.18em]">
             {state === "loading" && <Spinner />}
@@ -379,7 +379,7 @@ export default function ContactForm() {
           </span>
           <span className="font-numbers text-lg transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none">→</span>
         </button>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] leading-5 text-[#665f5a]">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] leading-5 text-white/58">
           <span>Sent directly to 828 Construction</span>
           <span>Personal response within 24 hours</span>
         </div>

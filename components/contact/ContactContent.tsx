@@ -332,7 +332,7 @@ function ContactHero() {
       data-stack-compact=""
       data-header-dark=""
       data-header-transparent=""
-      className="relative flex min-h-[clamp(31rem,72svh,46rem)] flex-col justify-between overflow-hidden bg-black text-white"
+      className="relative flex min-h-[clamp(28rem,66svh,40rem)] flex-col justify-between overflow-hidden bg-black text-white sm:min-h-[clamp(31rem,72svh,46rem)]"
       style={{ overflowX: "clip" }}
     >
       <div className="absolute inset-0">
@@ -392,11 +392,11 @@ function GetInTouch() {
       data-stack-compact=""
       data-stack-static=""
       data-header-dark=""
-      className="relative overflow-hidden bg-black px-6 py-20 text-white sm:py-24 lg:px-12 lg:py-20 xl:py-24"
+      className="relative overflow-hidden bg-black px-6 py-10 text-white sm:py-16 lg:px-12 lg:py-20 xl:py-24"
       style={{ overflowX: "clip" }}
     >
       <div className="mx-auto max-w-7xl">
-        <div className="ct-rise flex flex-wrap items-end justify-between gap-6">
+        <div className="ct-rise flex flex-wrap items-end justify-between gap-4 sm:gap-6">
           <div>
             <span className="font-labels text-[10px] uppercase tracking-[0.24em] text-white/48">
               Project inquiry
@@ -405,16 +405,53 @@ function GetInTouch() {
               Get in touch
             </h2>
           </div>
-          <span className="border border-white/14 px-3 py-2 font-labels text-[9px] uppercase tracking-[0.16em] text-white/58">
+          <span className="hidden border border-white/14 px-3 py-2 font-labels text-[9px] uppercase tracking-[0.16em] text-white/58 sm:inline-flex">
             Typical response within 24 hours
           </span>
         </div>
 
-        <div className="ct-line mt-8 h-px w-full origin-left bg-white/14" />
+        <div className="ct-line mt-5 h-px w-full origin-left bg-white/14 sm:mt-8" />
 
-        <div className="mt-10 grid gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16">
-          {/* The application path — every way a project reaches Joe. */}
-          <div>
+        <div className="mt-6 grid gap-12 sm:mt-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
+          {/* Project brief first in source and visual order: the primary action
+              now follows the hero immediately on mobile and stays first on
+              desktop for a predictable reading and keyboard sequence. */}
+          <div
+            data-gsap-reveal="true"
+            className="ct-form-card relative overflow-hidden border border-white/16 bg-[#0b0b0b] p-5 text-white shadow-[0_28px_80px_rgba(0,0,0,0.38)] sm:p-8 lg:p-10"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-[var(--color-accent)]" aria-hidden="true" />
+            <div className="mb-6 flex items-start justify-between gap-5 border-b border-white/14 pb-6 sm:mb-8 sm:pb-7">
+              <div>
+                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-[#d99a93]">
+                  Project brief / Start here
+                </span>
+                <h3 className="mt-3 max-w-md font-display text-[clamp(1.65rem,3vw,2.35rem)] font-normal leading-[1.05] tracking-[-0.02em] text-white">
+                  Tell us what you’re planning.
+                </h3>
+                <p className="mt-3 max-w-md text-sm leading-6 text-white/64">
+                  Four essentials are enough to start a useful conversation.
+                </p>
+              </div>
+              <div className="hidden shrink-0 text-right sm:block">
+                <span className="block font-numbers text-2xl font-bold leading-none text-white">02</span>
+                <span className="mt-2 block font-labels text-[8px] uppercase tracking-[0.16em] text-white/58">Minutes, typically</span>
+              </div>
+            </div>
+            <ContactForm />
+          </div>
+
+          {/* Every alternate path stays close, but no longer blocks the form
+              on small screens. */}
+          <div className="pt-1 lg:pt-0">
+            <div className="mb-6 lg:hidden">
+              <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-white/48">
+                Prefer another route?
+              </span>
+              <h3 className="mt-2 font-display text-2xl font-normal text-white">
+                Call, email, or visit.
+              </h3>
+            </div>
             {inquiryRows.map((row) => {
               const content = (
                 <>
@@ -467,32 +504,6 @@ function GetInTouch() {
                 Est. 2004 / Torrance, CA
               </span>
             </div>
-          </div>
-
-          {/* Project brief — a concise, working path into Joe's inbox. */}
-          <div
-            data-gsap-reveal="true"
-            className="ct-form-card relative overflow-hidden border border-white/18 bg-[#f2efe9] p-6 text-[#171717] shadow-[0_28px_80px_rgba(0,0,0,0.32)] sm:p-8 lg:p-10"
-          >
-            <div className="absolute inset-x-0 top-0 h-1 bg-[var(--color-accent)]" aria-hidden="true" />
-            <div className="mb-8 flex items-start justify-between gap-5 border-b border-[#d7d0c7] pb-7">
-              <div>
-                <span className="font-labels text-[9px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
-                  Project brief / Start here
-                </span>
-                <h3 className="mt-3 max-w-md font-display text-[clamp(1.65rem,3vw,2.35rem)] font-normal leading-[1.05] tracking-[-0.02em] text-[#171717]">
-                  Tell us what you’re planning.
-                </h3>
-                <p className="mt-3 max-w-md text-sm leading-6 text-[#6d655f]">
-                  Four essentials are enough to start a useful conversation.
-                </p>
-              </div>
-              <div className="hidden shrink-0 text-right sm:block">
-                <span className="block font-numbers text-2xl font-bold leading-none text-[#171717]">02</span>
-                <span className="mt-2 block font-labels text-[8px] uppercase tracking-[0.16em] text-[#665f5a]">Minutes, typically</span>
-              </div>
-            </div>
-            <ContactForm />
           </div>
         </div>
       </div>
