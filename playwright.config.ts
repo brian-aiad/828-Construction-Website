@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const externalBaseURL = process.env.TEST_BASE_URL;
-const baseURL = externalBaseURL || "http://localhost:3001";
+const baseURL = externalBaseURL || "http://localhost:3011";
 
 export default defineConfig({
   testDir: "./tests",
@@ -43,8 +43,8 @@ export default defineConfig({
   webServer: externalBaseURL
     ? undefined
     : {
-        command: "npm run dev",
-        url: "http://localhost:3001",
+        command: "npx next dev -p 3011",
+        url: "http://localhost:3011",
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
       },

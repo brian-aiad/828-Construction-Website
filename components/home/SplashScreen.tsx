@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
 const PREFIX = "828";
@@ -15,29 +15,33 @@ export default function SplashScreen() {
   const underlineRef = useRef<HTMLSpanElement>(null);
   const taglineRef   = useRef<HTMLSpanElement>(null);
   const tlRef        = useRef<gsap.core.Timeline | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const releaseModalRef = useRef<() => void>(() => {});
   const [dismissed, setDismissed] = useState(false);
 
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     try {
       window.sessionStorage.setItem("828:splash-seen", "1");
     } catch {}
-    // Release the splash scroll lock and guarantee the hero lands full-frame
-    document.body.style.overflow = "";
+    releaseModalRef.current();
+    releaseModalRef.current = () => {};
+    // Guarantee the hero lands full-frame after the modal releases.
     window.scrollTo(0, 0);
     setDismissed(true);
-  };
-  const skip    = () => {
+  }, []);
+  const skip = useCallback(() => {
     if (tlRef.current) {
       tlRef.current.progress(1);
       return;
     }
     dismiss();
-  };
+  }, [dismiss]);
 
   useEffect(() => {
-    const compactIntro =
-      window.matchMedia("(max-width: 1279px)").matches ||
-      window.matchMedia("(pointer: coarse)").matches;
+    const compactQuery = window.matchMedia("(max-width: 1279px)");
+    const coarseQuery = window.matchMedia("(pointer: coarse)");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const compactIntro = compactQuery.matches || coarseQuery.matches;
     if (compactIntro) {
       try {
         window.sessionStorage.setItem("828:splash-seen", "1");
@@ -53,6 +57,11 @@ export default function SplashScreen() {
       }
     } catch {}
 
+    if (reducedMotionQuery.matches) {
+      const frame = requestAnimationFrame(() => setDismissed(true));
+      return () => cancelAnimationFrame(frame);
+    }
+
     const splash    = splashRef.current;
     const underline = underlineRef.current;
     const tagline   = taglineRef.current;
@@ -61,17 +70,67 @@ export default function SplashScreen() {
     const allChars  = [...pChars, ...sChars];
     if (!splash || !underline || !tagline || allChars.length === 0) return;
 
+    splash.setAttribute("role", "dialog");
+    splash.setAttribute("aria-modal", "true");
+    splash.setAttribute("aria-label", "828 Construction introduction");
+    splash.removeAttribute("aria-hidden");
+    splash.inert = false;
+    splash.style.pointerEvents = "auto";
+    splash.querySelector<HTMLButtonElement>("button")?.removeAttribute("tabindex");
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const main = document.querySelector<HTMLElement>("#main-content");
+    const background = [
+      document.querySelector<HTMLElement>(".skip-link"),
+      document.querySelector<HTMLElement>("header"),
+      document.querySelector<HTMLElement>("[data-footer-surface]"),
+      ...Array.from(main?.children ?? []).filter(
+        (element): element is HTMLElement =>
+          element instanceof HTMLElement && element !== splash
+      ),
+    ].filter((element): element is HTMLElement => Boolean(element));
+    const previousInert = background.map((element) => element.inert);
+    background.forEach((element) => {
+      element.inert = true;
+    });
+
+    const focusFrame = requestAnimationFrame(() => {
+      splash.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+    });
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        skip();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const button = splash.querySelector<HTMLButtonElement>("button");
+      if (!button) return;
+      event.preventDefault();
+      button.focus({ preventScroll: true });
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    releaseModalRef.current = () => {
+      document.body.style.overflow = "";
+      cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", onKeyDown);
+      background.forEach((element, index) => {
+        element.inert = previousInert[index];
+      });
+      const previousFocus = previousFocusRef.current;
+      const focusTarget =
+        previousFocus && previousFocus !== document.body && previousFocus.isConnected
+          ? previousFocus
+          : main;
+      focusTarget?.focus({ preventScroll: true });
+      previousFocusRef.current = null;
+    };
+
     // Lock scrolling while the splash plays — wheel input during the intro
     // was leaving the page slightly scrolled, revealing a sliver of the
     // next section under the hero on first land.
     document.body.style.overflow = "hidden";
     window.scrollTo(0, 0);
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(splash, { opacity: 1 });
-      gsap.to(splash, { opacity: 0, duration: 0.12, delay: 0.08, onComplete: dismiss });
-      return;
-    }
 
     gsap.set(splash, { opacity: 1 });
     gsap.set(pChars, { yPercent: 22, opacity: 0 });
@@ -81,6 +140,15 @@ export default function SplashScreen() {
 
     const tl = gsap.timeline({ defaults: { overwrite: "auto" } });
     tlRef.current = tl;
+
+    const dismissForPreference = () => {
+      if (compactQuery.matches || coarseQuery.matches || reducedMotionQuery.matches) {
+        tl.progress(1);
+      }
+    };
+    compactQuery.addEventListener("change", dismissForPreference);
+    coarseQuery.addEventListener("change", dismissForPreference);
+    reducedMotionQuery.addEventListener("change", dismissForPreference);
 
     // "828" rises in, letter by letter
     tl.to(pChars, {
@@ -133,17 +201,23 @@ export default function SplashScreen() {
     }, 1.12);
 
     return () => {
-      document.body.style.overflow = "";
+      compactQuery.removeEventListener("change", dismissForPreference);
+      coarseQuery.removeEventListener("change", dismissForPreference);
+      reducedMotionQuery.removeEventListener("change", dismissForPreference);
+      releaseModalRef.current();
+      releaseModalRef.current = () => {};
       tl.kill();
       tlRef.current = null;
     };
-  }, []);
+  }, [dismiss, skip]);
 
   if (dismissed) return null;
 
   return (
     <div
       ref={splashRef}
+      aria-hidden="true"
+      inert
       className="splash-screen"
       style={{
         position: "fixed", inset: 0, zIndex: 9980,
@@ -151,7 +225,7 @@ export default function SplashScreen() {
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         gap: "1.05rem",
-        opacity: 0, pointerEvents: "auto",
+        opacity: 0, pointerEvents: "none",
       }}
     >
       {/* wordmark */}
@@ -222,6 +296,7 @@ export default function SplashScreen() {
       <button
         onClick={skip}
         aria-label="Skip intro"
+        tabIndex={-1}
         className="splash-skip"
         style={{
           position: "absolute", bottom: "2rem", right: "2rem",

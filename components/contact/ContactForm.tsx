@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/constants";
 import { useContactSubmission } from "@/components/contact/useContactSubmission";
 
@@ -62,7 +62,17 @@ export default function ContactForm() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [completedEssentials, setCompletedEssentials] = useState(0);
   const submittingRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
   const submitContact = useContactSubmission();
+
+  useEffect(() => {
+    if (state !== "success") return;
+    const frame = requestAnimationFrame(() => {
+      successRef.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [state]);
 
   function readForm(form: HTMLFormElement) {
     return {
@@ -122,10 +132,21 @@ export default function ContactForm() {
           throw new Error("Too many requests came through at once. Try again in a few minutes or call us now.");
         }
         if (body.errors) {
-          setFieldErrors(body.errors as FieldErrors);
+          const serverErrors = body.errors as FieldErrors;
+          setFieldErrors(serverErrors);
           setValidationMsg("Check the highlighted details and send again.");
           setState("idle");
           submittingRef.current = false;
+          requestAnimationFrame(() => {
+            const firstInvalidName = ["service", "name", "phone", "email", "message"].find(
+              (field) => serverErrors[field as FieldName]
+            );
+            if (firstInvalidName === "service") {
+              formRef.current?.querySelector<HTMLInputElement>('input[name="service"]')?.focus();
+            } else if (firstInvalidName) {
+              (formRef.current?.elements.namedItem(firstInvalidName) as HTMLElement | null)?.focus();
+            }
+          });
           return;
         }
         throw new Error(body.error || "Your details could not be sent.");
@@ -155,7 +176,7 @@ export default function ContactForm() {
 
   if (state === "success") {
     return (
-      <div className="flex min-h-[28rem] flex-col justify-center py-8 sm:min-h-[31rem] sm:py-12" role="status" aria-live="polite">
+      <div ref={successRef} tabIndex={-1} className="flex min-h-[28rem] flex-col justify-center py-8 sm:min-h-[31rem] sm:py-12" role="status" aria-live="polite">
         <SuccessMark />
         <p className="mt-8 font-labels text-[9px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
           Delivered to 828 Construction
@@ -188,6 +209,7 @@ export default function ContactForm() {
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       onInput={(event) => updateProgress(event.currentTarget)}
       onChange={(event) => updateProgress(event.currentTarget)}
@@ -229,7 +251,10 @@ export default function ContactForm() {
         </div>
       )}
 
-      <fieldset>
+      <fieldset
+        aria-invalid={fieldErrors.service ? "true" : undefined}
+        aria-describedby={fieldErrors.service ? "cf-service-err" : undefined}
+      >
         <legend className={labelClass}>
           What do you need? <span className="text-[var(--color-accent)]">*</span>
         </legend>
@@ -244,6 +269,7 @@ export default function ContactForm() {
                   type="radio"
                   name="service"
                   value={choice.value}
+                  required
                   aria-describedby={fieldErrors.service ? "cf-service-err" : undefined}
                 />
                 <label
@@ -260,7 +286,7 @@ export default function ContactForm() {
           })}
         </div>
         {fieldErrors.service && (
-          <p id="cf-service-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">
+          <p id="cf-service-err" className="mt-2 text-xs text-[#ffaaa2]">
             {fieldErrors.service}
           </p>
         )}
@@ -290,7 +316,7 @@ export default function ContactForm() {
               className={inputClass("name")}
               placeholder="Name"
             />
-            {fieldErrors.name && <p id="cf-name-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.name}</p>}
+            {fieldErrors.name && <p id="cf-name-err" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.name}</p>}
           </div>
           <div>
             <label htmlFor="cf-phone" className={labelClass}>
@@ -309,7 +335,7 @@ export default function ContactForm() {
               className={inputClass("phone")}
               placeholder="(310) 555-0000"
             />
-            {fieldErrors.phone && <p id="cf-phone-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.phone}</p>}
+            {fieldErrors.phone && <p id="cf-phone-err" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.phone}</p>}
           </div>
         </div>
         <div className="mt-5">
@@ -332,7 +358,7 @@ export default function ContactForm() {
             placeholder="you@example.com"
           />
           <p id="cf-email-help" className="sr-only">If provided, the inbox notification is configured so Joe can reply directly to this address.</p>
-          {fieldErrors.email && <p id="cf-email-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.email}</p>}
+          {fieldErrors.email && <p id="cf-email-err" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.email}</p>}
         </div>
       </div>
 
@@ -357,7 +383,7 @@ export default function ContactForm() {
         <p id="cf-message-help" className="mt-2 text-[11px] leading-5 text-white/60">
           Helpful: city, current condition, timing, and the decision you need to make.
         </p>
-        {fieldErrors.message && <p id="cf-message-err" role="alert" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.message}</p>}
+        {fieldErrors.message && <p id="cf-message-err" className="mt-2 text-xs text-[#ffaaa2]">{fieldErrors.message}</p>}
       </div>
 
       {state === "error" && (

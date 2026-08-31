@@ -25,6 +25,7 @@ export default function Header() {
   const lightInkRef = useRef(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const torTimeRef = useRef<HTMLSpanElement>(null);
+  const mobileModalRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const desktopServicesButtonRef = useRef<HTMLAnchorElement>(null);
@@ -136,6 +137,17 @@ export default function Header() {
   }, [pathname]);
 
   useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeMobileMenu = () => {
+      if (!desktop.matches) return;
+      setMobileOpen(false);
+      setMobileServicesOpen(false);
+    };
+    desktop.addEventListener("change", closeMobileMenu);
+    return () => desktop.removeEventListener("change", closeMobileMenu);
+  }, []);
+
+  useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -145,9 +157,30 @@ export default function Header() {
   useEffect(() => {
     if (!mobileOpen) return;
 
+    const background = [
+      document.querySelector<HTMLElement>(".skip-link"),
+      document.querySelector<HTMLElement>("#main-content"),
+      document.querySelector<HTMLElement>("[data-footer-surface]"),
+    ].filter((element): element is HTMLElement => Boolean(element));
+    const previous = background.map((element) => element.inert);
+    background.forEach((element) => {
+      element.inert = true;
+    });
+
+    return () => {
+      background.forEach((element, index) => {
+        element.inert = previous[index];
+      });
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
     const menu = mobileMenuRef.current;
+    const modal = mobileModalRef.current;
     const toggle = mobileMenuButtonRef.current;
-    if (!menu || !toggle) return;
+    if (!menu || !modal || !toggle) return;
 
     const focusableSelector =
       'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -165,10 +198,9 @@ export default function Header() {
       }
 
       if (event.key !== "Tab") return;
-      const focusables = [
-        toggle,
-        ...Array.from(menu.querySelectorAll<HTMLElement>(focusableSelector)),
-      ].filter((element) => element.getClientRects().length > 0);
+      const focusables = Array.from(
+        modal.querySelectorAll<HTMLElement>(focusableSelector)
+      ).filter((element) => element.getClientRects().length > 0);
       if (!focusables.length) return;
 
       const first = focusables[0];
@@ -264,7 +296,13 @@ export default function Header() {
   const inkActive = lightInk ? "text-black" : "text-white";
 
   return (
-    <>
+    <div
+      ref={mobileModalRef}
+      role={mobileOpen ? "dialog" : undefined}
+      aria-modal={mobileOpen ? "true" : undefined}
+      aria-label={mobileOpen ? "Site navigation" : undefined}
+      className={mobileOpen ? "fixed inset-0 z-[80]" : undefined}
+    >
       <motion.header
         ref={headerRef}
         data-header-surface={surface}
@@ -312,7 +350,7 @@ export default function Header() {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center justify-center gap-8">
+            <nav aria-label="Primary navigation" className="hidden lg:flex items-center justify-center gap-8">
               {NAV_LINKS.map((link) => {
                 if (link.href === "/services") {
                   return (
@@ -350,6 +388,7 @@ export default function Header() {
                         aria-haspopup="true"
                         aria-expanded={servicesOpen}
                         aria-controls="desktop-services-menu"
+                        aria-current={isServicesActive ? "page" : undefined}
                         className={`relative flex min-h-11 items-center gap-1.5 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
                           isServicesActive ? inkActive : inkBase
                         }`}
@@ -384,6 +423,7 @@ export default function Header() {
                               <Link
                                 href={`/services/${service.slug}`}
                                 prefetch={false}
+                                aria-current={pathname === `/services/${service.slug}` ? "page" : undefined}
                                 className="group/item flex items-center justify-between px-4 py-3 hover:bg-white/[0.04] transition-colors duration-150"
                               >
                                 <div>
@@ -440,6 +480,7 @@ export default function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    aria-current={pathname === link.href ? "page" : undefined}
                     className={`group relative inline-flex min-h-11 items-center font-labels text-[10px] uppercase tracking-[0.18em] transition-colors duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0 ${
                       pathname === link.href ? inkActive : inkBase
                     }`}
@@ -594,6 +635,7 @@ export default function Header() {
                               <Link
                                 href="/services"
                                 prefetch={false}
+                                aria-current={pathname === "/services" ? "page" : undefined}
                                 className="relative flex items-center justify-between py-3 border-b border-white/[0.04] before:absolute before:inset-x-0 before:-top-0.5 before:bottom-0 before:content-['']"
                               >
                                 <span className="font-labels text-[11px] text-gray-300 tracking-[0.18em] uppercase">
@@ -608,6 +650,7 @@ export default function Header() {
                                   key={service.slug}
                                   href={`/services/${service.slug}`}
                                   prefetch={false}
+                                  aria-current={pathname === `/services/${service.slug}` ? "page" : undefined}
                                   className={`flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0 transition-colors duration-150 ${
                                     pathname === `/services/${service.slug}`
                                       ? "text-[var(--color-accent-light)]"
@@ -644,6 +687,7 @@ export default function Header() {
                     <Link
                       href={link.href}
                       prefetch={false}
+                      aria-current={pathname === link.href ? "page" : undefined}
                       className={`block py-4 border-b font-display font-bold text-3xl tracking-tight transition-colors duration-200 ${
                         pathname === link.href
                           ? "text-white border-gray-700"
@@ -675,13 +719,13 @@ export default function Header() {
               >
                 {SITE.phone}
               </a>
-              <p className="text-center font-labels text-[9px] text-gray-700 tracking-[0.18em] uppercase mt-4">
+              <p className="text-center font-labels text-[9px] text-white/50 tracking-[0.18em] uppercase mt-4">
                 CA License #{SITE.license}
               </p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

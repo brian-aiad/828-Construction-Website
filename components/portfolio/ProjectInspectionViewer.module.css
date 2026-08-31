@@ -144,7 +144,12 @@
 .railButton:focus-visible {
   border-color: rgba(255, 255, 255, 0.72);
   opacity: 1;
-  outline: none;
+}
+
+.railButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #631a16;
 }
 
 .railButtonActive {

@@ -21,11 +21,16 @@ export default function PhoneCopyToast() {
       const number = target.getAttribute("href")?.replace("tel:", "") ?? "";
       if (!number) return;
 
-      navigator.clipboard?.writeText(number).then(() => {
-        setVisible(true);
-        clearTimeout(timer);
-        timer = setTimeout(() => setVisible(false), 2200);
-      });
+      navigator.clipboard
+        ?.writeText(number)
+        .then(() => {
+          setVisible(true);
+          clearTimeout(timer);
+          timer = setTimeout(() => setVisible(false), 2200);
+        })
+        .catch(() => {
+          // Clipboard access is optional enhancement; the phone link still works.
+        });
     };
 
     document.addEventListener("click", handleClick);
@@ -37,8 +42,10 @@ export default function PhoneCopyToast() {
 
   return (
     <div
-      aria-live="polite"
+      role={visible ? "status" : undefined}
+      aria-live={visible ? "polite" : "off"}
       aria-atomic="true"
+      aria-hidden={!visible}
       data-failsafe-exempt=""
       style={{
         position: "fixed",

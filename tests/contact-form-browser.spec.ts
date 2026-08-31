@@ -71,8 +71,43 @@ test.describe("contact form browser hardening", () => {
     await expect(
       page.getByRole("heading", { name: "Your project details are in Joe’s inbox." })
     ).toBeVisible();
+    await expect(page.getByRole("status")).toBeFocused();
     await expect(page.getByText("Ref. 828-BROWSER")).toBeVisible();
     expect(postCount).toBe(1);
+  });
+
+  test("server field errors focus the rejected field and allow correction", async ({ page }) => {
+    const challengeRequests = await mockChallenge(page);
+    let postCount = 0;
+    await page.route("**/api/contact", async (route) => {
+      if (route.request().method() !== "POST") return route.continue();
+      postCount++;
+      await route.fulfill(
+        postCount === 1
+          ? {
+              status: 422,
+              contentType: "application/json",
+              body: JSON.stringify({ errors: { email: "Check the email address." } }),
+            }
+          : {
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify({ ok: true, reference: "828-CORRECTED" }),
+            }
+      );
+    });
+
+    await page.goto("/contact", { waitUntil: "domcontentloaded" });
+    await waitForFormHydration(challengeRequests);
+    await fillMainForm(page);
+    await page.getByRole("button", { name: /send project details/i }).click();
+
+    await expect(page.locator("#cf-email")).toBeFocused();
+    await expect(page.locator("#cf-email-err")).toHaveText("Check the email address.");
+    await page.locator("#cf-email").fill("corrected@example.com");
+    await page.getByRole("button", { name: /send project details/i }).click();
+    await expect(page.getByText("Ref. 828-CORRECTED")).toBeVisible();
+    expect(postCount).toBe(2);
   });
 
   test("expired browser challenge is refreshed and retried once", async ({ page }) => {

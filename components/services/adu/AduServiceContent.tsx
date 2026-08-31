@@ -477,6 +477,7 @@ function AduHero() {
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 lg:bg-gradient-to-r lg:from-transparent lg:to-black/60" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/55 to-transparent" aria-hidden="true" />
           <div className="absolute bottom-7 left-7 hidden lg:block">
             <span className="font-labels text-[9px] uppercase tracking-[0.2em] text-white/78">
               Detached ADU / South Bay scale
@@ -581,7 +582,9 @@ function FaqCard({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const panelId = useId();
+  const baseId = useId();
+  const headingId = `${baseId}-heading`;
+  const panelId = `${baseId}-panel`;
   return (
     <article
       data-stagger={stagger}
@@ -598,10 +601,13 @@ function FaqCard({
         >
           {String(index + 1).padStart(2, "0")}
         </span>
-        <h3 className="mt-4 font-display text-lg leading-snug sm:text-xl">{faq.q}</h3>
+        <h3 id={headingId} className="mt-4 font-display text-lg leading-snug sm:text-xl">{faq.q}</h3>
         <div
           id={panelId}
           role="region"
+          aria-labelledby={headingId}
+          aria-hidden={!open}
+          inert={!open}
           className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
         >
@@ -618,6 +624,7 @@ function FaqCard({
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={panelId}
+          aria-label={`${open ? "Close answer" : "Answer"}: ${faq.q}`}
           className={`group/faq flex min-h-11 items-center gap-2 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors ${
             dark ? "text-white/65 hover:text-white" : "text-black/55 hover:text-black"
           }`}

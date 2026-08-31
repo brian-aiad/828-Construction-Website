@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { SITE, SERVICES } from "@/lib/constants";
@@ -81,14 +79,14 @@ export default function Footer() {
             <div data-motion-reveal="right" data-motion-delay="0.08">
             <a
               href={SITE.phoneHref}
-              className="relative block font-display text-[clamp(2.1rem,9vw,3rem)] font-normal leading-[1.02] tracking-[0] text-white/42 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/68 md:text-[3.2rem] min-[1180px]:text-[clamp(2.75rem,3.25vw,4rem)] min-[1180px]:before:hidden"
+              className="relative block font-display text-[clamp(2.1rem,9vw,3rem)] font-normal leading-[1.02] tracking-[0] text-white/58 transition-colors before:absolute before:inset-x-0 before:-top-[11px] before:-bottom-[4px] before:content-[''] hover:text-white/82 md:text-[3.2rem] min-[1180px]:text-[clamp(2.75rem,3.25vw,4rem)] min-[1180px]:before:hidden"
             >
               {formattedPhone}
             </a>
             <a
               href={`mailto:${SITE.email}`}
               data-footer-email=""
-              className="relative mt-4 block max-w-full break-all font-display text-[clamp(1.05rem,4vw,1.65rem)] font-normal leading-[1.12] tracking-[0] text-white/42 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/72 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:break-normal md:text-[2rem] min-[1180px]:mt-4 min-[1180px]:max-w-[min(44rem,100%)] min-[1180px]:whitespace-nowrap min-[1180px]:text-[clamp(1.45rem,2vw,2.45rem)] min-[1180px]:before:hidden"
+              className="relative mt-4 block max-w-full break-all font-display text-[clamp(1.05rem,4vw,1.65rem)] font-normal leading-[1.12] tracking-[0] text-white/58 transition-colors before:absolute before:inset-x-0 before:-top-[4px] before:-bottom-[21px] before:content-[''] hover:text-white/82 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:break-normal md:text-[2rem] min-[1180px]:mt-4 min-[1180px]:max-w-[min(44rem,100%)] min-[1180px]:whitespace-nowrap min-[1180px]:text-[clamp(1.45rem,2vw,2.45rem)] min-[1180px]:before:hidden"
             >
               {SITE.email}
             </a>

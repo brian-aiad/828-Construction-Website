@@ -20,6 +20,7 @@ const API_HEADERS = {
   Pragma: "no-cache",
   "Referrer-Policy": "no-referrer",
   "X-Content-Type-Options": "nosniff",
+  "X-Robots-Tag": "noindex, nofollow, nosnippet",
 };
 
 function json(body: unknown, status = 200, headers?: HeadersInit) {

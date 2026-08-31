@@ -5,7 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = SITE.url;
   // Update this only when public page content or search metadata changes.
   // Build time is not a truthful `lastmod` signal for crawlers.
-  const lastModified = new Date("2026-08-20T00:00:00-07:00");
+  const lastModified = new Date("2026-08-31T00:00:00-07:00");
 
   return [
     {

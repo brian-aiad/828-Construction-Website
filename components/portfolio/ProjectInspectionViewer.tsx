@@ -176,6 +176,7 @@ export default function ProjectInspectionViewer({
     const root = document.documentElement;
     const body = document.body;
     const savedY = window.scrollY;
+    const savedLocation = `${window.location.pathname}${window.location.search}`;
     const previousOverflow = body.style.overflow;
     const previousOverscroll = root.style.overscrollBehavior;
     const lenis = (window as unknown as { __lenis828?: LenisHandle }).__lenis828;
@@ -191,16 +192,30 @@ export default function ProjectInspectionViewer({
       lenis?.start();
       lenis?.resize();
 
-      returnFocusRef.current?.focus({ preventScroll: true });
+      const returnFocus = returnFocusRef.current;
+      const restoreFocus = () => {
+        const active = document.activeElement;
+        const focusIsUnclaimed =
+          !active ||
+          active === document.body ||
+          active === document.documentElement ||
+          active === returnFocus;
+        if (returnFocus?.isConnected && focusIsUnclaimed) {
+          returnFocus.focus({ preventScroll: true });
+        }
+      };
+      restoreFocus();
+      window.requestAnimationFrame(restoreFocus);
+      window.setTimeout(restoreFocus, 120);
       returnFocusRef.current = null;
 
       const restore = () => {
+        if (`${window.location.pathname}${window.location.search}` !== savedLocation) return;
         lenis?.scrollTo(savedY, { immediate: true });
         window.scrollTo(0, savedY);
       };
       restore();
       window.requestAnimationFrame(restore);
-      window.setTimeout(restore, 120);
     };
   }, []);
 

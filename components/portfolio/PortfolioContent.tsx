@@ -137,13 +137,18 @@ function CaseTile({
   const fallbackTone = dark
     ? "bg-[linear-gradient(135deg,#171313,#070707_56%,rgba(99,26,22,0.28))]"
     : "bg-[linear-gradient(135deg,#efe7dc,#d8cab8_56%,rgba(99,26,22,0.16))]";
+  const galleryIndex = caseData.gallery.photos.indexOf(src);
+  const photoPosition = galleryIndex >= 0 ? galleryIndex + 1 : index + 1;
 
   return (
     <button
       type="button"
       data-lead-parallax={lead ? "" : undefined}
-      onClick={() => onOpen(src)}
-      aria-label={`View photo — ${caseData.gallery.title}`}
+      onClick={(event) => {
+        event.currentTarget.focus({ preventScroll: true });
+        onOpen(src);
+      }}
+      aria-label={`View photo ${photoPosition} of ${caseData.gallery.photos.length} — ${caseData.gallery.title}`}
       className={`pf-tile group relative block w-full overflow-hidden text-left ${aspect} ${
         dark ? "bg-[#111]" : "bg-[#e8e3da]"
       } focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]`}
@@ -156,7 +161,7 @@ function CaseTile({
       <span className="absolute inset-0 overflow-hidden">
         <Image
           src={src}
-          alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${index + 1}`}
+          alt={`${caseData.gallery.title} — ${caseData.gallery.scope}, detail ${photoPosition}`}
           fill
           loading="lazy"
           sizes={sizes}
@@ -262,7 +267,11 @@ function CaseLedger({
       </p>
       <button
         type="button"
-        onClick={onOpenSet}
+        onClick={(event) => {
+          event.currentTarget.focus({ preventScroll: true });
+          onOpenSet();
+        }}
+        aria-label={`Open the full set — ${gallery.title}`}
         className={`mt-8 inline-flex min-h-[44px] items-center gap-3 border px-6 py-3.5 font-labels text-[9px] uppercase tracking-[0.18em] transition-colors ${
           dark
             ? "border-white/25 text-white/80 hover:border-white hover:text-white"

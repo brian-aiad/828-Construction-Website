@@ -616,7 +616,7 @@ function PrinciplesSection() {
                 src={photo.src}
                 alt={photo.alt}
                 fill
-                loading={i === 0 ? "eager" : "lazy"}
+                loading="lazy"
                 sizes="(max-width: 1024px) 100vw, 46vw"
                 quality={92}
                 placeholder="blur"

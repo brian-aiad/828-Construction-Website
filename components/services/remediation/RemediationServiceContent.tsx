@@ -551,7 +551,9 @@ function FaqCard({
   photo: (typeof FAQ_PHOTOS)[number];
 }) {
   const [open, setOpen] = useState(false);
-  const panelId = useId();
+  const baseId = useId();
+  const headingId = `${baseId}-heading`;
+  const panelId = `${baseId}-panel`;
   const dark = index % 2 === 0;
   return (
     <article
@@ -590,12 +592,15 @@ function FaqCard({
         >
           {String(index + 1).padStart(2, "0")}
         </span>
-        <h3 className="mt-4 font-display text-lg leading-snug sm:text-xl">{faq.q}</h3>
+        <h3 id={headingId} className="mt-4 font-display text-lg leading-snug sm:text-xl">{faq.q}</h3>
       </div>
       <div className="mt-6">
         <div
           id={panelId}
           role="region"
+          aria-labelledby={headingId}
+          aria-hidden={!open}
+          inert={!open}
           className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
         >
@@ -610,6 +615,7 @@ function FaqCard({
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={panelId}
+          aria-label={`${open ? "Close answer" : "Answer"}: ${faq.q}`}
           className={`flex min-h-11 items-center gap-2 font-labels text-[10px] uppercase tracking-[0.18em] transition-colors ${
             dark ? "text-white/65 hover:text-white" : "text-black/55 hover:text-black"
           }`}

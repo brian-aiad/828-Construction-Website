@@ -224,7 +224,7 @@ body {
     height: calc(100svh - 52px);
   }
 
-  [data-footer-surface] {
+  body:has([data-footer-runway]) [data-footer-surface] {
     margin-top: calc(-100svh + 52px);
   }
 
@@ -248,8 +248,13 @@ textarea {
 }
 
 :focus-visible {
-  outline: 1px solid var(--color-accent);
-  outline-offset: 4px;
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--color-accent);
+}
+
+#main-content {
+  scroll-margin-top: 4rem;
 }
 
 /* ── Hero LCP keyframes — CSS-only so text paints before JS hydrates ─────── */
@@ -913,6 +918,15 @@ html.lenis body {
 @media (max-width: 1279px), (pointer: coarse) {
   .splash-screen {
     display: none !important;
+  }
+
+  [data-route-curtain],
+  [data-route-curtain] > span {
+    animation: none !important;
+    opacity: 0 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
   }
 }
 

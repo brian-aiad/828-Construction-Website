@@ -748,7 +748,7 @@ function ServicePathRows() {
                         <div className="relative mb-6 mt-1 h-[16rem] overflow-hidden sm:h-[22rem] lg:mb-5 lg:ml-[14%]">
                           <Image
                             src={row.image}
-                            alt={`${service.title} by 828 Construction`}
+                            alt=""
                             fill
                             sizes="(max-width: 1279px) 100vw, 1px"
                             quality={92}
@@ -787,13 +787,12 @@ function ServicePathRows() {
               className="contact-path-desktop-stage group relative h-[clamp(28rem,64svh,48rem)] overflow-hidden"
             >
               {SERVICE_PATH_ROWS.map((row, i) => {
-                const service = SERVICES.find((item) => item.slug === row.slug)!;
                 const open = activeIdx === i;
                 return (
                   <Image
                     key={row.slug}
                     src={row.image}
-                    alt={`${service.title} by 828 Construction`}
+                    alt=""
                     fill
                     sizes="(min-width: 1280px) 50vw, 1px"
                     quality={92}

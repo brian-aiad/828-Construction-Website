@@ -83,16 +83,18 @@ async function testMobileMenu(page, result, deviceName) {
 
 async function testContactForm(page, result, deviceName) {
   if (new URL(page.url()).pathname !== "/contact") {
-    await page.goto(new URL("/contact", baseUrl).toString(), { waitUntil: "networkidle" });
+    await page.goto(new URL("/contact", baseUrl).toString(), { waitUntil: "load", timeout: 60_000 });
   } else {
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
   }
   await page.locator("form[aria-label='Contact form']").scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   await page.getByRole("button", { name: /send project details/i }).click();
   await page.waitForTimeout(350);
-  const alerts = await page.locator("[role='alert']").count();
-  if (alerts < 3) fail(result, `${deviceName}: contact form did not show field validation alerts`);
+  const alerts = await page.locator("form[aria-label='Contact form'] [role='alert']").count();
+  if (alerts !== 1) fail(result, `${deviceName}: contact form should announce one validation summary, found ${alerts}`);
+  const associatedErrors = await page.locator("[id$='-err']").count();
+  if (associatedErrors < 4) fail(result, `${deviceName}: contact form did not render associated field guidance`);
   const focused = await page.evaluate(() => document.activeElement?.getAttribute("name"));
   if (focused !== "service") fail(result, `${deviceName}: invalid form did not focus the first required field`);
   await page.screenshot({ path: join(outDir, "screenshots", `${deviceName}-contact-errors.png`), fullPage: false });
@@ -129,13 +131,13 @@ async function runDevice(browser, device, reducedMotion = false) {
   });
 
   for (const route of routes) {
-    await page.goto(new URL(route, baseUrl).toString(), { waitUntil: "networkidle", timeout: 45_000 });
+    await page.goto(new URL(route, baseUrl).toString(), { waitUntil: "load", timeout: 60_000 });
     await page.waitForTimeout(600);
     await scrollStress(page, result, `${device.name}${reducedMotion ? "-reduced" : ""} ${route}`);
   }
 
   if (device.viewport.width < 1024 && !reducedMotion) {
-    await page.goto(new URL("/", baseUrl).toString(), { waitUntil: "networkidle" });
+    await page.goto(new URL("/", baseUrl).toString(), { waitUntil: "load", timeout: 60_000 });
     await testMobileMenu(page, result, device.name);
   }
   if (!reducedMotion) await testContactForm(page, result, device.name);

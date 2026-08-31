@@ -6,7 +6,6 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SITE } from "@/lib/constants";
-import { AnimationController } from "@/utils/animationControl";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,51 +28,78 @@ export default function HeroV2() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const ctx = gsap.context(() => {
-      const lines = gsap.utils.toArray<HTMLElement>(".hero-line-inner");
-      const metaEls = [
-        eyebrowRef.current,
-        ctaRef.current,
-        licenseRef.current,
-        scrollHintRef.current,
-      ].filter(Boolean) as HTMLElement[];
+    const media = gsap.matchMedia();
+    media.add(
+      {
+        desktop: "(min-width: 1024px)",
+        coarseTablet: "(pointer: coarse) and (max-width: 1366px)",
+        reducedMotion: "(prefers-reduced-motion: reduce)",
+      },
+      (context) => {
+        const { desktop, coarseTablet, reducedMotion } = context.conditions as {
+          desktop: boolean;
+          coarseTablet: boolean;
+          reducedMotion: boolean;
+        };
+        if (!desktop || coarseTablet || reducedMotion) return;
 
-      if (!AnimationController.shouldAnimate()) {
-        return;
-      }
+        const lines = gsap.utils.toArray<HTMLElement>(".hero-line-inner", section);
+        const metaEls = [
+          eyebrowRef.current,
+          ctaRef.current,
+          licenseRef.current,
+          scrollHintRef.current,
+        ].filter(Boolean) as HTMLElement[];
 
-      gsap.set(lines, { yPercent: 110 });
-      // Keep hero copy paint-eligible for LCP while retaining a restrained
-      // fade/translate entrance. Fully transparent LCP text delays the metric.
-      gsap.set(metaEls, { y: 14, opacity: 0.72 });
+        const resetMotionStyles = () => {
+          lines.forEach((line) => line.style.removeProperty("transform"));
+          metaEls.forEach((element) => {
+            element.style.removeProperty("transform");
+            element.style.removeProperty("opacity");
+          });
+          imageRef.current?.style.removeProperty("transform");
+          imageRef.current?.style.removeProperty("will-change");
+          copyRef.current?.style.removeProperty("transform");
+          copyRef.current?.style.removeProperty("opacity");
+          copyRef.current?.style.removeProperty("will-change");
+          if (veilRef.current) veilRef.current.style.opacity = "0";
+        };
+
+        const ctx = gsap.context(() => {
+          if (imageRef.current) imageRef.current.style.willChange = "transform";
+          if (copyRef.current) copyRef.current.style.willChange = "transform, opacity";
+          gsap.set(lines, { yPercent: 110 });
+          // Keep hero copy paint-eligible for LCP while retaining a restrained
+          // fade/translate entrance. Fully transparent LCP text delays the metric.
+          gsap.set(metaEls, { y: 14, opacity: 0.72 });
 
       // Entry — line-by-line mask reveal, then metadata
-      gsap.to(lines, {
+          gsap.to(lines, {
         yPercent: 0,
         duration: 0.95,
         stagger: 0.09,
         ease: "power3.out",
         delay: 0.15,
-      });
-      gsap.to(metaEls, {
+          });
+          gsap.to(metaEls, {
         y: 0,
         opacity: 1,
         duration: 0.75,
         stagger: 0.08,
         ease: "power3.out",
         delay: 0.55,
-      });
+          });
 
       // Scroll — the hero is pinned (CSS sticky) beneath the page surface.
       // All scrub motion is driven by the covering surface's position so the
       // hero recedes (scale, dim, drift) as the light surface rides over it.
-      const surface = document.querySelector<HTMLElement>("[data-editorial-flow]");
-      const coverTrigger = surface
-        ? { trigger: surface, start: "top bottom", end: "top top" }
-        : { trigger: section, start: "top top", end: "bottom top" };
+          const surface = document.querySelector<HTMLElement>("[data-editorial-flow]");
+          const coverTrigger = surface
+            ? { trigger: surface, start: "top bottom", end: "top top" }
+            : { trigger: section, start: "top top", end: "bottom top" };
 
-      if (imageRef.current) {
-        gsap.fromTo(
+          if (imageRef.current) {
+            gsap.fromTo(
           imageRef.current,
           { scale: 1, yPercent: 0 },
           {
@@ -82,28 +108,28 @@ export default function HeroV2() {
             ease: "none",
             scrollTrigger: { ...coverTrigger, scrub: 1 },
           }
-        );
-      }
+            );
+          }
 
-      if (veilRef.current) {
-        gsap.to(veilRef.current, {
+          if (veilRef.current) {
+            gsap.to(veilRef.current, {
           opacity: 0.55,
           ease: "none",
           scrollTrigger: { ...coverTrigger, scrub: 1 },
-        });
-      }
+            });
+          }
 
-      if (copyRef.current) {
-        gsap.to(copyRef.current, {
+          if (copyRef.current) {
+            gsap.to(copyRef.current, {
           yPercent: -16,
           opacity: 0.3,
           ease: "none",
           scrollTrigger: { ...coverTrigger, scrub: 0.9 },
-        });
-      }
+            });
+          }
 
-      if (scrollHintRef.current && surface) {
-        gsap.to(scrollHintRef.current, {
+          if (scrollHintRef.current && surface) {
+            gsap.to(scrollHintRef.current, {
           opacity: 0,
           ease: "none",
           scrollTrigger: {
@@ -112,13 +138,23 @@ export default function HeroV2() {
             end: "top 75%",
             scrub: 1,
           },
-        });
-      }
-    }, sectionRef);
+            });
+          }
+        }, sectionRef);
+
+        return () => {
+          try {
+            ctx.revert();
+          } catch {}
+          resetMotionStyles();
+        };
+      },
+      section
+    );
 
     return () => {
       try {
-        ctx.revert();
+        media.revert();
       } catch {}
     };
   }, []);
@@ -131,7 +167,7 @@ export default function HeroV2() {
       className="sticky top-0 z-0 h-[100svh] overflow-hidden bg-black text-white"
       aria-label="828 Construction homepage hero"
     >
-      <div ref={imageRef} className="absolute inset-0" style={{ willChange: "transform" }}>
+      <div ref={imageRef} className="absolute inset-0">
         <Image
           src="/images/generated/home-hero-bluehour-adu-v2.webp"
           alt="Modern South Bay ADU with warm interior lighting at blue hour"
@@ -166,15 +202,14 @@ export default function HeroV2() {
         <div
           ref={copyRef}
           className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_1px_minmax(24rem,0.62fr)] lg:items-end lg:gap-8"
-          style={{ willChange: "transform, opacity" }}
         >
           <p
             ref={eyebrowRef}
-            className="flex items-center gap-3 font-labels text-[clamp(0.9rem,1.45vw,1.25rem)] uppercase tracking-[0.22em] text-white/78 sm:gap-4 sm:tracking-[0.34em]"
+            className="flex items-center gap-2 font-labels text-[0.78rem] uppercase tracking-[0.15em] text-white/78 min-[360px]:gap-3 min-[360px]:text-[clamp(0.9rem,1.45vw,1.25rem)] min-[360px]:tracking-[0.22em] sm:gap-4 sm:tracking-[0.34em]"
           >
             <span
               aria-hidden="true"
-              className="inline-block h-px w-10 lg:w-12"
+              className="inline-block h-px w-7 min-[360px]:w-10 lg:w-12"
               style={{ background: "var(--color-accent-light)" }}
             />
             Torrance / South Bay

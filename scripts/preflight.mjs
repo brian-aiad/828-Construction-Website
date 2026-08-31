@@ -32,6 +32,7 @@ const ALL_ROUTES = [
   { path: '/services/consulting', name: 'Consulting' },
   { path: '/portfolio',           name: 'Portfolio' },
   { path: '/contact',             name: 'Contact' },
+  { path: '/qa-preflight-not-found', name: '404', status: 404 },
 ];
 
 const DESKTOP = { name: 'desktop', width: 1440, height: 900 };
@@ -150,6 +151,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function testRoute(browser, routeObj, viewport) {
   const { path, name } = routeObj;
+  const expectedStatus = routeObj.status ?? 200;
   const url = `${BASE_URL}${path}`;
 
   const result = {
@@ -184,29 +186,31 @@ async function testRoute(browser, routeObj, viewport) {
         txt.includes('gtag') ||
         txt.includes('_vercel/insights') ||
         txt.includes('va.vercel-scripts.com');
-      // Ignore transient static-asset 500 console logs — server resource race conditions
-      const isStaticAsset500 = txt.includes('status of 500');
-      if (!isThirdPartyNoise && !isStaticAsset500) result.errors.push(`Console: ${txt}`);
+      const consoleLocation = m.location().url;
+      const isExpectedNotFoundDocument =
+        expectedStatus === 404 &&
+        txt.includes('status of 404') &&
+        (!consoleLocation || consoleLocation === url);
+      if (!isThirdPartyNoise && !isExpectedNotFoundDocument) {
+        result.errors.push(`Console: ${txt}`);
+      }
     }
   });
 
-  // ── Collect image 404s + any 500s from local server ─────────────────────
-  // Track CSS 500s separately — they prevent Tailwind from loading and cascade-break
+  // ── Collect image 404s + failed local responses ─────────────────────────
+  // Track CSS failures separately — they prevent Tailwind from loading and cascade-break
   // overflow checks (overflow-hidden doesn't apply → false-positive H-overflow).
   let cssAssetFailed = false;
   page.on('response', (res) => {
     const u   = res.url();
     const st  = res.status();
+    const isExpectedDocument =
+      res.request().resourceType() === 'document' && u === url && st === expectedStatus;
     const isImg = /\.(jpg|jpeg|png|webp|gif|svg|avif)(\?|$)/i.test(u) || u.includes('/images/');
     if (st === 404 && isImg) result.image404s.push(u.split('/').slice(-3).join('/'));
-    // Capture 500s from localhost — but skip transient static-asset 500s which are
-    // server resource race conditions (random JS chunks and fonts under load, not code errors)
-    if (st === 500 && u.includes('localhost')) {
-      const isStaticAsset = u.includes('/_next/static/') && (
-        u.endsWith('.js') || u.endsWith('.css') || u.endsWith('.woff2') || u.endsWith('.woff')
-      );
-      if (isStaticAsset && u.endsWith('.css')) cssAssetFailed = true;
-      if (!isStaticAsset) result.errors.push(`HTTP 500: ${u}`);
+    if (st >= 400 && u.startsWith(BASE_URL) && !isExpectedDocument) {
+      if (u.endsWith('.css')) cssAssetFailed = true;
+      result.errors.push(`HTTP ${st}: ${u}`);
     }
   });
 
@@ -214,7 +218,7 @@ async function testRoute(browser, routeObj, viewport) {
   try {
     const response = await page.goto(url, { waitUntil: 'load', timeout: 45_000 });
     const status   = response?.status() ?? 0;
-    if (status !== 200) result.errors.push(`HTTP ${status}`);
+    if (status !== expectedStatus) result.errors.push(`HTTP ${status} (expected ${expectedStatus})`);
 
     // Wait for GSAP + Lenis to initialize
     await sleep(2500);
@@ -301,33 +305,73 @@ async function testRoute(browser, routeObj, viewport) {
 
 async function runNavTest(browser) {
   const ctx  = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => {
+    try { sessionStorage.setItem('828:splash-seen', '1'); } catch {}
+  });
   const page = await ctx.newPage();
-  const removeChildErrors = [];
+  const errors = [];
 
-  page.on('pageerror', (e) => {
-    const msg = e.message;
-    if (msg.includes('removeChild') || msg.includes('NotFoundError')) {
-      removeChildErrors.push(msg);
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (message) => {
+    if (message.type() !== 'error') return;
+    const text = message.text();
+    const isThirdPartyNoise =
+      text.includes('google-analytics') ||
+      text.includes('gtag') ||
+      text.includes('_vercel/insights') ||
+      text.includes('va.vercel-scripts.com');
+    if (!isThirdPartyNoise) {
+      errors.push(`Console: ${text}`);
     }
   });
 
   try {
     await page.goto(`${BASE_URL}/`, { waitUntil: 'load', timeout: 30_000 });
-    await sleep(1200);
-    await page.goto(`${BASE_URL}/about`, { waitUntil: 'load', timeout: 30_000 });
-    await sleep(500);
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'load', timeout: 30_000 });
-    await sleep(500);
-    // Services → process (another SplitType-heavy pair)
-    await page.goto(`${BASE_URL}/services`, { waitUntil: 'load', timeout: 30_000 });
-    await sleep(500);
-    await page.goto(`${BASE_URL}/process`, { waitUntil: 'load', timeout: 30_000 });
-    await sleep(500);
+    await sleep(800);
+
+    for (const destination of ['/about', '/services', '/portfolio', '/contact']) {
+      await page.locator(`header a[href="${destination}"]`).first().click();
+      await page.waitForURL(`${BASE_URL}${destination}`, { timeout: 30_000 });
+      await sleep(700);
+    }
+
+    await page.goBack({ waitUntil: 'load', timeout: 30_000 });
+    await sleep(700);
+    await page.goBack({ waitUntil: 'load', timeout: 30_000 });
+    await sleep(700);
+    await page.goForward({ waitUntil: 'load', timeout: 30_000 });
+    await page.waitForFunction(
+      () => !document.querySelector('[data-route-curtain]')?.hasAttribute('data-phase'),
+      { timeout: 3_000 }
+    );
+
+    const state = await page.evaluate(() => {
+      const heading = document.querySelector('main h1');
+      const headingStyle = heading ? getComputedStyle(heading) : null;
+      const headingRect = heading?.getBoundingClientRect();
+      return {
+        bodyLocked: document.body.style.overflow === 'hidden',
+        mainInert: document.querySelector('#main-content')?.inert ?? false,
+        curtainPhase:
+          document.querySelector('[data-route-curtain]')?.getAttribute('data-phase') ?? null,
+        headingVisible: Boolean(
+          headingRect &&
+          headingStyle &&
+          headingRect.width > 0 &&
+          headingRect.height > 0 &&
+          parseFloat(headingStyle.opacity) > 0.05
+        ),
+      };
+    });
+    if (state.bodyLocked) errors.push('Body remained scroll-locked after navigation');
+    if (state.mainInert) errors.push('Main remained inert after navigation');
+    if (state.curtainPhase) errors.push(`Route curtain remained in phase ${state.curtainPhase}`);
+    if (!state.headingVisible) errors.push('Destination heading is not visible');
   } finally {
     await ctx.close();
   }
 
-  return { PASS: removeChildErrors.length === 0, errors: removeChildErrors };
+  return { PASS: errors.length === 0, errors };
 }
 
 // ─── Hard-refresh test (Fix 13 / Fix 16) ────────────────────────────────────

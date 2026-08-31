@@ -10,6 +10,7 @@ const HEADERS = {
   Pragma: "no-cache",
   "Referrer-Policy": "no-referrer",
   "X-Content-Type-Options": "nosniff",
+  "X-Robots-Tag": "noindex, nofollow, nosnippet",
 };
 
 function methodNotAllowed() {

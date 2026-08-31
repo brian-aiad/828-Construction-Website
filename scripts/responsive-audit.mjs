@@ -3,7 +3,8 @@ import { chromium } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const baseUrl = process.argv[2] || "http://localhost:3001";
+const baseUrl = process.argv[2] || "http://localhost:4001";
+const requestedRoute = process.argv[3];
 const routes = [
   "/",
   "/about",
@@ -13,7 +14,12 @@ const routes = [
   "/services/consulting",
   "/portfolio",
   "/contact",
-];
+].filter((route) => !requestedRoute || route === requestedRoute);
+
+if (requestedRoute && routes.length === 0) {
+  console.error(`Unknown route: ${requestedRoute}`);
+  process.exit(1);
+}
 
 const viewports = [
   { name: "iphone-se", width: 375, height: 667, isMobile: true },
@@ -125,8 +131,8 @@ async function run() {
 
       try {
         const response = await page.goto(new URL(route, baseUrl).toString(), {
-          waitUntil: "networkidle",
-          timeout: 45_000,
+          waitUntil: "load",
+          timeout: 60_000,
         });
         result.status = response?.status() || 0;
         await page.waitForTimeout(900);

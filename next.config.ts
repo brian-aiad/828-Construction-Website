@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 828, 1080, 1200, 1920],
-    qualities: [62, 72, 74, 75, 82, 86, 88, 90, 92, 93, 95],
+    qualities: [62, 72, 74, 75, 82, 86, 88, 90, 92, 93, 94, 95],
     minimumCacheTTL: 31536000,
   },
   // `npm run build` runs `tsc --noEmit` before Next. Keep Next's duplicate
@@ -47,10 +47,10 @@ const nextConfig: NextConfig = {
         destination: "/portfolio",
         permanent: true,
       },
-      // /projects/* → /portfolio/* (pattern — catch any sub-paths)
+      // Retired project subpaths have no one-to-one portfolio routes.
       {
         source: "/projects/:path*",
-        destination: "/portfolio/:path*",
+        destination: "/portfolio",
         permanent: true,
       },
       // /process → /portfolio (process merged into portfolio)

@@ -6,6 +6,14 @@ import { useEffect, useRef } from "react";
 const COVER_MS = 260;
 const REVEAL_MS = 640;
 
+function motionCurtainEnabled() {
+  return !(
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.matchMedia("(max-width: 1279px)").matches
+  );
+}
+
 export default function RouteTransitionCurtain() {
   const pathname = usePathname();
   const curtainRef = useRef<HTMLDivElement>(null);
@@ -50,7 +58,7 @@ export default function RouteTransitionCurtain() {
 
       const curtain = curtainRef.current;
       if (!curtain) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!motionCurtainEnabled()) return;
       intentStartedAtRef.current = performance.now();
       curtain.dataset.phase = "covering";
       clearTimeout(phaseTimerRef.current);
@@ -76,7 +84,7 @@ export default function RouteTransitionCurtain() {
     }
 
     firstPathRef.current = pathname;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!motionCurtainEnabled()) {
       delete curtain.dataset.phase;
       return;
     }

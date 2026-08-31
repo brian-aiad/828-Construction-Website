@@ -169,9 +169,14 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
         refreshMotion();
       };
 
+      let refreshFrame = 0;
+      let nestedRefreshFrame = 0;
+
       if (document.readyState === "complete") {
         // Already loaded — refresh on next frame (after this effect batch)
-        requestAnimationFrame(() => requestAnimationFrame(doRefresh));
+        refreshFrame = requestAnimationFrame(() => {
+          nestedRefreshFrame = requestAnimationFrame(doRefresh);
+        });
       } else {
         window.addEventListener("load", doRefresh, { once: true });
       }
@@ -180,6 +185,9 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
       // Must be in CLEANUP (not body) so it fires BEFORE the new page's
       // children useEffects create their ScrollTriggers.
       return () => {
+        window.removeEventListener("load", doRefresh);
+        if (refreshFrame) cancelAnimationFrame(refreshFrame);
+        if (nestedRefreshFrame) cancelAnimationFrame(nestedRefreshFrame);
         window.scrollTo(0, 0);
         ScrollTrigger.getAll().forEach((st) => st.kill());
       };
@@ -255,8 +263,10 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     // ScrollTriggers. Recalculates positions with correct scroll origin (Y=0).
     ScrollTrigger.refresh();
 
+    let disposed = false;
     document.fonts?.ready
       .then(() => {
+        if (disposed) return;
         lenis.resize();
         ScrollTrigger.refresh(true);
       })
@@ -281,6 +291,7 @@ export default function LenisProvider({ children }: { children: ReactNode }) {
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
+      disposed = true;
       clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);

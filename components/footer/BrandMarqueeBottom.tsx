@@ -1,7 +1,3 @@
-"use client";
-
-import { useRef } from "react";
-
 const REPETITIONS = 6;
 
 type BrandMarqueeBottomProps = {
@@ -25,7 +21,6 @@ export default function BrandMarqueeBottom({
   text = "828 CONSTRUCTION",
   color = "rgba(255, 255, 255, 0.28)",
 }: BrandMarqueeBottomProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
   // giant: the footer wordmark lane.
   const heightClass = giant
     ? "h-[clamp(2.7rem,4.05vw,4.75rem)]"
@@ -45,20 +40,12 @@ export default function BrandMarqueeBottom({
   // reads as one continuous train (Brian, 2026-07-13).
   const paddingClass = panel || giant ? "pr-4" : compact ? "pr-10" : "pr-16";
 
-  const setPaused = (paused: boolean) => {
-    if (!trackRef.current) return;
-    trackRef.current.style.animationPlayState = paused ? "paused" : "running";
-  };
-
   return (
     <div
       aria-hidden="true"
       className={`brand-marquee-bottom relative w-full overflow-hidden motion-reduce:hidden ${heightClass} ${className}`}
-      onPointerEnter={() => setPaused(true)}
-      onPointerLeave={() => setPaused(false)}
     >
       <div
-        ref={trackRef}
         className="animate-brand-marquee absolute left-0 top-0 flex h-full w-max items-center whitespace-nowrap will-change-transform"
       >
         {Array.from({ length: REPETITIONS }).map((_, i) => (
